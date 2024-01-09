@@ -1,0 +1,4 @@
+matplotlib >= 3.3.2
+openpyxl
+seaborn
+wheel
