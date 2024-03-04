@@ -7,7 +7,7 @@ To install the package using pip, execute the following command:
 
 .. code-block::
 
-    python -m pip install slenderpy@git+https://github.com/rte-france/pallas-thermohl
+    python -m pip install thermohl@git+https://github.com/rte-france/pallas-thermohl
 
 Using conda
 -----------
