@@ -1,6 +1,4 @@
 """Several models for different air properties with temperature dependency."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import numpy as np
 from typing import Union
 

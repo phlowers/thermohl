@@ -1,18 +1,12 @@
 """Functions and classes to obtain various probability distributions for scalar random variables."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import warnings
 from typing import Union
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
 from scipy.special import erf
 from scipy.special import i0
 from scipy.special import i1
-from scipy.stats import circmean
-from scipy.stats import circstd
-from scipy.stats import circvar
 
 _twopi = 2 * np.pi
 
