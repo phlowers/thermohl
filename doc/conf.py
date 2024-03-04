@@ -15,7 +15,7 @@ sys.path.insert(0, os.path.abspath('../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'slenderpy'
+project = 'Thermohl'
 copyright = '2024, RTE & Eurobios Mews Labs'
 author = 'Eurobios Mews Labs'
 

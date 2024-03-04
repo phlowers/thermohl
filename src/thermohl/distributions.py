@@ -44,11 +44,11 @@ def truncnorm(a: float, b: float, mu: float, sigma: float,
               err_mu: float = 1.0E-03, err_sigma: float = 1.0E-02, rel_err: bool = True):
     """Truncated normal distribution. Wrapper from scipy.stats."""
     if a >= b:
-        raise ValueError('Input a (%E) should be lower than b (%E).' % (a, b))
+        raise ValueError('Input a (%.3E) should be lower than b (%.3E).' % (a, b))
     if mu < a or mu > b:
-        raise ValueError('Input mu (%E) should be in [a, b] range (%E, %E).' % (mu, a, b))
+        raise ValueError('Input mu (%.3E) should be in [a, b] range (%.3E, %.3E).' % (mu, a, b))
     if sigma < 0.:
-        raise ValueError('Input sigma (%E) should be positive.' % (sigma,))
+        raise ValueError('Input sigma (%.3E) should be positive.' % (sigma,))
 
     al, bt, m, s = _truncnorm_header(a, b, mu, sigma)
     dist = scipy.stats.truncnorm(al, bt, m, s)
@@ -63,11 +63,11 @@ def truncnorm(a: float, b: float, mu: float, sigma: float,
         err_sigma_ *= sigma
     if np.abs(sigma - std) >= err_sigma_:
         warnings.warn(
-            'Required std cannot be achieved (%E instead of %E). Choose a lower std, extend your '
+            'Required std cannot be achieved (%.3E instead of %.3E). Choose a lower std, extend your '
             'bounds or change your distribution.' % (sigma, std), RuntimeWarning)
     if np.abs(mu - mean) >= err_mu_:
         warnings.warn(
-            'Required mean cannot be achieved (%E instead of %E). Move the mean towards the center of your '
+            'Required mean cannot be achieved (%.3E instead of %.3E). Move the mean towards the center of your '
             'bounds, extend your bounds or change your distribution.' % (mu, mean), RuntimeWarning)
 
     return dist
@@ -117,11 +117,11 @@ def wrapnorm(mu: float, sigma: float):
     """
     mu2 = mu % _twopi
     if mu2 != mu:
-        warnings.warn('Changed mean from %.E to %.E to fit [0,2*pi] interval.'
+        warnings.warn('Changed mean from %.3E to %.3E to fit [0,2*pi] interval.'
                       % (mu, mu2), RuntimeWarning)
     if sigma >= _twopi:
         warnings.warn(
-            'Required std cannot be achieved (%E > 2*pi). Choose a lower std '
+            'Required std cannot be achieved (%.3E > 2*pi). Choose a lower std '
             'or change your distribution.' % (sigma,), RuntimeWarning)
     return WrappedNormal(mu2, sigma)
 
@@ -156,14 +156,14 @@ def vonmises(mu: float, sigma: float):
     if mu2 > np.pi:
         mu2 -= _twopi
     if mu2 != mu:
-        warnings.warn('Changed mean from %.E to %.E to fit [-pi,+pi] interval.'
+        warnings.warn('Changed mean from %.3E to %.3E to fit [-pi,+pi] interval.'
                       % (mu, mu2), RuntimeWarning)
     if sigma < 0.:
-        raise ValueError('Input sigma (%E) should be positive.' % (sigma,))
+        raise ValueError('Input sigma (%.3E) should be positive.' % (sigma,))
     sigmax = _twopi / np.sqrt(12)
     if sigma >= sigmax:
         warnings.warn(
-            'Required std cannot be achieved (%E > %E). Choose a lower std '
+            'Required std cannot be achieved (%.3E > %.3E). Choose a lower std '
             'or change your distribution.' % (sigma, sigmax), RuntimeWarning)
     kappa = _vonmises_kappa(sigma)
     return scipy.stats.vonmises_line(kappa, loc=mu)
