@@ -3,15 +3,13 @@
 See Thermal behaviour of overhead conductors, study committee 22, working
 group 12, 2002.
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import numpy as np
 from typing import Union
 
+import numpy as np
 import thermohl.air as air
 import thermohl.sun as sun
 from thermohl.utils import PowerTerm
-from thermohl.utils import RadiativeCooling
+from thermohl.utils import RadiativeCooling as RCu
 
 
 class JouleHeating(PowerTerm):
@@ -19,7 +17,8 @@ class JouleHeating(PowerTerm):
 
     def value(self, T: Union[float, np.ndarray], I: Union[float, np.ndarray],
               km: Union[float, np.ndarray], kl: Union[float, np.ndarray],
-              RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20., **kwargs) -> Union[float, np.ndarray]:
+              RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20.,
+              **kwargs) -> Union[float, np.ndarray]:
         r"""Compute joule heating.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -49,7 +48,8 @@ class JouleHeating(PowerTerm):
 
     def derivative(self, T: Union[float, np.ndarray], I: Union[float, np.ndarray],
                    km: Union[float, np.ndarray], kl: Union[float, np.ndarray],
-                   RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20., **kwargs) -> Union[float, np.ndarray]:
+                   RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20.,
+                   **kwargs) -> Union[float, np.ndarray]:
         r"""Compute joule heating derivative.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -98,8 +98,7 @@ class SolarHeating(PowerTerm):
         return np.where(sa > 0., A * Id + B, 0.)
 
     def value(self, T: Union[float, np.ndarray],
-              lat: Union[float, np.ndarray], azm: Union[float, np.ndarray],
-              al: Union[float, np.ndarray],
+              lat: Union[float, np.ndarray], azm: Union[float, np.ndarray], al: Union[float, np.ndarray],
               month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]], hour: Union[float, np.ndarray],
               D: Union[float, np.ndarray], alpha: Union[float, np.ndarray], **kwargs) -> Union[float, np.ndarray]:
         r"""Compute solar heating.
@@ -183,7 +182,8 @@ class ConvectiveCooling(PowerTerm):
 
     def value(self, T: Union[float, np.ndarray], alt: Union[float, np.ndarray], azm: Union[float, np.ndarray],
               Ta: Union[float, np.ndarray], ws: Union[float, np.ndarray], wa: Union[float, np.ndarray],
-              D: Union[float, np.ndarray], R: Union[float, np.ndarray], g: float = 9.81, **kwargs) -> Union[float, np.ndarray]:
+              D: Union[float, np.ndarray], R: Union[float, np.ndarray], g: float = 9.81, **kwargs) -> Union[
+        float, np.ndarray]:
         r"""Compute convective cooling.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -225,3 +225,7 @@ class ConvectiveCooling(PowerTerm):
         nf = ConvectiveCooling._nu_forced(Tf, nu, alt, ws, da, D, R)
         nn = ConvectiveCooling._nu_natural(Tf, Td, nu, D, g)
         return np.pi * lm * (T - Ta) * np.maximum(nf, nn)
+
+
+class RadiativeCooling(RCu):
+    """."""

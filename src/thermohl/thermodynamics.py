@@ -1,6 +1,4 @@
 """Thermodynamics quantities. Values from Wikipedia unless specified."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import numpy as np
 
 # Standard temperature and pressure from EPA and NIST; _T0 in K, _p0 in Pa

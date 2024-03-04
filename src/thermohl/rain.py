@@ -5,8 +5,6 @@ al., 2011 (https://doi.org/10.1016/j.epsr.2011.06.004) and *Dynamic thermal
 rating of power lines in raining conditions-model and measurements*, Maksic et
 al., 2016 (https://doi.org/10.1109/PESGM.2016.7741611).
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import numpy as np
 
 from thermohl import air
