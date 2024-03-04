@@ -4,10 +4,9 @@
     position is then used to estimate the solar radiation in CIGRE and IEEE
     models.
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import numpy as np
 from typing import Union
+
+import numpy as np
 
 
 def hour_angle(hour: Union[float, np.ndarray],

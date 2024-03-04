@@ -7,17 +7,11 @@ To install the package using pip, execute the following command:
 
 .. code-block::
 
-    python -m pip install git+https://gitlab.eurobios.com/rte/thermohl
+    python -m pip install slenderpy@git+https://github.com/rte-france/pallas-thermohl
 
 Using conda
 -----------
 (not available yet)
-
-The package is available on conda-forge. To install, execute the following command:
-
-.. code-block::
-
-    python -m conda install thermohl -c conda-forge
 
 Simple usage
 ===========

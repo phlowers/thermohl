@@ -3,15 +3,12 @@
 IEEE std 38-2012 is the IEEE Standard for Calculating the Current-Temperature
 Relationship of Bare Overhead Conductors.
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import numpy as np
 from typing import Union
 
+import numpy as np
 import thermohl.air as air
 import thermohl.sun as sun
-from thermohl.utils import PowerTerm
-from thermohl.utils import RadiativeCooling
+from thermohl.utils import PowerTerm, RadiativeCooling as RCu
 
 
 class JouleHeating(PowerTerm):
@@ -108,7 +105,8 @@ class SolarHeating(PowerTerm):
     @staticmethod
     def _solar_radiation(lat: Union[float, np.ndarray], alt: Union[float, np.ndarray], azm: Union[float, np.ndarray],
                          trb: Union[float, np.ndarray],
-                         month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]], hour: Union[float, np.ndarray]) \
+                         month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]],
+                         hour: Union[float, np.ndarray]) \
             -> np.ndarray:
         """Compute solar radiation."""
         sa = sun.solar_altitude(lat, month, day, hour)
@@ -224,3 +222,7 @@ class ConvectiveCooling(PowerTerm):
         da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
         return np.maximum(ConvectiveCooling._value_forced(Tf, Td, vm, ws, D, da),
                           ConvectiveCooling._value_natural(Td, vm, D))
+
+
+class RadiativeCooling(RCu):
+    """."""

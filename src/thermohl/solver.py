@@ -1,6 +1,4 @@
 """Models to compute equilibrium temperature or max intensity in a conductor."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import copy
 import datetime
 import time
@@ -8,14 +6,13 @@ from typing import Union, Tuple, Optional
 
 import numpy as np
 import pandas as pd
-
 import thermohl.cigre as cig_
 import thermohl.cner as cnr_
 import thermohl.ieee as i3e_
 import thermohl.olla as ola_
 import thermohl.utils as utils
+from pyntb.optimize import bisect_v
 from thermohl.numeric import reshape
-from thermohl.numeric import vect_bisection
 
 
 def default_values():
@@ -152,14 +149,10 @@ class Solver:
         t = time.time()
 
         # solve
-        n = utils.dict_max_len(self.dc)
-        Tm = Tmin * np.ones((n,))
-        TM = Tmax * np.ones((n,))
-
         def _fun(x):
-            return self._rhs_value(x)
+            return -self._rhs_value(x)
 
-        T, err = vect_bisection(_fun, Tm, TM, tol, maxiter)
+        T, err = bisect_v(_fun, Tmin, Tmax, (utils.dict_max_len(self.dc),), tol, maxiter)
 
         self.ctime = time.time() - t
 
@@ -188,8 +181,8 @@ class Solver:
         return df
 
     def transient_temperature(self, time: np.ndarray, T0: Optional[float] = None,
-                              transit: Optional[np.ndarray] = None, Ta: Optional[np.ndarray]=None,
-                              wind_angle: Optional[np.ndarray]=None, wind_speed: Optional[np.ndarray]=None,
+                              transit: Optional[np.ndarray] = None, Ta: Optional[np.ndarray] = None,
+                              wind_angle: Optional[np.ndarray] = None, wind_speed: Optional[np.ndarray] = None,
                               Pa=None, rh=None, pr=None,
                               return_core: bool = False, return_avg: bool = False, return_power: bool = False) \
             -> pd.DataFrame:
@@ -406,17 +399,16 @@ class Solver:
                 Ta, Ts = self.jh._avg_surf(T, **self.dc)
                 jh = (self.cc.value(Ts, **self.dc) + self.rc.value(Ts, **self.dc) +
                       self.pc.value(Ts, **self.dc) - self.sh.value(Ts, **self.dc))
-                return jh - self.jh.value(Ts, **self.dc)
+                return -jh + self.jh.value(Ts, **self.dc)
         elif target == 'avg':
             def fun(i):
                 self.dc['I'] = i
                 Ts, Tc = self.jh._surf_core(T, **self.dc)
                 jh = (self.cc.value(Ts, **self.dc) + self.rc.value(Ts, **self.dc) +
                       self.pc.value(Ts, **self.dc) - self.sh.value(Ts, **self.dc))
-                return jh - self.jh.value(Ts, **self.dc)
+                return -jh + self.jh.value(Ts, **self.dc)
 
-        v = np.ones((n,))
-        A, e = vect_bisection(fun, Imin * v, Imax * v, tol, maxiter)
+        A, e = bisect_v(fun, Imin, Imax, (n,), tol, maxiter)
 
         self.ctime = time.time() - t
 

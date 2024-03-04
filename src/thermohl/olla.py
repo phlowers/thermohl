@@ -2,15 +2,12 @@
 
 Based on NT-RD-CNER-DL-SLA-20-00215 by RTE.
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import numpy as np
 from typing import Union, Tuple
 
+import numpy as np
+from pyntb.optimize import fixed_point
 from thermohl import ieee
-from thermohl.numeric import fixed_point
-from thermohl.utils import PowerTerm
-from thermohl.utils import RadiativeCooling
+from thermohl.utils import PowerTerm, RadiativeCooling as RCu
 
 
 class JouleHeating(PowerTerm):
@@ -58,7 +55,7 @@ class JouleHeating(PowerTerm):
                      D: Union[float, np.ndarray], d: Union[float, np.ndarray],
                      A: Union[float, np.ndarray], a: Union[float, np.ndarray], l: Union[float, np.ndarray]) \
             -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray], Union[float, np.ndarray],
-                     Union[float, np.ndarray], Union[float, np.ndarray]]:
+            Union[float, np.ndarray], Union[float, np.ndarray]]:
         d = d * np.ones_like(T)
         D = D * np.ones_like(T)
         a = a * np.ones_like(T)
@@ -85,7 +82,7 @@ class JouleHeating(PowerTerm):
         def Tmoy(x) -> Union[float, np.ndarray]:
             return T + 0.5 * c * JouleHeating._RAC(x, I, D, d, A, a, km, ki, kl, kq, RDC20, T20, f)
 
-        Ta = fixed_point(Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter, raise_err=False)
+        Ta = fixed_point(Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter)
         Tc = 2. * Ta - T
 
         return Ta, Tc
@@ -121,7 +118,7 @@ class JouleHeating(PowerTerm):
         def Tmoy(x) -> Union[float, np.ndarray]:
             return T - 0.5 * c * JouleHeating._RAC(x, I, D, d, A, a, km, ki, kl, kq, RDC20, T20, f)
 
-        Ta = fixed_point(Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter, raise_err=False)
+        Ta = fixed_point(Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter)
         Ts = 2. * Ta - T
 
         return Ta, Ts
@@ -290,3 +287,7 @@ class ConvectiveCooling(ieee.ConvectiveCooling):
 
     See ieee.ConvectiveCooling; it is exactly the same.
     """
+
+
+class RadiativeCooling(RCu):
+    """."""

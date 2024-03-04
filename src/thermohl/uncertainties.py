@@ -1,6 +1,4 @@
 """Tools to perform Monte Carlo simulations using the thermOHL steady solvers with uncertain input parameters."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 from typing import Union, Tuple
 
 import numpy as np
@@ -8,7 +6,6 @@ import pandas as pd
 import scipy.stats
 from scipy.stats import circmean
 from scipy.stats import circstd
-
 from thermohl import distributions
 from thermohl import solver
 from thermohl import utils

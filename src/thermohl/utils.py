@@ -1,13 +1,10 @@
 """Misc. utility code for thermohl project."""
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import os
 from typing import Union, Optional
 
 import numpy as np
 import pandas as pd
 import yaml
-
 from thermohl.air import kelvin
 
 

@@ -2,16 +2,14 @@
 
 See NT-RD-CNER-DL-SLA-20-00215.
 """
-# !/usr/bin/env python3
-# -*- coding: utf-8 -*-
-import numpy as np
 from typing import Union, Tuple
 
+import numpy as np
+from pyntb.optimize import fixed_point
 from thermohl import air
 from thermohl import olla
 from thermohl import sun
 from thermohl import utils
-from thermohl.numeric import fixed_point
 
 
 class JouleHeating(utils.PowerTerm):
@@ -22,7 +20,7 @@ class JouleHeating(utils.PowerTerm):
                      D: Union[float, np.ndarray], d: Union[float, np.ndarray],
                      A: Union[float, np.ndarray], a: Union[float, np.ndarray]) \
             -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray], Union[float, np.ndarray],
-                     Union[float, np.ndarray], Union[float, np.ndarray]]:
+            Union[float, np.ndarray], Union[float, np.ndarray]]:
         d = d * np.ones_like(T)
         D = D * np.ones_like(T)
         a = a * np.ones_like(T)
@@ -49,7 +47,7 @@ class JouleHeating(utils.PowerTerm):
         def _Tmoy(x):
             return T + 0.5 * c * olla.JouleHeating._RAC(x, I, D, d, A, a, km, ki, kl, kq, RDC20, T20, f)
 
-        Ta = fixed_point(_Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter, raise_err=False)
+        Ta = fixed_point(_Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter)
         Tc = 2. * Ta - T
 
         return Ta, Tc
@@ -77,14 +75,15 @@ class JouleHeating(utils.PowerTerm):
                   kl: Union[float, np.ndarray], kq: Union[float, np.ndarray],
                   RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20.,
                   f: Union[float, np.ndarray] = 50.,
-                  xtol: float = 1.0E-03, maxiter: int = 128, **kwargs) -> Tuple[Union[float, np.ndarray], Union[float, np.ndarray]]:
+                  xtol: float = 1.0E-03, maxiter: int = 128, **kwargs) -> Tuple[
+        Union[float, np.ndarray], Union[float, np.ndarray]]:
         """Compute average temperature and surface temperature."""
         c, d, D, a, A = JouleHeating._temp_header(T, I, D, d, A, a)
 
         def _Tmoy(x):
             return T - 0.5 * c * olla.JouleHeating._RAC(x, I, D, d, A, a, km, ki, kl, kq, RDC20, T20, f)
 
-        Ta = fixed_point(_Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter, raise_err=False)
+        Ta = fixed_point(_Tmoy, np.zeros_like(T), xtol=xtol, maxiter=maxiter)
         Ts = 2. * Ta - T
 
         return Ta, Ts
@@ -158,7 +157,8 @@ class SolarHeating(utils.PowerTerm):
 
     @staticmethod
     def _solar_radiation(lat: Union[float, np.ndarray], azm: Union[float, np.ndarray],
-                         month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]], hour: Union[float, np.ndarray]) \
+                         month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]],
+                         hour: Union[float, np.ndarray]) \
             -> Union[float, np.ndarray]:
         """Compute solar radiation.
 
@@ -306,7 +306,8 @@ class RadiativeCooling(utils.PowerTerm):
         return 1.78E-07 * epsilon * D * ((T + 273.)**4 - (Ta + 273.)**4)
 
     def derivative(self, T: Union[float, np.ndarray], Ta: Union[float, np.ndarray],
-                   D: Union[float, np.ndarray], epsilon: Union[float, np.ndarray], **kwargs) -> Union[float, np.ndarray]:
+                   D: Union[float, np.ndarray], epsilon: Union[float, np.ndarray], **kwargs) -> Union[
+        float, np.ndarray]:
         r"""Analytical derivative of value method.
 
         Parameters
