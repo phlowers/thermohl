@@ -205,6 +205,8 @@ def df2dct(df: pd.DataFrame) -> dict:
 
 def dict_max_len(dc: dict) -> int:
     """Get max length of all elements in a dict."""
+    if len(dc) == 0:
+        return 0
     n = 1
     for k in dc.keys():
         try:
@@ -220,9 +222,14 @@ def extend_to_max_len(dc: dict, n: Optional[int] = None) -> dict:
         n = dict_max_len(dc)
     dc2 = {}
     for k in dc.keys():
-        if type(dc[k]) is np.ndarray:
+        if isinstance(dc[k], np.ndarray):
             t = dc[k].dtype
+            c = len(dc[k]) == n
         else:
             t = type(dc[k])
-        dc2[k] = dc[k] * np.ones((n,), dtype=t)
+            c = False
+        if c:
+            dc2[k] = dc[k][:]
+        else:
+            dc2[k] = dc[k] * np.ones((n,), dtype=t)
     return dc2

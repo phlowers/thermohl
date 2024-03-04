@@ -1,6 +1,7 @@
 """Several models for different air properties with temperature dependency."""
-import numpy as np
 from typing import Union
+
+import numpy as np
 
 _zerok = 273.15  # Temperature value used to convert temperatures from Celsius degrees to Kelvins.
 
