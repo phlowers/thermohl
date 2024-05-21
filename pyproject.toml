@@ -26,5 +26,10 @@ dependencies = [
     "pyntb >= 2024.0.1"
 ]
 
+[project.optional-dependencies]
+doc = ["sphinx", "sphinx_rtd_theme"]
+examples = ["matplotlib", ] # openpyxl, seaborn
+test = ["pytest", "pylint"]
+
 [project.urls]
 "Homepage" = "https://github.com/rte-france/pallas-thermohl"
