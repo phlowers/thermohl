@@ -6,13 +6,14 @@ from typing import Union, Tuple
 
 import numpy as np
 from pyntb.optimize import fixed_point
+
 from thermohl import air
-from thermohl import olla
 from thermohl import sun
-from thermohl import utils
+from thermohl.power import olla
+from thermohl.power.base import PowerTerm
 
 
-class JouleHeating(utils.PowerTerm):
+class JouleHeating(PowerTerm):
     """Joule heating term."""
 
     @staticmethod
@@ -139,7 +140,7 @@ class JouleHeating(utils.PowerTerm):
         return Rac * I**2
 
 
-class SolarHeating(utils.PowerTerm):
+class SolarHeating(PowerTerm):
     """Solar heating term.
 
     Very similar to IEEE. Differences explained in methods' comments.
@@ -211,7 +212,7 @@ class SolarHeating(utils.PowerTerm):
         return np.zeros_like(T)
 
 
-class ConvectiveCooling(utils.PowerTerm):
+class ConvectiveCooling(PowerTerm):
     """Convective cooling term.
 
     Very similar to IEEE. The differences are in some coefficient values for air
@@ -275,11 +276,11 @@ class ConvectiveCooling(utils.PowerTerm):
                           ConvectiveCooling._value_natural(Td, vm, D))
 
 
-class RadiativeCooling(utils.PowerTerm):
+class RadiativeCooling(PowerTerm):
     """Power term for radiative cooling.
 
-    Very similar to utils.RadiativeCooling. Difference are in the Stefan-Boltzman
-    constant value and the celsius-kelvin conversion.
+    Very similar to thermohl.power.base.RadiativeCooling. Difference are in the
+    Stefan-Boltzman constant value and the celsius-kelvin conversion.
     """
 
     def value(self, T: Union[float, np.ndarray], Ta: Union[float, np.ndarray],

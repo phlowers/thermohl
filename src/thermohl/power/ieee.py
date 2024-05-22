@@ -6,9 +6,11 @@ Relationship of Bare Overhead Conductors.
 from typing import Union
 
 import numpy as np
+
 import thermohl.air as air
 import thermohl.sun as sun
-from thermohl.utils import PowerTerm, RadiativeCooling as RCu
+from thermohl.power.base import PowerTerm
+from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 
 
 class JouleHeating(PowerTerm):
@@ -224,5 +226,5 @@ class ConvectiveCooling(PowerTerm):
                           ConvectiveCooling._value_natural(Td, vm, D))
 
 
-class RadiativeCooling(RCu):
-    """."""
+class RadiativeCooling(RadiativeCooling_):
+    pass
