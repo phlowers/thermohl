@@ -6,10 +6,11 @@ group 12, 2002.
 from typing import Union
 
 import numpy as np
+
 import thermohl.air as air
 import thermohl.sun as sun
-from thermohl.utils import PowerTerm
-from thermohl.utils import RadiativeCooling as RCu
+from thermohl.power.base import PowerTerm
+from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 
 
 class JouleHeating(PowerTerm):
@@ -227,5 +228,5 @@ class ConvectiveCooling(PowerTerm):
         return np.pi * lm * (T - Ta) * np.maximum(nf, nn)
 
 
-class RadiativeCooling(RCu):
-    """."""
+class RadiativeCooling(RadiativeCooling_):
+    pass
