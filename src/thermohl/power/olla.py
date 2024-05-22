@@ -6,8 +6,10 @@ from typing import Union, Tuple
 
 import numpy as np
 from pyntb.optimize import fixed_point
-from thermohl import ieee
-from thermohl.utils import PowerTerm, RadiativeCooling as RCu
+
+from thermohl.power import ieee
+from thermohl.power.base import PowerTerm
+from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 
 
 class JouleHeating(PowerTerm):
@@ -283,11 +285,8 @@ class SolarHeating(ieee.SolarHeating):
 
 
 class ConvectiveCooling(ieee.ConvectiveCooling):
-    """Convective cooling term.
-
-    See ieee.ConvectiveCooling; it is exactly the same.
-    """
+    pass
 
 
-class RadiativeCooling(RCu):
-    """."""
+class RadiativeCooling(RadiativeCooling_):
+    pass
