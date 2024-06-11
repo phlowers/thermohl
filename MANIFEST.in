@@ -1,2 +1,1 @@
-include src/thermohl/default_values.yaml
 include src/thermohl/default_uncertainties.yaml
