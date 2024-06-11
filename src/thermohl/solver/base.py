@@ -1,8 +1,10 @@
 """Base class to build a solver for heat equation."""
 
-from typing import Union
+import datetime
+from typing import Union, Tuple, Type
 
 import numpy as np
+import pandas as pd
 
 from thermohl.power.base import PowerTerm
 
@@ -98,7 +100,7 @@ class Args:
                 pass
         return n
 
-    def extend_to_max_len(self, inplace: bool = False):
+    def extend_to_max_len(self, inplace: bool = True):
         """."""
         if inplace:
             a = self
@@ -120,6 +122,24 @@ class Args:
         if not inplace:
             return a
 
+    def compress(self, inplace: bool = True):
+        if inplace:
+            a = self
+        else:
+            a = Args()
+        for k in self.keys():
+            if isinstance(self[k], np.ndarray):
+                u = np.unique(self[k])
+                if len(u) == 1:
+                    a[k] = u[0]
+                else:
+                    a[k] = self[k]
+            else:
+                a[k] = self[k]
+
+        if not inplace:
+            return a
+
 
 class Solver:
     """Object to solve a temperature problem.
@@ -131,33 +151,152 @@ class Solver:
     __init__ function.
     """
 
-    def __init__(self, dic: dict = None, joule: PowerTerm = PowerTerm(), solar: PowerTerm = PowerTerm(),
-                 convective: PowerTerm = PowerTerm(), radiative: PowerTerm = PowerTerm(),
-                 precipitation: PowerTerm = PowerTerm()):
+    def __init__(
+            self,
+            dic: dict = None,
+            joule: Type[PowerTerm] = PowerTerm,
+            solar: Type[PowerTerm] = PowerTerm,
+            convective: Type[PowerTerm] = PowerTerm,
+            radiative: Type[PowerTerm] = PowerTerm,
+            precipitation: Type[PowerTerm] = PowerTerm
+    ):
+        """
+        Create a Solver object.
+
+        Parameters
+        ----------
+        dc : dict
+            Input values used in power terms. If there is a missing value, a
+            default is used.
+        jouleH : utils.PowerTerm
+            Joule heating term.
+        solarH : utils.PowerTerm
+            Solar heating term.
+        convectiveC : utils.PowerTerm
+            Convective cooling term.
+        radiativeC : utils.PowerTerm
+            Radiative cooling term.
+
+        Returns
+        -------
+        None.
+
+        """
         if dic is None:
             dic = {}
         self.args = Args(dic)
-        self.jh = joule
-        self.sh = solar
-        self.cc = convective
-        self.rc = radiative
-        self.pc = precipitation
+        self.args.extend_to_max_len(inplace=True)
+
+        self.jh = joule(**self.args.__dict__)
+        self.sh = solar(**self.args.__dict__)
+        self.cc = convective(**self.args.__dict__)
+        self.rc = radiative(**self.args.__dict__)
+        self.pc = precipitation(**self.args.__dict__)
+
+        self.args.compress()
         return
 
-    def balance(self, T=Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def update(self):
+        self.args.extend_to_max_len(inplace=True)
+        self.jh.__init__(**self.args.__dict__)
+        self.sh.__init__(**self.args.__dict__)
+        self.cc.__init__(**self.args.__dict__)
+        self.rc.__init__(**self.args.__dict__)
+        self.pc.__init__(**self.args.__dict__)
+        return
+
+    def balance(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         return (
-                self.jh.value(T, self.args) +
-                self.sh.value(T, self.args) -
-                self.cc.value(T, self.args) -
-                self.rc.value(T, self.args) -
-                self.pc.value(T, self.args)
+                self.jh.value(T) +
+                self.sh.value(T) -
+                self.cc.value(T) -
+                self.rc.value(T) -
+                self.pc.value(T)
         )
 
     def steady_temperature(self):
-        return
+        pass
 
     def transient_temperature(self):
-        return
+        pass
 
     def steady_intensity(self):
-        return
+        pass
+
+
+def _reshape1d(v, n):
+    """Reshape input v in size (n,) if possible."""
+    try:
+        l = len(v)
+        if l == 1:
+            w = v * np.ones(n, dtype=v.dtype)
+        else:
+            raise ValueError('Uncompatible size')
+    except AttributeError:
+        w = v * np.ones(n, dtype=type(v))
+    return w
+
+
+def reshape(v, nr=None, nc=None):
+    """Reshape input v in size (nr, nc) if possible."""
+    if nr is None and nc is None:
+        raise ValueError()
+    if nr is None:
+        w = _reshape1d(v, nc)
+    elif nc is None:
+        w = _reshape1d(v, nr)
+    else:
+        try:
+            s = v.shape
+            if len(s) == 1:
+                if nr == s[0]:
+                    w = np.column_stack(nc * (v,))
+                elif nc == s[0]:
+                    w = np.row_stack(nr * (v,))
+            elif len(s) == 0:
+                raise AttributeError()
+            else:
+                w = np.reshape(v, (nr, nc))
+        except AttributeError:
+            w = v * np.ones((nr, nc), dtype=type(v))
+    return w
+
+
+def _set_dates(
+        month: Union[float, np.ndarray],
+        day: Union[float, np.ndarray],
+        hour: Union[float, np.ndarray],
+        t: np.ndarray,
+        n: int
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Set months, days and hours as 2D arrays.
+
+    This function is used in transient temperature computations. Inputs month,
+    day and hour are floats or 1D arrays of size n; input t is a time vector of
+    size N with evaluation times in seconds. It sets arrays months, days and
+    hours, of size (N, n) such that
+        months[i, j] = datetime(month[j], day[j], hour[j]) + t[i] .
+    """
+    oi = np.ones((n,), dtype=int)
+    of = np.ones((n,), dtype=float)
+    month2 = month * oi
+    day2 = day * oi
+    hour2 = hour * of
+
+    N = len(t)
+    months = np.zeros((N, n), dtype=int)
+    days = np.zeros((N, n), dtype=int)
+    hours = np.zeros((N, n), dtype=float)
+
+    td = np.array([datetime.timedelta()] + [datetime.timedelta(seconds=t[i] - t[i - 1]) for i in range(1, N)])
+
+    for j in range(n):
+        hj = int(np.floor(hour2[j]))
+        dj = datetime.timedelta(seconds=3600. * (hour2[j] - hj))
+        t0 = datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hj) + dj
+        ts = pd.Series(t0 + td)
+        months[:, j] = ts.dt.month
+        days[:, j] = ts.dt.day
+        hours[:, j] = ts.dt.hour + ts.dt.minute / 60. + (ts.dt.second + ts.dt.microsecond * 1.0E-06) / 3600.
+
+    return months, days, hours
