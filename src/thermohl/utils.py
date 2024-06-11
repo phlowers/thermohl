@@ -1,6 +1,5 @@
 """Misc. utility code for thermohl project."""
 import os
-from typing import Optional
 
 import numpy as np
 import pandas as pd
@@ -97,35 +96,3 @@ def df2dct(df: pd.DataFrame) -> dict:
     for k in q.keys():
         q[k] = np.array(q[k])
     return q
-
-
-def dict_max_len(dc: dict) -> int:
-    """Get max length of all elements in a dict."""
-    if len(dc) == 0:
-        return 0
-    n = 1
-    for k in dc.keys():
-        try:
-            n = max(n, len(dc[k]))
-        except TypeError:
-            pass
-    return n
-
-
-def extend_to_max_len(dc: dict, n: Optional[int] = None) -> dict:
-    """Put all elements in dc in size (n,)."""
-    if n is None:
-        n = dict_max_len(dc)
-    dc2 = {}
-    for k in dc.keys():
-        if isinstance(dc[k], np.ndarray):
-            t = dc[k].dtype
-            c = len(dc[k]) == n
-        else:
-            t = type(dc[k])
-            c = False
-        if c:
-            dc2[k] = dc[k][:]
-        else:
-            dc2[k] = dc[k] * np.ones((n,), dtype=t)
-    return dc2
