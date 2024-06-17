@@ -16,18 +16,21 @@ from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 class JouleHeating(PowerTerm):
     """Joule heating term."""
 
-    def value(self, T: Union[float, np.ndarray], I: Union[float, np.ndarray],
-              km: Union[float, np.ndarray], kl: Union[float, np.ndarray],
-              RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20.,
-              **kwargs) -> Union[float, np.ndarray]:
-        r"""Compute joule heating.
+    def __init__(
+            self,
+            I: Union[float, np.ndarray],
+            km: Union[float, np.ndarray],
+            kl: Union[float, np.ndarray],
+            RDC20: Union[float, np.ndarray],
+            T20: Union[float, np.ndarray] = 20.,
+            **kwargs,
+    ):
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         I : float or np.ndarray
             Transit intensity.
         km : float or np.ndarray
@@ -39,18 +42,30 @@ class JouleHeating(PowerTerm):
         T20 : float or np.ndarray, optional
             Reference temperature. The default is 20.
 
+        """
+        self.I = I
+        self.km = km
+        self.kl = kl
+        self.RDC20 = RDC20
+        self.T20 = T20
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute joule heating.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
         Returns
         -------
         float or np.ndarray
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return km * RDC20 * (1. + kl * (T - T20)) * I**2
+        return self.km * self.RDC20 * (1. + self.kl * (T - self.T20)) * self.I**2
 
-    def derivative(self, T: Union[float, np.ndarray], I: Union[float, np.ndarray],
-                   km: Union[float, np.ndarray], kl: Union[float, np.ndarray],
-                   RDC20: Union[float, np.ndarray], T20: Union[float, np.ndarray] = 20.,
-                   **kwargs) -> Union[float, np.ndarray]:
+    def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         r"""Compute joule heating derivative.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -59,16 +74,6 @@ class JouleHeating(PowerTerm):
         ----------
         T : float or np.ndarray
             Conductor temperature.
-        I : float or np.ndarray
-            Transit intensity.
-        km : float or np.ndarray
-            Coefficient for magnetic effects.
-        kl : float or np.ndarray
-            Linear resistance augmentation with temperature.
-        RDC20 : float or np.ndarray
-            Electric resistance per unit length (DC) at 20°C.
-        T20 : float or np.ndarray, optional
-            Reference temperature. The default is 20.
 
         Returns
         -------
@@ -76,15 +81,21 @@ class JouleHeating(PowerTerm):
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return km * RDC20 * kl * I**2 * np.ones_like(T)
+        return self.km * self.RDC20 * self.kl * self.I**2 * np.ones_like(T)
 
 
 class SolarHeating(PowerTerm):
     """Solar heating term."""
 
     @staticmethod
-    def _solar_radiation(lat: Union[float, np.ndarray], azm: Union[float, np.ndarray], albedo: Union[float, np.ndarray],
-                         month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]], hour) -> np.ndarray:
+    def _solar_radiation(
+            lat: Union[float, np.ndarray],
+            azm: Union[float, np.ndarray],
+            albedo: Union[float, np.ndarray],
+            month: Union[int, np.ndarray[int]],
+            day: Union[int,
+            np.ndarray[int]], hour
+    ) -> np.ndarray:
         """Compute solar radiation."""
         sd = sun.solar_declination(month, day)
         sh = sun.hour_angle(hour)
@@ -94,22 +105,33 @@ class SolarHeating(PowerTerm):
         eta = np.arccos(np.cos(sa) * np.cos(gs - azm))
         A = 0.5 * np.pi * albedo * np.sin(sa) + np.sin(eta)
         x = np.sin(sa)
-        C = np.piecewise(x, [x < 0., x >= 0.], [lambda x_: 0., lambda x_: x_**1.2])
+        C = np.piecewise(
+            x,
+            [x < 0., x >= 0.],
+            [lambda x_: 0., lambda x_: x_**1.2]
+        )
         B = 0.5 * np.pi * (1 + albedo) * (570. - 0.47 * Id) * C
         return np.where(sa > 0., A * Id + B, 0.)
 
-    def value(self, T: Union[float, np.ndarray],
-              lat: Union[float, np.ndarray], azm: Union[float, np.ndarray], al: Union[float, np.ndarray],
-              month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]], hour: Union[float, np.ndarray],
-              D: Union[float, np.ndarray], alpha: Union[float, np.ndarray], **kwargs) -> Union[float, np.ndarray]:
-        r"""Compute solar heating.
+    def __init__(
+            self,
+            lat: Union[float, np.ndarray],
+            azm: Union[float, np.ndarray],
+            al: Union[float, np.ndarray],
+            month: Union[int, np.ndarray[int]],
+            day: Union[int, np.ndarray[int]],
+            hour: Union[float, np.ndarray],
+            D: Union[float, np.ndarray],
+            alpha: Union[float, np.ndarray],
+            srad: Union[float, np.ndarray] = None,
+            **kwargs
+    ):
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         lat : float or np.ndarray
             Latitude.
         azm : float or np.ndarray
@@ -127,6 +149,9 @@ class SolarHeating(PowerTerm):
             external diameter.
         alpha : float or np.ndarray
             Solar absorption coefficient.
+        srad : xxx
+            xxx.
+
 
         Returns
         -------
@@ -134,8 +159,30 @@ class SolarHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        s = SolarHeating._solar_radiation(np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour)
-        return alpha * s * D * np.ones_like(T)
+        self.alpha = alpha
+        if srad is None:
+            self.srad = SolarHeating._solar_radiation(np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour)
+        else:
+            self.srad = srad
+        self.D = D
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute solar heating.
+
+        If more than one input are numpy arrays, they should have the same size.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
+        Returns
+        -------
+        float or np.ndarray
+            Power term value (W.m\ :sup:`-1`\ ).
+
+        """
+        return self.alpha * self.srad * self.D * np.ones_like(T)
 
     def derivative(self, T: Union[float, np.ndarray], **kwargs) -> np.ndarray:
         """Compute solar heating derivative."""
@@ -145,54 +192,24 @@ class SolarHeating(PowerTerm):
 class ConvectiveCooling(PowerTerm):
     """Convective cooling term."""
 
-    @staticmethod
-    def _nu_forced(Tf: Union[float, np.ndarray], nu: Union[float, np.ndarray], alt: Union[float, np.ndarray],
-                   ws: Union[float, np.ndarray], wa: Union[float, np.ndarray],
-                   D: Union[float, np.ndarray], R: Union[float, np.ndarray]) -> np.ndarray:
-        """Nusselt number for forced convection."""
-        rd = air.CIGRE.relative_density(Tf, alt)
-        Re = rd * np.abs(ws) * D / nu
-
-        B1 = 0.048 * np.ones_like(Re)
-        B1 = np.where(R < 0.05, 0.178, B1)
-        B1 = np.where(Re <= 2.65E+03, 0.641, B1)
-
-        n = 0.800 * np.ones_like(Re)
-        n = np.where(R < 0.05, 0.633, n)
-        n = np.where(Re <= 2.65E+03, 0.471, n)
-
-        B2 = np.where(wa < np.deg2rad(24.), 0.68, 0.58)
-        m1 = np.where(wa < np.deg2rad(24.), 1.08, 0.90)
-
-        return np.maximum(0.42 + B2 * np.sin(wa)**m1, 0.55) * (B1 * Re**n)
-
-    @staticmethod
-    def _nu_natural(Tf: Union[float, np.ndarray], Td: Union[float, np.ndarray], nu: Union[float, np.ndarray],
-                    D: Union[float, np.ndarray], g: Union[float, np.ndarray]) -> np.ndarray:
-        """Nusselt number for natural convection."""
-        gr = D**3 * np.abs(Td) * g / ((Tf + 273.15) * nu**2)
-        gp = gr * air.CIGRE.prandtl(Tf)
-        # gp[gp < 0.] = 0.
-        ia = gp < 1.0E+04
-        A2, m2 = (np.zeros_like(Tf),) * 2
-        A2[ia] = 0.850
-        m2[ia] = 0.188
-        A2[~ia] = 0.480
-        m2[~ia] = 0.250
-        return A2 * gp**m2
-
-    def value(self, T: Union[float, np.ndarray], alt: Union[float, np.ndarray], azm: Union[float, np.ndarray],
-              Ta: Union[float, np.ndarray], ws: Union[float, np.ndarray], wa: Union[float, np.ndarray],
-              D: Union[float, np.ndarray], R: Union[float, np.ndarray], g: float = 9.81, **kwargs) -> Union[
-        float, np.ndarray]:
-        r"""Compute convective cooling.
+    def __init__(
+            self,
+            alt: Union[float, np.ndarray],
+            azm: Union[float, np.ndarray],
+            Ta: Union[float, np.ndarray],
+            ws: Union[float, np.ndarray],
+            wa: Union[float, np.ndarray],
+            D: Union[float, np.ndarray],
+            R: Union[float, np.ndarray],
+            g: float = 9.81,
+            **kwargs
+    ):
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         alt : float or np.ndarray
             Altitude.
         azm : float or np.ndarray
@@ -210,22 +227,75 @@ class ConvectiveCooling(PowerTerm):
         g : float, optional
             Gravitational acceleration. The default is 9.81.
 
+        """
+        self.alt = alt
+        # self.azm = azm
+        self.Ta = Ta
+        self.ws = ws
+        self.D = D
+        self.R = R
+        self.g = g
+        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
+
+    def _nu_forced(self, Tf: Union[float, np.ndarray], nu: Union[float, np.ndarray]) -> np.ndarray:
+        """Nusselt number for forced convection."""
+        rd = air.CIGRE.relative_density(Tf, self.alt)
+        Re = rd * np.abs(self.ws) * self.D / nu
+
+        B1 = 0.048 * np.ones_like(Re)
+        B1 = np.where(self.R < 0.05, 0.178, B1)
+        B1 = np.where(Re <= 2.65E+03, 0.641, B1)
+
+        n = 0.800 * np.ones_like(Re)
+        n = np.where(self.R < 0.05, 0.633, n)
+        n = np.where(Re <= 2.65E+03, 0.471, n)
+
+        B2 = np.where(self.da < np.deg2rad(24.), 0.68, 0.58)
+        m1 = np.where(self.da < np.deg2rad(24.), 1.08, 0.90)
+
+        return np.maximum(0.42 + B2 * np.sin(self.da)**m1, 0.55) * (B1 * Re**n)
+
+    def _nu_natural(
+            self,
+            Tf: Union[float, np.ndarray],
+            Td: Union[float, np.ndarray],
+            nu: Union[float, np.ndarray],
+    ) -> np.ndarray:
+        """Nusselt number for natural convection."""
+        gr = self.D**3 * np.abs(Td) * self.g / ((Tf + 273.15) * nu**2)
+        gp = gr * air.CIGRE.prandtl(Tf)
+        # gp[gp < 0.] = 0.
+        ia = gp < 1.0E+04
+        A2, m2 = (np.zeros_like(Tf),) * 2
+        A2[ia] = 0.850
+        m2[ia] = 0.188
+        A2[~ia] = 0.480
+        m2[~ia] = 0.250
+        return A2 * gp**m2
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute convective cooling.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
         Returns
         -------
         float or np.ndarray
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        Tf = 0.5 * (T + Ta)
-        Td = T - Ta
-        lm = air.CIGRE.thermal_conductivity(Tf)
-        # lm[lm < 0.01] = 0.01
+        Tf = 0.5 * (T + self.Ta)
+        Td = T - self.Ta
         nu = air.CIGRE.kinematic_viscosity(Tf)
         # nu[nu < 1.0E-06] = 1.0E-06
-        da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
-        nf = ConvectiveCooling._nu_forced(Tf, nu, alt, ws, da, D, R)
-        nn = ConvectiveCooling._nu_natural(Tf, Td, nu, D, g)
-        return np.pi * lm * (T - Ta) * np.maximum(nf, nn)
+        lm = air.CIGRE.thermal_conductivity(Tf)
+        # lm[lm < 0.01] = 0.01
+        nf = self._nu_forced(Tf, nu)
+        nn = self._nu_natural(Tf, Td, nu)
+        return np.pi * lm * (T - self.Ta) * np.maximum(nf, nn)
 
 
 class RadiativeCooling(RadiativeCooling_):
