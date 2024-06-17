@@ -30,22 +30,12 @@ class JouleHeating(JouleHeating_):
             RDCHigh: Union[float, np.ndarray],
             **kwargs
     ):
-        self.TLow = TLow
-        self.THigh = THigh
-        self.RDCLow = RDCLow
-        self.RDCHigh = RDCHigh
-        self.I = I
-        self.c = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute joule heating.
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         I : float or np.ndarray
             Transit intensity.
         TLow : float or np.ndarray
@@ -56,6 +46,27 @@ class JouleHeating(JouleHeating_):
             Electric resistance per unit length at TLow .
         RDCHigh : float or np.ndarray
             Electric resistance per unit length at THigh.
+
+        Returns
+        -------
+        float or np.ndarray
+            Power term value (W.m\ :sup:`-1`\ ).
+
+        """
+        self.TLow = TLow
+        self.THigh = THigh
+        self.RDCLow = RDCLow
+        self.RDCHigh = RDCHigh
+        self.I = I
+        self.c = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute joule heating.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
 
         Returns
         -------
@@ -136,22 +147,12 @@ class SolarHeating(PowerTerm):
             srad: Union[float, np.ndarray] = None,
             **kwargs,
     ):
-        self.alpha = alpha
-        if srad is None:
-            self.srad = SolarHeating._solar_radiation(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
-        else:
-            self.srad = srad
-        self.D = D
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute solar heating.
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         lat : float or np.ndarray
             Latitude.
         alt : float or np.ndarray
@@ -171,6 +172,29 @@ class SolarHeating(PowerTerm):
             external diameter.
         alpha : float or np.ndarray
             Solar absorption coefficient.
+        srad : xxx
+            xxx
+
+        Returns
+        -------
+        float or np.ndarray
+            Power term value (W.m\ :sup:`-1`\ ).
+
+        """
+        self.alpha = alpha
+        if srad is None:
+            self.srad = SolarHeating._solar_radiation(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
+        else:
+            self.srad = srad
+        self.D = D
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute solar heating.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
 
         Returns
         -------
@@ -188,31 +212,6 @@ class SolarHeating(PowerTerm):
 class ConvectiveCooling(PowerTerm):
     """Convective cooling term."""
 
-    @staticmethod
-    def _value_forced(
-            Tf: Union[float, np.ndarray],
-            Td: Union[float, np.ndarray],
-            vm: Union[float, np.ndarray],
-            ws: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            wa: Union[float, np.ndarray]
-    ) -> Union[float, np.ndarray]:
-        """Compute forced convective cooling value."""
-        lf = air.IEEE.thermal_conductivity(Tf)
-        mu = air.IEEE.dynamic_viscosity(Tf)
-        Re = ws * D * vm / mu
-        Kp = (1.194 - np.cos(wa) + 0.194 * np.cos(2. * wa) + 0.368 * np.sin(2. * wa))
-        return Kp * np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6) * lf * Td
-
-    @staticmethod
-    def _value_natural(
-            Td: Union[float, np.ndarray],
-            vm: Union[float, np.ndarray],
-            D: Union[float, np.ndarray]
-    ) -> Union[float, np.ndarray]:
-        """Compute natural convective cooling value."""
-        return 3.645 * np.sqrt(vm) * D**0.75 * np.sign(Td) * np.abs(Td)**1.25
-
     def __init__(
             self,
             alt: Union[float, np.ndarray],
@@ -223,21 +222,12 @@ class ConvectiveCooling(PowerTerm):
             D: Union[float, np.ndarray],
             **kwargs,
     ):
-        self.alt = alt
-        self.Ta = Ta
-        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
-        self.ws = ws
-        self.D = D
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute convective cooling.
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
-            Conductor temperature.
         alt : float or np.ndarray
             Altitude.
         azm : float or np.ndarray
@@ -251,6 +241,43 @@ class ConvectiveCooling(PowerTerm):
         D : float or np.ndarray
             External diameter.
 
+        """
+        self.alt = alt
+        self.Ta = Ta
+        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
+        self.ws = ws
+        self.wa = wa
+        self.D = D
+
+    def _value_forced(
+            self,
+            Tf: Union[float, np.ndarray],
+            Td: Union[float, np.ndarray],
+            vm: Union[float, np.ndarray],
+    ) -> Union[float, np.ndarray]:
+        """Compute forced convective cooling value."""
+        lf = air.IEEE.thermal_conductivity(Tf)
+        mu = air.IEEE.dynamic_viscosity(Tf)
+        Re = self.ws * self.D * vm / mu
+        Kp = (1.194 - np.cos(self.da) + 0.194 * np.cos(2. * self.da) + 0.368 * np.sin(2. * self.da))
+        return Kp * np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6) * lf * Td
+
+    def _value_natural(
+            self,
+            Td: Union[float, np.ndarray],
+            vm: Union[float, np.ndarray],
+    ) -> Union[float, np.ndarray]:
+        """Compute natural convective cooling value."""
+        return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td)**1.25
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute convective cooling.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
         Returns
         -------
         float or np.ndarray
@@ -262,8 +289,8 @@ class ConvectiveCooling(PowerTerm):
         Tf[Tf < 0.] = 0.
         vm = air.IEEE.volumic_mass(Tf, self.alt)
         return np.maximum(
-            ConvectiveCooling._value_forced(Tf, Td, vm, self.ws, self.D, self.da),
-            ConvectiveCooling._value_natural(Td, vm, self.D)
+            self._value_forced(Tf, Td, vm),
+            self._value_natural(Td, vm)
         )
 
 

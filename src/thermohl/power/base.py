@@ -68,7 +68,7 @@ class RadiativeCooling(PowerTerm):
             sigma: float = 5.67E-08,
             **kwargs
     ):
-        r""".
+        r"""Init with args.
 
         Parameters
         ----------
