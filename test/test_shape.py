@@ -4,7 +4,7 @@ from thermohl import solver
 
 
 def _solvers():
-    return [solver._factory(dic=None, heateq='1t', models=m) for m in ['cigre', 'ieee']]
+    return [solver._factory(dic=None, heateq='1t', models=m) for m in ['cner', 'cigre', 'ieee', 'olla']]
 
 
 def test_0():

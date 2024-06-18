@@ -28,7 +28,7 @@ def _factory(dic=None, heateq='1t', models='ieee'):
         return solver(dic, ieeep.JouleHeating, ieeep.SolarHeating,
                       ieeep.ConvectiveCooling, ieeep.RadiativeCooling)
     elif models == 'olla':
-        return solver(dic, ollap.JouleHeatingMulti, ollap.SolarHeating,
+        return solver(dic, ollap.JouleHeating, ollap.SolarHeating,
                       ollap.ConvectiveCooling, ollap.RadiativeCooling)
     elif models == 'cner':
         return solver(dic, cnerp.JouleHeating, cnerp.SolarHeating,
