@@ -1,6 +1,7 @@
 """Base class to build a solver for heat equation."""
 
 import datetime
+from abc import ABC, abstractmethod
 from typing import Union, Tuple, Type
 
 import numpy as np
@@ -143,7 +144,7 @@ class Args:
             return a
 
 
-class Solver:
+class Solver(ABC):
     """Object to solve a temperature problem.
 
     The temperature of a conductor is driven by four power terms, two heating
@@ -152,6 +153,28 @@ class Solver:
     temperature problem with the heating and cooling terms passed to its
     __init__ function.
     """
+
+    class Names:
+        pjle = 'P_joule'
+        psol = 'P_solar'
+        pcnv = 'P_convection'
+        prad = 'P_radiation'
+        ppre = 'P_precipitation'
+
+        err = 'err'
+
+        surf = 'surf'
+        avg = 'avg'
+        core = 'core'
+
+        temp = 't'
+        tsurf = 't_surf'
+        tavg = 't_avg'
+        tcore = 't_core'
+
+        @staticmethod
+        def powers():
+            return Solver.Names.pjle, Solver.Names.psol, Solver.Names.pcnv, Solver.Names.prad, Solver.Names.ppre
 
     def __init__(
             self,
@@ -162,8 +185,7 @@ class Solver:
             radiative: Type[PowerTerm] = PowerTerm,
             precipitation: Type[PowerTerm] = PowerTerm
     ):
-        """
-        Create a Solver object.
+        """Create a Solver object.
 
         Parameters
         ----------
@@ -187,14 +209,13 @@ class Solver:
         if dic is None:
             dic = {}
         self.args = Args(dic)
-        self.args.extend_to_max_len(inplace=True)
 
+        self.args.extend_to_max_len(inplace=True)
         self.jh = joule(**self.args.__dict__)
         self.sh = solar(**self.args.__dict__)
         self.cc = convective(**self.args.__dict__)
         self.rc = radiative(**self.args.__dict__)
         self.pc = precipitation(**self.args.__dict__)
-
         self.args.compress()
         return
 
@@ -205,6 +226,7 @@ class Solver:
         self.cc.__init__(**self.args.__dict__)
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
+        self.args.compress()
         return
 
     def balance(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
@@ -216,12 +238,15 @@ class Solver:
                 self.pc.value(T)
         )
 
+    @abstractmethod
     def steady_temperature(self):
         pass
 
+    @abstractmethod
     def transient_temperature(self):
         pass
 
+    @abstractmethod
     def steady_intensity(self):
         pass
 

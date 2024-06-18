@@ -278,21 +278,3 @@ class _JouleHeating:
         js = jd * s_
         ij = 2. * np.pi * np.sum(0.5 * (js[..., 1:] + js[..., :-1]) * np.diff(s_, axis=-1), axis=-1)
         return ij
-
-
-def morgan_coefficient(
-        D: Union[float, np.ndarray],
-        d: Union[float, np.ndarray],
-        shape: Tuple[int, ...] = (1,)
-) -> Union[float, np.ndarray]:
-    """Coefficient for heat flux between surface and core in steady state."""
-    c = 0.5 * np.ones(shape)
-    D_ = D * np.ones_like(c)
-    d_ = d * np.ones_like(c)
-    i = d_ > 0.
-    c[i] -= (d_[i]**2 / (D_[i]**2 - d_[i]**2)) * np.log(D_[i] / d_[i])
-
-    if len(shape) == 1 and shape[0] == 1:
-        return c[0]
-    else:
-        return c
