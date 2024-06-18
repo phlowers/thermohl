@@ -51,17 +51,17 @@ class Solver1T(Solver_):
         T, err = bisect_v(lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter)
 
         # format output
-        df = pd.DataFrame(data=T, columns=['T'])
+        df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
 
         if return_err:
-            df['err'] = err
+            df[Solver_.Names.err] = err
 
         if return_power:
-            df['P_joule'] = self.jh.value(T)
-            df['P_solar'] = self.sh.value(T)
-            df['P_convection'] = self.cc.value(T)
-            df['P_radiation'] = self.rc.value(T)
-            df['P_precipitation'] = self.pc.value(T)
+            df[Solver_.Names.pjle] = self.jh.value(T)
+            df[Solver_.Names.psol] = self.sh.value(T)
+            df[Solver_.Names.pcnv] = self.cc.value(T)
+            df[Solver_.Names.prad] = self.rc.value(T)
+            df[Solver_.Names.ppre] = self.pc.value(T)
 
         return df
 
@@ -185,17 +185,17 @@ class Solver1T(Solver_):
 
         # manage return dict 2 : powers
         if return_power:
-            for c in ['P_joule', 'P_solar', 'P_convection', 'P_radiation', 'P_precipitation']:
+            for c in Solver_.Names.powers():
                 dr[c] = np.zeros_like(T)
             for i in range(N):
                 for k in de.keys():
                     self.args[k] = de[k][i, :]
                 self.update()
-                dr['P_joule'][i, :] = self.jh.value(T[i, :])
-                dr['P_solar'][i, :] = self.sh.value(T[i, :])
-                dr['P_convection'][i, :] = self.cc.value(T[i, :])
-                dr['P_radiation'][i, :] = self.rc.value(T[i, :])
-                dr['P_precipitation'][i, :] = self.pc.value(T[i, :])
+                dr[Solver_.Names.pjle][i, :] = self.jh.value(T[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
 
         # squeeze return values if n is 1
         if n == 1:
@@ -271,13 +271,13 @@ class Solver1T(Solver_):
         df = pd.DataFrame(data=A, columns=['I'])
 
         if return_err:
-            df['err'] = err
+            df[Solver_.Names.err] = err
 
         if return_power:
-            df['P_joule'] = self.jh.value(T)
-            df['P_solar'] = self.sh.value(T)
-            df['P_convection'] = self.cc.value(T)
-            df['P_radiation'] = self.rc.value(T)
-            df['P_precipitation'] = self.pc.value(T)
+            df[Solver_.Names.pjle] = self.jh.value(T)
+            df[Solver_.Names.psol] = self.sh.value(T)
+            df[Solver_.Names.pcnv] = self.cc.value(T)
+            df[Solver_.Names.prad] = self.rc.value(T)
+            df[Solver_.Names.ppre] = self.pc.value(T)
 
         return df
