@@ -97,6 +97,9 @@ class JouleHeating(PowerTerm):
     def _kem(self, A, a, km, ki) -> Union[float, np.ndarray]:
         """Compute magnetic coefficient."""
         s = np.ones_like(self.I) * np.ones_like(A) * np.ones_like(a) * np.ones_like(km) * np.ones_like(ki)
+        z = s.shape == ()
+        if z:
+            s = np.array([1.])
         I_ = self.I * s
         a_ = a * s
         A_ = A * s
@@ -104,6 +107,8 @@ class JouleHeating(PowerTerm):
         ki_ = ki * s
         kem = km * s
         kem[m] += ki_[m] * I_[m] / ((A_[m] - a_[m]) * 1.0E+06)
+        if z:
+            kem = kem[0]
         return kem
 
     def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:

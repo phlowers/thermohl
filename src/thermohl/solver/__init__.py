@@ -11,6 +11,10 @@ from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 
 
+def default_values():
+    return Args(dic=None).__dict__
+
+
 def _factory(dic=None, heateq='1t', models='ieee'):
     if heateq == '1t':
         solver = Solver1T

@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import calendar
 import datetime
 
@@ -30,7 +28,7 @@ def _plot_seasons(ax=None, year=2001):
     return
 
 
-def test_hour_angle():
+def plot_hour_angle():
     """Plot hour angle over time (one day)."""
 
     dr = pd.date_range(datetime.datetime(2001, 4, 14, 20, 0, 0),
@@ -48,7 +46,7 @@ def test_hour_angle():
     return
 
 
-def test_solar_declination():
+def plot_solar_declination():
     """Plot solar declination over time (one year)."""
 
     dr = pd.date_range(datetime.datetime(2000, 12, 15),
@@ -69,7 +67,7 @@ def test_solar_declination():
     return
 
 
-def test_solar_altitude_1(only_positive=False):
+def plot_solar_altitude_1(only_positive=False):
     """Plot solar altitude at different latitudes.
 
     See variation at fixed hours for different days of the year.
@@ -104,7 +102,7 @@ def test_solar_altitude_1(only_positive=False):
     return
 
 
-def test_solar_altitude_2(only_positive=False):
+def plot_solar_altitude_2(only_positive=False):
     """Plot solar altitude at different latitudes.
 
     See variation on the 21st of each month for different hours of the day.
@@ -137,7 +135,7 @@ def test_solar_altitude_2(only_positive=False):
     return
 
 
-def test_solar_azimuth_1(only_positive=False):
+def plot_solar_azimuth_1(only_positive=False):
     """Plot solar azimuth at different latitudes.
 
     See variation at fixed hours for different days of the year.
@@ -172,7 +170,7 @@ def test_solar_azimuth_1(only_positive=False):
     return
 
 
-def test_solar_azimuth_2(only_positive=False):
+def plot_solar_azimuth_2(only_positive=False):
     """Plot solar azimuth at different latitudes.
 
     See variation on the 21st of each month for different hours of the day.
@@ -211,9 +209,9 @@ if __name__ == '__main__':
     matplotlib.use('TkAgg')
     plt.close('all')
 
-    test_hour_angle()
-    test_solar_declination()
-    test_solar_altitude_1()
-    test_solar_altitude_2()
-    test_solar_azimuth_1()
-    test_solar_azimuth_2()
+    plot_hour_angle()
+    plot_solar_declination()
+    plot_solar_altitude_1()
+    plot_solar_altitude_2()
+    plot_solar_azimuth_1()
+    plot_solar_azimuth_2()
