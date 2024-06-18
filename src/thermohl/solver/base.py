@@ -27,10 +27,12 @@ class Args:
     #     'THigh', 'TLow'
     # ]
 
-    def __init__(self, dic: dict = {}):
+    def __init__(self, dic: dict = None):
         # add default values
         self._set_default_values()
         # use values from input dict
+        if dic is None:
+            dic = {}
         keys = self.keys()
         for k in dic:
             if k in keys and dic[k] is not None:
