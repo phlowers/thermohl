@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import calendar
 import datetime
 
@@ -8,41 +6,39 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-from thermohl import cigre
-from thermohl import cner
-from thermohl import ieee
-from thermohl import olla
 from thermohl import solver
+from thermohl.power import cigre
+from thermohl.power import cner
+from thermohl.power import ieee
+from thermohl.power import olla
 
 
-def test_joule_heating(dat):
+def plot_joule_heating(dic):
     mdl = [
-        dict(label='cigre', model=cigre.JouleHeating()),
-        dict(label='ieee', model=ieee.JouleHeating()),
-        dict(label='olla', model=olla.JouleHeating()),
-        dict(label='olla-multi', model=olla.JouleHeatingMulti()),
-        dict(label='cner', model=cner.JouleHeating()),
+        dict(label='cigre', model=cigre.JouleHeating(**dic)),
+        dict(label='ieee', model=ieee.JouleHeating(**dic)),
+        dict(label='olla', model=olla.JouleHeating(**dic)),
+        dict(label='cner', model=cner.JouleHeating(**dic)),
     ]
     plt.figure()
     t = np.linspace(0., 200., 4001)
     for d in mdl:
-        plt.plot(t, d['model'].value(t, **dat), label=d['label'])
+        plt.plot(t, d['model'].value(t), label=d['label'])
     plt.grid(True)
     plt.xlabel('Temperature (C)')
     plt.ylabel('Joule Heating per unit length (Wm**-1)')
     plt.legend()
-
     plt.show()
 
     return
 
 
-def test_solar_heating(dat):
+def plot_solar_heating(dic):
     # olla not tested here since olla's solar heating is the same as ieee's one
     mdl = [
-        dict(label='cigre', cm=cm.winter, model=cigre.SolarHeating()),
-        dict(label='ieee', cm=cm.autumn, model=ieee.SolarHeating()),
-        dict(label='cner', cm=cm.summer, model=cner.SolarHeating()),
+        dict(label='cigre', cm=cm.winter, model=cigre.SolarHeating(**dic)),
+        dict(label='ieee', cm=cm.autumn, model=ieee.SolarHeating(**dic)),
+        dict(label='cner', cm=cm.summer, model=cner.SolarHeating(**dic)),
     ]
 
     # examples 1
@@ -50,14 +46,12 @@ def test_solar_heating(dat):
     day = 21 * np.ones_like(month)
     hour = np.linspace(0, 24, 24 * 120 + 1)
     fig, ax = plt.subplots(nrows=1, ncols=len(mdl))
-    dat2 = dat.copy()
-    dat2['hour'] = hour
     for k in range(12):
-        dat2['month'] = month[k]
-        dat2['day'] = day[k]
+        dic.update([('month', month[k]), ('day', day[k]), ('hour', hour)])
         for i, d in enumerate(mdl):
+            d['model'].__init__(**dic)
             c = d['cm'](np.linspace(0., 1., len(day) + 2))[1:-1]
-            ax[i].plot(hour, d['model'].value(0., **dat2), '-', c=c[k], label=calendar.month_name[k + 1])
+            ax[i].plot(hour, d['model'].value(0.), '-', c=c[k], label=calendar.month_name[k + 1])
             ax[i].set_title(d['label'])
 
     ax[0].set_ylabel('Solar Heating per unit length (Wm**-1)')
@@ -68,19 +62,19 @@ def test_solar_heating(dat):
         ax[j].set_xlabel('Hour of day')
 
     # examples 2
-    dr = pd.date_range(datetime.datetime(2001, 1, 1),
-                       datetime.datetime(2001, 12, 31),
-                       freq='H')
+    dr = pd.date_range(
+        datetime.datetime(2001, 1, 1),
+        datetime.datetime(2001, 12, 31),
+        freq='h'
+    )
     hl = np.linspace(0, 24, 13)[:-1]
     fig, ax = plt.subplots(nrows=1, ncols=len(mdl))
-    dat2 = dat.copy()
-    dat2['month'] = dr.month.values
-    dat2['day'] = dr.day.values
     for k, h in enumerate(hl):
-        dat2['hour'] = h
+        dic.update([('month', dr.month.values), ('day', dr.day.values), ('hour', h)])
         for i, d in enumerate(mdl):
+            d['model'].__init__(**dic)
             c = d['cm'](np.linspace(0., 1., len(hl) + 2))[1:-1]
-            ax[i].plot(dr, d['model'].value(0., **dat2), '-', c=c[k], label='At %02d:00' % (h,))
+            ax[i].plot(dr, d['model'].value(0.), '-', c=c[k], label='At %02d:00' % (h,))
             ax[i].set_title(d['label'])
     ax[0].set_ylabel('Solar Heating per unit length (Wm**-1)')
     for j in range(len(mdl)):
@@ -94,30 +88,28 @@ def test_solar_heating(dat):
     return
 
 
-def test_convective_cooling(dat):
+def plot_convective_cooling(dic):
     ws = np.linspace(0, 1, 5)
-    wa = dat['azm'] - np.array([0, 45, 90])
+    wa = dic['azm'] - np.array([0, 45, 90])
     Tc = np.linspace(0., 80., 41)
     Ta = np.linspace(-10, 40, 6)
-    dat2 = dat.copy()
 
     # olla not tested here since olla's convective cooling is the same as ieee's one
     mdl = [
-        dict(label='cigre', cm=cm.winter, model=cigre.ConvectiveCooling()),
-        dict(label='ieee', cm=cm.autumn, model=ieee.ConvectiveCooling()),
-        dict(label='cner', cm=cm.summer, model=cner.ConvectiveCooling()),
+        dict(label='cigre', cm=cm.winter, model=cigre.ConvectiveCooling(**dic)),
+        dict(label='ieee', cm=cm.autumn, model=ieee.ConvectiveCooling(**dic)),
+        dict(label='cner', cm=cm.summer, model=cner.ConvectiveCooling(**dic)),
     ]
 
     fig, ax = plt.subplots(nrows=len(ws), ncols=len(wa))
     for i, u in enumerate(ws):
         for j, a in enumerate(wa):
             for m, ta in enumerate(Ta):
-                dat2['ws'] = u
-                dat2['wa'] = a
-                dat2['Ta'] = ta
+                dic.update([('ws', u), ('wa', a), ('Ta', ta)])
                 for k, d in enumerate(mdl):
+                    d['model'].__init__(**dic)
                     c = d['cm'](np.linspace(0., 1., len(Ta) + 2))[1:-1]
-                    ax[i, j].plot(Tc, d['model'].value(Tc, **dat2), '-', c=c[m], label='T$_a$=%.0f C' % (ta,))
+                    ax[i, j].plot(Tc, d['model'].value(Tc), '-', c=c[m], label='T$_a$=%.0f C' % (ta,))
                 ax[i, j].set_title('At u=%.1f and $\phi$=%.0f' % (u, a))
                 ax[i, j].grid(True)
                 ax[i, j].set_ylim([-50, 100])
@@ -132,7 +124,7 @@ def test_convective_cooling(dat):
     return
 
 
-def test_radiative_cooling(dat):
+def plot_radiative_cooling(dic):
     Tc = np.linspace(0., 80., 41)
     Ta = np.linspace(-20, 50, 8)
     cl = cm.Spectral_r(np.linspace(0., 1., len(Ta) + 2)[1:-1])
@@ -141,11 +133,13 @@ def test_radiative_cooling(dat):
 
     plt.figure()
     for i, ta in enumerate(Ta):
-        rc = ieee.RadiativeCooling()
-        plt.plot(Tc, rc.value(Tc, ta, dat['D'], dat['epsilon']), c=cl[i], label='T$_a$=%.0f C' % (ta,))
+        dic['Ta'] = ta
 
-        nc = cner.RadiativeCooling()
-        plt.plot(Tc, nc.value(Tc, ta, dat['D'], dat['epsilon']), '--', c=cl[i])
+        rc = ieee.RadiativeCooling(**dic)
+        plt.plot(Tc, rc.value(Tc), c=cl[i], label='T$_a$=%.0f C' % (ta,))
+
+        nc = cner.RadiativeCooling(**dic)
+        plt.plot(Tc, nc.value(Tc), '--', c=cl[i])
 
     plt.grid(True)
     plt.title('NB: CNER model is the dotted line')
@@ -167,12 +161,12 @@ if __name__ == '__main__':
     matplotlib.use('TkAgg')
     plt.close('all')
 
-    dct = solver.default_values()
-    dct['lat'] = 45.
-    dct['tb'] = 0.
-    dct['al'] = 0.25
+    dic = solver.default_values()
+    dic['lat'] = 45.
+    dic['tb'] = 0.
+    dic['al'] = 0.25
 
-    test_joule_heating(dct)
-    test_solar_heating(dct)
-    test_convective_cooling(dct)
-    test_radiative_cooling(dct)
+    plot_joule_heating(dic)
+    plot_solar_heating(dic)
+    plot_convective_cooling(dic)
+    plot_radiative_cooling(dic)
