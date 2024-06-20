@@ -286,7 +286,7 @@ class ConvectiveCooling(PowerTerm):
         """
         Tf = 0.5 * (T + self.Ta)
         Td = T - self.Ta
-        Tf[Tf < 0.] = 0.
+        Tf = np.where(Tf < 0., 0., Tf)
         vm = air.IEEE.volumic_mass(Tf, self.alt)
         return np.maximum(
             self._value_forced(Tf, Td, vm),
