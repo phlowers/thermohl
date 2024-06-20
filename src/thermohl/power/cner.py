@@ -8,7 +8,7 @@ import numpy as np
 
 from thermohl import air
 from thermohl import sun
-from thermohl.power import olla
+from thermohl.power import olla, ieee
 from thermohl.power.base import PowerTerm
 
 
@@ -203,64 +203,5 @@ class ConvectiveCooling(PowerTerm):
         return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))
 
 
-class RadiativeCooling(PowerTerm):
-    """Power term for radiative cooling.
-
-    Very similar to thermohl.power.base.RadiativeCooling. Difference are in the
-    Stefan-Boltzman constant value and the celsius-kelvin conversion.
-    """
-
-    def __init__(
-            self,
-            Ta: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            epsilon: Union[float, np.ndarray],
-            **kwargs
-    ):
-        r"""Init with args.
-
-        Parameters
-        ----------
-        Ta : float or np.ndarray
-            Ambient temperature (C).
-        D : float or np.ndarray
-            External diameter (m).
-        epsilon : float or np.ndarray
-            Emissivity.
-
-        """
-        self.Ta = Ta
-        self.D = D
-        self.epsilon = epsilon
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute radiative cooling using the Stefan-Boltzmann law.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature (C).
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        return 1.78E-07 * self.epsilon * self.D * ((T + 273.)**4 - (self.Ta + 273.)**4)
-
-    def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Analytical derivative of value method.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature (C).
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
-
-        """
-        return 4. * 1.78E-07 * self.epsilon * self.D * T**3
+class RadiativeCooling(ieee.RadiativeCooling):
+    pass
