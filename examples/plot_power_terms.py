@@ -129,20 +129,26 @@ def plot_radiative_cooling(dic):
     Ta = np.linspace(-20, 50, 8)
     cl = cm.Spectral_r(np.linspace(0., 1., len(Ta) + 2)[1:-1])
 
-    # only ieee and cner models are tested here since cigre, ieee and olla radiative coolings are all the same
+    # cner is not displayed since it is the same as ieee
 
     plt.figure()
+    plt.plot(np.nan, np.nan, ls='-', c='gray', label='cigre')
+    plt.plot(np.nan, np.nan, ls='--', c='gray', label='ieee')
+    plt.plot(np.nan, np.nan, ls=':', c='gray', label='olla')
+
     for i, ta in enumerate(Ta):
         dic['Ta'] = ta
 
-        rc = ieee.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), c=cl[i], label='T$_a$=%.0f C' % (ta,))
+        rc = cigre.RadiativeCooling(**dic)
+        plt.plot(Tc, rc.value(Tc), ls='-', c=cl[i], label='T$_a$=%.0f C' % (ta,))
 
-        nc = cner.RadiativeCooling(**dic)
-        plt.plot(Tc, nc.value(Tc), '--', c=cl[i])
+        rc = ieee.RadiativeCooling(**dic)
+        plt.plot(Tc, rc.value(Tc), ls='--', c=cl[i])
+
+        rc = olla.RadiativeCooling(**dic)
+        plt.plot(Tc, rc.value(Tc), ':', c=cl[i])
 
     plt.grid(True)
-    plt.title('NB: CNER model is the dotted line')
     plt.xlabel('Conductor temperature (C)')
     plt.ylabel('Radiative Cooling per unit length (Wm**-1)')
     plt.legend()

@@ -299,4 +299,31 @@ class ConvectiveCooling(PowerTerm):
 
 
 class RadiativeCooling(RadiativeCooling_):
-    pass
+
+    def __init__(
+            self,
+            Ta: Union[float, np.ndarray],
+            D: Union[float, np.ndarray],
+            epsilon: Union[float, np.ndarray],
+            sigma: float = 5.67E-08,
+            **kwargs
+    ):
+        r"""Init with args.
+
+        Parameters
+        ----------
+        Ta : float or np.ndarray
+            Ambient temperature (C).
+        D : float or np.ndarray
+            External diameter (m).
+        epsilon : float or np.ndarray
+            Emissivity.
+        sigma : float, optional
+            Stefan-Boltzmann constant in W.m\ :sup:`-2`\ K\ :sup:`4`\ . The
+            default is 5.67E-08.
+
+        Returns
+        -------
+
+        """
+        super().__init__(Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273., **kwargs)
