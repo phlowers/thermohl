@@ -32,7 +32,7 @@ class PowerTerm:
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return np.zeros_like(T)
+        return np.zeros_like(T) if not np.isscalar(T) else 0. * T
 
     def derivative(self, T: Union[float, np.ndarray], dT: float = _dT) -> Union[float, np.ndarray]:
         r"""Compute power term derivative regarding temperature in function of temperature.
