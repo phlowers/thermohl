@@ -94,5 +94,8 @@ def df2dct(df: pd.DataFrame) -> dict:
     """
     q = df.to_dict(orient='list')
     for k in q.keys():
-        q[k] = np.array(q[k])
+        if len(q[k]) > 1:
+            q[k] = np.array(q[k])
+        else:
+            q[k] = q[k][0]
     return q

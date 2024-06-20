@@ -63,7 +63,8 @@ class SolarHeating(ieee.SolarHeating):
 
         """
         for k in ['alt', 'tb']:
-            kwargs.pop(k)
+            if k in kwargs.keys():
+                kwargs.pop(k)
         super().__init__(
             lat=lat, alt=0., azm=azm, tb=0., month=month, day=day, hour=hour, D=D, alpha=alpha, srad=srad,
             **kwargs
