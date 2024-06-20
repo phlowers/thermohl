@@ -26,7 +26,6 @@ class JouleHeating(PowerTerm):
             kl: Union[float, np.ndarray],
             kq: Union[float, np.ndarray],
             RDC20: Union[float, np.ndarray],
-            l: Union[float, np.ndarray],
             T20: Union[float, np.ndarray] = 20.,
             f: Union[float, np.ndarray] = 50.,
             **kwargs
@@ -57,8 +56,6 @@ class JouleHeating(PowerTerm):
             Quadratic resistance augmentation with temperature.
         RDC20 : float or np.ndarray
             Electric resistance per unit length (DC) at 20°C.
-        l : float or np.ndarray
-            ...
         T20 : float or np.ndarray, optional
             Reference temperature. The default is 20.
         f : float or np.ndarray, optional
@@ -174,7 +171,8 @@ class SolarHeating(ieee.SolarHeatingBase):
             [0., 0., 0., 0., 0., 0., 0.]
         )
         for k in ['alt', 'tb']:
-            kwargs.pop(k)
+            if k in kwargs.keys():
+                kwargs.pop(k)
         super().__init__(
             lat=lat, alt=0., azm=azm, tb=0., month=month, day=day, hour=hour, D=D, alpha=alpha, est=est, srad=srad,
             **kwargs
