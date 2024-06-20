@@ -10,10 +10,9 @@ import numpy as np
 import thermohl.air as air
 import thermohl.sun as sun
 from thermohl.power.base import PowerTerm
-from thermohl.power.joule_heating import JouleHeating as JouleHeating_
 
 
-class JouleHeating(JouleHeating_):
+class JouleHeating(PowerTerm):
     """Joule heating term."""
 
     @staticmethod
@@ -94,27 +93,26 @@ class JouleHeating(JouleHeating_):
         return self.c * self.I**2 * np.ones_like(T)
 
 
-class SolarHeating(PowerTerm):
-    """Solar heating term."""
+class _SRad:
 
-    _clean = [-4.22391E+01, +6.38044E+01, -1.9220E+00, +3.46921E-02, -3.61118E-04, +1.94318E-06, -4.07608E-09]
-    _indus = [+5.31821E+01, +1.4211E+01, +6.6138E-01, -3.1658E-02, +5.4654E-04, -4.3446E-06, +1.3236E-08]
+    def __init__(self, cl, il):
+        self.clean = cl
+        self.indus = il
 
-    @staticmethod
-    def _catm(x: Union[float, np.ndarray], trb: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def catm(self, x: Union[float, np.ndarray], trb: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         """Compute coefficient for atmosphere turbidity."""
         omt = 1. - trb
-        A = omt * SolarHeating._clean[6] + trb * SolarHeating._indus[6]
-        B = omt * SolarHeating._clean[5] + trb * SolarHeating._indus[5]
-        C = omt * SolarHeating._clean[4] + trb * SolarHeating._indus[4]
-        D = omt * SolarHeating._clean[3] + trb * SolarHeating._indus[3]
-        E = omt * SolarHeating._clean[2] + trb * SolarHeating._indus[2]
-        F = omt * SolarHeating._clean[1] + trb * SolarHeating._indus[1]
-        G = omt * SolarHeating._clean[0] + trb * SolarHeating._indus[0]
+        A = omt * self.clean[6] + trb * self.indus[6]
+        B = omt * self.clean[5] + trb * self.indus[5]
+        C = omt * self.clean[4] + trb * self.indus[4]
+        D = omt * self.clean[3] + trb * self.indus[3]
+        E = omt * self.clean[2] + trb * self.indus[2]
+        F = omt * self.clean[1] + trb * self.indus[1]
+        G = omt * self.clean[0] + trb * self.indus[0]
         return A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
 
-    @staticmethod
-    def _solar_radiation(
+    def __call__(
+            self,
             lat: Union[float, np.ndarray],
             alt: Union[float, np.ndarray],
             azm: Union[float, np.ndarray],
@@ -128,10 +126,58 @@ class SolarHeating(PowerTerm):
         sz = sun.solar_azimuth(lat, month, day, hour)
         th = np.arccos(np.cos(sa) * np.cos(sz - azm))
         K = 1. + 1.148E-04 * alt - 1.108E-08 * alt**2
-        Q = SolarHeating._catm(np.rad2deg(sa), trb)
+        Q = self.catm(np.rad2deg(sa), trb)
         sr = K * Q * np.sin(th)
         return np.where(sr > 0., sr, 0.)
 
+
+class SolarHeatingBase(PowerTerm):
+    """Solar heating term."""
+
+    def __init__(
+            self,
+            lat: Union[float, np.ndarray],
+            alt: Union[float, np.ndarray],
+            azm: Union[float, np.ndarray],
+            tb: Union[float, np.ndarray],
+            month: Union[int, np.ndarray[int]],
+            day: Union[int, np.ndarray[int]],
+            hour: Union[float, np.ndarray],
+            D: Union[float, np.ndarray],
+            alpha: Union[float, np.ndarray],
+            est: _SRad,
+            srad: Union[float, np.ndarray] = None,
+            **kwargs,
+    ):
+        self.alpha = alpha
+        if srad is None:
+            self.srad = est(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
+        else:
+            self.srad = srad
+        self.D = D
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute solar heating.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
+        Returns
+        -------
+        float or np.ndarray
+            Power term value (W.m\ :sup:`-1`\ ).
+
+        """
+        return self.alpha * self.srad * self.D * np.ones_like(T)
+
+    def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        """Compute solar heating derivative."""
+        return np.zeros_like(T)
+
+
+class SolarHeating(SolarHeatingBase):
     def __init__(
             self,
             lat: Union[float, np.ndarray],
@@ -180,32 +226,11 @@ class SolarHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        self.alpha = alpha
-        if srad is None:
-            self.srad = SolarHeating._solar_radiation(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
-        else:
-            self.srad = srad
-        self.D = D
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute solar heating.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        return self.alpha * self.srad * self.D * np.ones_like(T)
-
-    def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        """Compute solar heating derivative."""
-        return np.zeros_like(T)
+        est = _SRad(
+            [-4.22391E+01, +6.38044E+01, -1.9220E+00, +3.46921E-02, -3.61118E-04, +1.94318E-06, -4.07608E-09],
+            [+5.31821E+01, +1.4211E+01, +6.6138E-01, -3.1658E-02, +5.4654E-04, -4.3446E-06, +1.3236E-08]
+        )
+        super().__init__(lat, alt, azm, tb, month, day, hour, D, alpha, est, srad, **kwargs)
 
 
 class ConvectiveCooling(PowerTerm):
