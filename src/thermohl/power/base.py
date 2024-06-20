@@ -4,7 +4,7 @@ from typing import Union
 
 import numpy as np
 
-from thermohl.air import kelvin
+from thermohl.air import _zerok
 
 _dT = 1.0E-03
 
@@ -60,12 +60,16 @@ class PowerTerm:
 class RadiativeCooling(PowerTerm):
     """Generic power term for radiative cooling."""
 
+    def _celsius2kelvin(self, T):
+        return T + self.zerok
+
     def __init__(
             self,
             Ta: Union[float, np.ndarray],
             D: Union[float, np.ndarray],
             epsilon: Union[float, np.ndarray],
             sigma: float = 5.67E-08,
+            zerok: float = _zerok,
             **kwargs
     ):
         r"""Init with args.
@@ -81,12 +85,15 @@ class RadiativeCooling(PowerTerm):
         sigma : float, optional
             Stefan-Boltzmann constant in W.m\ :sup:`-2`\ K\ :sup:`4`\ . The
             default is 5.67E-08.
+        zerok : float, optional
+            Value for zero kelvin.
 
         Returns
         -------
 
         """
-        self.Ta = kelvin(Ta)
+        self.zerok = zerok
+        self.Ta = self._celsius2kelvin(Ta)
         self.D = D
         self.epsilon = epsilon
         self.sigma = sigma
@@ -105,7 +112,7 @@ class RadiativeCooling(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return np.pi * self.sigma * self.epsilon * self.D * (kelvin(T)**4 - self.Ta**4)
+        return np.pi * self.sigma * self.epsilon * self.D * (self._celsius2kelvin(T)**4 - self.Ta**4)
 
     def derivative(self, T: Union[float, np.ndarray], dT: float = _dT) -> Union[float, np.ndarray]:
         r"""Analytical derivative of value method.
