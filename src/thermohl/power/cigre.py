@@ -7,10 +7,135 @@ from typing import Union
 
 import numpy as np
 
-import thermohl.air as air
 import thermohl.sun as sun
 from thermohl.power.base import PowerTerm
 from thermohl.power.base import RadiativeCooling as RadiativeCooling_
+
+
+class Air:
+    """CIGRE air models."""
+
+    @staticmethod
+    def volumic_mass(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+        r"""Compute air volumic mass.
+
+        If both inputs are numpy arrays, they should have the same size.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius).
+        alt : float or numpy.ndarray, optional
+            Altitude above sea-level. The default is 0.
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Volumic mass in kg.m\ :sup:`-3`\ .
+
+        """
+        return 1.2925 * Air.relative_density(Tc, alt)
+
+    @staticmethod
+    def relative_density(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+        """Compute relative density, ie density ratio regarding density at zero altitude.
+
+        This function has temperature and altitude as input for consistency
+        regarding other functions in the module, but the temperature has no
+        influence, only the altitude for this model.
+
+        If both inputs are numpy arrays, they should have the same size.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius).
+        alt : float or numpy.ndarray, optional
+            Altitude above sea-level. The default is 0.
+
+        Returns
+        -------
+        TYPE
+            DESCRIPTION.
+
+        """
+        return np.exp(-1.16E-04 * alt) * np.ones_like(Tc)
+
+    @staticmethod
+    def kinematic_viscosity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute air kinematic viscosity.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Kinematic viscosity in m\ :sup:`2`\ .s\ :sup:`-1`\ .
+
+        """
+        return 1.32E-05 + 9.5E-08 * Tc
+
+    @staticmethod
+    def dynamic_viscosity(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+        r"""Compute air dynamic viscosity.
+
+        If both inputs are numpy arrays, they should have the same size.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+        alt : float or numpy.ndarray, optional
+            Altitude above sea-level. The default is 0.
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Dynamic viscosity in kg.m\ :sup:`-1`\ .s\ :sup:`-1`\ .
+
+        """
+        return Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
+
+    @staticmethod
+    def thermal_conductivity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute air thermal conductivity.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Thermal conductivity in W.m\ :sup:`-1`\ .K\ :sup:`-1`\ .
+
+        """
+        return 2.42E-02 + 7.2E-05 * Tc
+
+    @staticmethod
+    def prandtl(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        """Compute Prandtl number.
+
+        The Prandtl number (Pr) is a dimensionless number, named after the German
+        physicist Ludwig Prandtl, defined as the ratio of momentum diffusivity to
+        thermal diffusivity.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Prandtl number (no unit)
+
+        """
+        return 0.715 - 2.5E-04 * Tc
 
 
 class JouleHeating(PowerTerm):
@@ -229,7 +354,6 @@ class ConvectiveCooling(PowerTerm):
 
         """
         self.alt = alt
-        # self.azm = azm
         self.Ta = Ta
         self.ws = ws
         self.D = D
@@ -239,7 +363,7 @@ class ConvectiveCooling(PowerTerm):
 
     def _nu_forced(self, Tf: Union[float, np.ndarray], nu: Union[float, np.ndarray]) -> np.ndarray:
         """Nusselt number for forced convection."""
-        rd = air.CIGRE.relative_density(Tf, self.alt)
+        rd = Air.relative_density(Tf, self.alt)
         Re = rd * np.abs(self.ws) * self.D / nu
 
         B1 = 0.048 * np.ones_like(Re)
@@ -263,7 +387,7 @@ class ConvectiveCooling(PowerTerm):
     ) -> np.ndarray:
         """Nusselt number for natural convection."""
         gr = self.D**3 * np.abs(Td) * self.g / ((Tf + 273.15) * nu**2)
-        gp = gr * air.CIGRE.prandtl(Tf)
+        gp = gr * Air.prandtl(Tf)
         # gp[gp < 0.] = 0.
         ia = gp < 1.0E+04
         A2, m2 = (np.zeros_like(Tf),) * 2
@@ -289,9 +413,9 @@ class ConvectiveCooling(PowerTerm):
         """
         Tf = 0.5 * (T + self.Ta)
         Td = T - self.Ta
-        nu = air.CIGRE.kinematic_viscosity(Tf)
+        nu = Air.kinematic_viscosity(Tf)
         # nu[nu < 1.0E-06] = 1.0E-06
-        lm = air.CIGRE.thermal_conductivity(Tf)
+        lm = Air.thermal_conductivity(Tf)
         # lm[lm < 0.01] = 0.01
         nf = self._nu_forced(Tf, nu)
         nn = self._nu_natural(Tf, Td, nu)
