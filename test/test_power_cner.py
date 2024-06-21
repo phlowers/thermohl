@@ -61,8 +61,10 @@ class ExcelSheet:
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
         wa = np.deg2rad(self.args['wa'])
         K = 1.194 - np.cos(wa) + 0.194 * np.cos(2 * wa) + 0.368 * np.sin(2 * wa)
-        PCn = 3.645 * rho**0.5 * D**0.75 * (Ts - self.args['Ta'])**1.25
+        PCn = 3.645 * rho**0.5 * D**0.75 * np.sign(Ts - self.args['Ta']) * np.abs(Ts - self.args['Ta'])**1.25
         PCf = F * lm * K * (Ts - self.args['Ta'])
+        # print(f"re={Re}, kp={K}, lam={lm}")
+        # print(f"pcn={PCn}, pcf={PCf}")
         return np.maximum(PCn, PCf)
 
     def radiative_cooling(self, Ts):
@@ -100,51 +102,52 @@ def excel_conductor_data():
     return df
 
 
-def scn():
+def scenarios():
     """Get list of hard-coded scenarios to test."""
     dic = dict(
-        conductor=["Aster228", "Pastel228"],
-        Ta=[20., 20.],
-        ws=[3., 3.],
-        wa=[90., 90.],
-        lat=[46., 46.],
-        alt=[1., 1.],
+        conductor=["Aster228", "Pastel228", "Petunia612", "Petunia612", "ACSS1317", "ACSS1317", "Aster228", "Aster228",
+                   "Aster228", "Aster228"],
+        Ta=[20., 20., 20., 20., 20., 20., 20., 20., 20., 20.],
+        ws=[3., 3., 3., 0., 0., 3., 0.6, 0.6, 0.6, 0.6],
+        wa=[90., 90., 90., 45., 45., 90., 90., 90., 90., 90.],
+        lat=[46., 46., 46., 46., 46., 46., 46., 46., 46., 46.],
+        alt=[1., 1., 1., 1., 1., 1., 1., 1., 1., 1.],
         azm=90.,
-        I=[1000., 1000.],
+        I=[1000., 1000., 1800., 1100., 3000., 4000., 700., 700., 700., 700.],
         alpha=0.9,
         epsilon=0.8,
         tb=0.,
-        month=[3, 3],
-        day=[7, 7],
-        hour=[0., 0.],
+        month=[3, 3, 3, 3, 3, 3, 3, 6, 6, 6],
+        day=[7, 7, 7, 7, 7, 7, 7, 21, 21, 21],
+        hour=[0., 0., 0., 0., 0., 0., 12., 12., 19., 12.],
     )
-
     df = pd.DataFrame(dic)
     dg = excel_conductor_data()
     df = pd.merge(df, dg, on='conductor', how='left').drop(columns='conductor')
     return df
 
 
-def test_power():
+def test_compare_power():
     """Compare computed values to hard-coded ones from ieee guide [find ref]."""
 
-    from thermohl.utils import df2dct
+    T = np.linspace(-50, +250, 999)
 
-    T = np.linspace(-50, +450, 6)
-    # T = np.linspace(-50, +450, 5001)
-    # T = np.array([1, 2, 3.])
-    ds = scn()
+    ds = scenarios()
     n = len(ds)
     ds = pd.concat(len(T) * (ds,)).reset_index(drop=True)
-    T = np.concat([n * (t,) for t in T])
+    T = np.concatenate([n * (t,) for t in T])
 
-    dc = df2dct(ds)
+    from thermohl.utils import df2dct
+    d1 = df2dct(ds)
+    ds['wa'] = np.rad2deg(np.arcsin(np.sin(np.deg2rad(np.abs(ds['azm'] - ds['wa']) % 180.))))
+    d2 = df2dct(ds)
+    del (ds, n)
 
-    ex = ExcelSheet(dc)
-    pj = cner.JouleHeating(**dc)
-    ps = cner.SolarHeating(**dc)
-    pc = cner.ConvectiveCooling(**dc)
-    pr = cner.RadiativeCooling(**dc)
+    pj = cner.JouleHeating(**d1)
+    ps = cner.SolarHeating(**d1)
+    pc = cner.ConvectiveCooling(**d1)
+    pr = cner.RadiativeCooling(**d1)
+    ex = ExcelSheet(d2)
 
     assert np.all(np.isclose(ex.joule_heating(T), pj.value(T)))
     assert np.all(np.isclose(ex.solar_heating(), ps.value(0.)))
