@@ -116,6 +116,9 @@ class JouleHeating(PowerTerm):
         self.I = I
         self.c = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
 
+    def _rdc(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        return self.RDCLow + self.c * (T - self.TLow)
+
     def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         r"""Compute joule heating.
 
@@ -130,7 +133,7 @@ class JouleHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return (self.RDCLow + self.c * (T - self.TLow)) * self.I**2
+        return self._rdc(T) * self.I**2
 
     def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         r"""Compute joule heating derivative.
