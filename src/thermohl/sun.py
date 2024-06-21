@@ -35,6 +35,9 @@ def hour_angle(hour: Union[float, np.ndarray],
     return np.radians(15. * (solar_hour - 12.))
 
 
+_csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
+
+
 def solar_declination(month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]]):
     """Compute solar declination.
 
@@ -53,8 +56,7 @@ def solar_declination(month: Union[int, np.ndarray[int]], day: Union[int, np.nda
         Solar declination in radians.
 
     """
-    csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
-    doy = csm[month - 1] + day
+    doy = _csm[month - 1] + day
     return np.deg2rad(23.46) * np.sin(2. * np.pi * (doy + 284) / 365.)
 
 
@@ -128,7 +130,9 @@ def solar_azimuth(lat: Union[float, np.ndarray],
     sd = solar_declination(month, day)
     ha = hour_angle(hour, minute=minute, second=second)
     Xi = np.sin(ha) / (np.sin(lat) * np.cos(ha) - np.cos(lat) * np.tan(sd))
-    C = np.where(Xi >= 0.,
-                 np.where(ha < 0., 0., np.pi),
-                 np.where(ha < 0., np.pi, 2. * np.pi))
+    C = np.where(
+        Xi >= 0.,
+        np.where(ha < 0., 0., np.pi),
+        np.where(ha < 0., np.pi, 2. * np.pi)
+    )
     return C + np.arctan(Xi)
