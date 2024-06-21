@@ -35,10 +35,10 @@ def plot_joule_heating(dic):
 
 def plot_solar_heating(dic):
     mdl = [
-        dict(label='cigre', cm=cm.winter, model=cigre.SolarHeating(**dic)),
+        dict(label='cigre', cm=cm.spring, model=cigre.SolarHeating(**dic)),
         dict(label='cner', cm=cm.summer, model=cner.SolarHeating(**dic)),
         dict(label='ieee', cm=cm.autumn, model=ieee.SolarHeating(**dic)),
-        dict(label='olla', cm=cm.spring, model=olla.SolarHeating(**dic)),
+        dict(label='olla', cm=cm.winter, model=olla.SolarHeating(**dic)),
     ]
 
     # examples 1
@@ -96,9 +96,10 @@ def plot_convective_cooling(dic):
 
     # olla not tested here since olla's convective cooling is the same as ieee's one
     mdl = [
-        dict(label='cigre', cm=cm.winter, model=cigre.ConvectiveCooling(**dic)),
+        dict(label='cigre', cm=cm.spring, model=cigre.ConvectiveCooling(**dic)),
         dict(label='cner', cm=cm.summer, model=cner.ConvectiveCooling(**dic)),
         dict(label='ieee', cm=cm.autumn, model=ieee.ConvectiveCooling(**dic)),
+        dict(label='olla', cm=cm.winter, model=olla.ConvectiveCooling(**dic)),
     ]
 
     fig, ax = plt.subplots(nrows=len(ws), ncols=len(wa))
@@ -170,7 +171,7 @@ if __name__ == '__main__':
     dic = solver.default_values()
     dic['lat'] = 45.
     dic['tb'] = 0.33
-    dic['al'] = 0.25
+    dic['al'] = 0.85
 
     plot_joule_heating(dic)
     plot_solar_heating(dic)
