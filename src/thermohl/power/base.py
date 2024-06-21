@@ -4,8 +4,6 @@ from typing import Union
 
 import numpy as np
 
-from thermohl.air import _zerok
-
 _dT = 1.0E-03
 
 
@@ -69,7 +67,7 @@ class RadiativeCooling(PowerTerm):
             D: Union[float, np.ndarray],
             epsilon: Union[float, np.ndarray],
             sigma: float = 5.67E-08,
-            zerok: float = _zerok,
+            zerok: float = 273.15,
             **kwargs
     ):
         r"""Init with args.

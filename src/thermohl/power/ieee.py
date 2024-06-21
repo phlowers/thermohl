@@ -7,9 +7,67 @@ from typing import Union
 
 import numpy as np
 
-import thermohl.air as air
 import thermohl.sun as sun
 from thermohl.power.base import PowerTerm
+
+
+class Air:
+    """Air quantities."""
+
+    @staticmethod
+    def volumic_mass(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+        r"""Compute air volumic mass.
+
+        If both inputs are numpy arrays, they should have the same size.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius).
+        alt : float or numpy.ndarray, optional
+            Altitude above sea-level. The default is 0.
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Volumic mass in kg.m\ :sup:`-3`\ .
+
+        """
+        return (1.293 - 1.525E-04 * alt + 6.379E-09 * alt**2) / (1. + 0.00367 * Tc)
+
+    @staticmethod
+    def dynamic_viscosity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute air dynamic viscosity.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Dynamic viscosity in kg.m\ :sup:`-1`\ .s\ :sup:`-1`\ .
+
+        """
+        return (1.458E-06 * (Tc + 273.)**1.5) / (Tc + 383.4)
+
+    @staticmethod
+    def thermal_conductivity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute air thermal conductivity.
+
+        Parameters
+        ----------
+        Tc : float or numpy.ndarray
+            Air temperature (in Celsius)
+
+        Returns
+        -------
+        float or numpy.ndarray
+             Thermal conductivity in W.m\ :sup:`-1`\ .K\ :sup:`-1`\ .
+
+        """
+        return 2.424E-02 + 7.477E-05 * Tc - 4.407E-09 * Tc**2
 
 
 class JouleHeating(PowerTerm):
@@ -201,7 +259,7 @@ class SolarHeating(SolarHeatingBase):
         lat : float or np.ndarray
             Latitude.
         alt : float or np.ndarray
-            altitude.
+            Altitude.
         azm : float or np.ndarray
             Azimuth.
         tb : float or np.ndarray
@@ -233,7 +291,73 @@ class SolarHeating(SolarHeatingBase):
         super().__init__(lat, alt, azm, tb, month, day, hour, D, alpha, est, srad, **kwargs)
 
 
-class ConvectiveCooling(PowerTerm):
+class ConvectiveCoolingBase(PowerTerm):
+    """Convective cooling term."""
+
+    def __init__(
+            self,
+            alt: Union[float, np.ndarray],
+            azm: Union[float, np.ndarray],
+            Ta: Union[float, np.ndarray],
+            ws: Union[float, np.ndarray],
+            wa: Union[float, np.ndarray],
+            D: Union[float, np.ndarray],
+            rho, mu, lambda_,
+            **kwargs,
+    ):
+        self.alt = alt
+        self.Ta = Ta
+        self.ws = ws
+        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
+        self.D = D
+
+        self.rho = rho
+        self.mu = mu
+        self.lambda_ = lambda_
+
+    def _value_forced(
+            self,
+            Tf: Union[float, np.ndarray],
+            Td: Union[float, np.ndarray],
+            vm: Union[float, np.ndarray],
+    ) -> Union[float, np.ndarray]:
+        """Compute forced convective cooling value."""
+        Re = self.ws * self.D * vm / self.mu(Tf)
+        Kp = (1.194 - np.cos(self.da) + 0.194 * np.cos(2. * self.da) + 0.368 * np.sin(2. * self.da))
+        return Kp * np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6) * self.lambda_(Tf) * Td
+
+    def _value_natural(
+            self,
+            Td: Union[float, np.ndarray],
+            vm: Union[float, np.ndarray],
+    ) -> Union[float, np.ndarray]:
+        """Compute natural convective cooling value."""
+        return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td)**1.25
+
+    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+        r"""Compute convective cooling.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Conductor temperature.
+
+        Returns
+        -------
+        float or np.ndarray
+            Power term value (W.m\ :sup:`-1`\ ).
+
+        """
+        Tf = 0.5 * (T + self.Ta)
+        Td = T - self.Ta
+        vm = self.rho(Tf, self.alt)
+        return np.maximum(
+            self._value_forced(Tf, Td, vm),
+            self._value_natural(Td, vm)
+        )
+
+
+class ConvectiveCooling(ConvectiveCoolingBase):
     """Convective cooling term."""
 
     def __init__(
@@ -266,56 +390,7 @@ class ConvectiveCooling(PowerTerm):
             External diameter.
 
         """
-        self.alt = alt
-        self.Ta = Ta
-        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
-        self.ws = ws
-        self.wa = wa
-        self.D = D
-
-    def _value_forced(
-            self,
-            Tf: Union[float, np.ndarray],
-            Td: Union[float, np.ndarray],
-            vm: Union[float, np.ndarray],
-    ) -> Union[float, np.ndarray]:
-        """Compute forced convective cooling value."""
-        lf = air.IEEE.thermal_conductivity(Tf)
-        mu = air.IEEE.dynamic_viscosity(Tf)
-        Re = self.ws * self.D * vm / mu
-        Kp = (1.194 - np.cos(self.da) + 0.194 * np.cos(2. * self.da) + 0.368 * np.sin(2. * self.da))
-        return Kp * np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6) * lf * Td
-
-    def _value_natural(
-            self,
-            Td: Union[float, np.ndarray],
-            vm: Union[float, np.ndarray],
-    ) -> Union[float, np.ndarray]:
-        """Compute natural convective cooling value."""
-        return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td)**1.25
-
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
-        r"""Compute convective cooling.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        Tf = 0.5 * (T + self.Ta)
-        Td = T - self.Ta
-        Tf = np.where(Tf < 0., 0., Tf)
-        vm = air.IEEE.volumic_mass(Tf, self.alt)
-        return np.maximum(
-            self._value_forced(Tf, Td, vm),
-            self._value_natural(Td, vm)
-        )
+        super().__init__(alt, azm, Ta, ws, wa, D, Air.volumic_mass, Air.dynamic_viscosity, Air.thermal_conductivity)
 
 
 class RadiativeCooling(PowerTerm):

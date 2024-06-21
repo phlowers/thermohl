@@ -6,7 +6,6 @@ from typing import Union
 
 import numpy as np
 
-from thermohl import air
 from thermohl.power import ieee
 from thermohl.power.base import PowerTerm
 
@@ -179,61 +178,12 @@ class SolarHeating(ieee.SolarHeatingBase):
         )
 
 
-class ConvectiveCooling(PowerTerm):
+class ConvectiveCooling(ieee.ConvectiveCooling):
     """Convective cooling term.
 
     Very similar to IEEE. The differences are in some coefficient values for air
     constants.
     """
-
-    def __init__(
-            self,
-            alt: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            Ta: Union[float, np.ndarray],
-            ws: Union[float, np.ndarray],
-            wa: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            **kwargs
-    ):
-        r"""Init with args.
-
-        If more than one input are numpy arrays, they should have the same size.
-
-        Parameters
-        ----------
-        alt : float or np.ndarray
-            Altitude.
-        azm : float or np.ndarray
-            Azimuth.
-        Ta : float or np.ndarray
-            Ambient temperature.
-        ws : float or np.ndarray
-            Wind speed.
-        wa : float or np.ndarray
-            Wind angle regarding north.
-        D : float or np.ndarray
-            External diameter.
-
-        """
-        self.alt = alt
-        self.Ta = Ta
-        self.ws = ws
-        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
-        self.D = D
-
-    def _value_forced(self, Tf, Td, vm):
-        """Compute forced convective cooling value."""
-        lf = air.IEEE.thermal_conductivity(Tf)
-        # very slight difference with air.IEEE.dynamic_viscosity() due to the celsius/kelvin conversion
-        mu = (1.458E-06 * (Tf + 273)**1.5) / (Tf + 383.4)
-        Re = self.ws * self.D * vm / mu
-        Kp = (1.194 - np.cos(self.da) + 0.194 * np.cos(2. * self.da) + 0.368 * np.sin(2. * self.da))
-        return Kp * np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6) * lf * Td
-
-    def _value_natural(self, Td, vm):
-        """Compute natural convective cooling value."""
-        return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td)**1.25
 
     def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         r"""Compute convective cooling.
@@ -251,10 +201,12 @@ class ConvectiveCooling(PowerTerm):
         """
         Tf = 0.5 * (T + self.Ta)
         Td = T - self.Ta
-        Tf = np.where(Tf < 0., 0., Tf)
         # very slight difference with air.IEEE.volumic_mass() in coefficient before alt**2
         vm = (1.293 - 1.525E-04 * self.alt + 6.38E-09 * self.alt**2) / (1 + 0.00367 * Tf)
-        return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))
+        return np.maximum(
+            self._value_forced(Tf, Td, vm),
+            self._value_natural(Td, vm)
+        )
 
 
 class RadiativeCooling(ieee.RadiativeCooling):
