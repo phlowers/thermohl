@@ -15,7 +15,7 @@ def default_values():
     return Args(dic=None).__dict__
 
 
-def _factory(dic=None, heateq='1t', models='ieee'):
+def _factory(dic=None, heateq='1t', model='ieee'):
     if heateq == '1t':
         solver = Solver1T
     elif heateq == '3t':
@@ -25,16 +25,16 @@ def _factory(dic=None, heateq='1t', models='ieee'):
     else:
         raise ValueError()
 
-    if models == 'cigre':
+    if model == 'cigre':
         return solver(dic, cigrep.JouleHeating, cigrep.SolarHeating,
                       cigrep.ConvectiveCooling, cigrep.RadiativeCooling)
-    elif models == 'ieee':
+    elif model == 'ieee':
         return solver(dic, ieeep.JouleHeating, ieeep.SolarHeating,
                       ieeep.ConvectiveCooling, ieeep.RadiativeCooling)
-    elif models == 'olla':
+    elif model == 'olla':
         return solver(dic, ollap.JouleHeating, ollap.SolarHeating,
                       ollap.ConvectiveCooling, ollap.RadiativeCooling)
-    elif models == 'cner':
+    elif model == 'cner':
         return solver(dic, cnerp.JouleHeating, cnerp.SolarHeating,
                       cnerp.ConvectiveCooling, cnerp.RadiativeCooling)
     else:
@@ -52,7 +52,7 @@ def cigre(dic=None, heateq='1t'):
         Input heat equation.
 
     """
-    return _factory(dic, heateq=heateq, models='cigre')
+    return _factory(dic, heateq=heateq, model='cigre')
 
 
 def ieee(dic=None, heateq='1t'):
@@ -66,7 +66,7 @@ def ieee(dic=None, heateq='1t'):
         Input heat equation.
 
     """
-    return _factory(dic, heateq=heateq, models='ieee')
+    return _factory(dic, heateq=heateq, model='ieee')
 
 
 def olla(dic=None, heateq='1t'):
@@ -80,7 +80,7 @@ def olla(dic=None, heateq='1t'):
         Input heat equation.
 
     """
-    return _factory(dic, heateq=heateq, models='olla')
+    return _factory(dic, heateq=heateq, model='olla')
 
 
 def cner(dic=None, heateq='1t'):
@@ -94,4 +94,4 @@ def cner(dic=None, heateq='1t'):
         Input heat equation.
 
     """
-    return _factory(dic, heateq=heateq, models='cner')
+    return _factory(dic, heateq=heateq, model='cner')
