@@ -13,7 +13,7 @@ from thermohl.power.base import PowerTerm
 class _DEFPARAM:
     tmin = -99.
     tmax = +999.
-    tol = 1.0E-06
+    tol = 1.0E-09
     maxiter = 64
     imin = 0.
     imax = 9999.
