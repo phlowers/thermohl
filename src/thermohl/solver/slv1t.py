@@ -268,7 +268,7 @@ class Solver1T(Solver_):
         self.args.I = transit
 
         # format output
-        df = pd.DataFrame(data=A, columns=['I'])
+        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
 
         if return_err:
             df[Solver_.Names.err] = err
