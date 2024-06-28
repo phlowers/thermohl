@@ -167,6 +167,8 @@ class Solver(ABC):
         avg = 'avg'
         core = 'core'
 
+        time = 'time'
+        transit = 'I'
         temp = 't'
         tsurf = 't_surf'
         tavg = 't_avg'

@@ -1,4 +1,4 @@
-from typing import Tuple, Type, Union
+from typing import Tuple, Type, Union, Optional
 
 import numpy as np
 import pandas as pd
@@ -7,6 +7,8 @@ from pyntb.optimize import qnewt2d_v
 from thermohl.power.base import PowerTerm
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
+from thermohl.solver.base import _set_dates, reshape
+from thermohl.solver.slv1t import Solver1T
 
 
 def _profile_mom(ts: float, tc: float, r: Union[float, np.ndarray], re: float) -> Union[float, np.ndarray]:
@@ -27,89 +29,18 @@ def _profile_bim(ts: float, tc: float, r: Union[float, np.ndarray], ri: float, r
     return tc - np.piecewise(r, [r <= ri, r > ri], [fl, fr])
 
 
-def _profile_bim_avg(ts: float, tc: float, ri: float, re: float) -> float:
-    """Analytical formulation for average temperature in _profile_bim."""
+def _profile_bim_avg_coeffs(ri: float, re: float):
     ri2 = ri**2
     re2 = re**2
     a = 0.5 * (re2 - ri2)**2 - re2 * ri2 * (2. * np.log(re / ri) - 1.) - ri**4
     b = 2. * re2 * (re2 - ri2) * _phi(re, ri, re)
+    return a, b
+
+
+def _profile_bim_avg(ts: float, tc: float, ri: float, re: float) -> float:
+    """Analytical formulation for average temperature in _profile_bim."""
+    a, b = _profile_bim_avg_coeffs(ri, re)
     return tc - (a / b) * (tc - ts)
-
-
-# def rsolve_simplified(t, I, Ts0, Tc0, slv):
-#     pp = dict(
-#         t=t,
-#         Tsurf=np.zeros_like(t),
-#         Tcore=np.zeros_like(t),
-#         Tavg=np.zeros_like(t),
-#         Pjou=np.zeros_like(t),
-#         Psol=np.zeros_like(t),
-#         Pcnv=np.zeros_like(t),
-#         Prad=np.zeros_like(t),
-#         Ppre=np.zeros_like(t),
-#     )
-#
-#     def powers(ta, ts, I_):
-#         pj = _JouleHeating.value(ta, I_, slv.dc['D'], slv.dc['d'], slv.dc['A'], slv.dc['a'], slv.dc['km'],
-#                                  slv.dc['ki'], slv.dc['kl'], slv.dc['kq'], slv.dc['RDC20'])
-#         ps = slv.sh.value(ts, **slv.dc)
-#         pc = slv.cc.value(np.array([ts]), **slv.dc)[0]
-#         pr = slv.rc.value(np.array(ts), **slv.dc)
-#         pp = slv.pc.value(np.array([ts]), **slv.dc)[0]
-#         return pj, ps, pc, pr, pp
-#
-#     # pre-comp
-#     c = _morgan_coeff(slv.dc['D'], slv.dc['d'], (1,))
-#     rho = slv.dc['m'] / slv.dc['A']
-#     cp = slv.dc['c']
-#     re = 0.5 * slv.dc['D']
-#     ri = 0.5 * slv.dc['d']
-#     re2 = re**2
-#     ri2 = ri**2
-#     den = rho * cp * np.pi * re2
-#     tpl = 2. * np.pi * slv.dc['l']
-#     if ri:
-#         a = 0.5 * (re2 - ri2)**2 - re2 * ri2 * (2. * np.log(re / ri) - 1.) - ri**4
-#         b = 2. * re2 * (re2 - ri2) * _phi(re, ri, re)
-#         al = a / b
-#     else:
-#         al = 0.5
-#
-#     # init
-#     pp['Tsurf'][0] = Ts0
-#     pp['Tcore'][0] = Tc0
-#     if ri > 0.:
-#         pp['Tavg'][0] = _profile_bim_avg(Ts0, Tc0, ri, re)
-#     else:
-#         pp['Tavg'][0] = 0.5 * (Ts0 + Tc0)
-#
-#     pj, ps, pc, pr, pp_ = powers(pp['Tavg'][0], pp['Tsurf'][0], I[0])
-#     pb = pj + ps - pc - pr - pp_
-#     pp['Pjou'][0] = pj
-#     pp['Psol'][0] = ps
-#     pp['Pcnv'][0] = pc
-#     pp['Prad'][0] = pr
-#     pp['Ppre'][0] = pp_
-#
-#     for i in range(len(t) - 1):
-#         ta = pp['Tavg'][i] + (t[i + 1] - t[i]) * pb / den
-#         mg = c * (pp['Pjou'][i] - pb) / tpl
-#         tc = ta + al * mg
-#         ts = tc - mg
-#
-#         pj, ps, pc, pr, pp_ = powers(ta, ts, I[i])
-#         pb = pj + ps - pc - pr - pp_
-#
-#         pp['Tsurf'][i + 1] = ts
-#         pp['Tavg'][i + 1] = ta
-#         pp['Tcore'][i + 1] = tc
-#         pp['Pjou'][i + 1] = pj
-#         pp['Psol'][i + 1] = ps
-#         pp['Pcnv'][i + 1] = pc
-#         pp['Prad'][i + 1] = pr
-#         pp['Ppre'][i + 1] = pp_
-#
-#     return pp
 
 
 class Solver3T(Solver_):
@@ -151,7 +82,7 @@ class Solver3T(Solver_):
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
 
-        self.mgc = Solver3T._morgan_coefficients(self.args.D, self.args.d, self.args.max_len())
+        self.mgc = Solver3T._morgan_coefficients(self.args.D, self.args.d, (self.args.max_len(),))
 
         self.args.compress()
         return
@@ -183,8 +114,8 @@ class Solver3T(Solver_):
             tol: float = DP.tol,
             maxiter: int = DP.maxiter,
             return_err: bool = False,
-            return_temp: bool = False,
-            return_power: bool = True):
+            return_power: bool = True
+    ):
 
         # if no guess provided, use ambient temp
         shape = (self.args.max_len(),)
@@ -196,10 +127,10 @@ class Solver3T(Solver_):
         Tcg_ = Tcg * np.ones(shape)
 
         # solve system
-        x, y, i, e = qnewt2d_v(self.balance, self.morgan, Tsg_, Tcg_, rtol=tol, maxiter=maxiter, dx=1.0E-03,
-                               dy=1.0E-03)
-        if np.max(e) > tol or i == maxiter:
-            print(f"rstat_analytic max err is {np.max(e):.3E} in {i:d} iterations")
+        x, y, cnt, err = qnewt2d_v(self.balance, self.morgan, Tsg_, Tcg_, rtol=tol,
+                                   maxiter=maxiter, dx=1.0E-03, dy=1.0E-03)
+        if np.max(err) > tol or cnt == maxiter:
+            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
         # format output
         z = 0.5 * (x + y)
@@ -208,7 +139,7 @@ class Solver3T(Solver_):
         df = pd.DataFrame({Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y})
 
         if return_err:
-            df[Solver_.Names.err] = e
+            df[Solver_.Names.err] = err
 
         if return_power:
             df[Solver_.Names.pjle] = self.joule(x, y)
@@ -217,16 +148,228 @@ class Solver3T(Solver_):
             df[Solver_.Names.prad] = self.rc.value(x)
             df[Solver_.Names.ppre] = self.pc.value(x)
 
-    def transient_temperature(self):
-        pass
+        return df
+
+    def transient_temperature(
+            self,
+            time: np.ndarray,
+            Ts0: Optional[float] = None,
+            Tc0: Optional[float] = None,
+            transit: Optional[np.ndarray] = None,
+            Ta: Optional[np.ndarray] = None,
+            wind_speed: Optional[np.ndarray] = None,
+            wind_angle: Optional[np.ndarray] = None,
+            Pa: Optional[np.ndarray] = None,
+            rh: Optional[np.ndarray] = None,
+            pr: Optional[np.ndarray] = None,
+            return_power: bool = False,
+    ) -> pd.DataFrame:
+        # if time-changing quantities are not provided, use ones from args (static)
+        if transit is None:
+            transit = self.args.I
+        if Ta is None:
+            Ta = self.args.Ta
+        if wind_speed is None:
+            wind_speed = self.args.ws
+        if wind_angle is None:
+            wind_angle = self.args.wa
+        if Pa is None:
+            Pa = self.args.Pa
+        if rh is None:
+            rh = self.args.rh
+        if pr is None:
+            pr = self.args.pr
+
+        # get sizes (n for input dict entries, N for time)
+        n = self.args.max_len()
+        N = len(time)
+        if N < 2:
+            raise ValueError()
+
+        # get initial temperature
+        if Ts0 is None:
+            Ts0 = Ta
+        if Tc0 is None:
+            Tc0 = 1. + Ts0
+
+        # get month, day and hours
+        month, day, hour = _set_dates(self.args.month, self.args.day, self.args.hour, time, n)
+
+        # save args
+        args = self.args.__dict__.copy()
+
+        # Two dicts, one (dc) with static quantities (with all elements of size
+        # n), the other (de) with time-changing quantities (with all elements of
+        # size N*n); uk is a list of keys that are in dc but not in de.
+        de = dict(
+            month=month,
+            day=day,
+            hour=hour,
+            I=reshape(transit, N, n),
+            Ta=reshape(Ta, N, n),
+            wa=reshape(wind_angle, N, n),
+            ws=reshape(wind_speed, N, n),
+            Pa=reshape(Pa, N, n),
+            rh=reshape(rh, N, n),
+            pr=reshape(pr, N, n),
+        )
+        del (month, day, hour)
+
+        # shortcuts for time-loop
+        c, D, d, ix = self.mgc
+        tpl = 2. * np.pi * self.args.l
+        al = 0.5 * np.ones(n)
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        al[ix] = a / b
+        imc = 1. / (self.args.m * self.args.c)
+
+        # init
+        ts = np.zeros((N, n))
+        ta = np.zeros((N, n))
+        tc = np.zeros((N, n))
+        ts[0, :] = Ts0
+        tc[0, :] = Tc0
+        ta[0, :] = 0.5 * (ts + tc)
+
+        # main time loop
+        for i in range(1, len(time)):
+            for k in de.keys():
+                self.args[k] = de[k][i, :]
+            self.update()
+            bal = self.balance(ts[i, :], tc[i, :])
+            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
+            mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
+            tc[i, :] = ta + al * mrg
+            ts[i, :] = tc - mrg
+
+        # save results
+        dr = {
+            Solver_.Names.time: time,
+            Solver_.Names.tsurf: ts,
+            Solver_.Names.tavg: ta,
+            Solver_.Names.tcore: tc,
+        }
+
+        if return_power:
+            dr[Solver_.Names.pjle] = np.zeros((N, n))
+            dr[Solver_.Names.psol] = np.zeros((N, n))
+            dr[Solver_.Names.pcnv] = np.zeros((N, n))
+            dr[Solver_.Names.prad] = np.zeros((N, n))
+            dr[Solver_.Names.ppre] = np.zeros((N, n))
+
+            for i in range(len(time)):
+                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+
+        return dr
 
     def steady_intensity(
             self,
             Tmax: Union[float, np.ndarray],
-            target,
+            target='auto',
             tol: float = DP.tol,
             maxiter: int = DP.maxiter,
             return_err: bool = False,
-            return_power: bool = True
+            return_temp: bool = True,
+            return_power: bool = True,
     ):
-        pass
+
+        # save transit in arg
+        transit = self.args.I
+
+        # ...
+        shape = (self.args.max_len(),)
+        Tmax_ = Tmax * np.ones(shape)
+
+        # check target
+        if target == 'auto':
+            target_ = None
+        elif isinstance(target, str):
+            if target not in [Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]:
+                raise ValueError()
+            else:
+                target_ = np.array([target for i in range(shape[0])])
+        else:
+            if len(target) != shape[0]:
+                raise ValueError()
+            for t in target:
+                if t not in [Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]:
+                    raise ValueError()
+            target_ = target
+
+        # pre-compute indexes
+        c, D, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+
+        if target_ is None:
+            target_ = np.array([Solver_.Names.avg for i in range(shape[0])])
+            target_[ix] = Solver_.Names.core
+
+        js = np.where(target_ == Solver_.Names.surf)[0]
+        ja = np.where(target_ == Solver_.Names.avg)[0]
+        jc = np.where(target_ == Solver_.Names.core)[0]
+        jx = np.intersect1d(ix, ja)
+
+        def _newtheader(i, tg):
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            ts = np.ones_like(tg)
+            ta = np.ones_like(tg)
+            tc = np.ones_like(tg)
+            ts[js] = Tmax_[js]
+            tc[js] = tg[js]
+            ta[ja] = Tmax_[ja]
+            tc[ja] = tg[ja]
+            tc[jc] = Tmax_[jc]
+            ts[jc] = tg[jc]
+            ts[ja] = 2 * ta[ja] - tc[ja]
+            ts[jx] = tc[jx] - b[jx] / a[jx] * (tc[jx] - ta[jx])
+            return ts, tc
+
+        def balance(i, tg):
+            ts, tc = _newtheader(i, tg)
+            return self.balance(ts, tc)
+
+        def morgan(i, tg):
+            ts, tc = _newtheader(i, tg)
+            return self.morgan(ts, tc)
+
+        # solve system
+        s = Solver1T(self.args.__dict__, type(self.jh), type(self.sh), type(self.cc), type(self.rc), type(self.pc))
+        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
+        x, y, cnt, err = qnewt2d_v(balance, morgan, r[Solver_.Names.transit].values, Tmax, rtol=tol,
+                                   maxiter=maxiter, dx=1.0E-03, dy=1.0E-03)
+        if np.max(err) > tol or cnt == maxiter:
+            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
+
+        # format output
+        df = pd.DataFrame({Solver_.Names.transit: x})
+
+        if return_err:
+            df['err'] = err
+
+        if return_temp or return_power:
+            ts, tc = _newtheader(x, y)
+            ta = 0.5 * (x + y)
+            ta[ix] = _profile_bim_avg(x[ix], y[ix], 0.5 * d[ix], 0.5 * D[ix])
+
+        if return_temp:
+            df[Solver_.Names.tsurf] = ts
+            df[Solver_.Names.tavg] = ta
+            df[Solver_.Names.tcore] = tc
+
+        if return_power:
+            df[Solver_.Names.pjle] = self.joule(ts, tc)
+            df[Solver_.Names.psol] = self.sh.value(ts)
+            df[Solver_.Names.pcnv] = self.cc.value(ts)
+            df[Solver_.Names.prad] = self.rc.value(ts)
+            df[Solver_.Names.ppre] = self.pc.value(ts)
+
+        # restore previous transit
+        self.args.I = transit
+        self.jh.__init__(**self.args.__dict__)
+
+        return df
