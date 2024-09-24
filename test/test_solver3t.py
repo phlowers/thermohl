@@ -29,7 +29,7 @@ def test_balance():
     for s in _solvers(dic):
         # compute guess with 1t solver
         s1 = solver._factory(dic=dic, heateq='1t', model='ieee')
-        t1 = s1.steady_temperature(tol=5., maxiter=16, return_err=False, return_power=False)
+        t1 = s1.steady_temperature(tol=2., maxiter=16, return_err=False, return_power=False)
         t1 = t1['t'].values
         # 3t solve
         df = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64)
@@ -52,12 +52,15 @@ def test_consistency():
         Ta=np.random.uniform(0., 30., N),
         ws=np.random.uniform(0., 7., N),
         wa=np.random.uniform(0., 90., N),
+        d=np.random.randint(2, size=N) * solver.default_values()['d'],
     )
 
     for s in _solvers(dic):
         for t in ['surf', 'avg', 'core']:
             # solve intensity with different targets
             df = s.steady_intensity(Tmax=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
+            # check target temp
+            assert np.all(np.isclose(df['t_' + t], 100, atol=1.0E-09))
             # check balance
             bl = df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation']
             assert np.all(np.isclose(bl, 0., atol=1.0E-09))
