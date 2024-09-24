@@ -55,7 +55,7 @@ class Solver3T(Solver_):
         c = 0.5 * np.ones(shape)
         D_ = D * np.ones_like(c)
         d_ = d * np.ones_like(c)
-        i = d_ > 0.
+        i = np.where(d_ > 0.)[0]
         c[i] -= (d_[i]**2 / (D_[i]**2 - d_[i]**2)) * np.log(D_[i] / d_[i])
         if len(shape) == 1 and shape[0] == 1:
             return c[0], D_[0], d_[0], i[0]
@@ -105,7 +105,7 @@ class Solver3T(Solver_):
 
     def morgan(self, ts: Union[float, np.ndarray], tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         c, _, _, _ = self.mgc
-        return (ts - tc) - c * self.joule(ts, tc) / (2. * np.pi * self.args.l)
+        return (tc - ts) - c * self.joule(ts, tc) / (2. * np.pi * self.args.l)
 
     def steady_temperature(
             self,
@@ -304,7 +304,7 @@ class Solver3T(Solver_):
 
         # pre-compute indexes
         c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
 
         if target_ is None:
             target_ = np.array([Solver_.Names.avg for i in range(shape[0])])
@@ -318,17 +318,27 @@ class Solver3T(Solver_):
         def _newtheader(i, tg):
             self.args.I = i
             self.jh.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg)
-            ta = np.ones_like(tg)
-            tc = np.ones_like(tg)
+            ts = np.ones_like(tg) * np.nan
+            ta = np.ones_like(tg) * np.nan
+            tc = np.ones_like(tg) * np.nan
+
             ts[js] = Tmax_[js]
             tc[js] = tg[js]
+            tc[js] = ts[js] + c[js] * self.joule(ts, tc)[js] / (2. * np.pi * self.args.l)
+
             ta[ja] = Tmax_[ja]
-            tc[ja] = tg[ja]
+            al = 0.05
+            bt = 0.02
+            gm = (b / a - 1) * bt
+            tc[ja] = ta[ja] + al * tg[ja]
+            ts[ja] = ta[ja] - al * tg[ja]
+            tc[jx] = ta[jx] + bt * tg[jx]
+            ts[jx] = ta[jx] - gm[jx] * tg[jx]
+
             tc[jc] = Tmax_[jc]
             ts[jc] = tg[jc]
-            ts[ja] = 2 * ta[ja] - tc[ja]
-            ts[jx] = tc[jx] - b[jx] / a[jx] * (tc[jx] - ta[jx])
+            ts[jc] = tc[jc] - c[jc] * self.joule(ts, tc)[jc] / (2. * np.pi * self.args.l)
+
             return ts, tc
 
         def balance(i, tg):
@@ -355,8 +365,8 @@ class Solver3T(Solver_):
 
         if return_temp or return_power:
             ts, tc = _newtheader(x, y)
-            ta = 0.5 * (x + y)
-            ta[ix] = _profile_bim_avg(x[ix], y[ix], 0.5 * d[ix], 0.5 * D[ix])
+            ta = 0.5 * (ts + tc)
+            ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
 
         if return_temp:
             df[Solver_.Names.tsurf] = ts
