@@ -23,7 +23,8 @@ def test_balance():
         Ta=np.random.uniform(0., 30., N),
         ws=np.random.uniform(0., 7., N),
         wa=np.random.uniform(0., 90., N),
-        I=np.random.uniform(40., 4000., N)
+        I=np.random.uniform(40., 4000., N),
+        d=np.random.randint(2, size=N) * solver.default_values()['d'],
     )
 
     for s in _solvers(dic):
@@ -47,6 +48,7 @@ def test_consistency():
         Ta=np.random.uniform(0., 30., N),
         ws=np.random.uniform(0., 7., N),
         wa=np.random.uniform(0., 90., N),
+        d=np.random.randint(2, size=N) * solver.default_values()['d'],
     )
 
     for s in _solvers(dic):
