@@ -105,7 +105,7 @@ class Solver3T(Solver_):
 
     def morgan(self, ts: Union[float, np.ndarray], tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
         c, _, _, _ = self.mgc
-        return (tc - tc) - c * self.joule(ts, tc) / (2. * np.pi * self.args.l)
+        return (ts - tc) - c * self.joule(ts, tc) / (2. * np.pi * self.args.l)
 
     def steady_temperature(
             self,
@@ -289,7 +289,9 @@ class Solver3T(Solver_):
             target_ = None
         elif isinstance(target, str):
             if target not in [Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]:
-                raise ValueError()
+                raise ValueError(f"Target temperature should be in "
+                                 f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
+                                 f" got {target} instead.")
             else:
                 target_ = np.array([target for i in range(shape[0])])
         else:
@@ -339,8 +341,8 @@ class Solver3T(Solver_):
 
         # solve system
         s = Solver1T(self.args.__dict__, type(self.jh), type(self.sh), type(self.cc), type(self.rc), type(self.pc))
-        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
-        x, y, cnt, err = qnewt2d_v(balance, morgan, r[Solver_.Names.transit].values, Tmax, rtol=tol,
+        r = s.steady_intensity(Tmax_, tol=1.0, maxiter=8, return_power=False)
+        x, y, cnt, err = qnewt2d_v(balance, morgan, r[Solver_.Names.transit].values, Tmax_, rtol=tol,
                                    maxiter=maxiter, dx=1.0E-03, dy=1.0E-03)
         if np.max(err) > tol or cnt == maxiter:
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
