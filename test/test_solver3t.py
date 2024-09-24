@@ -27,11 +27,16 @@ def test_balance():
     )
 
     for s in _solvers(dic):
-        df = s.steady_temperature(return_err=True, return_power=True, tol=tol, maxiter=64)
+        # compute guess with 1t solver
+        s1 = solver._factory(dic=dic, heateq='1t', model='ieee')
+        t1 = s1.steady_temperature(tol=5., maxiter=16, return_err=False, return_power=False)
+        t1 = t1['t'].values
+        # 3t solve
+        df = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64)
         assert np.all(df['err'] < tol)
         bl = np.abs(df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation'])
-        atol = np.maximum(np.abs(s.balance(df['t'] + 0.5 * df['err'])), np.abs(s.balance(df['t'] - 0.5 * df['err'])))
-        assert np.all(np.isclose(bl, 0., atol=atol))
+        # todo: also check morgan law; independently or with s own method?
+        assert np.all(np.isclose(bl, 0., atol=1.0E-09))
 
 
 def test_consistency():
@@ -50,10 +55,20 @@ def test_consistency():
     )
 
     for s in _solvers(dic):
-        df = s.steady_intensity(Tmax=100., return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
-        bl = df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation']
-        assert np.all(np.isclose(bl, 0., atol=1.0E-06))
-        s.args['I'] = df['I'].values
-        s.update()
-        dg = s.steady_temperature(return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
-        assert np.all(np.isclose(dg['t'].values, 100.))
+        for t in ['surf', 'avg', 'core']:
+            # solve intensity with different targets
+            df = s.steady_intensity(Tmax=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
+            # check balance
+            bl = df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation']
+            assert np.all(np.isclose(bl, 0., atol=1.0E-09))
+            # set args intensity to newly founds ampacities
+            s.args['I'] = df['I'].values
+            s.update()
+            # compute guess with 1t solver
+            s1 = solver._factory(dic=dic, heateq='1t', model='ieee')
+            t1 = s1.steady_temperature(tol=5., maxiter=16, return_err=False, return_power=False)
+            t1 = t1['t'].values
+            # 3t solve
+            dg = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
+            # check consistency
+            assert np.all(np.isclose(dg['t_' + t].values, 100.))
