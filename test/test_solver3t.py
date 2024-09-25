@@ -23,7 +23,8 @@ def test_balance():
         Ta=np.random.uniform(0., 30., N),
         ws=np.random.uniform(0., 7., N),
         wa=np.random.uniform(0., 90., N),
-        I=np.random.uniform(40., 4000., N)
+        I=np.random.uniform(40., 4000., N),
+        d=np.random.randint(2, size=N) * solver.default_values()['d'],
     )
 
     for s in _solvers(dic):
@@ -33,13 +34,14 @@ def test_balance():
         t1 = t1['t'].values
         # 3t solve
         df = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64)
+        # checks
         assert np.all(df['err'] < tol)
-        bl = np.abs(df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation'])
-        # todo: also check morgan law; independently or with s own method?
-        assert np.all(np.isclose(bl, 0., atol=1.0E-09))
+        assert np.all(np.isclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
+        assert np.all(np.isclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
 
 
 def test_consistency():
+    tol = 1.0E-09
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
@@ -59,11 +61,9 @@ def test_consistency():
         for t in ['surf', 'avg', 'core']:
             # solve intensity with different targets
             df = s.steady_intensity(Tmax=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
-            # check target temp
-            assert np.all(np.isclose(df['t_' + t], 100, atol=1.0E-09))
-            # check balance
-            bl = df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation']
-            assert np.all(np.isclose(bl, 0., atol=1.0E-09))
+            assert np.all(df['err'] < tol)
+            assert np.all(np.isclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
+            assert np.all(np.isclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
             # set args intensity to newly founds ampacities
             s.args['I'] = df['I'].values
             s.update()
