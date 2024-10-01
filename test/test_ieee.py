@@ -8,6 +8,9 @@ def test_compare_powers():
     """Compare computed values to hard-coded ones from ieee std 38-2012."""
     dic = solver.default_values()
 
+    # there are a lot of rounding in the standard guide, hence the relatively
+    # large tolerances used in our tests ...
+
     dic['ws'] = 0.61
     dic['wa'] = 0.
     dic['epsilon'] = 0.8

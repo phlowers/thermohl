@@ -366,13 +366,28 @@ class ConvectiveCooling(PowerTerm):
         rd = Air.relative_density(Tf, self.alt)
         Re = rd * np.abs(self.ws) * self.D / nu
 
-        B1 = 0.048 * np.ones_like(Re)
-        B1 = np.where(self.R < 0.05, 0.178, B1)
-        B1 = np.where(Re <= 2.65E+03, 0.641, B1)
+        s = np.ones_like(Tf) * np.ones_like(nu) * np.ones_like(Re)
+        z = s.shape == ()
+        if z:
+            s = np.array([1.])
 
-        n = 0.800 * np.ones_like(Re)
-        n = np.where(self.R < 0.05, 0.633, n)
-        n = np.where(Re <= 2.65E+03, 0.471, n)
+        B1 = 0.641 * s
+        n = 0.471 * s
+
+        # NB : (0.641/0.178)**(1/(0.633-0.471)) = 2721.4642715250125
+        ix = np.logical_and(self.R <= 0.05, Re >= 2721.4642715250125)
+        # NB : (0.641/0.048)**(1/(0.800-0.471)) = 2638.3210085195865
+        jx = np.logical_and(self.R > 0.05, Re >= 2638.3210085195865)
+
+        B1[ix] = 0.178
+        B1[jx] = 0.048
+
+        n[ix] = 0.633
+        n[jx] = 0.800
+
+        if z:
+            B1 = B1[0]
+            n = n[0]
 
         B2 = np.where(self.da < np.deg2rad(24.), 0.68, 0.58)
         m1 = np.where(self.da < np.deg2rad(24.), 1.08, 0.90)
