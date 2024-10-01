@@ -319,25 +319,17 @@ class Solver3T(Solver_):
             self.args.I = i
             self.jh.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
-            ta = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
 
             ts[js] = Tmax_[js]
             tc[js] = tg[js]
-            tc[js] = ts[js] + c[js] * self.joule(ts, tc)[js] / (2. * np.pi * self.args.l)
 
-            ta[ja] = Tmax_[ja]
-            al = 0.05
-            bt = 0.02
-            gm = (b / a - 1) * bt
-            tc[ja] = ta[ja] + al * tg[ja]
-            ts[ja] = ta[ja] - al * tg[ja]
-            tc[jx] = ta[jx] + bt * tg[jx]
-            ts[jx] = ta[jx] - gm[jx] * tg[jx]
+            ts[ja] = tg[ja]
+            tc[ja] = 2 * Tmax_[ja] - ts[ja]
+            tc[jx] = (b[jx] * Tmax_[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
 
             tc[jc] = Tmax_[jc]
             ts[jc] = tg[jc]
-            ts[jc] = tc[jc] - c[jc] * self.joule(ts, tc)[jc] / (2. * np.pi * self.args.l)
 
             return ts, tc
 
@@ -364,21 +356,22 @@ class Solver3T(Solver_):
             df['err'] = err
 
         if return_temp or return_power:
+
             ts, tc = _newtheader(x, y)
             ta = 0.5 * (ts + tc)
             ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
 
-        if return_temp:
-            df[Solver_.Names.tsurf] = ts
-            df[Solver_.Names.tavg] = ta
-            df[Solver_.Names.tcore] = tc
+            if return_temp:
+                df[Solver_.Names.tsurf] = ts
+                df[Solver_.Names.tavg] = ta
+                df[Solver_.Names.tcore] = tc
 
-        if return_power:
-            df[Solver_.Names.pjle] = self.joule(ts, tc)
-            df[Solver_.Names.psol] = self.sh.value(ts)
-            df[Solver_.Names.pcnv] = self.cc.value(ts)
-            df[Solver_.Names.prad] = self.rc.value(ts)
-            df[Solver_.Names.ppre] = self.pc.value(ts)
+            if return_power:
+                df[Solver_.Names.pjle] = self.joule(ts, tc)
+                df[Solver_.Names.psol] = self.sh.value(ts)
+                df[Solver_.Names.pcnv] = self.cc.value(ts)
+                df[Solver_.Names.prad] = self.rc.value(ts)
+                df[Solver_.Names.ppre] = self.pc.value(ts)
 
         # restore previous transit
         self.args.I = transit
