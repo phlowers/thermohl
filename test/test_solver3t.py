@@ -10,6 +10,8 @@ def _solvers(dic=None):
 
 
 def test_balance():
+    # NB : this one fails only with 'cigre' powers
+
     tol = 1.0E-09
     np.random.seed(_nprs)
     N = 9999
@@ -62,16 +64,13 @@ def test_consistency():
             # solve intensity with different targets
             df = s.steady_intensity(Tmax=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
             assert np.all(df['err'] < tol)
+            # set args intensity to newly founds ampacities
+            s.args.I = df['I'].values
+            s.update()
             assert np.all(np.isclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
             assert np.all(np.isclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
-            # set args intensity to newly founds ampacities
-            s.args['I'] = df['I'].values
-            s.update()
-            # compute guess with 1t solver
-            s1 = solver._factory(dic=dic, heateq='1t', model='ieee')
-            t1 = s1.steady_temperature(tol=5., maxiter=16, return_err=False, return_power=False)
-            t1 = t1['t'].values
             # 3t solve
-            dg = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
+            dg = s.steady_temperature(Tsg=df['t_surf'].round(1).values, Tcg=df['t_core'].round(1).values,
+                                      return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
             # check consistency
             assert np.all(np.isclose(dg['t_' + t].values, 100.))
