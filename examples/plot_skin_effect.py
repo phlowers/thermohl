@@ -24,7 +24,7 @@ def plot_skin_effect():
     plt.grid(True)
     plt.legend()
     plt.ylim([1.00, 1.15])
-    plt.title('_ks [from olla.Joule.Heating (computed with Bessel approx.)]')
+    plt.title('_ks [from olla.Joule.Heating - computed with Bessel approx.]')
 
     plt.show()
 
