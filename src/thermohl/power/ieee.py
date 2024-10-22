@@ -214,7 +214,7 @@ class SolarHeatingBase(PowerTerm):
         if srad is None:
             self.srad = est(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
         else:
-            self.srad = srad
+            self.srad = np.maximum(srad, 0.)
         self.D = D
 
     def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
