@@ -1,4 +1,7 @@
 """Functions and classes to obtain various probability distributions for scalar random variables."""
+
+# TODO : move this to pyntb as it is too general for thermohl only; then add proper tests !
+
 import warnings
 from typing import Union
 
@@ -141,7 +144,7 @@ def _vonmises_kappa(sigma: float) -> float:
         return _vonmises_circ_var(x) - vr
 
     try:
-        kappa = newton(fun, x0=k0)
+        kappa = newton(fun, x0=k0, tol=1.0E-06, maxiter=32)
     except RuntimeError:
         kappa = 1 / sigma**2
 
