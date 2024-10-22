@@ -153,3 +153,23 @@ def test_compare_power():
     assert np.allclose(ex.solar_heating(), ps.value(0.))
     assert np.allclose(ex.convective_cooling(T), pc.value(T))
     assert np.allclose(ex.radiative_cooling(T), pr.value(T))
+
+
+def test_solar_heating():
+    # adapted from devin repo dev/test/test_rte.py
+
+    n = 5
+    ones = np.ones(n)
+
+    lat = np.array([40., 46., 46., 46., 46.])
+    azm = np.array([90., 0., 0., 0., 0.])
+    month = np.array([7, 3, 3, 3, 3])
+    day = np.array([19, 7, 14, 7, 7])
+    hour = np.array([14., 12., 17., 12., 12.])
+    D = 4.4E-02 * ones
+    alpha = 0.9 * ones
+
+    p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
+    s = cner.SolarHeating(lat, azm, month, day, hour, D, alpha, srad=None)
+
+    assert np.allclose(p, s.value(ones), 0.1)
