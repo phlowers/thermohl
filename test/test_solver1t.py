@@ -33,7 +33,7 @@ def test_balance():
         bl = np.abs(df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation'])
         atol = np.maximum(np.abs(s.balance(df['t'] + 0.5 * df['err'])),
                           np.abs(s.balance(df['t'] - 0.5 * df['err'])))
-        assert np.all(np.isclose(bl, 0., atol=atol))
+        assert np.allclose(bl, 0., atol=atol)
 
 
 def test_consistency():
@@ -55,8 +55,8 @@ def test_consistency():
     for s in _solvers(dic):
         df = s.steady_intensity(T=100., return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
         bl = df['P_joule'] + df['P_solar'] - df['P_convection'] - df['P_radiation'] - df['P_precipitation']
-        assert np.all(np.isclose(bl, 0., atol=1.0E-06))
+        assert np.allclose(bl, 0., atol=1.0E-06)
         s.args['I'] = df['I'].values
         s.update()
         dg = s.steady_temperature(return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
-        assert np.all(np.isclose(dg['t'].values, 100.))
+        assert np.allclose(dg['t'].values, 100.)

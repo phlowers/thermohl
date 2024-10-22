@@ -38,8 +38,8 @@ def test_balance():
         df = s.steady_temperature(Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64)
         # checks
         assert np.all(df['err'] < tol)
-        assert np.all(np.isclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
-        assert np.all(np.isclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
+        assert np.allclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol)
+        assert np.allclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol)
 
 
 def test_consistency():
@@ -67,10 +67,10 @@ def test_consistency():
             # set args intensity to newly founds ampacities
             s.args.I = df['I'].values
             s.update()
-            assert np.all(np.isclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
-            assert np.all(np.isclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol))
+            assert np.allclose(s.balance(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol)
+            assert np.allclose(s.morgan(ts=df['t_surf'], tc=df['t_core']).values, 0., atol=tol)
             # 3t solve
             dg = s.steady_temperature(Tsg=df['t_surf'].round(1).values, Tcg=df['t_core'].round(1).values,
                                       return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
             # check consistency
-            assert np.all(np.isclose(dg['t_' + t].values, 100.))
+            assert np.allclose(dg['t_' + t].values, 100.)

@@ -149,7 +149,7 @@ def test_compare_power():
     pr = cner.RadiativeCooling(**d1)
     ex = ExcelSheet(d2)
 
-    assert np.all(np.isclose(ex.joule_heating(T), pj.value(T)))
-    assert np.all(np.isclose(ex.solar_heating(), ps.value(0.)))
-    assert np.all(np.isclose(ex.convective_cooling(T), pc.value(T)))
-    assert np.all(np.isclose(ex.radiative_cooling(T), pr.value(T)))
+    assert np.allclose(ex.joule_heating(T), pj.value(T))
+    assert np.allclose(ex.solar_heating(), ps.value(0.))
+    assert np.allclose(ex.convective_cooling(T), pc.value(T))
+    assert np.allclose(ex.radiative_cooling(T), pr.value(T))
