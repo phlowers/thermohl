@@ -57,10 +57,11 @@ class Solver3T(Solver_):
         d_ = d * np.ones_like(c)
         i = np.where(d_ > 0.)[0]
         c[i] -= (d_[i]**2 / (D_[i]**2 - d_[i]**2)) * np.log(D_[i] / d_[i])
-        if len(shape) == 1 and shape[0] == 1:
-            return c[0], D_[0], d_[0], i[0]
-        else:
-            return c, D_, d_, i
+        # if len(shape) == 1 and shape[0] == 1:
+        #     return c[0], D_[0], d_[0], i[0]
+        # else:
+        #     return c, D_, d_, i
+        return c, D_, d_, i
 
     def __init__(
             self,
@@ -229,7 +230,7 @@ class Solver3T(Solver_):
         tc = np.zeros((N, n))
         ts[0, :] = Ts0
         tc[0, :] = Tc0
-        ta[0, :] = 0.5 * (ts + tc)
+        ta[0, :] = 0.5 * (ts[0, :] + tc[0, :])
 
         # main time loop
         for i in range(1, len(time)):
@@ -239,8 +240,8 @@ class Solver3T(Solver_):
             bal = self.balance(ts[i, :], tc[i, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
             mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
-            tc[i, :] = ta + al * mrg
-            ts[i, :] = tc - mrg
+            tc[i, :] = ta[i, :] + al * mrg
+            ts[i, :] = tc[i, :] - mrg
 
         # save results
         dr = {
@@ -264,11 +265,17 @@ class Solver3T(Solver_):
                 dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
 
+        if n == 1:
+            for k in dr:
+                if k == Solver_.Names.time:
+                    continue
+                dr[k] = dr[k][:, 0]
+
         return dr
 
     def steady_intensity(
             self,
-            Tmax: Union[float, np.ndarray],
+            T: Union[float, np.ndarray],
             target='auto',
             tol: float = DP.tol,
             maxiter: int = DP.maxiter,
@@ -282,7 +289,7 @@ class Solver3T(Solver_):
 
         # ...
         shape = (self.args.max_len(),)
-        Tmax_ = Tmax * np.ones(shape)
+        Tmax_ = T * np.ones(shape)
 
         # check target
         if target == 'auto':
