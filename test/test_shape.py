@@ -1,10 +1,36 @@
 import numpy as np
+import pandas as pd
 
 from thermohl import solver
 
 
 def _solvers():
-    return [solver._factory(dic=None, heateq='1t', model=m) for m in ['cner', 'cigre', 'ieee', 'olla']]
+    li = []
+    for ht in ['1t', '3t']:
+        for m in ['cner', 'cigre', 'ieee', 'olla']:
+            li.append(solver._factory(dic=None, heateq=ht, model=m))
+    return li
+
+
+def _ampargs(s: solver.Solver, t: pd.DataFrame):
+    if isinstance(s, solver.Solver1T):
+        a = dict(T=t[solver.Solver.Names.temp].values)
+    elif isinstance(s, solver.Solver3T):
+        a = dict(T=t[solver.Solver.Names.tsurf].values, target=solver.Solver.Names.surf)
+    else:
+        raise NotImplementedError
+    return a
+
+
+def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
+    if isinstance(s, solver.Solver1T):
+        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values, transit=I)
+    elif isinstance(s, solver.Solver3T):
+        a = dict(time=t, transit=I, Ts0=ds[solver.Solver.Names.tsurf].values,
+                 Tc0=ds[solver.Solver.Names.tcore].values)
+    else:
+        raise NotImplementedError
+    return a
 
 
 def test_power_default():
@@ -28,7 +54,7 @@ def test_power_1d():
         for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
             p.__init__(**d)
             v = p.value(0.)
-            assert np.isscalar(p.value(0.)) or p.value(0.).shape == (n,)
+            assert np.isscalar(v) or v.shape == (n,)
             v = p.value(np.array([0.]))
             assert v.shape == (1,) or v.shape == (n,)
             assert p.value(np.linspace(-10, +50, n)).shape == (n,)
@@ -37,8 +63,8 @@ def test_power_1d():
 def test_steady_default():
     for s in _solvers():
         t = s.steady_temperature()
-        i = s.steady_intensity(T=t['t'].values)
-
+        a = _ampargs(s, t)
+        i = s.steady_intensity(**a)
         assert len(t) == 1
         assert len(i) == 1
 
@@ -49,8 +75,8 @@ def test_steady_1d():
         s.args.Ta = np.linspace(-10, +50, n)
         s.update()
         t = s.steady_temperature()
-        i = s.steady_intensity(T=t['t'].values)
-
+        a = _ampargs(s, t)
+        i = s.steady_intensity(**a)
         assert len(t) == n
         assert len(i) == n
 
@@ -62,8 +88,8 @@ def test_steady_1d_mix():
         s.args.I = np.array([199.])
         s.update()
         t = s.steady_temperature()
-        i = s.steady_intensity(T=t['t'].values)
-
+        a = _ampargs(s, t)
+        i = s.steady_intensity(**a)
         assert len(t) == n
         assert len(i) == n
 
@@ -74,11 +100,18 @@ def test_transient_0():
         I = 199 * np.ones_like(t)
 
         ds = s.steady_temperature()
-        r = s.transient_temperature(t, T0=ds['t'].values[0], transit=I)
-        r = s.transient_temperature(t, T0=ds['t'].values, transit=I, return_power=True)
+        a = _traargs(s, ds, t, I)
 
-        assert len(r['time']) == len(t)
-        assert r['T'].shape == (len(t),)
+        r = s.transient_temperature(**a)
+        assert len(r.pop('time')) == len(t)
+        for k in r.keys():
+            assert r[k].shape == (len(t),)
+
+        r = s.transient_temperature(**{**a, 'return_power': True})
+
+        assert len(r.pop('time')) == len(t)
+        for k in r.keys():
+            assert r[k].shape == (len(t),)
 
 
 def test_transient_1():
@@ -91,8 +124,14 @@ def test_transient_1():
         I = 199 * np.ones_like(t)
 
         ds = s.steady_temperature()
-        r = s.transient_temperature(t, T0=ds['t'].values, transit=I)
-        r = s.transient_temperature(t, T0=ds['t'].values, transit=I, return_power=True)
+        a = _traargs(s, ds, t, I)
 
-        assert len(r['time']) == len(t)
-        assert r['T'].shape == (len(t), s.args.max_len())
+        r = s.transient_temperature(**a)
+        assert len(r.pop('time')) == len(t)
+        for k in r.keys():
+            assert r[k].shape == (len(t), n)
+
+        r = s.transient_temperature(**{**a, 'return_power': True})
+        assert len(r.pop('time')) == len(t)
+        for k in r.keys():
+            assert r[k].shape == (len(t), n)
