@@ -62,7 +62,7 @@ def test_consistency():
     for s in _solvers(dic):
         for t in ['surf', 'avg', 'core']:
             # solve intensity with different targets
-            df = s.steady_intensity(Tmax=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
+            df = s.steady_intensity(T=100., target=t, return_err=True, return_power=True, tol=1.0E-09, maxiter=64)
             assert np.all(df['err'] < tol)
             # set args intensity to newly founds ampacities
             s.args.I = df['I'].values
