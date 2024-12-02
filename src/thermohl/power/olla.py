@@ -2,17 +2,19 @@
 
 Based on NT-RD-CNER-DL-SLA-20-00215 by RTE.
 """
-from typing import Union
+
+from typing import Optional, Any
 
 import numpy as np
 
+from thermohl import floatArrayLike, intArrayLike
 from thermohl.power import ieee, cner
 from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 
 _zerok = 273.15
 
 
-def kelvin(t):
+def kelvin(t: floatArrayLike) -> floatArrayLike:
     return t + _zerok
 
 
@@ -20,7 +22,7 @@ class Air:
     """`Wikipedia <https://fr.wikipedia.org/wiki/Air> models."""
 
     @staticmethod
-    def volumic_mass(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
         r"""
         Compute air volumic mass.
 
@@ -40,10 +42,10 @@ class Air:
 
         """
         Tk = kelvin(Tc)
-        return 1.292 * _zerok * np.exp(-3.42E-02 * alt / Tk) / Tk
+        return 1.292 * _zerok * np.exp(-3.42e-02 * alt / Tk) / Tk
 
     @staticmethod
-    def dynamic_viscosity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def dynamic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
         Parameters
@@ -58,11 +60,12 @@ class Air:
 
         """
         Tk = kelvin(Tc)
-        return 8.8848E-15 * Tk**3 - 3.2398E-11 * Tk**2 + 6.2657E-08 * Tk + 2.3543E-06
+        return 8.8848e-15 * Tk**3 - 3.2398e-11 * Tk**2 + 6.2657e-08 * Tk + 2.3543e-06
 
     @staticmethod
-    def kinematic_viscosity(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[
-        float, np.ndarray]:
+    def kinematic_viscosity(
+        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
         Parameters
@@ -81,7 +84,7 @@ class Air:
         return Air.dynamic_viscosity(Tc) / Air.volumic_mass(Tc, alt=alt)
 
     @staticmethod
-    def thermal_conductivity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air thermal conductivity.
 
         The output is valid for input in [-150, 1300] range (in Celsius)
@@ -98,11 +101,12 @@ class Air:
 
         """
         Tk = kelvin(Tc)
-        return (1.5207E-11 * Tk**3 - 4.8570E-08 * Tk**2 + 1.0184E-04 * Tk - 3.9333E-04)
+        return 1.5207e-11 * Tk**3 - 4.8570e-08 * Tk**2 + 1.0184e-04 * Tk - 3.9333e-04
 
 
 class JouleHeating(cner.JouleHeating):
     """Joule heating term."""
+
     pass
 
 
@@ -110,17 +114,17 @@ class SolarHeating(ieee.SolarHeating):
     """Solar heating term."""
 
     def __init__(
-            self,
-            lat: Union[float, np.ndarray],
-            alt: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            month: Union[int, np.ndarray[int]],
-            day: Union[int, np.ndarray[int]],
-            hour: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            alpha: Union[float, np.ndarray],
-            srad: Union[float, np.ndarray] = None,
-            **kwargs,
+        self,
+        lat: floatArrayLike,
+        alt: floatArrayLike,
+        azm: floatArrayLike,
+        month: intArrayLike,
+        day: intArrayLike,
+        hour: floatArrayLike,
+        D: floatArrayLike,
+        alpha: floatArrayLike,
+        srad: Optional[floatArrayLike] = None,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -156,10 +160,20 @@ class SolarHeating(ieee.SolarHeating):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        if 'tb' in kwargs.keys():
-            kwargs.pop('tb')
+        if "tb" in kwargs.keys():
+            kwargs.pop("tb")
         super().__init__(
-            lat=lat, alt=alt, azm=azm, tb=0., month=month, day=day, hour=hour, D=D, alpha=alpha, srad=srad, **kwargs
+            lat=lat,
+            alt=alt,
+            azm=azm,
+            tb=0.0,
+            month=month,
+            day=day,
+            hour=hour,
+            D=D,
+            alpha=alpha,
+            srad=srad,
+            **kwargs,
         )
 
 
@@ -167,14 +181,14 @@ class ConvectiveCooling(ieee.ConvectiveCoolingBase):
     """Convective cooling term."""
 
     def __init__(
-            self,
-            alt: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            Ta: Union[float, np.ndarray],
-            ws: Union[float, np.ndarray],
-            wa: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            **kwargs,
+        self,
+        alt: floatArrayLike,
+        azm: floatArrayLike,
+        Ta: floatArrayLike,
+        ws: floatArrayLike,
+        wa: floatArrayLike,
+        D: floatArrayLike,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -197,7 +211,16 @@ class ConvectiveCooling(ieee.ConvectiveCoolingBase):
 
         """
         super().__init__(
-            alt, azm, Ta, ws, wa, D, Air.volumic_mass, Air.dynamic_viscosity, Air.thermal_conductivity, **kwargs
+            alt,
+            azm,
+            Ta,
+            ws,
+            wa,
+            D,
+            Air.volumic_mass,
+            Air.dynamic_viscosity,
+            Air.thermal_conductivity,
+            **kwargs,
         )
 
 

@@ -2,21 +2,22 @@
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Union, Tuple, Type
+from typing import Tuple, Type, Any
 
 import numpy as np
 import pandas as pd
 
+from thermohl import floatArrayLike
 from thermohl.power.base import PowerTerm
 
 
 class _DEFPARAM:
-    tmin = -99.
-    tmax = +999.
-    tol = 1.0E-09
+    tmin = -99.0
+    tmax = +999.0
+    tol = 1.0e-09
     maxiter = 64
-    imin = 0.
-    imax = 9999.
+    imin = 0.0
+    imax = 9999.0
 
 
 class Args:
@@ -42,46 +43,52 @@ class Args:
     def _set_default_values(self):
         """Set default values."""
 
-        self.lat = 45.  # latitude (deg)
-        self.lon = 0.  # longitude (deg)
-        self.alt = 0.  # altitude (m)
-        self.azm = 0.  # azimuth (deg)
+        self.lat = 45.0  # latitude (deg)
+        self.lon = 0.0  # longitude (deg)
+        self.alt = 0.0  # altitude (m)
+        self.azm = 0.0  # azimuth (deg)
 
         self.month = 3  # month number (1=Jan, 2=Feb, ...)
         self.day = 21  # day of the month
         self.hour = 12  # hour of the day (in [0, 23] range)
 
-        self.Ta = 15.  # ambient temperature (C)
-        self.Pa = 1.0E+05  # ambient pressure (Pa)
+        self.Ta = 15.0  # ambient temperature (C)
+        self.Pa = 1.0e05  # ambient pressure (Pa)
         self.rh = 0.8  # relative humidity (none, in [0, 1])
-        self.pr = 0.  # rain precipitation rate (m.s**-1)
-        self.ws = 0.  # wind speed (m.s**-1)
-        self.wa = 90.  # wind angle (deg, regarding north)
+        self.pr = 0.0  # rain precipitation rate (m.s**-1)
+        self.ws = 0.0  # wind speed (m.s**-1)
+        self.wa = 90.0  # wind angle (deg, regarding north)
         self.al = 0.8  # albedo (1)
         self.tb = 0.1  # coefficient for air pollution from 0 (clean) to 1 (polluted)
 
-        self.I = 100.  # transit intensity (A)
+        self.I = 100.0  # transit intensity (A)
 
         self.m = 1.5  # mass per unit length (kg.m**-1)
-        self.d = 1.9E-02  # core diameter (m)
-        self.D = 3.0E-02  # external (global) diameter (m)
-        self.a = 2.84E-04  # core section (m**2)
-        self.A = 7.07E-04  # external (global) section (m**2)
-        self.R = 4.0E-02  # roughness (1)
+        self.d = 1.9e-02  # core diameter (m)
+        self.D = 3.0e-02  # external (global) diameter (m)
+        self.a = 2.84e-04  # core section (m**2)
+        self.A = 7.07e-04  # external (global) section (m**2)
+        self.R = 4.0e-02  # roughness (1)
         self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
-        self.c = 500.  # specific heat capacity (J.kg**-1.K**-1)
+        self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 
         self.alpha = 0.5  # solar absorption (1)
         self.epsilon = 0.5  # emissivity (1)
-        self.RDC20 = 2.5E-05  # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
+        self.RDC20 = (
+            2.5e-05  # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
+        )
         self.km = 1.006  # coefficient for magnetic effects (1)
         self.ki = 0.016  # coefficient for magnetic effects (A**-1)
-        self.kl = 3.8E-03  # linear resistance augmentation with temperature (K**-1)
-        self.kq = 8.0E-07  # quadratic resistance augmentation with temperature (K**-2)
-        self.RDCHigh = 3.05E-05  # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
-        self.RDCLow = 2.66E-05  # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
-        self.THigh = 60.  # temperature for RDCHigh measurement (°C)
-        self.TLow = 20.  # temperature for RDCLow measurement (°C)
+        self.kl = 3.8e-03  # linear resistance augmentation with temperature (K**-1)
+        self.kq = 8.0e-07  # quadratic resistance augmentation with temperature (K**-2)
+        self.RDCHigh = (
+            3.05e-05  # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
+        )
+        self.RDCLow = (
+            2.66e-05  # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
+        )
+        self.THigh = 60.0  # temperature for RDCHigh measurement (°C)
+        self.TLow = 20.0  # temperature for RDCLow measurement (°C)
 
     def keys(self):
         """Get list of members as dict keys."""
@@ -93,7 +100,7 @@ class Args:
     def __setitem__(self, key, value):
         self.__dict__[key] = value
 
-    def max_len(self):
+    def max_len(self) -> int:
         """."""
         n = 1
         for k in self.keys():
@@ -155,37 +162,43 @@ class Solver(ABC):
     """
 
     class Names:
-        pjle = 'P_joule'
-        psol = 'P_solar'
-        pcnv = 'P_convection'
-        prad = 'P_radiation'
-        ppre = 'P_precipitation'
+        pjle = "P_joule"
+        psol = "P_solar"
+        pcnv = "P_convection"
+        prad = "P_radiation"
+        ppre = "P_precipitation"
 
-        err = 'err'
+        err = "err"
 
-        surf = 'surf'
-        avg = 'avg'
-        core = 'core'
+        surf = "surf"
+        avg = "avg"
+        core = "core"
 
-        time = 'time'
-        transit = 'I'
-        temp = 't'
-        tsurf = 't_surf'
-        tavg = 't_avg'
-        tcore = 't_core'
+        time = "time"
+        transit = "I"
+        temp = "t"
+        tsurf = "t_surf"
+        tavg = "t_avg"
+        tcore = "t_core"
 
         @staticmethod
         def powers():
-            return Solver.Names.pjle, Solver.Names.psol, Solver.Names.pcnv, Solver.Names.prad, Solver.Names.ppre
+            return (
+                Solver.Names.pjle,
+                Solver.Names.psol,
+                Solver.Names.pcnv,
+                Solver.Names.prad,
+                Solver.Names.ppre,
+            )
 
     def __init__(
-            self,
-            dic: dict = None,
-            joule: Type[PowerTerm] = PowerTerm,
-            solar: Type[PowerTerm] = PowerTerm,
-            convective: Type[PowerTerm] = PowerTerm,
-            radiative: Type[PowerTerm] = PowerTerm,
-            precipitation: Type[PowerTerm] = PowerTerm
+        self,
+        dic: dict = None,
+        joule: Type[PowerTerm] = PowerTerm,
+        solar: Type[PowerTerm] = PowerTerm,
+        convective: Type[PowerTerm] = PowerTerm,
+        radiative: Type[PowerTerm] = PowerTerm,
+        precipitation: Type[PowerTerm] = PowerTerm,
     ):
         """Create a Solver object.
 
@@ -231,13 +244,13 @@ class Solver(ABC):
         self.args.compress()
         return
 
-    def balance(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def balance(self, T: floatArrayLike) -> floatArrayLike:
         return (
-                self.jh.value(T) +
-                self.sh.value(T) -
-                self.cc.value(T) -
-                self.rc.value(T) -
-                self.pc.value(T)
+            self.jh.value(T)
+            + self.sh.value(T)
+            - self.cc.value(T)
+            - self.rc.value(T)
+            - self.pc.value(T)
         )
 
     @abstractmethod
@@ -253,14 +266,14 @@ class Solver(ABC):
         pass
 
 
-def _reshape1d(v, n):
+def _reshape1d(v: Any, n: int) -> np.ndarray[Any]:
     """Reshape input v in size (n,) if possible."""
     try:
         l = len(v)
         if l == 1:
             w = v * np.ones(n, dtype=v.dtype)
         else:
-            raise ValueError('Uncompatible size')
+            raise ValueError("Uncompatible size")
     except AttributeError:
         w = v * np.ones(n, dtype=type(v))
     return w
@@ -292,11 +305,11 @@ def reshape(v, nr=None, nc=None):
 
 
 def _set_dates(
-        month: Union[float, np.ndarray],
-        day: Union[float, np.ndarray],
-        hour: Union[float, np.ndarray],
-        t: np.ndarray,
-        n: int
+    month: floatArrayLike,
+    day: floatArrayLike,
+    hour: floatArrayLike,
+    t: np.ndarray,
+    n: int,
 ) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
     """Set months, days and hours as 2D arrays.
 
@@ -317,15 +330,22 @@ def _set_dates(
     days = np.zeros((N, n), dtype=int)
     hours = np.zeros((N, n), dtype=float)
 
-    td = np.array([datetime.timedelta()] + [datetime.timedelta(seconds=t[i] - t[i - 1]) for i in range(1, N)])
+    td = np.array(
+        [datetime.timedelta()]
+        + [datetime.timedelta(seconds=t[i] - t[i - 1]) for i in range(1, N)]
+    )
 
     for j in range(n):
         hj = int(np.floor(hour2[j]))
-        dj = datetime.timedelta(seconds=3600. * (hour2[j] - hj))
+        dj = datetime.timedelta(seconds=3600.0 * (hour2[j] - hj))
         t0 = datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hj) + dj
         ts = pd.Series(t0 + td)
         months[:, j] = ts.dt.month
         days[:, j] = ts.dt.day
-        hours[:, j] = ts.dt.hour + ts.dt.minute / 60. + (ts.dt.second + ts.dt.microsecond * 1.0E-06) / 3600.
+        hours[:, j] = (
+            ts.dt.hour
+            + ts.dt.minute / 60.0
+            + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
+        )
 
     return months, days, hours
