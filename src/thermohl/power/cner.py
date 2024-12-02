@@ -2,10 +2,12 @@
 
 See NT-RD-CNER-DL-SLA-20-00215.
 """
-from typing import Union
+
+from typing import Any, Optional
 
 import numpy as np
 
+from thermohl import floatArrayLike, intArrayLike
 from thermohl.power import ieee
 from thermohl.power.base import PowerTerm
 
@@ -14,20 +16,20 @@ class JouleHeating(PowerTerm):
     """Joule heating term."""
 
     def __init__(
-            self,
-            I: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            d: Union[float, np.ndarray],
-            A: Union[float, np.ndarray],
-            a: Union[float, np.ndarray],
-            km: Union[float, np.ndarray],
-            ki: Union[float, np.ndarray],
-            kl: Union[float, np.ndarray],
-            kq: Union[float, np.ndarray],
-            RDC20: Union[float, np.ndarray],
-            T20: Union[float, np.ndarray] = 20.,
-            f: Union[float, np.ndarray] = 50.,
-            **kwargs
+        self,
+        I: floatArrayLike,
+        D: floatArrayLike,
+        d: floatArrayLike,
+        A: floatArrayLike,
+        a: floatArrayLike,
+        km: floatArrayLike,
+        ki: floatArrayLike,
+        kl: floatArrayLike,
+        kq: floatArrayLike,
+        RDC20: floatArrayLike,
+        T20: floatArrayLike = 20.0,
+        f: floatArrayLike = 50.0,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -71,38 +73,56 @@ class JouleHeating(PowerTerm):
         self.T20 = T20
         self.f = f
 
-    def _rdc(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def _rdc(self, T: floatArrayLike) -> floatArrayLike:
         """Compute resistance per unit length for direct current."""
-        dt = (T - self.T20)
-        return self.RDC20 * (1. + self.kl * dt + self.kq * dt**2)
+        dt = T - self.T20
+        return self.RDC20 * (1.0 + self.kl * dt + self.kq * dt**2)
 
-    def _ks(self, rdc):
+    def _ks(self, rdc: floatArrayLike) -> floatArrayLike:
         """Compute skin-effect coefficient."""
         # Note: approx version as in [NT-RD-CNER-DL-SLA-20-00215]
-        z = 8 * np.pi * self.f * (self.D - self.d)**2 / ((self.D**2 - self.d**2) * 1.0E+07 * rdc)
+        z = (
+            8
+            * np.pi
+            * self.f
+            * (self.D - self.d) ** 2
+            / ((self.D**2 - self.d**2) * 1.0e07 * rdc)
+        )
         a = 7 * z**2 / (315 + 3 * z**2)
         b = 56 / (211 + z**2)
-        beta = 1. - self.d / self.D
-        return 1 + a * (1. - 0.5 * beta - b * beta**2)
+        beta = 1.0 - self.d / self.D
+        return 1 + a * (1.0 - 0.5 * beta - b * beta**2)
 
-    def _kem(self, A, a, km, ki) -> Union[float, np.ndarray]:
+    def _kem(
+        self,
+        A: floatArrayLike,
+        a: floatArrayLike,
+        km: floatArrayLike,
+        ki: floatArrayLike,
+    ) -> floatArrayLike:
         """Compute magnetic coefficient."""
-        s = np.ones_like(self.I) * np.ones_like(A) * np.ones_like(a) * np.ones_like(km) * np.ones_like(ki)
+        s = (
+            np.ones_like(self.I)
+            * np.ones_like(A)
+            * np.ones_like(a)
+            * np.ones_like(km)
+            * np.ones_like(ki)
+        )
         z = s.shape == ()
         if z:
-            s = np.array([1.])
+            s = np.array([1.0])
         I_ = self.I * s
         a_ = a * s
         A_ = A * s
-        m = a_ > 0.
+        m = a_ > 0.0
         ki_ = ki * s
         kem = km * s
-        kem[m] += ki_[m] * I_[m] / ((A_[m] - a_[m]) * 1.0E+06)
+        kem[m] += ki_[m] * I_[m] / ((A_[m] - a_[m]) * 1.0e06)
         if z:
             kem = kem[0]
         return kem
 
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Parameters
@@ -124,16 +144,16 @@ class JouleHeating(PowerTerm):
 
 class SolarHeating(ieee.SolarHeatingBase):
     def __init__(
-            self,
-            lat: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            month: Union[int, np.ndarray[int]],
-            day: Union[int, np.ndarray[int]],
-            hour: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            alpha: Union[float, np.ndarray],
-            srad: Union[float, np.ndarray] = None,
-            **kwargs
+        self,
+        lat: floatArrayLike,
+        azm: floatArrayLike,
+        month: intArrayLike,
+        day: intArrayLike,
+        hour: floatArrayLike,
+        D: floatArrayLike,
+        alpha: floatArrayLike,
+        srad: Optional[floatArrayLike] = None,
+        **kwargs: Any,
     ):
         r"""Build with args.
 
@@ -166,15 +186,25 @@ class SolarHeating(ieee.SolarHeatingBase):
 
         """
         est = ieee._SRad(
-            [-42., +63.8, -1.922, 0.03469, -3.61E-04, +1.943E-06, -4.08E-09],
-            [0., 0., 0., 0., 0., 0., 0.]
+            [-42.0, +63.8, -1.922, 0.03469, -3.61e-04, +1.943e-06, -4.08e-09],
+            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )
-        for k in ['alt', 'tb']:
+        for k in ["alt", "tb"]:
             if k in kwargs.keys():
                 kwargs.pop(k)
         super().__init__(
-            lat=lat, alt=0., azm=azm, tb=0., month=month, day=day, hour=hour, D=D, alpha=alpha, est=est, srad=srad,
-            **kwargs
+            lat=lat,
+            alt=0.0,
+            azm=azm,
+            tb=0.0,
+            month=month,
+            day=day,
+            hour=hour,
+            D=D,
+            alpha=alpha,
+            est=est,
+            srad=srad,
+            **kwargs,
         )
 
 
@@ -185,7 +215,7 @@ class ConvectiveCooling(ieee.ConvectiveCooling):
     constants.
     """
 
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
@@ -202,11 +232,10 @@ class ConvectiveCooling(ieee.ConvectiveCooling):
         Tf = 0.5 * (T + self.Ta)
         Td = T - self.Ta
         # very slight difference with air.IEEE.volumic_mass() in coefficient before alt**2
-        vm = (1.293 - 1.525E-04 * self.alt + 6.38E-09 * self.alt**2) / (1 + 0.00367 * Tf)
-        return np.maximum(
-            self._value_forced(Tf, Td, vm),
-            self._value_natural(Td, vm)
+        vm = (1.293 - 1.525e-04 * self.alt + 6.38e-09 * self.alt**2) / (
+            1 + 0.00367 * Tf
         )
+        return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))
 
 
 class RadiativeCooling(ieee.RadiativeCooling):
