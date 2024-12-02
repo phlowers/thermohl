@@ -1,7 +1,5 @@
 [build-system]
-requires = [
-    "setuptools>=40.8.0",
-]
+requires = ["setuptools>=40.8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -30,6 +28,10 @@ dependencies = [
 doc = ["sphinx", "sphinx_rtd_theme"]
 examples = ["matplotlib", ] # openpyxl, seaborn
 test = ["pytest", "pylint"]
+lint = ["mypy"]
 
 [project.urls]
 "Homepage" = "https://github.com/rte-france/pallas-thermohl"
+
+[tool.mypy]
+strict = true

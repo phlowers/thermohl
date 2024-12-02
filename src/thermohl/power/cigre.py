@@ -3,11 +3,13 @@
 See Thermal behaviour of overhead conductors, study committee 22, working
 group 12, 2002.
 """
-from typing import Union
+
+from typing import Any, Optional
 
 import numpy as np
 
 import thermohl.sun as sun
+from thermohl import floatArrayLike, intArrayLike
 from thermohl.power.base import PowerTerm
 from thermohl.power.base import RadiativeCooling as RadiativeCooling_
 
@@ -16,7 +18,7 @@ class Air:
     """CIGRE air models."""
 
     @staticmethod
-    def volumic_mass(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
         r"""Compute air volumic mass.
 
         If both inputs are numpy arrays, they should have the same size.
@@ -37,7 +39,9 @@ class Air:
         return 1.2925 * Air.relative_density(Tc, alt)
 
     @staticmethod
-    def relative_density(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+    def relative_density(
+        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         """Compute relative density, ie density ratio regarding density at zero altitude.
 
         This function has temperature and altitude as input for consistency
@@ -59,10 +63,10 @@ class Air:
             DESCRIPTION.
 
         """
-        return np.exp(-1.16E-04 * alt) * np.ones_like(Tc)
+        return np.exp(-1.16e-04 * alt) * np.ones_like(Tc)
 
     @staticmethod
-    def kinematic_viscosity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def kinematic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
         Parameters
@@ -76,10 +80,12 @@ class Air:
              Kinematic viscosity in m\ :sup:`2`\ .s\ :sup:`-1`\ .
 
         """
-        return 1.32E-05 + 9.5E-08 * Tc
+        return 1.32e-05 + 9.5e-08 * Tc
 
     @staticmethod
-    def dynamic_viscosity(Tc: Union[float, np.ndarray], alt: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+    def dynamic_viscosity(
+        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
         If both inputs are numpy arrays, they should have the same size.
@@ -100,7 +106,7 @@ class Air:
         return Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
 
     @staticmethod
-    def thermal_conductivity(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air thermal conductivity.
 
         Parameters
@@ -114,10 +120,10 @@ class Air:
              Thermal conductivity in W.m\ :sup:`-1`\ .K\ :sup:`-1`\ .
 
         """
-        return 2.42E-02 + 7.2E-05 * Tc
+        return 2.42e-02 + 7.2e-05 * Tc
 
     @staticmethod
-    def prandtl(Tc: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def prandtl(Tc: floatArrayLike) -> floatArrayLike:
         """Compute Prandtl number.
 
         The Prandtl number (Pr) is a dimensionless number, named after the German
@@ -135,20 +141,20 @@ class Air:
              Prandtl number (no unit)
 
         """
-        return 0.715 - 2.5E-04 * Tc
+        return 0.715 - 2.5e-04 * Tc
 
 
 class JouleHeating(PowerTerm):
     """Joule heating term."""
 
     def __init__(
-            self,
-            I: Union[float, np.ndarray],
-            km: Union[float, np.ndarray],
-            kl: Union[float, np.ndarray],
-            RDC20: Union[float, np.ndarray],
-            T20: Union[float, np.ndarray] = 20.,
-            **kwargs,
+        self,
+        I: floatArrayLike,
+        km: floatArrayLike,
+        kl: floatArrayLike,
+        RDC20: floatArrayLike,
+        T20: floatArrayLike = 20.0,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -174,7 +180,7 @@ class JouleHeating(PowerTerm):
         self.RDC20 = RDC20
         self.T20 = T20
 
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Parameters
@@ -188,9 +194,9 @@ class JouleHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return self.km * self.RDC20 * (1. + self.kl * (T - self.T20)) * self.I**2
+        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.I**2
 
-    def derivative(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def derivative(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -214,42 +220,38 @@ class SolarHeating(PowerTerm):
 
     @staticmethod
     def _solar_radiation(
-            lat: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            albedo: Union[float, np.ndarray],
-            month: Union[int, np.ndarray[int]],
-            day: Union[int,
-            np.ndarray[int]], hour
-    ) -> np.ndarray:
+        lat: floatArrayLike,
+        azm: floatArrayLike,
+        albedo: floatArrayLike,
+        month: intArrayLike,
+        day: intArrayLike,
+        hour: floatArrayLike,
+    ) -> floatArrayLike:
         """Compute solar radiation."""
         sd = sun.solar_declination(month, day)
         sh = sun.hour_angle(hour)
         sa = sun.solar_altitude(lat, month, day, hour)
-        Id = 1280. * np.sin(sa) / (0.314 + np.sin(sa))
+        Id = 1280.0 * np.sin(sa) / (0.314 + np.sin(sa))
         gs = np.arcsin(np.cos(sd) * np.sin(sh) / np.cos(sa))
         eta = np.arccos(np.cos(sa) * np.cos(gs - azm))
         A = 0.5 * np.pi * albedo * np.sin(sa) + np.sin(eta)
         x = np.sin(sa)
-        C = np.piecewise(
-            x,
-            [x < 0., x >= 0.],
-            [lambda x_: 0., lambda x_: x_**1.2]
-        )
-        B = 0.5 * np.pi * (1 + albedo) * (570. - 0.47 * Id) * C
-        return np.where(sa > 0., A * Id + B, 0.)
+        C = np.piecewise(x, [x < 0.0, x >= 0.0], [lambda x_: 0.0, lambda x_: x_**1.2])
+        B = 0.5 * np.pi * (1 + albedo) * (570.0 - 0.47 * Id) * C
+        return np.where(sa > 0.0, A * Id + B, 0.0)
 
     def __init__(
-            self,
-            lat: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            al: Union[float, np.ndarray],
-            month: Union[int, np.ndarray[int]],
-            day: Union[int, np.ndarray[int]],
-            hour: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            alpha: Union[float, np.ndarray],
-            srad: Union[float, np.ndarray] = None,
-            **kwargs
+        self,
+        lat: floatArrayLike,
+        azm: floatArrayLike,
+        al: floatArrayLike,
+        month: intArrayLike,
+        day: intArrayLike,
+        hour: floatArrayLike,
+        D: floatArrayLike,
+        alpha: floatArrayLike,
+        srad: Optional[floatArrayLike] = None,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -286,12 +288,14 @@ class SolarHeating(PowerTerm):
         """
         self.alpha = alpha
         if srad is None:
-            self.srad = SolarHeating._solar_radiation(np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour)
+            self.srad = SolarHeating._solar_radiation(
+                np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour
+            )
         else:
             self.srad = srad
         self.D = D
 
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         If more than one input are numpy arrays, they should have the same size.
@@ -309,7 +313,7 @@ class SolarHeating(PowerTerm):
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)
 
-    def derivative(self, T: Union[float, np.ndarray], **kwargs) -> np.ndarray:
+    def derivative(self, T: floatArrayLike, **kwargs: Any) -> floatArrayLike:
         """Compute solar heating derivative."""
         return np.zeros_like(T)
 
@@ -318,16 +322,16 @@ class ConvectiveCooling(PowerTerm):
     """Convective cooling term."""
 
     def __init__(
-            self,
-            alt: Union[float, np.ndarray],
-            azm: Union[float, np.ndarray],
-            Ta: Union[float, np.ndarray],
-            ws: Union[float, np.ndarray],
-            wa: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            R: Union[float, np.ndarray],
-            g: float = 9.81,
-            **kwargs
+        self,
+        alt: floatArrayLike,
+        azm: floatArrayLike,
+        Ta: floatArrayLike,
+        ws: floatArrayLike,
+        wa: floatArrayLike,
+        D: floatArrayLike,
+        R: floatArrayLike,
+        g: float = 9.81,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -359,9 +363,9 @@ class ConvectiveCooling(PowerTerm):
         self.D = D
         self.R = R
         self.g = g
-        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.)))
+        self.da = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.0)))
 
-    def _nu_forced(self, Tf: Union[float, np.ndarray], nu: Union[float, np.ndarray]) -> np.ndarray:
+    def _nu_forced(self, Tf: floatArrayLike, nu: floatArrayLike) -> floatArrayLike:
         """Nusselt number for forced convection."""
         rd = Air.relative_density(Tf, self.alt)
         Re = rd * np.abs(self.ws) * self.D / nu
@@ -369,7 +373,7 @@ class ConvectiveCooling(PowerTerm):
         s = np.ones_like(Tf) * np.ones_like(nu) * np.ones_like(Re)
         z = s.shape == ()
         if z:
-            s = np.array([1.])
+            s = np.array([1.0])
 
         B1 = 0.641 * s
         n = 0.471 * s
@@ -389,22 +393,22 @@ class ConvectiveCooling(PowerTerm):
             B1 = B1[0]
             n = n[0]
 
-        B2 = np.where(self.da < np.deg2rad(24.), 0.68, 0.58)
-        m1 = np.where(self.da < np.deg2rad(24.), 1.08, 0.90)
+        B2 = np.where(self.da < np.deg2rad(24.0), 0.68, 0.58)
+        m1 = np.where(self.da < np.deg2rad(24.0), 1.08, 0.90)
 
-        return np.maximum(0.42 + B2 * np.sin(self.da)**m1, 0.55) * (B1 * Re**n)
+        return np.maximum(0.42 + B2 * np.sin(self.da) ** m1, 0.55) * (B1 * Re**n)
 
     def _nu_natural(
-            self,
-            Tf: Union[float, np.ndarray],
-            Td: Union[float, np.ndarray],
-            nu: Union[float, np.ndarray],
-    ) -> np.ndarray:
+        self,
+        Tf: floatArrayLike,
+        Td: floatArrayLike,
+        nu: floatArrayLike,
+    ) -> floatArrayLike:
         """Nusselt number for natural convection."""
         gr = self.D**3 * np.abs(Td) * self.g / ((Tf + 273.15) * nu**2)
         gp = gr * Air.prandtl(Tf)
         # gp[gp < 0.] = 0.
-        ia = gp < 1.0E+04
+        ia = gp < 1.0e04
         A2, m2 = (np.zeros_like(Tf),) * 2
         A2[ia] = 0.850
         m2[ia] = 0.188
@@ -412,7 +416,7 @@ class ConvectiveCooling(PowerTerm):
         m2[~ia] = 0.250
         return A2 * gp**m2
 
-    def value(self, T: Union[float, np.ndarray]) -> Union[float, np.ndarray]:
+    def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
@@ -440,12 +444,12 @@ class ConvectiveCooling(PowerTerm):
 class RadiativeCooling(RadiativeCooling_):
 
     def __init__(
-            self,
-            Ta: Union[float, np.ndarray],
-            D: Union[float, np.ndarray],
-            epsilon: Union[float, np.ndarray],
-            sigma: float = 5.67E-08,
-            **kwargs
+        self,
+        Ta: floatArrayLike,
+        D: floatArrayLike,
+        epsilon: floatArrayLike,
+        sigma: float = 5.67e-08,
+        **kwargs: Any,
     ):
         r"""Init with args.
 
@@ -465,4 +469,6 @@ class RadiativeCooling(RadiativeCooling_):
         -------
 
         """
-        super().__init__(Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273., **kwargs)
+        super().__init__(
+            Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273.0, **kwargs
+        )
