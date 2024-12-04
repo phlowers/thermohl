@@ -118,7 +118,7 @@ class RadiativeCooling(PowerTerm):
             * (self._celsius2kelvin(T) ** 4 - self.Ta**4)
         )
 
-    def derivative(self, T: floatArrayLike, dT: float = _dT) -> floatArrayLike:
+    def derivative(self, T: floatArrayLike) -> floatArrayLike:
         r"""Analytical derivative of value method.
 
         Parameters

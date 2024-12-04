@@ -2,12 +2,17 @@
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Tuple, Type, Any
-
+from typing import Tuple, Type, Any, Optional, KeysView, Union, Dict
 import numpy as np
 import pandas as pd
 
-from thermohl import floatArrayLike
+from thermohl import (
+    floatArrayLike,
+    floatArray,
+    intArray,
+    numberArray,
+    numberArrayLike,
+)
 from thermohl.power.base import PowerTerm
 
 
@@ -29,7 +34,7 @@ class Args:
     #     'THigh', 'TLow'
     # ]
 
-    def __init__(self, dic: dict = None):
+    def __init__(self, dic: Optional[dict[str, Any]] = None):
         # add default values
         self._set_default_values()
         # use values from input dict
@@ -40,64 +45,65 @@ class Args:
             if k in keys and dic[k] is not None:
                 self[k] = dic[k]
 
-    def _set_default_values(self):
+    def _set_default_values(self) -> None:
         """Set default values."""
 
-        self.lat = 45.0  # latitude (deg)
-        self.lon = 0.0  # longitude (deg)
-        self.alt = 0.0  # altitude (m)
-        self.azm = 0.0  # azimuth (deg)
+        self.lat = np.array(45.0)  # latitude (deg)
+        self.lon = np.array(0.0)  # longitude (deg)
+        self.alt = np.array(0.0)  # altitude (m)
+        self.azm = np.array(0.0)  # azimuth (deg)
 
-        self.month = 3  # month number (1=Jan, 2=Feb, ...)
-        self.day = 21  # day of the month
-        self.hour = 12  # hour of the day (in [0, 23] range)
+        self.month = np.array(3)  # month number (1=Jan, 2=Feb, ...)
+        self.day = np.array(21)  # day of the month
+        self.hour = np.array(12)  # hour of the day (in [0, 23] range)
 
-        self.Ta = 15.0  # ambient temperature (C)
-        self.Pa = 1.0e05  # ambient pressure (Pa)
-        self.rh = 0.8  # relative humidity (none, in [0, 1])
-        self.pr = 0.0  # rain precipitation rate (m.s**-1)
-        self.ws = 0.0  # wind speed (m.s**-1)
-        self.wa = 90.0  # wind angle (deg, regarding north)
-        self.al = 0.8  # albedo (1)
-        self.tb = 0.1  # coefficient for air pollution from 0 (clean) to 1 (polluted)
+        self.Ta = np.array(15.0)  # ambient temperature (C)
+        self.Pa = np.array(1.0e05)  # ambient pressure (Pa)
+        self.rh = np.array(0.8)  # relative humidity (none, in [0, 1])
+        self.pr = np.array(0.0)  # rain precipitation rate (m.s**-1)
+        self.ws = np.array(0.0)  # wind speed (m.s**-1)
+        self.wa = np.array(90.0)  # wind angle (deg, regarding north)
+        self.al = np.array(0.8)  # albedo (1)
+        # coefficient for air pollution from 0 (clean) to 1 (polluted)
+        self.tb = np.array(0.1)
 
-        self.I = 100.0  # transit intensity (A)
+        self.I = np.array(100.0)  # transit intensity (A)
 
-        self.m = 1.5  # mass per unit length (kg.m**-1)
-        self.d = 1.9e-02  # core diameter (m)
-        self.D = 3.0e-02  # external (global) diameter (m)
-        self.a = 2.84e-04  # core section (m**2)
-        self.A = 7.07e-04  # external (global) section (m**2)
-        self.R = 4.0e-02  # roughness (1)
-        self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
-        self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
+        self.m = np.array(1.5)  # mass per unit length (kg.m**-1)
+        self.d = np.array(1.9e-02)  # core diameter (m)
+        self.D = np.array(3.0e-02)  # external (global) diameter (m)
+        self.a = np.array(2.84e-04)  # core section (m**2)
+        self.A = np.array(7.07e-04)  # external (global) section (m**2)
+        self.R = np.array(4.0e-02)  # roughness (1)
+        self.l = np.array(1.0)  # radial thermal conductivity (W.m**-1.K**-1)
+        self.c = np.array(500.0)  # specific heat capacity (J.kg**-1.K**-1)
 
-        self.alpha = 0.5  # solar absorption (1)
-        self.epsilon = 0.5  # emissivity (1)
-        self.RDC20 = (
-            2.5e-05  # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        )
-        self.km = 1.006  # coefficient for magnetic effects (1)
-        self.ki = 0.016  # coefficient for magnetic effects (A**-1)
-        self.kl = 3.8e-03  # linear resistance augmentation with temperature (K**-1)
-        self.kq = 8.0e-07  # quadratic resistance augmentation with temperature (K**-2)
-        self.RDCHigh = (
-            3.05e-05  # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
-        )
-        self.RDCLow = (
-            2.66e-05  # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
-        )
-        self.THigh = 60.0  # temperature for RDCHigh measurement (°C)
-        self.TLow = 20.0  # temperature for RDCLow measurement (°C)
+        self.alpha = np.array(0.5)  # solar absorption (1)
+        self.epsilon = np.array(0.5)  # emissivity (1)
+        # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
+        self.RDC20 = np.array(2.5e-05)
 
-    def keys(self):
+        self.km = np.array(1.006)  # coefficient for magnetic effects (1)
+        self.ki = np.array(0.016)  # coefficient for magnetic effects (A**-1)
+        # linear resistance augmentation with temperature (K**-1)
+        self.kl = np.array(3.8e-03)
+        # quadratic resistance augmentation with temperature (K**-2)
+        self.kq = np.array(8.0e-07)
+        # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
+        self.RDCHigh = np.array(3.05e-05)
+        # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
+        self.RDCLow = np.array(2.66e-05)
+        self.THigh = np.array(60.0)  # temperature for RDCHigh measurement (°C)
+        self.TLow = np.array(20.0)  # temperature for RDCLow measurement (°C)
+
+    def keys(self) -> KeysView[str]:
         """Get list of members as dict keys."""
         return self.__dict__.keys()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: str) -> Any:
         return self.__dict__[key]
 
-    def __setitem__(self, key, value):
+    def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
 
     def max_len(self) -> int:
@@ -110,12 +116,8 @@ class Args:
                 pass
         return n
 
-    def extend_to_max_len(self, inplace: bool = True):
+    def extend_to_max_len(self) -> None:
         """."""
-        if inplace:
-            a = self
-        else:
-            a = Args()
         n = self.max_len()
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
@@ -125,30 +127,16 @@ class Args:
                 t = type(self[k])
                 c = False
             if c:
-                a[k] = self[k][:]
+                self[k] = self[k][:]
             else:
-                a[k] = self[k] * np.ones((n,), dtype=t)
+                self[k] = self[k] * np.ones((n,), dtype=t)
 
-        if not inplace:
-            return a
-
-    def compress(self, inplace: bool = True):
-        if inplace:
-            a = self
-        else:
-            a = Args()
+    def compress(self) -> None:
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
                 u = np.unique(self[k])
                 if len(u) == 1:
-                    a[k] = u[0]
-                else:
-                    a[k] = self[k]
-            else:
-                a[k] = self[k]
-
-        if not inplace:
-            return a
+                    self[k] = u[0]
 
 
 class Solver(ABC):
@@ -167,13 +155,10 @@ class Solver(ABC):
         pcnv = "P_convection"
         prad = "P_radiation"
         ppre = "P_precipitation"
-
         err = "err"
-
         surf = "surf"
         avg = "avg"
         core = "core"
-
         time = "time"
         transit = "I"
         temp = "t"
@@ -182,7 +167,7 @@ class Solver(ABC):
         tcore = "t_core"
 
         @staticmethod
-        def powers():
+        def powers() -> tuple[str, str, str, str, str]:
             return (
                 Solver.Names.pjle,
                 Solver.Names.psol,
@@ -193,7 +178,7 @@ class Solver(ABC):
 
     def __init__(
         self,
-        dic: dict = None,
+        dic: Optional[dict[str, Any]] = None,
         joule: Type[PowerTerm] = PowerTerm,
         solar: Type[PowerTerm] = PowerTerm,
         convective: Type[PowerTerm] = PowerTerm,
@@ -221,11 +206,8 @@ class Solver(ABC):
         None.
 
         """
-        if dic is None:
-            dic = {}
         self.args = Args(dic)
-
-        self.args.extend_to_max_len(inplace=True)
+        self.args.extend_to_max_len()
         self.jh = joule(**self.args.__dict__)
         self.sh = solar(**self.args.__dict__)
         self.cc = convective(**self.args.__dict__)
@@ -234,8 +216,8 @@ class Solver(ABC):
         self.args.compress()
         return
 
-    def update(self):
-        self.args.extend_to_max_len(inplace=True)
+    def update(self) -> None:
+        self.args.extend_to_max_len()
         self.jh.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
@@ -254,19 +236,19 @@ class Solver(ABC):
         )
 
     @abstractmethod
-    def steady_temperature(self):
-        pass
+    def steady_temperature(self) -> pd.DataFrame:
+        raise NotImplementedError
 
     @abstractmethod
-    def transient_temperature(self):
-        pass
+    def transient_temperature(self) -> Dict[str, Any]:
+        raise NotImplementedError
 
     @abstractmethod
-    def steady_intensity(self):
-        pass
+    def steady_intensity(self) -> pd.DataFrame:
+        raise NotImplementedError
 
 
-def _reshape1d(v: Any, n: int) -> np.ndarray[Any]:
+def _reshape1d(v: numberArrayLike, n: int) -> numberArray:
     """Reshape input v in size (n,) if possible."""
     try:
         l = len(v)
@@ -279,28 +261,21 @@ def _reshape1d(v: Any, n: int) -> np.ndarray[Any]:
     return w
 
 
-def reshape(v, nr=None, nc=None):
+def reshape(v: numberArrayLike, nr: int, nc: int) -> numberArray:
     """Reshape input v in size (nr, nc) if possible."""
-    if nr is None and nc is None:
-        raise ValueError()
-    if nr is None:
-        w = _reshape1d(v, nc)
-    elif nc is None:
-        w = _reshape1d(v, nr)
-    else:
-        try:
-            s = v.shape
-            if len(s) == 1:
-                if nr == s[0]:
-                    w = np.column_stack(nc * (v,))
-                elif nc == s[0]:
-                    w = np.row_stack(nr * (v,))
-            elif len(s) == 0:
-                raise AttributeError()
-            else:
-                w = np.reshape(v, (nr, nc))
-        except AttributeError:
-            w = v * np.ones((nr, nc), dtype=type(v))
+    try:
+        s = v.shape
+        if len(s) == 1:
+            if nr == s[0]:
+                w = np.column_stack(nc * (v,))
+            elif nc == s[0]:
+                w = np.vstack(nr * (v,))
+        elif len(s) == 0:
+            raise AttributeError()
+        else:
+            w = np.reshape(v, (nr, nc))
+    except AttributeError:
+        w = v * np.ones((nr, nc), dtype=type(v))
     return w
 
 
@@ -308,9 +283,9 @@ def _set_dates(
     month: floatArrayLike,
     day: floatArrayLike,
     hour: floatArrayLike,
-    t: np.ndarray,
+    t: floatArray,
     n: int,
-) -> Tuple[np.ndarray, np.ndarray, np.ndarray]:
+) -> Tuple[intArray, intArray, floatArray]:
     """Set months, days and hours as 2D arrays.
 
     This function is used in transient temperature computations. Inputs month,

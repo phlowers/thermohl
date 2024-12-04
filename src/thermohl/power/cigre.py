@@ -313,7 +313,7 @@ class SolarHeating(PowerTerm):
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)
 
-    def derivative(self, T: floatArrayLike, **kwargs: Any) -> floatArrayLike:
+    def derivative(self, T: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""
         return np.zeros_like(T)
 

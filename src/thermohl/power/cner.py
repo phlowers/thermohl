@@ -91,7 +91,7 @@ class JouleHeating(PowerTerm):
         a = 7 * z**2 / (315 + 3 * z**2)
         b = 56 / (211 + z**2)
         beta = 1.0 - self.d / self.D
-        return 1 + a * (1.0 - 0.5 * beta - b * beta**2)
+        return 1.0 + a * (1.0 - 0.5 * beta - b * beta**2)
 
     def _kem(
         self,
