@@ -1,3 +1,4 @@
+# mypy: ignore-errors
 """Rain cooling power term.
 
 Based on *Modelling precipitation cooling of overhead conductors*, Pytlak et
@@ -26,8 +27,8 @@ class PrecipitationCooling(PowerTerm):
     def _ma(Ta, ws, D, pr, ps):
         # ! -- pr and ps in m.s**-1
         rho = thermodynamics.Water.volumic_mass(Ta)
-        mar = np.sqrt((pr * rho)**2 + (ws * 23.589 * pr**0.8460)**2)
-        mas = np.sqrt((ps * rho)**2 + (ws * 142.88 * ps**0.9165)**2)
+        mar = np.sqrt((pr * rho) ** 2 + (ws * 23.589 * pr**0.8460) ** 2)
+        mas = np.sqrt((ps * rho) ** 2 + (ws * 142.88 * ps**0.9165) ** 2)
         return D * (mar + mas)
 
     @staticmethod
@@ -43,15 +44,17 @@ class PrecipitationCooling(PowerTerm):
         ec = thermodynamics.Water.vapor_pressure(T=air.kelvin(T))
         ea = thermodynamics.Water.vapor_pressure(T=air.kelvin(Ta))
         me = pm * h * k * (ec - rh * ea) / (cp * Pa)
-        return np.where(Td != 0., me, np.zeros_like(T))
+        return np.where(Td != 0.0, me, np.zeros_like(T))
 
     @staticmethod
     def _mass_flux(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps):
-        return np.minimum(PrecipitationCooling._ma(Ta, ws, D, pr, ps),
-                          PrecipitationCooling._me(T, alt, Ta, ws, wa, D, Pa, rh))
+        return np.minimum(
+            PrecipitationCooling._ma(Ta, ws, D, pr, ps),
+            PrecipitationCooling._me(T, alt, Ta, ws, wa, D, Pa, rh),
+        )
 
     @staticmethod
-    def _evap(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps=0.):
+    def _evap(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps=0.0):
         m = PrecipitationCooling._mass_flux(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps)
         Le = thermodynamics.Water.heat_of_vaporization()
         cw = thermodynamics.Water.heat_capacity(T=air.kelvin(T))
@@ -62,9 +65,9 @@ class PrecipitationCooling(PowerTerm):
         ci = thermodynamics.Ice.heat_capacity()
         rr = m * (Le + cw * (Te - Ta))
         rs = m * (Le + cw * T + Lf * ci * Ta)
-        return np.maximum(rr + 0. * rs, np.zeros_like(T))
+        return np.maximum(rr + 0.0 * rs, np.zeros_like(T))
 
     @staticmethod
-    def _imp(T, Ta, ws, D, pr, ps=0.):
+    def _imp(T, Ta, ws, D, pr, ps=0.0):
         cw = thermodynamics.Water.heat_capacity(T=air.kelvin(T))
         return 0.71 * cw * (T - Ta) * PrecipitationCooling._ma(Ta, ws, D, pr, ps)
