@@ -3,15 +3,15 @@
 # TODO : move this to pyntb as it is too general for thermohl only; then add proper tests !
 
 import warnings
-from typing import Union
+from typing import Union, Optional
 
 import numpy as np
-import scipy.stats
+import scipy
 from scipy.special import erf
 from scipy.special import i0
 from scipy.special import i1
 
-from thermohl import floatArrayLike
+from thermohl import floatArrayLike, frozen_dist
 
 _twopi = 2 * np.pi
 
@@ -58,7 +58,7 @@ def truncnorm(
     err_mu: float = 1.0e-03,
     err_sigma: float = 1.0e-02,
     rel_err: bool = True,
-):
+) -> frozen_dist:
     """Truncated normal distribution. Wrapper from scipy.stats."""
     if a >= b:
         raise ValueError("Input a (%.3E) should be lower than b (%.3E)." % (a, b))
@@ -115,7 +115,9 @@ class WrappedNormal(object):
     def rvs(
         self,
         size: int = 1,
-        random_state: Union[int, np.random.Generator, np.random.RandomState] = None,
+        random_state: Optional[
+            Union[int, np.random.Generator, np.random.RandomState]
+        ] = None,
     ) -> floatArrayLike:
         smpl = scipy.stats.norm.rvs(
             loc=self.mu, scale=self.sigma, size=size, random_state=random_state
@@ -137,11 +139,11 @@ class WrappedNormal(object):
     def std(self) -> float:
         return np.sqrt(self.var())
 
-    def ppf(self, q) -> float:
+    def ppf(self, q: float) -> np.float64:
         return np.quantile(self.rvs(9999), q)
 
 
-def wrapnorm(mu: float, sigma: float):
+def wrapnorm(mu: float, sigma: float) -> WrappedNormal:
     """Get Wrapped Normal distribution.
     -- in radians, in [0, 2*pi]
     """
@@ -172,7 +174,7 @@ def _vonmises_kappa(sigma: float) -> float:
     vr = 1.0 - np.exp(-0.5 * sigma**2)
     k0 = 0.5 / vr
 
-    def fun(x) -> float:
+    def fun(x: float) -> float:
         return _vonmises_circ_var(x) - vr
 
     try:
@@ -183,7 +185,7 @@ def _vonmises_kappa(sigma: float) -> float:
     return kappa
 
 
-def vonmises(mu: float, sigma: float):
+def vonmises(mu: float, sigma: float) -> frozen_dist:
     """Get von Mises distribution.
     -- in radians, in [-pi,+pi]
     """
