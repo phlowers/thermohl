@@ -1,9 +1,10 @@
-from typing import Optional, Union
+from typing import Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
 from pyntb.optimize import bisect_v
 
+from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Args
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
@@ -13,13 +14,13 @@ from thermohl.solver.base import _set_dates, reshape
 class Solver1T(Solver_):
 
     def steady_temperature(
-            self,
-            Tmin: float = DP.tmin,
-            Tmax: float = DP.tmax,
-            tol: float = DP.tol,
-            maxiter: int = DP.maxiter,
-            return_err: bool = False,
-            return_power: bool = True
+        self,
+        Tmin: float = DP.tmin,
+        Tmax: float = DP.tmax,
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_power: bool = True,
     ) -> pd.DataFrame:
         """
         Compute steady-state temperature.
@@ -48,7 +49,9 @@ class Solver1T(Solver_):
         """
 
         # solve with bisection
-        T, err = bisect_v(lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter)
+        T, err = bisect_v(
+            lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
+        )
 
         # format output
         df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
@@ -66,18 +69,18 @@ class Solver1T(Solver_):
         return df
 
     def transient_temperature(
-            self,
-            time: np.ndarray,
-            T0: Optional[float] = None,
-            transit: Optional[np.ndarray] = None,
-            Ta: Optional[np.ndarray] = None,
-            wind_speed: Optional[np.ndarray] = None,
-            wind_angle: Optional[np.ndarray] = None,
-            Pa: Optional[np.ndarray] = None,
-            rh: Optional[np.ndarray] = None,
-            pr: Optional[np.ndarray] = None,
-            return_power: bool = False
-    ) -> pd.DataFrame:
+        self,
+        time: floatArray = np.array([]),
+        T0: Optional[float] = None,
+        transit: Optional[floatArray] = None,
+        Ta: Optional[floatArray] = None,
+        wind_speed: Optional[floatArray] = None,
+        wind_angle: Optional[floatArray] = None,
+        Pa: Optional[floatArray] = None,
+        rh: Optional[floatArray] = None,
+        pr: Optional[floatArray] = None,
+        return_power: bool = False,
+    ) -> Dict[str, Any]:
         """
         Compute transient-state temperature.
 
@@ -144,7 +147,9 @@ class Solver1T(Solver_):
             T0 = Ta
 
         # get month, day and hours
-        month, day, hour = _set_dates(self.args.month, self.args.day, self.args.hour, time, n)
+        month, day, hour = _set_dates(
+            self.args.month, self.args.day, self.args.hour, time, n
+        )
 
         # save args
         args = self.args.__dict__.copy()
@@ -167,7 +172,7 @@ class Solver1T(Solver_):
         del (month, day, hour)
 
         # shortcuts for time-loop
-        imc = 1. / (self.args.m * self.args.c)
+        imc = 1.0 / (self.args.m * self.args.c)
 
         # init
         T = np.zeros((N, n))
@@ -175,10 +180,12 @@ class Solver1T(Solver_):
 
         # main time loop
         for i in range(1, len(time)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
+            for k, v in de.items():
+                self.args[k] = v[i, :]
             self.update()
-            T[i, :] = T[i - 1, :] + (time[i] - time[i - 1]) * self.balance(T[i - 1, :]) * imc
+            T[i, :] = (
+                T[i - 1, :] + (time[i] - time[i - 1]) * self.balance(T[i - 1, :]) * imc
+            )
 
         # save results
         dr = dict(time=time, T=T)
@@ -200,7 +207,7 @@ class Solver1T(Solver_):
         # squeeze return values if n is 1
         if n == 1:
             for k in dr:
-                if k == 'time':
+                if k == "time":
                     continue
                 dr[k] = dr[k][:, 0]
 
@@ -210,14 +217,14 @@ class Solver1T(Solver_):
         return dr
 
     def steady_intensity(
-            self,
-            T: Union[float, np.ndarray],
-            Imin: float = DP.imin,
-            Imax: float = DP.imax,
-            tol: float = DP.tol,
-            maxiter: int = DP.maxiter,
-            return_err: bool = False,
-            return_power: bool = True
+        self,
+        T: floatArrayLike = np.array([]),
+        Imin: float = DP.imin,
+        Imax: float = DP.imax,
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_power: bool = True,
     ) -> pd.DataFrame:
         """Compute steady-state max intensity.
 
@@ -255,9 +262,14 @@ class Solver1T(Solver_):
         # solve with bisection
         shape = (self.args.max_len(),)
         T_ = T * np.ones(shape)
-        jh = self.cc.value(T_) + self.rc.value(T_) + self.pc.value(T_) - self.sh.value(T_)
+        jh = (
+            self.cc.value(T_)
+            + self.rc.value(T_)
+            + self.pc.value(T_)
+            - self.sh.value(T_)
+        )
 
-        def fun(i):
+        def fun(i: floatArray) -> floatArrayLike:
             self.args.I = i
             self.jh.__init__(**self.args.__dict__)
             return self.jh.value(T_) - jh
