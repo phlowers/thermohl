@@ -1,7 +1,5 @@
 [build-system]
-requires = [
-    "setuptools>=68.0.0",
-]
+requires = ["setuptools>=68.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -30,10 +28,13 @@ dependencies = [
 [project.optional-dependencies]
 doc = [
     "sphinx ~= 7.4.7",
-    "sphinx_rtd_theme ~= 3.0.2"]
+    "sphinx_rtd_theme ~= 3.0.2"
+]
 examples = [
     "matplotlib ~= 3.9.2",
-] # openpyxl, seaborn
+    # openpyxl,
+    # seaborn,
+] 
 test = [
     "pytest ~= 7.2.2",
     "pylint ~= 3.3.1"
@@ -43,8 +44,13 @@ lint = [
     "ruff ~= 0.8.0"
 ]
 dev = [
-    "thermohl[test,lint]",
+    "thermohl[test,lint]"
 ]
 
 [project.urls]
 "Homepage" = "https://github.com/rte-france/pallas-thermohl"
+
+[tool.mypy]
+strict = true
+ignore_missing_imports = true
+warn_return_any = false
