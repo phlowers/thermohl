@@ -17,7 +17,7 @@ python3 -m pip install --upgrade pip
 # -- install local package
 cd ..
 rm -rf build
-pip install .[examples,test]
+pip install .[examples,dev]
 
 # -- end text
 echo "---"

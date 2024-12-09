@@ -2,7 +2,8 @@
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Tuple, Type, Any, Optional, KeysView, Union, Dict
+from typing import Tuple, Type, Any, Optional, KeysView, Dict
+
 import numpy as np
 import pandas as pd
 
@@ -48,53 +49,53 @@ class Args:
     def _set_default_values(self) -> None:
         """Set default values."""
 
-        self.lat = np.array(45.0)  # latitude (deg)
-        self.lon = np.array(0.0)  # longitude (deg)
-        self.alt = np.array(0.0)  # altitude (m)
-        self.azm = np.array(0.0)  # azimuth (deg)
+        self.lat = 45.0  # latitude (deg)
+        self.lon = 0.0  # longitude (deg)
+        self.alt = 0.0  # altitude (m)
+        self.azm = 0.0  # azimuth (deg)
 
-        self.month = np.array(3)  # month number (1=Jan, 2=Feb, ...)
-        self.day = np.array(21)  # day of the month
-        self.hour = np.array(12)  # hour of the day (in [0, 23] range)
+        self.month = 3  # month number (1=Jan, 2=Feb, ...)
+        self.day = 21  # day of the month
+        self.hour = 12  # hour of the day (in [0, 23] range)
 
-        self.Ta = np.array(15.0)  # ambient temperature (C)
-        self.Pa = np.array(1.0e05)  # ambient pressure (Pa)
-        self.rh = np.array(0.8)  # relative humidity (none, in [0, 1])
-        self.pr = np.array(0.0)  # rain precipitation rate (m.s**-1)
-        self.ws = np.array(0.0)  # wind speed (m.s**-1)
-        self.wa = np.array(90.0)  # wind angle (deg, regarding north)
-        self.al = np.array(0.8)  # albedo (1)
+        self.Ta = 15.0  # ambient temperature (C)
+        self.Pa = 1.0e05  # ambient pressure (Pa)
+        self.rh = 0.8  # relative humidity (none, in [0, 1])
+        self.pr = 0.0  # rain precipitation rate (m.s**-1)
+        self.ws = 0.0  # wind speed (m.s**-1)
+        self.wa = 90.0  # wind angle (deg, regarding north)
+        self.al = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
-        self.tb = np.array(0.1)
+        self.tb = 0.1
 
-        self.I = np.array(100.0)  # transit intensity (A)
+        self.I = 100.0  # transit intensity (A)
 
-        self.m = np.array(1.5)  # mass per unit length (kg.m**-1)
-        self.d = np.array(1.9e-02)  # core diameter (m)
-        self.D = np.array(3.0e-02)  # external (global) diameter (m)
-        self.a = np.array(2.84e-04)  # core section (m**2)
-        self.A = np.array(7.07e-04)  # external (global) section (m**2)
-        self.R = np.array(4.0e-02)  # roughness (1)
-        self.l = np.array(1.0)  # radial thermal conductivity (W.m**-1.K**-1)
-        self.c = np.array(500.0)  # specific heat capacity (J.kg**-1.K**-1)
+        self.m = 1.5  # mass per unit length (kg.m**-1)
+        self.d = 1.9e-02  # core diameter (m)
+        self.D = 3.0e-02  # external (global) diameter (m)
+        self.a = 2.84e-04  # core section (m**2)
+        self.A = 7.07e-04  # external (global) section (m**2)
+        self.R = 4.0e-02  # roughness (1)
+        self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
+        self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 
-        self.alpha = np.array(0.5)  # solar absorption (1)
-        self.epsilon = np.array(0.5)  # emissivity (1)
+        self.alpha = 0.5  # solar absorption (1)
+        self.epsilon = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        self.RDC20 = np.array(2.5e-05)
+        self.RDC20 = 2.5e-05
 
-        self.km = np.array(1.006)  # coefficient for magnetic effects (1)
-        self.ki = np.array(0.016)  # coefficient for magnetic effects (A**-1)
+        self.km = 1.006  # coefficient for magnetic effects (1)
+        self.ki = 0.016  # coefficient for magnetic effects (A**-1)
         # linear resistance augmentation with temperature (K**-1)
-        self.kl = np.array(3.8e-03)
+        self.kl = 3.8e-03
         # quadratic resistance augmentation with temperature (K**-2)
-        self.kq = np.array(8.0e-07)
+        self.kq = 8.0e-07
         # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
-        self.RDCHigh = np.array(3.05e-05)
+        self.RDCHigh = 3.05e-05
         # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
-        self.RDCLow = np.array(2.66e-05)
-        self.THigh = np.array(60.0)  # temperature for RDCHigh measurement (°C)
-        self.TLow = np.array(20.0)  # temperature for RDCLow measurement (°C)
+        self.RDCLow = 2.66e-05
+        self.THigh = 60.0  # temperature for RDCHigh measurement (°C)
+        self.TLow = 20.0  # temperature for RDCLow measurement (°C)
 
     def keys(self) -> KeysView[str]:
         """Get list of members as dict keys."""
@@ -177,13 +178,13 @@ class Solver(ABC):
             )
 
     def __init__(
-        self,
-        dic: Optional[dict[str, Any]] = None,
-        joule: Type[PowerTerm] = PowerTerm,
-        solar: Type[PowerTerm] = PowerTerm,
-        convective: Type[PowerTerm] = PowerTerm,
-        radiative: Type[PowerTerm] = PowerTerm,
-        precipitation: Type[PowerTerm] = PowerTerm,
+            self,
+            dic: Optional[dict[str, Any]] = None,
+            joule: Type[PowerTerm] = PowerTerm,
+            solar: Type[PowerTerm] = PowerTerm,
+            convective: Type[PowerTerm] = PowerTerm,
+            radiative: Type[PowerTerm] = PowerTerm,
+            precipitation: Type[PowerTerm] = PowerTerm,
     ):
         """Create a Solver object.
 
@@ -228,11 +229,11 @@ class Solver(ABC):
 
     def balance(self, T: floatArrayLike) -> floatArrayLike:
         return (
-            self.jh.value(T)
-            + self.sh.value(T)
-            - self.cc.value(T)
-            - self.rc.value(T)
-            - self.pc.value(T)
+                self.jh.value(T)
+                + self.sh.value(T)
+                - self.cc.value(T)
+                - self.rc.value(T)
+                - self.pc.value(T)
         )
 
     @abstractmethod
@@ -280,11 +281,11 @@ def reshape(v: numberArrayLike, nr: int, nc: int) -> numberArray:
 
 
 def _set_dates(
-    month: floatArrayLike,
-    day: floatArrayLike,
-    hour: floatArrayLike,
-    t: floatArray,
-    n: int,
+        month: floatArrayLike,
+        day: floatArrayLike,
+        hour: floatArrayLike,
+        t: floatArray,
+        n: int,
 ) -> Tuple[intArray, intArray, floatArray]:
     """Set months, days and hours as 2D arrays.
 
@@ -318,9 +319,9 @@ def _set_dates(
         months[:, j] = ts.dt.month
         days[:, j] = ts.dt.day
         hours[:, j] = (
-            ts.dt.hour
-            + ts.dt.minute / 60.0
-            + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
+                ts.dt.hour
+                + ts.dt.minute / 60.0
+                + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
         )
 
     return months, days, hours
