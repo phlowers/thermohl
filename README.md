@@ -34,6 +34,12 @@ python -m pip install thermohl@git+https://github.com/rte-france/pallas-thermohl
 
 (not available yet)
 
+## Development
+Install the development dependencies and program scripts via `pip install -e .[dev]`.
+
+Build a new wheel via `python -m build --wheel`.
+This build a wheel in newly-created dist/ directory
+
 ## Building the documentation
 
 First, make sure you have sphinx and the Readthedocs theme installed.
@@ -41,8 +47,7 @@ First, make sure you have sphinx and the Readthedocs theme installed.
 If you use pip, open a terminal and enter the following commands:
 
 ```shell script
-pip install sphinx
-pip install sphinx_rtd_theme
+pip install -e .[doc]
 ```
 
 If you use conda, open an Anaconda Powershell Prompt and enter the following commands:
