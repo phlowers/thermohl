@@ -25,17 +25,18 @@ def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArra
     return (0.5 * (r**2 - ri2) - ri2 * np.log(r / ri)) / (re**2 - ri2)
 
 
-def _profile_bim(
-    ts: floatArrayLike,
-    tc: floatArrayLike,
-    r: floatArray,
-    ri: floatArrayLike,
-    re: floatArrayLike,
-) -> floatArrayLike:
-    """Analytic temperature profile for steady heat equation in cylinder (bi-mat)."""
-    fl = lambda x: np.zeros_like(x)
-    fr = lambda x: (tc - ts) * _phi(x, ri, re) / _phi(re, ri, re)
-    return tc - np.piecewise(r, [r <= ri, r > ri], [fl, fr])
+# TODO: Unused => to delete
+# def _profile_bim(
+#     ts: floatArrayLike,
+#     tc: floatArrayLike,
+#     r: floatArray,
+#     ri: floatArrayLike,
+#     re: floatArrayLike,
+# ) -> floatArrayLike:
+#     """Analytic temperature profile for steady heat equation in cylinder (bi-mat)."""
+#     fl = lambda x: np.zeros_like(x)
+#     fr = lambda x: (tc - ts) * _phi(x, ri, re) / _phi(re, ri, re)
+#     return tc - np.piecewise(r, [r <= ri, r > ri], [fl, fr])
 
 
 def _profile_bim_avg_coeffs(
@@ -66,7 +67,7 @@ class Solver3T(Solver_):
         c = 0.5 * np.ones(shape)
         D_ = D * np.ones_like(c)
         d_ = d * np.ones_like(c)
-        i = np.where(d_ > 0.0)[0]
+        i = np.nonzero(d_ > 0.0)[0]
         c[i] -= (d_[i] ** 2 / (D_[i] ** 2 - d_[i] ** 2)) * np.log(D_[i] / d_[i])
         # if len(shape) == 1 and shape[0] == 1:
         #     return c[0], D_[0], d_[0], i[0]
@@ -187,21 +188,64 @@ class Solver3T(Solver_):
         pr: Optional[floatArrayLike] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
+        """
+        Compute transient-state temperature.
+
+        Parameters
+        ----------
+        time : numpy.ndarray
+            A 1D array with times (in seconds) when the temperature needs to be
+            computed. The array must contain increasing values (undefined
+            behaviour otherwise).
+        Ts0 : float
+            Initial surface temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
+        transit : numpy.ndarray
+            A 1D array with time-varying transit. It should have the same size
+            as input time. If set to None the value from internal dict will be
+            used. The default is None.
+        Ta : numpy.ndarray
+            A 1D array with time-varying ambient temperature. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        wind_speed : numpy.ndarray
+            A 1D array with time-varying wind_speed. It should have the same size
+            as input time. If set to None the value from internal dict will be
+            used. The default is None.
+        wind_angle : numpy.ndarray
+            A 1D array with time-varying wind_angle. It should have the same size
+            as input time. If set to None the value from internal dict will be
+            used. The default is None.
+        Pa : numpy.ndarray
+            A 1D array with time-varying atmospheric pressure. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        rh : numpy.ndarray
+            A 1D array with time-varying relative humidity. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        pr : numpy.ndarray
+            A 1D array with time-varying precipitation. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        return_power : bool, optional
+            Return power term values. The default is False.
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary with temperature and other results (depending on inputs)
+            in the keys.
+
+        """
         # if time-changing quantities are not provided, use ones from args (static)
-        if transit is None:
-            transit = self.args.I
-        if Ta is None:
-            Ta = self.args.Ta
-        if wind_speed is None:
-            wind_speed = self.args.ws
-        if wind_angle is None:
-            wind_angle = self.args.wa
-        if Pa is None:
-            Pa = self.args.Pa
-        if rh is None:
-            rh = self.args.rh
-        if pr is None:
-            pr = self.args.pr
+        transit = transit if transit is not None else self.args.I
+        Ta = Ta if Ta is not None else self.args.Ta
+        wind_speed = wind_speed if wind_speed is not None else self.args.ws
+        wind_angle = wind_angle if wind_angle is not None else self.args.wa
+        Pa = Pa if Pa is not None else self.args.Pa
+        rh = rh if rh is not None else self.args.rh
+        pr = pr if pr is not None else self.args.pr
 
         # get sizes (n for input dict entries, N for time)
         n = self.args.max_len()
@@ -276,11 +320,8 @@ class Solver3T(Solver_):
         }
 
         if return_power:
-            dr[Solver_.Names.pjle] = np.zeros((N, n))
-            dr[Solver_.Names.psol] = np.zeros((N, n))
-            dr[Solver_.Names.pcnv] = np.zeros((N, n))
-            dr[Solver_.Names.prad] = np.zeros((N, n))
-            dr[Solver_.Names.ppre] = np.zeros((N, n))
+            for power in Solver_.Names.powers():
+                dr[power] = np.zeros_like(ts)
 
             for i in range(len(time)):
                 dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
@@ -347,9 +388,9 @@ class Solver3T(Solver_):
             target_ = np.array([Solver_.Names.avg for i in range(shape[0])])
             target_[ix] = Solver_.Names.core
 
-        js = np.where(target_ == Solver_.Names.surf)[0]
-        ja = np.where(target_ == Solver_.Names.avg)[0]
-        jc = np.where(target_ == Solver_.Names.core)[0]
+        js = np.nonzero(target_ == Solver_.Names.surf)[0]
+        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
+        jc = np.nonzero(target_ == Solver_.Names.core)[0]
         jx = np.intersect1d(ix, ja)
 
         def _newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:

@@ -1,7 +1,12 @@
+import numbers
+from array import array
+from copy import deepcopy
 from typing import Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
+from mypy.server import update
+from numpy import number
 from pyntb.optimize import bisect_v
 
 from thermohl import floatArrayLike, floatArray
@@ -50,7 +55,12 @@ class Solver1T(Solver_):
 
         # solve with bisection
         T, err = bisect_v(
-            lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
+            lambda x: -self.balance(x),
+            Tmin,
+            Tmax,
+            (self.args.max_len(),),
+            tol,
+            maxiter,
         )
 
         # format output
@@ -109,42 +119,47 @@ class Solver1T(Solver_):
             A 1D array with time-varying wind_angle. It should have the same size
             as input time. If set to None the value from internal dict will be
             used. The default is None.
+        Pa : numpy.ndarray
+            A 1D array with time-varying atmospheric pressure. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        rh : numpy.ndarray
+            A 1D array with time-varying relative humidity. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
+        pr : numpy.ndarray
+            A 1D array with time-varying precipitation. It should have the
+            same size as input time. If set to None the value from internal dict
+            will be used. The default is None.
         return_power : bool, optional
             Return power term values. The default is False.
 
         Returns
         -------
-        pandas.DataFrame
-            A DataFrame with temperature and other results (depending on inputs)
-            in the columns.
+        Dict[str, Any]
+            A dictionary with temperature and other results (depending on inputs)
+            in the keys.
 
         """
 
         # if time-changing quantities are not provided, use ones from args (static)
-        if transit is None:
-            transit = self.args.I
-        if Ta is None:
-            Ta = self.args.Ta
-        if wind_speed is None:
-            wind_speed = self.args.ws
-        if wind_angle is None:
-            wind_angle = self.args.wa
-        if Pa is None:
-            Pa = self.args.Pa
-        if rh is None:
-            rh = self.args.rh
-        if pr is None:
-            pr = self.args.pr
+        transit = transit if transit is not None else self.args.I
+        Ta = Ta if Ta is not None else self.args.Ta
+        wind_speed = wind_speed if wind_speed is not None else self.args.ws
+        wind_angle = wind_angle if wind_angle is not None else self.args.wa
+        Pa = Pa if Pa is not None else self.args.Pa
+        rh = rh if rh is not None else self.args.rh
+        pr = pr if pr is not None else self.args.pr
 
         # get sizes (n for input dict entries, N for time)
         n = self.args.max_len()
         N = len(time)
         if N < 2:
-            raise ValueError()
+            raise ValueError("The length of the time array must be at least 2.")
 
         # get initial temperature
         if T0 is None:
-            T0 = Ta
+            T0 = Ta if isinstance(Ta, numbers.Number) else Ta[0]
 
         # get month, day and hours
         month, day, hour = _set_dates(
@@ -207,7 +222,7 @@ class Solver1T(Solver_):
         # squeeze return values if n is 1
         if n == 1:
             for k in dr:
-                if k == "time":
+                if k == Solver_.Names.time:
                     continue
                 dr[k] = dr[k][:, 0]
 

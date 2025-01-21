@@ -1,5 +1,6 @@
 """Generic radiative cooling term."""
 
+from abc import ABC
 from typing import Any
 import numpy as np
 from thermohl import floatArrayLike
@@ -7,7 +8,7 @@ from thermohl import floatArrayLike
 _dT = 1.0e-03
 
 
-class PowerTerm:
+class PowerTerm(ABC):
     """Base class for power term."""
 
     def __init__(self, **kwargs: Any):
@@ -32,7 +33,10 @@ class PowerTerm:
         """
         return np.zeros_like(T) if not np.isscalar(T) else 0.0
 
-    def derivative(self, T: floatArrayLike, dT: float = _dT) -> floatArrayLike:
+    # TODO: Unused, to remove
+    def derivative(
+        self, conductor_temperature: floatArrayLike, dT: float = _dT
+    ) -> floatArrayLike:
         r"""Compute power term derivative regarding temperature in function of temperature.
 
         Usually this function should be overriden in children classes; if it is
@@ -41,7 +45,7 @@ class PowerTerm:
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature (C).
         dT : float, optional
             Temperature increment. The default is 1.0E-03.
@@ -52,7 +56,10 @@ class PowerTerm:
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return (self.value(T + dT) - self.value(T - dT)) / (2.0 * dT)
+        return (
+            self.value(conductor_temperature + dT)
+            - self.value(conductor_temperature - dT)
+        ) / (2.0 * dT)
 
 
 class RadiativeCooling(PowerTerm):
@@ -118,12 +125,12 @@ class RadiativeCooling(PowerTerm):
             * (self._celsius2kelvin(T) ** 4 - self.Ta**4)
         )
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Analytical derivative of value method.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature (C).
 
         Returns
@@ -132,4 +139,6 @@ class RadiativeCooling(PowerTerm):
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return 4.0 * np.pi * self.sigma * self.epsilon * self.D * T**3
+        return (
+            4.0 * np.pi * self.sigma * self.epsilon * self.D * conductor_temperature**3
+        )

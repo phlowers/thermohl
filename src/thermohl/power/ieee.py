@@ -142,14 +142,14 @@ class JouleHeating(PowerTerm):
         """
         return self._rdc(T) * self.I**2
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -158,7 +158,7 @@ class JouleHeating(PowerTerm):
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return self.c * self.I**2 * np.ones_like(T)
+        return self.c * self.I**2 * np.ones_like(conductor_temperature)
 
 
 class _SRad:
@@ -240,9 +240,9 @@ class SolarHeatingBase(PowerTerm):
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""
-        return np.zeros_like(T)
+        return np.zeros_like(conductor_temperature)
 
 
 class SolarHeating(SolarHeatingBase):
@@ -351,7 +351,23 @@ class ConvectiveCoolingBase(PowerTerm):
         Td: floatArrayLike,
         vm: floatArrayLike,
     ) -> floatArrayLike:
-        """Compute forced convective cooling value."""
+        """
+        Compute forced convective cooling value.
+
+        Parameters
+        ----------
+        Tf : float or np.ndarray
+            Temperature field array.
+        Td : float or np.ndarray
+            Temperature difference array.
+        vm : float or np.ndarray
+            Velocity magnitude array.
+
+        Returns
+        -------
+        float or np.ndarray
+            Computed forced convective cooling values.
+        """
         Re = self.ws * self.D * vm / self.mu(Tf)
         Kp = (
             1.194
@@ -371,7 +387,21 @@ class ConvectiveCoolingBase(PowerTerm):
         Td: floatArrayLike,
         vm: floatArrayLike,
     ) -> floatArrayLike:
-        """Compute natural convective cooling value."""
+        """
+        Compute natural convective cooling value.
+
+        Parameters
+        ----------
+        Td : float or np.ndarray
+            Temperature difference array.
+        vm : float or np.ndarray
+            Velocity magnitude array.
+
+        Returns
+        -------
+        float or np.ndarray
+            Natural convective cooling value array.
+        """
         return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td) ** 1.25
 
     def value(self, T: floatArrayLike) -> floatArrayLike:
@@ -491,12 +521,12 @@ class RadiativeCooling(PowerTerm):
             * (((T + 273.0) / 100.0) ** 4 - ((self.Ta + 273.0) / 100.0) ** 4)
         )
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Analytical derivative of value method.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature (C).
 
         Returns
@@ -505,4 +535,4 @@ class RadiativeCooling(PowerTerm):
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return 4.0 * 1.78e-07 * self.epsilon * self.D * T**3
+        return 4.0 * 1.78e-07 * self.epsilon * self.D * conductor_temperature**3
