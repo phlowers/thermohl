@@ -74,12 +74,37 @@ class JouleHeating(PowerTerm):
         self.f = f
 
     def _rdc(self, T: floatArrayLike) -> floatArrayLike:
-        """Compute resistance per unit length for direct current."""
+        """
+        Compute resistance per unit length for direct current.
+
+        Parameters
+        ----------
+        T : float or np.ndarray
+            Temperature array or value at which to compute the resistance.
+
+        Returns
+        -------
+        float or np.ndarray
+            Resistance per unit length for direct current at the given temperature(s).
+        """
         dt = T - self.T20
         return self.RDC20 * (1.0 + self.kl * dt + self.kq * dt**2)
 
     def _ks(self, rdc: floatArrayLike) -> floatArrayLike:
-        """Compute skin-effect coefficient."""
+        """
+        Compute skin-effect coefficient.
+
+        This method calculates the skin-effect coefficient based on the given
+        resistance (rdc) and the object's attributes. The calculation is an
+        approximation as described in the document [NT-RD-CNER-DL-SLA-20-00215].
+
+        Parameters:
+        rdc (float or np.ndarray): The resistance value(s) for which the skin-effect
+                              coefficient is to be computed.
+
+        Returns:
+        floatArrayLike: The computed skin-effect coefficient(s).
+        """
         # Note: approx version as in [NT-RD-CNER-DL-SLA-20-00215]
         z = (
             8
@@ -100,7 +125,25 @@ class JouleHeating(PowerTerm):
         km: floatArrayLike,
         ki: floatArrayLike,
     ) -> floatArrayLike:
-        """Compute magnetic coefficient."""
+        """
+        Compute magnetic coefficient.
+
+        Parameters
+        ----------
+        A : float or np.ndarray
+            External (total) section.
+        a : float or np.ndarray
+            Core section.
+        km : float or np.ndarray
+            Coefficient for magnetic effects.
+        ki : float or np.ndarray
+            Coefficient for magnetic effects.
+
+        Returns
+        -------
+        floatArrayLike
+            Computed magnetic coefficient.
+        """
         s = (
             np.ones_like(self.I)
             * np.ones_like(A)

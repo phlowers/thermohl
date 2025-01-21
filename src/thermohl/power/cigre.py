@@ -196,14 +196,14 @@ class JouleHeating(PowerTerm):
         """
         return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.I**2
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -212,7 +212,13 @@ class JouleHeating(PowerTerm):
             Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
 
         """
-        return self.km * self.RDC20 * self.kl * self.I**2 * np.ones_like(T)
+        return (
+            self.km
+            * self.RDC20
+            * self.kl
+            * self.I**2
+            * np.ones_like(conductor_temperature)
+        )
 
 
 class SolarHeating(PowerTerm):
@@ -313,9 +319,9 @@ class SolarHeating(PowerTerm):
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)
 
-    def derivative(self, T: floatArrayLike) -> floatArrayLike:
+    def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""
-        return np.zeros_like(T)
+        return np.zeros_like(conductor_temperature)
 
 
 class ConvectiveCooling(PowerTerm):
