@@ -6,6 +6,7 @@ from typing import Tuple, Type, Any, Optional, KeysView, Dict
 
 import numpy as np
 import pandas as pd
+from numpy import ndarray
 
 from thermohl import (
     floatArrayLike,
@@ -108,7 +109,17 @@ class Args:
         self.__dict__[key] = value
 
     def max_len(self) -> int:
-        """."""
+        """
+        Calculate the maximum length of the values in the dictionary.
+
+        This method iterates over all keys in the dictionary and determines the maximum length
+        of the values associated with those keys.
+        If a value is not of a type that has a length, it is ignored.
+
+        Returns:
+            int: The maximum length of the values in the dictionary. If the dictionary is empty
+            or all values are of types that do not have a length, the method returns 1.
+        """
         n = 1
         for k in self.keys():
             try:
@@ -118,7 +129,20 @@ class Args:
         return n
 
     def extend_to_max_len(self) -> None:
-        """."""
+        """
+        Extend all elements in the dictionary to the maximum length.
+
+        This method iterates over all keys in the dictionary and checks if the
+        corresponding value is a numpy ndarray. If it is, it checks if its length
+        matches the maximum length obtained from the `max_len` method.
+        If the length matches, it creates a copy of the array.
+        If the length does not match or for non-ndarray values, it creates
+        a new numpy array of the maximum length, filled with the original value
+        and having the same data type.
+
+        Returns:
+            None
+        """
         n = self.max_len()
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
@@ -133,6 +157,13 @@ class Args:
                 self[k] = self[k] * np.ones((n,), dtype=t)
 
     def compress(self) -> None:
+        """
+        Compresses the values in the dictionary by replacing numpy arrays with a
+        single unique value if all elements in the array are the same.
+
+        Returns:
+            None
+        """
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
                 u = np.unique(self[k])
@@ -178,14 +209,14 @@ class Solver(ABC):
             )
 
     def __init__(
-            self,
-            dic: Optional[dict[str, Any]] = None,
-            joule: Type[PowerTerm] = PowerTerm,
-            solar: Type[PowerTerm] = PowerTerm,
-            convective: Type[PowerTerm] = PowerTerm,
-            radiative: Type[PowerTerm] = PowerTerm,
-            precipitation: Type[PowerTerm] = PowerTerm,
-    ):
+        self,
+        dic: Optional[dict[str, Any]] = None,
+        joule: Type[PowerTerm] = PowerTerm,
+        solar: Type[PowerTerm] = PowerTerm,
+        convective: Type[PowerTerm] = PowerTerm,
+        radiative: Type[PowerTerm] = PowerTerm,
+        precipitation: Type[PowerTerm] = PowerTerm,
+    ) -> None:
         """Create a Solver object.
 
         Parameters
@@ -215,7 +246,6 @@ class Solver(ABC):
         self.rc = radiative(**self.args.__dict__)
         self.pc = precipitation(**self.args.__dict__)
         self.args.compress()
-        return
 
     def update(self) -> None:
         self.args.extend_to_max_len()
@@ -225,15 +255,14 @@ class Solver(ABC):
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
         self.args.compress()
-        return
 
     def balance(self, T: floatArrayLike) -> floatArrayLike:
         return (
-                self.jh.value(T)
-                + self.sh.value(T)
-                - self.cc.value(T)
-                - self.rc.value(T)
-                - self.pc.value(T)
+            self.jh.value(T)
+            + self.sh.value(T)
+            - self.cc.value(T)
+            - self.rc.value(T)
+            - self.pc.value(T)
         )
 
     @abstractmethod
@@ -249,51 +278,69 @@ class Solver(ABC):
         raise NotImplementedError
 
 
-def _reshape1d(v: numberArrayLike, n: int) -> numberArray:
-    """Reshape input v in size (n,) if possible."""
-    try:
-        l = len(v)
-        if l == 1:
-            w = v * np.ones(n, dtype=v.dtype)
-        else:
-            raise ValueError("Uncompatible size")
-    except AttributeError:
-        w = v * np.ones(n, dtype=type(v))
-    return w
+def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
+    """
+    Reshape the input array to the specified dimensions (nr, nc) if possible.
 
+    Args:
+        input_array (numberArrayLike): Input array to be reshaped.
+        nb_row (int): Desired number of rows for the reshaped array.
+        nb_columns (int): Desired number of columns for the reshaped array.
 
-def reshape(v: numberArrayLike, nr: int, nc: int) -> numberArray:
-    """Reshape input v in size (nr, nc) if possible."""
+    Returns:
+        numberArray: Reshaped array of size (nb_row, nb_columns). If reshaping is not possible,
+            returns an array filled with the input_value repeated to fill the dimension (nb_row, nb_columns).
+
+    Raises:
+        AttributeError: If the input_array has an invalid shape that cannot be reshaped.
+    """
+    reshaped_array = ndarray
     try:
-        s = v.shape
-        if len(s) == 1:
-            if nr == s[0]:
-                w = np.column_stack(nc * (v,))
-            elif nc == s[0]:
-                w = np.vstack(nr * (v,))
-        elif len(s) == 0:
+        input_shape = input_array.shape
+        if len(input_shape) == 1:
+            if nb_row == input_shape[0]:
+                reshaped_array = np.column_stack(nb_columns * (input_array,))
+            elif nb_columns == input_shape[0]:
+                reshaped_array = np.vstack(nb_row * (input_array,))
+        elif len(input_shape) == 0:
             raise AttributeError()
         else:
-            w = np.reshape(v, (nr, nc))
+            reshaped_array = np.reshape(input_array, (nb_row, nb_columns))
     except AttributeError:
-        w = v * np.ones((nr, nc), dtype=type(v))
-    return w
+        reshaped_array = input_array * np.ones(
+            (nb_row, nb_columns), dtype=type(input_array)
+        )
+    return reshaped_array
 
 
 def _set_dates(
-        month: floatArrayLike,
-        day: floatArrayLike,
-        hour: floatArrayLike,
-        t: floatArray,
-        n: int,
+    month: floatArrayLike,
+    day: floatArrayLike,
+    hour: floatArrayLike,
+    time: floatArray,
+    n: int,
 ) -> Tuple[intArray, intArray, floatArray]:
-    """Set months, days and hours as 2D arrays.
+    """
+    Set months, days and hours as 2D arrays.
 
     This function is used in transient temperature computations. Inputs month,
     day and hour are floats or 1D arrays of size n; input t is a time vector of
     size N with evaluation times in seconds. It sets arrays months, days and
     hours, of size (N, n) such that
         months[i, j] = datetime(month[j], day[j], hour[j]) + t[i] .
+
+    Args:
+        month (floatArrayLike): Array of floats or float representing the months.
+        day (floatArrayLike): Array of floats or float representing the days.
+        hour (floatArrayLike): Array of floats or float representing the hours.
+        time (floatArray): Array of floats representing the time vector in seconds.
+        n (int): Size of the input arrays month, day, and hour.
+
+    Returns:
+    Tuple[intArray, intArray, floatArray]:
+        - months (intArray): 2D array of shape (N, n) with month values.
+        - days (intArray): 2D array of shape (N, n) with day values.
+        - hours (floatArray): 2D array of shape (N, n) with hour values.
     """
     oi = np.ones((n,), dtype=int)
     of = np.ones((n,), dtype=float)
@@ -301,27 +348,30 @@ def _set_dates(
     day2 = day * oi
     hour2 = hour * of
 
-    N = len(t)
+    N = len(time)
     months = np.zeros((N, n), dtype=int)
     days = np.zeros((N, n), dtype=int)
     hours = np.zeros((N, n), dtype=float)
 
     td = np.array(
         [datetime.timedelta()]
-        + [datetime.timedelta(seconds=t[i] - t[i - 1]) for i in range(1, N)]
+        + [
+            datetime.timedelta(seconds=float(time[i] - time[i - 1]))
+            for i in range(1, N)
+        ]
     )
 
     for j in range(n):
         hj = int(np.floor(hour2[j]))
-        dj = datetime.timedelta(seconds=3600.0 * (hour2[j] - hj))
+        dj = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hj)))
         t0 = datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hj) + dj
         ts = pd.Series(t0 + td)
         months[:, j] = ts.dt.month
         days[:, j] = ts.dt.day
         hours[:, j] = (
-                ts.dt.hour
-                + ts.dt.minute / 60.0
-                + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
+            ts.dt.hour
+            + ts.dt.minute / 60.0
+            + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
         )
 
     return months, days, hours

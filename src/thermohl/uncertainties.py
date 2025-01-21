@@ -183,7 +183,9 @@ def _steady_uncertainties(
     #  all to max_len size
     n = utils.dict_max_len(s.dc)
     dc = utils.extend_to_max_len(s.dc, n)
-    Tmax = tmax * np.ones(n, )
+    Tmax = tmax * np.ones(
+        n,
+    )
 
     # add missing uncertainties parameters
     du = utils.add_default_uncertainties(u)
@@ -417,7 +419,9 @@ def sensitivity(
     #  all to max_len size
     n = utils.dict_max_len(s.dc)
     dc = utils.extend_to_max_len(s.dc, n)
-    Tmax = tmax * np.ones(n, )
+    Tmax = tmax * np.ones(
+        n,
+    )
 
     # add missing uncertainties parameters
     du = utils.add_default_uncertainties(u)
