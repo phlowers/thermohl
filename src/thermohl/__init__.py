@@ -1,4 +1,5 @@
-from typing import Union, List, Any, TypeVar, Sequence
+from typing import Union, List
+
 import numpy as np
 import numpy.typing as npt
 import scipy
