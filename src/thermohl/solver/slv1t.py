@@ -1,16 +1,11 @@
 import numbers
-from array import array
-from copy import deepcopy
-from typing import Optional, Dict, Any
+from typing import Dict, Any, Optional
 
 import numpy as np
 import pandas as pd
-from mypy.server import update
-from numpy import number
 from pyntb.optimize import bisect_v
 
 from thermohl import floatArrayLike, floatArray
-from thermohl.solver.base import Args
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
@@ -55,12 +50,7 @@ class Solver1T(Solver_):
 
         # solve with bisection
         T, err = bisect_v(
-            lambda x: -self.balance(x),
-            Tmin,
-            Tmax,
-            (self.args.max_len(),),
-            tol,
-            maxiter,
+            lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
         )
 
         # format output
@@ -82,13 +72,6 @@ class Solver1T(Solver_):
         self,
         time: floatArray = np.array([]),
         T0: Optional[float] = None,
-        transit: Optional[floatArray] = None,
-        Ta: Optional[floatArray] = None,
-        wind_speed: Optional[floatArray] = None,
-        wind_angle: Optional[floatArray] = None,
-        Pa: Optional[floatArray] = None,
-        rh: Optional[floatArray] = None,
-        pr: Optional[floatArray] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -103,53 +86,13 @@ class Solver1T(Solver_):
         T0 : float
             Initial temperature. If set to None, the ambient temperature from
             internal dict will be used. The default is None.
-        transit : numpy.ndarray
-            A 1D array with time-varying transit. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        Ta : numpy.ndarray
-            A 1D array with time-varying ambient temperature. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        wind_speed : numpy.ndarray
-            A 1D array with time-varying wind_speed. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        wind_angle : numpy.ndarray
-            A 1D array with time-varying wind_angle. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        Pa : numpy.ndarray
-            A 1D array with time-varying atmospheric pressure. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        rh : numpy.ndarray
-            A 1D array with time-varying relative humidity. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        pr : numpy.ndarray
-            A 1D array with time-varying precipitation. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
         return_power : bool, optional
             Return power term values. The default is False.
 
-        Returns
-        -------
-        Dict[str, Any]
+        Returns : Dict[str, Any]
             A dictionary with temperature and other results (depending on inputs)
             in the keys.
-
         """
-
-        # if time-changing quantities are not provided, use ones from args (static)
-        transit = transit if transit is not None else self.args.I
-        Ta = Ta if Ta is not None else self.args.Ta
-        wind_speed = wind_speed if wind_speed is not None else self.args.ws
-        wind_angle = wind_angle if wind_angle is not None else self.args.wa
-        Pa = Pa if Pa is not None else self.args.Pa
-        rh = rh if rh is not None else self.args.rh
-        pr = pr if pr is not None else self.args.pr
 
         # get sizes (n for input dict entries, N for time)
         n = self.args.max_len()
@@ -159,30 +102,31 @@ class Solver1T(Solver_):
 
         # get initial temperature
         if T0 is None:
-            T0 = Ta if isinstance(Ta, numbers.Number) else Ta[0]
+            T0 = (
+                self.args.Ta
+                if isinstance(self.args.Ta, numbers.Number)
+                else self.args.Ta[0]
+            )
 
         # get month, day and hours
         month, day, hour = _set_dates(
             self.args.month, self.args.day, self.args.hour, time, n
         )
 
-        # save args
-        args = self.args.__dict__.copy()
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
+        # Two dicts, one (dc) with static quantities (with all elements of size n), the other (de)
+        # with time-changing quantities (with all elements of
         # size N*n); uk is a list of keys that are in dc but not in de.
         de = dict(
             month=month,
             day=day,
             hour=hour,
-            I=reshape(transit, N, n),
-            Ta=reshape(Ta, N, n),
-            wa=reshape(wind_angle, N, n),
-            ws=reshape(wind_speed, N, n),
-            Pa=reshape(Pa, N, n),
-            rh=reshape(rh, N, n),
-            pr=reshape(pr, N, n),
+            I=reshape(self.args.I, N, n),
+            Ta=reshape(self.args.Ta, N, n),
+            wa=reshape(self.args.wa, N, n),
+            ws=reshape(self.args.ws, N, n),
+            Pa=reshape(self.args.Pa, N, n),
+            rh=reshape(self.args.rh, N, n),
+            pr=reshape(self.args.pr, N, n),
         )
         del (month, day, hour)
 
@@ -221,13 +165,10 @@ class Solver1T(Solver_):
 
         # squeeze return values if n is 1
         if n == 1:
-            for k in dr:
-                if k == Solver_.Names.time:
-                    continue
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
                 dr[k] = dr[k][:, 0]
-
-        # restore args
-        self.args = Args(args)
 
         return dr
 
