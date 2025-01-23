@@ -24,11 +24,10 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
 
 def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values, transit=I)
+        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            transit=I,
             Ts0=ds[solver.Solver.Names.tsurf].values,
             Tc0=ds[solver.Solver.Names.tcore].values,
         )
