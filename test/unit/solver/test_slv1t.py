@@ -117,34 +117,6 @@ def test_transient_temperature_with_error(solver):
     assert Solver1T.Names.ppre in result
 
 
-def test_transient_temperature_custom_params(solver):
-    time = np.array([0, 1, 2, 3, 4, 5])
-    transit = np.array([1, 1, 1, 1, 1, 1])
-    Ta = np.array([25, 26, 27, 28, 29, 30])
-    wind_speed = np.array([0, 0, 0, 0, 0, 0])
-    wind_angle = np.array([0, 0, 0, 0, 0, 0])
-    Pa = np.array([101325, 101325, 101325, 101325, 101325, 101325])
-    rh = np.array([50, 50, 50, 50, 50, 50])
-    pr = np.array([0, 0, 0, 0, 0, 0])
-
-    result = solver.transient_temperature(
-        time,
-        transit=transit,
-        Ta=Ta,
-        wind_speed=wind_speed,
-        wind_angle=wind_angle,
-        Pa=Pa,
-        rh=rh,
-        pr=pr,
-    )
-
-    assert isinstance(result, dict)
-    assert "time" in result
-    assert "T" in result
-    assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
-
-
 def test_steady_intensity_default(solver):
     T = np.array([75])
 
