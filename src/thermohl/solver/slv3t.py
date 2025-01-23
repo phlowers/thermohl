@@ -25,20 +25,6 @@ def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArra
     return (0.5 * (r**2 - ri2) - ri2 * np.log(r / ri)) / (re**2 - ri2)
 
 
-# TODO: Unused => to delete
-# def _profile_bim(
-#     ts: floatArrayLike,
-#     tc: floatArrayLike,
-#     r: floatArray,
-#     ri: floatArrayLike,
-#     re: floatArrayLike,
-# ) -> floatArrayLike:
-#     """Analytic temperature profile for steady heat equation in cylinder (bi-mat)."""
-#     fl = lambda x: np.zeros_like(x)
-#     fr = lambda x: (tc - ts) * _phi(x, ri, re) / _phi(re, ri, re)
-#     return tc - np.piecewise(r, [r <= ri, r > ri], [fl, fr])
-
-
 def _profile_bim_avg_coeffs(
     ri: floatArrayLike, re: floatArrayLike
 ) -> tuple[floatArrayLike, floatArrayLike]:
@@ -67,7 +53,7 @@ class Solver3T(Solver_):
         c = 0.5 * np.ones(shape)
         D_ = D * np.ones_like(c)
         d_ = d * np.ones_like(c)
-        i = np.nonzero(d_ > 0.0)[0]
+        i = np.where(d_ > 0.0)[0]
         c[i] -= (d_[i] ** 2 / (D_[i] ** 2 - d_[i] ** 2)) * np.log(D_[i] / d_[i])
         # if len(shape) == 1 and shape[0] == 1:
         #     return c[0], D_[0], d_[0], i[0]
@@ -133,10 +119,8 @@ class Solver3T(Solver_):
 
         # if no guess provided, use ambient temp
         shape = (self.args.max_len(),)
-        if Tsg is None:
-            Tsg = 1.0 * self.args.Ta
-        if Tcg is None:
-            Tcg = 1.5 * np.abs(self.args.Ta)
+        Tsg = Tsg if Tsg is not None else 1.0 * self.args.Ta
+        Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.Ta)
         Tsg_ = Tsg * np.ones(shape)
         Tcg_ = Tcg * np.ones(shape)
 
@@ -179,13 +163,6 @@ class Solver3T(Solver_):
         time: floatArray = np.array([]),
         Ts0: Optional[floatArrayLike] = None,
         Tc0: Optional[floatArrayLike] = None,
-        transit: Optional[floatArrayLike] = None,
-        Ta: Optional[floatArrayLike] = None,
-        wind_speed: Optional[floatArrayLike] = None,
-        wind_angle: Optional[floatArrayLike] = None,
-        Pa: Optional[floatArrayLike] = None,
-        rh: Optional[floatArrayLike] = None,
-        pr: Optional[floatArrayLike] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -200,34 +177,6 @@ class Solver3T(Solver_):
         Ts0 : float
             Initial surface temperature. If set to None, the ambient temperature from
             internal dict will be used. The default is None.
-        transit : numpy.ndarray
-            A 1D array with time-varying transit. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        Ta : numpy.ndarray
-            A 1D array with time-varying ambient temperature. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        wind_speed : numpy.ndarray
-            A 1D array with time-varying wind_speed. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        wind_angle : numpy.ndarray
-            A 1D array with time-varying wind_angle. It should have the same size
-            as input time. If set to None the value from internal dict will be
-            used. The default is None.
-        Pa : numpy.ndarray
-            A 1D array with time-varying atmospheric pressure. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        rh : numpy.ndarray
-            A 1D array with time-varying relative humidity. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
-        pr : numpy.ndarray
-            A 1D array with time-varying precipitation. It should have the
-            same size as input time. If set to None the value from internal dict
-            will be used. The default is None.
         return_power : bool, optional
             Return power term values. The default is False.
 
@@ -238,15 +187,6 @@ class Solver3T(Solver_):
             in the keys.
 
         """
-        # if time-changing quantities are not provided, use ones from args (static)
-        transit = transit if transit is not None else self.args.I
-        Ta = Ta if Ta is not None else self.args.Ta
-        wind_speed = wind_speed if wind_speed is not None else self.args.ws
-        wind_angle = wind_angle if wind_angle is not None else self.args.wa
-        Pa = Pa if Pa is not None else self.args.Pa
-        rh = rh if rh is not None else self.args.rh
-        pr = pr if pr is not None else self.args.pr
-
         # get sizes (n for input dict entries, N for time)
         n = self.args.max_len()
         N = len(time)
@@ -254,18 +194,13 @@ class Solver3T(Solver_):
             raise ValueError()
 
         # get initial temperature
-        if Ts0 is None:
-            Ts0 = Ta
-        if Tc0 is None:
-            Tc0 = 1.0 + Ts0
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
 
         # get month, day and hours
         month, day, hour = _set_dates(
             self.args.month, self.args.day, self.args.hour, time, n
         )
-
-        # save args
-        args = self.args.__dict__.copy()
 
         # Two dicts, one (dc) with static quantities (with all elements of size
         # n), the other (de) with time-changing quantities (with all elements of
@@ -274,13 +209,13 @@ class Solver3T(Solver_):
             month=month,
             day=day,
             hour=hour,
-            I=reshape(transit, N, n),
-            Ta=reshape(Ta, N, n),
-            wa=reshape(wind_angle, N, n),
-            ws=reshape(wind_speed, N, n),
-            Pa=reshape(Pa, N, n),
-            rh=reshape(rh, N, n),
-            pr=reshape(pr, N, n),
+            I=reshape(self.args.I, N, n),
+            Ta=reshape(self.args.Ta, N, n),
+            wa=reshape(self.args.wa, N, n),
+            ws=reshape(self.args.ws, N, n),
+            Pa=reshape(self.args.Pa, N, n),
+            rh=reshape(self.args.rh, N, n),
+            pr=reshape(self.args.pr, N, n),
         )
         del (month, day, hour)
 
@@ -331,31 +266,14 @@ class Solver3T(Solver_):
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
 
         if n == 1:
-            for k in dr:
-                if k == Solver_.Names.time:
-                    continue
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
                 dr[k] = dr[k][:, 0]
 
         return dr
 
-    def steady_intensity(
-        self,
-        T: floatArrayLike = np.array([]),
-        target: strListLike = "auto",
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
-        return_err: bool = False,
-        return_temp: bool = True,
-        return_power: bool = True,
-    ) -> pd.DataFrame:
-
-        # save transit in arg
-        transit = self.args.I
-
-        # ...
-        shape = (self.args.max_len(),)
-        Tmax_ = T * np.ones(shape)
-
+    def _check_target(self, target, max_len):
         # check target
         if target == "auto":
             target_ = None
@@ -371,26 +289,47 @@ class Solver3T(Solver_):
                     f" got {target} instead."
                 )
             else:
-                target_ = np.array([target for i in range(shape[0])])
+                target_ = np.array([target for _ in range(max_len)])
         else:
-            if len(target) != shape[0]:
+            if len(target) != max_len:
                 raise ValueError()
             for t in target:
-                if t not in [Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]:
+                if t not in [
+                    Solver_.Names.surf,
+                    Solver_.Names.avg,
+                    Solver_.Names.core,
+                ]:
                     raise ValueError()
             target_ = np.array(target)
+        return target_
+
+    def steady_intensity(
+        self,
+        T: floatArrayLike = np.array([]),
+        target: strListLike = "auto",
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_temp: bool = True,
+        return_power: bool = True,
+    ) -> pd.DataFrame:
+
+        max_len = self.args.max_len()
+        Tmax_ = T * np.ones(max_len)
+
+        target_ = self._check_target(target, max_len)
 
         # pre-compute indexes
         c, D, d, ix = self.mgc
         a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
 
         if target_ is None:
-            target_ = np.array([Solver_.Names.avg for i in range(shape[0])])
+            target_ = np.array([Solver_.Names.avg for i in range(max_len)])
             target_[ix] = Solver_.Names.core
 
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        js = np.where(target_ == Solver_.Names.surf)[0]
+        ja = np.where(target_ == Solver_.Names.avg)[0]
+        jc = np.where(target_ == Solver_.Names.core)[0]
         jx = np.intersect1d(ix, ja)
 
         def _newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
@@ -449,7 +388,6 @@ class Solver3T(Solver_):
             df["err"] = err
 
         if return_temp or return_power:
-
             ts, tc = _newtheader(x, y)
             ta = 0.5 * (ts + tc)
             ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
@@ -465,9 +403,5 @@ class Solver3T(Solver_):
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)
                 df[Solver_.Names.ppre] = self.pc.value(ts)
-
-        # restore previous transit
-        self.args.I = transit
-        self.jh.__init__(**self.args.__dict__)
 
         return df
