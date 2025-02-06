@@ -1,7 +1,5 @@
 """Functions and classes to obtain various probability distributions for scalar random variables."""
 
-# TODO : move this to pyntb as it is too general for thermohl only; then add proper tests !
-
 import warnings
 from typing import Union, Optional
 
