@@ -1,15 +1,9 @@
-"""Power terms implementation matching cner's Excel sheet.
-
-See NT-RD-CNER-DL-SLA-20-00215.
-"""
-
-from typing import Any, Optional
+from typing import Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, intArrayLike
-from thermohl.power import ieee
-from thermohl.power.base import PowerTerm
+from thermohl import floatArrayLike
+from thermohl.power import PowerTerm
 
 
 class JouleHeating(PowerTerm):
@@ -183,103 +177,3 @@ class JouleHeating(PowerTerm):
         ks = self._ks(rdc)
         rac = self.kem * ks * rdc
         return rac * self.I**2
-
-
-class SolarHeating(ieee.SolarHeatingBase):
-    def __init__(
-        self,
-        lat: floatArrayLike,
-        azm: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
-        D: floatArrayLike,
-        alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
-        **kwargs: Any,
-    ):
-        r"""Build with args.
-
-        If more than one input are numpy arrays, they should have the same size.
-
-        Parameters
-        ----------
-        lat : float or np.ndarray
-            Latitude.
-        azm : float or np.ndarray
-            Azimuth.
-        month : int or np.ndarray
-            Month number (must be between 1 and 12).
-        day : int or np.ndarray
-            Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-            month).
-        hour : float or np.ndarray
-            Hour of the day (solar, must be between 0 and 23).
-        D : float or np.ndarray
-            external diameter.
-        alpha : np.ndarray
-            Solar absorption coefficient.
-        srad : xxx
-            xxx
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        est = ieee._SRad(
-            [-42.0, +63.8, -1.922, 0.03469, -3.61e-04, +1.943e-06, -4.08e-09],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        )
-        for k in ["alt", "tb"]:
-            if k in kwargs.keys():
-                kwargs.pop(k)
-        super().__init__(
-            lat=lat,
-            alt=0.0,
-            azm=azm,
-            tb=0.0,
-            month=month,
-            day=day,
-            hour=hour,
-            D=D,
-            alpha=alpha,
-            est=est,
-            srad=srad,
-            **kwargs,
-        )
-
-
-class ConvectiveCooling(ieee.ConvectiveCooling):
-    """Convective cooling term.
-
-    Very similar to IEEE. The differences are in some coefficient values for air
-    constants.
-    """
-
-    def value(self, T: floatArrayLike) -> floatArrayLike:
-        r"""Compute convective cooling.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        Tf = 0.5 * (T + self.Ta)
-        Td = T - self.Ta
-        # very slight difference with air.IEEE.volumic_mass() in coefficient before alt**2
-        vm = (1.293 - 1.525e-04 * self.alt + 6.38e-09 * self.alt**2) / (
-            1 + 0.00367 * Tf
-        )
-        return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))
-
-
-class RadiativeCooling(ieee.RadiativeCooling):
-    pass

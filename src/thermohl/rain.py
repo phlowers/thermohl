@@ -9,8 +9,8 @@ al., 2016 (https://doi.org/10.1109/PESGM.2016.7741611).
 import numpy as np
 
 from thermohl import air
-from thermohl import ieee
 from thermohl import thermodynamics
+from thermohl.power import olla, ieee
 from thermohl.utils import PowerTerm
 
 
@@ -40,9 +40,9 @@ class PrecipitationCooling(PowerTerm):
         h = cc / (np.pi * D * Td)
         k = 18.015 / 28.9647
         pm = np.pi * D
-        cp = thermodynamics.Air.heat_capacity(T=air.kelvin(Tf))
-        ec = thermodynamics.Water.vapor_pressure(T=air.kelvin(T))
-        ea = thermodynamics.Water.vapor_pressure(T=air.kelvin(Ta))
+        cp = thermodynamics.Air.heat_capacity(T=olla.air.kelvin(Tf))
+        ec = thermodynamics.Water.vapor_pressure(T=olla.air.kelvin(T))
+        ea = thermodynamics.Water.vapor_pressure(T=olla.air.kelvin(Ta))
         me = pm * h * k * (ec - rh * ea) / (cp * Pa)
         return np.where(Td != 0.0, me, np.zeros_like(T))
 
@@ -57,7 +57,7 @@ class PrecipitationCooling(PowerTerm):
     def _evap(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps=0.0):
         m = PrecipitationCooling._mass_flux(T, alt, Ta, ws, wa, D, Pa, rh, pr, ps)
         Le = thermodynamics.Water.heat_of_vaporization()
-        cw = thermodynamics.Water.heat_capacity(T=air.kelvin(T))
+        cw = thermodynamics.Water.heat_capacity(T=olla.air.kelvin(T))
         Tb = thermodynamics.Water.boiling_point(p=Pa)
         Tb = air.celsius(Tb)
         Te = np.minimum(T, Tb)
@@ -69,5 +69,5 @@ class PrecipitationCooling(PowerTerm):
 
     @staticmethod
     def _imp(T, Ta, ws, D, pr, ps=0.0):
-        cw = thermodynamics.Water.heat_capacity(T=air.kelvin(T))
+        cw = thermodynamics.Water.heat_capacity(T=olla.air.kelvin(T))
         return 0.71 * cw * (T - Ta) * PrecipitationCooling._ma(Ta, ws, D, pr, ps)

@@ -15,7 +15,7 @@ from thermohl import (
     numberArray,
     numberArrayLike,
 )
-from thermohl.power.base import PowerTerm
+from thermohl.power import PowerTerm
 
 
 class _DEFPARAM:
