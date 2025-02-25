@@ -1,68 +1,14 @@
 """Generic radiative cooling term."""
 
-from abc import ABC
 from typing import Any
+
 import numpy as np
+
 from thermohl import floatArrayLike
-
-_dT = 1.0e-03
-
-
-class PowerTerm(ABC):
-    """Base class for power term."""
-
-    def __init__(self, **kwargs: Any):
-        pass
-
-    def value(self, T: floatArrayLike) -> floatArrayLike:
-        r"""Compute power term value in function of temperature.
-
-        Usually this function should be overridden in children classes; if it is
-        not the case it will just return zero.
-
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature (C).
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
-
-        """
-        return np.zeros_like(T) if not np.isscalar(T) else 0.0
-
-    # TODO: Unused, to remove
-    def derivative(
-        self, conductor_temperature: floatArrayLike, dT: float = _dT
-    ) -> floatArrayLike:
-        r"""Compute power term derivative regarding temperature in function of temperature.
-
-        Usually this function should be overriden in children classes; if it is
-        not the case it will evaluate the derivative from the value method with
-        a second-order approximation.
-
-        Parameters
-        ----------
-        conductor_temperature : float or np.ndarray
-            Conductor temperature (C).
-        dT : float, optional
-            Temperature increment. The default is 1.0E-03.
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
-
-        """
-        return (
-            self.value(conductor_temperature + dT)
-            - self.value(conductor_temperature - dT)
-        ) / (2.0 * dT)
+from thermohl.power.power_term import PowerTerm
 
 
-class RadiativeCooling(PowerTerm):
+class RadiativeCoolingBase(PowerTerm):
     """Generic power term for radiative cooling."""
 
     def _celsius2kelvin(self, T: floatArrayLike) -> floatArrayLike:
@@ -131,7 +77,7 @@ class RadiativeCooling(PowerTerm):
         Parameters
         ----------
         conductor_temperature : float or np.ndarray
-            Conductor temperature (C).
+        Conductor temperature (C).
 
         Returns
         -------

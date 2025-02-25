@@ -1,6 +1,6 @@
 import numpy as np
 
-import thermohl.power.ieee
+from thermohl.power import ieee
 from thermohl import solver
 
 
@@ -32,20 +32,14 @@ def test_compare_powers():
 
     T = 100.0
 
-    assert np.isclose(
-        thermohl.power.ieee.ConvectiveCooling(**dic).value(T), 81.93, rtol=0.002
-    )
-    assert np.isclose(
-        thermohl.power.ieee.RadiativeCooling(**dic).value(T), 39.1, rtol=0.001
-    )
-    assert np.isclose(
-        thermohl.power.ieee.SolarHeating(**dic).value(T), 22.44, rtol=0.001
-    )
-    jh = thermohl.power.ieee.JouleHeating(**dic)
+    assert np.isclose(ieee.ConvectiveCooling(**dic).value(T), 81.93, rtol=0.002)
+    assert np.isclose(ieee.RadiativeCooling(**dic).value(T), 39.1, rtol=0.001)
+    assert np.isclose(ieee.SolarHeating(**dic).value(T), 22.44, rtol=0.001)
+    jh = ieee.JouleHeating(**dic)
     assert np.isclose(jh._rdc(T), 9.390e-05, rtol=1.0e-09)
 
     # additional debug
-    thermohl.power.ieee.SolarHeating(**dic).value(T)
+    ieee.SolarHeating(**dic).value(T)
 
     from thermohl import sun
 
