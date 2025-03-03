@@ -1,17 +1,24 @@
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
 """Utility functions to compute different sun positions from a point on earth.
 
     These positions usually depend on the point latitude and the time. The sun
     position is then used to estimate the solar radiation in CIGRE and IEEE
     models.
 """
-from typing import Union
 
 import numpy as np
+from thermohl import floatArrayLike, intArrayLike
 
 
-def hour_angle(hour: Union[float, np.ndarray],
-               minute: Union[float, np.ndarray] = 0.,
-               second: Union[float, np.ndarray] = 0.) -> Union[float, np.ndarray]:
+def hour_angle(
+    hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
+) -> floatArrayLike:
     """Compute hour angle.
 
     If more than one input are numpy arrays, they should have the same size.
@@ -31,11 +38,14 @@ def hour_angle(hour: Union[float, np.ndarray],
         Hour angle in radians.
 
     """
-    solar_hour = hour % 24 + minute / 60. + second / 3600.
-    return np.radians(15. * (solar_hour - 12.))
+    solar_hour = hour % 24 + minute / 60.0 + second / 3600.0
+    return np.radians(15.0 * (solar_hour - 12.0))
 
 
-def solar_declination(month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]]):
+_csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
+
+
+def solar_declination(month: intArrayLike, day: intArrayLike) -> floatArrayLike:
     """Compute solar declination.
 
     If more than one input are numpy arrays, they should have the same size.
@@ -53,16 +63,18 @@ def solar_declination(month: Union[int, np.ndarray[int]], day: Union[int, np.nda
         Solar declination in radians.
 
     """
-    csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
-    doy = csm[month - 1] + day
-    return np.deg2rad(23.46) * np.sin(2. * np.pi * (doy + 284) / 365.)
+    doy = _csm[month - 1] + day
+    return np.deg2rad(23.46) * np.sin(2.0 * np.pi * (doy + 284) / 365.0)
 
 
-def solar_altitude(lat: Union[float, np.ndarray],
-                   month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]],
-                   hour: Union[float, np.ndarray],
-                   minute: Union[float, np.ndarray] = 0., second: Union[float, np.ndarray] = 0.) \
-        -> Union[float, np.ndarray]:
+def solar_altitude(
+    lat: floatArrayLike,
+    month: intArrayLike,
+    day: intArrayLike,
+    hour: floatArrayLike,
+    minute: floatArrayLike = 0.0,
+    second: floatArrayLike = 0.0,
+) -> floatArrayLike:
     """Compute solar altitude.
 
     If more than one input are numpy arrays, they should have the same size.
@@ -94,11 +106,14 @@ def solar_altitude(lat: Union[float, np.ndarray],
     return np.arcsin(np.cos(lat) * np.cos(sd) * np.cos(ha) + np.sin(lat) * np.sin(sd))
 
 
-def solar_azimuth(lat: Union[float, np.ndarray],
-                  month: Union[int, np.ndarray[int]], day: Union[int, np.ndarray[int]],
-                  hour: Union[float, np.ndarray],
-                  minute: Union[float, np.ndarray] = 0., second: Union[float, np.ndarray] = 0.) \
-        -> Union[float, np.ndarray]:
+def solar_azimuth(
+    lat: floatArrayLike,
+    month: intArrayLike,
+    day: intArrayLike,
+    hour: floatArrayLike,
+    minute: floatArrayLike = 0.0,
+    second: floatArrayLike = 0.0,
+) -> floatArrayLike:
     """Compute solar azimuth.
 
     If more than one input are numpy arrays, they should have the same size.
@@ -128,7 +143,9 @@ def solar_azimuth(lat: Union[float, np.ndarray],
     sd = solar_declination(month, day)
     ha = hour_angle(hour, minute=minute, second=second)
     Xi = np.sin(ha) / (np.sin(lat) * np.cos(ha) - np.cos(lat) * np.tan(sd))
-    C = np.where(Xi >= 0.,
-                 np.where(ha < 0., 0., np.pi),
-                 np.where(ha < 0., np.pi, 2. * np.pi))
+    C = np.where(
+        Xi >= 0.0,
+        np.where(ha < 0.0, 0.0, np.pi),
+        np.where(ha < 0.0, np.pi, 2.0 * np.pi),
+    )
     return C + np.arctan(Xi)

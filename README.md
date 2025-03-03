@@ -1,3 +1,12 @@
+<!--
+SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+SPDX-License-Identifier: MPL-2.0
+-->
+
 # ThermOHL
 
 _**Thermohl**_ is a python package allowing the computation of the temperature in overhead conductors for given
@@ -34,6 +43,12 @@ python -m pip install thermohl@git+https://github.com/rte-france/pallas-thermohl
 
 (not available yet)
 
+## Development
+Install the development dependencies and program scripts via `pip install -e .[dev]`.
+
+Build a new wheel via `python -m build --wheel`.
+This build a wheel in newly-created dist/ directory
+
 ## Building the documentation
 
 First, make sure you have sphinx and the Readthedocs theme installed.
@@ -41,8 +56,7 @@ First, make sure you have sphinx and the Readthedocs theme installed.
 If you use pip, open a terminal and enter the following commands:
 
 ```shell script
-pip install sphinx
-pip install sphinx_rtd_theme
+pip install -e .[doc]
 ```
 
 If you use conda, open an Anaconda Powershell Prompt and enter the following commands:
