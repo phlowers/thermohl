@@ -53,7 +53,7 @@ dev = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/rte-france/pallas-thermohl"
+"Homepage" = "https://github.com/phlowers/thermohl"
 
 [tool.mypy]
 strict = true
