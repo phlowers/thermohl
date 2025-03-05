@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# -- dir for all envs
+ENV_DIR=/home/${USER}/ENV
+mkdir -p $ENV_DIR
+
+# -- current env with link
+VENV=${ENV_DIR}/pallas-thermohl
+VLNK=.venv
+ln -sf $VENV $VLNK
+python3 -m venv $VENV
+source $VENV/bin/activate
+
+# -- upgrade pip
+python3 -m pip install --upgrade pip
+
+# -- install local package
+cd ..
+rm -rf build
+pip install .[examples,dev]
+
+# -- end text
+echo "---"
+echo -e "\e[1mto start the environment, type :\e[0m"
+echo "source ${VENV}/bin/activate"
+echo ""
+echo -e "\e[1mto stop the environment, type :\e[0m"
+echo "deactivate"

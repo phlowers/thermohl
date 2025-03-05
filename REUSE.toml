@@ -1,0 +1,8 @@
+version = 1
+
+[[annotations]]
+path = ["examples/create_env"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
+SPDX-License-Identifier = "MPL-2.0"
+
