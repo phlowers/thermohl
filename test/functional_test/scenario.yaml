@@ -1,0 +1,358 @@
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+ampacity:
+  steady:
+    - scenario 1:
+        cable: "ASTER600"
+        type_cable: "homogen"
+        Tmax_cable: 90
+        weather_temperature: 20
+        wind_speed: 0
+        wind_angle: 45
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 1164.7
+
+    - scenario 2:
+        cable: "CROCUS400"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 45
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 1307.1
+
+    - scenario 3:
+        cable: "NARCISSE600G"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: 20
+        wind_speed: 5
+        wind_angle: 0
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 1411.4
+
+    - scenario 4:
+        cable: "PETUNIA600"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: -20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 2060.5
+
+    - scenario 5:
+        cable: "ASTER600"
+        type_cable: "homogen"
+        Tmax_cable: 90
+        weather_temperature: 0
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 2144
+
+    - scenario 6:
+        cable: "CROCUS400"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: 40
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+
+        I_max: 1172.3
+
+    - scenario 7:
+        cable: "NARCISSE600G"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+
+        I_max: 1684.7
+
+    - scenario 8:
+        cable: "PETUNIA600"
+        type_cable: "bimetallic"
+        Tmax_cable: 90
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+
+        I_max: 1572.7
+
+    - scenario 9:
+        cable: "ASTER600"
+        type_cable: "homogen"
+        Tmax_cable: 45
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+
+        I_max: 1022.1
+
+    - scenario 10:
+        cable: "CROCUS400"
+        type_cable: "bimetallic"
+        Tmax_cable: 45
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 1000
+        date: "2021-06-21T12:00:00"
+
+        I_max: 732.6
+
+    - scenario 11:
+        cable: "NARCISSE600G"
+        type_cable: "bimetallic"
+        Tmax_cable: 200
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+
+        I_max: 2475.2
+
+    - scenario 12:
+        cable: "PETUNIA600"
+        type_cable: "bimetallic"
+        Tmax_cable: 45
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+
+        I_max: 899.4
+
+temperature:
+  steady:
+    - scenario 13:
+        cable: "ASTER600"
+        weather_temperature: 20
+        wind_speed: 0
+        wind_angle: 45
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 1000
+
+        T_surf: 69.7
+        T_mean: 72.3
+        T_heart: 74.9
+
+    - scenario 14:
+        cable: "CROCUS400"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 45
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 1000
+
+        T_surf: 52.4
+        T_mean: 54.9
+        T_heart: 57.4
+
+    - scenario 15:
+        cable: "NARCISSE600G"
+        weather_temperature: 20
+        wind_speed: 5
+        wind_angle: 0
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 2000
+
+        T_surf: 168.5
+        T_mean: 177.8
+        T_heart: 187.2
+
+    - scenario 16:
+        cable: "PETUNIA600"
+        weather_temperature: -20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 2000
+
+        T_surf: 64.5
+        T_mean: 72.8
+        T_heart: 81.1
+
+    - scenario 17:
+        cable: "ASTER600"
+        weather_temperature: 0
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 2000
+
+        T_surf: 64.9
+        T_mean: 75.4
+        T_heart: 85.8
+
+    - scenario 18:
+        cable: "CROCUS400"
+        weather_temperature: 40
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-03-07T00:00:00"
+        iac: 1000
+
+        T_surf: 69.7
+        T_mean: 72.3
+        T_heart: 74.9
+
+    - scenario 19:
+        cable: "NARCISSE600G"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 46
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+        iac: 2500
+
+        T_surf: 174.9
+        T_mean: 190
+        T_heart: 205
+
+    - scenario 20:
+        cable: "PETUNIA600"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+        iac: 0
+
+        T_surf: 27.1
+        T_mean: 27.1
+        T_heart: 27.1
+
+    - scenario 21:
+        cable: "ASTER600"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+        iac: 0
+
+        T_surf: 27.1
+        T_mean: 27.1
+        T_heart: 27.1
+
+    - scenario 22:
+        cable: "CROCUS400"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 1000
+        date: "2021-06-21T12:00:00"
+        iac: 1000
+
+        T_surf: 57.3
+        T_mean: 59.9
+        T_heart: 62.4
+
+    - scenario 23:
+        cable: "NARCISSE600G"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+        iac: 1000
+
+        T_surf: 43.4
+        T_mean: 45
+        T_heart: 46.5
+
+    - scenario 24:
+        cable: "PETUNIA600"
+        weather_temperature: 20
+        wind_speed: 3
+        wind_angle: 90
+        latitude: 43
+        longitude: 1
+        altitude: 100
+        date: "2021-06-21T12:00:00"
+        iac: 1000
+
+        T_surf: 45.9
+        T_mean: 47.7
+        T_heart: 49.6

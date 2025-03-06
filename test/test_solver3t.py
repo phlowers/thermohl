@@ -14,7 +14,8 @@ _nprs = 123456
 
 def _solvers(dic=None):
     return [
-        solver._factory(dic=dic, heateq="3t", model=m)
+        solver._factory(dic=dic, heateq=he, model=m)
+        for he in ["3t", "3tl"]
         for m in ["cner", "cigre", "ieee", "olla"]
     ]
 

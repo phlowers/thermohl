@@ -39,13 +39,14 @@ doc = [
     "sphinx_rtd_theme ~= 3.0.2"]
 examples = [
     "matplotlib ~= 3.9.2",
-] # openpyxl, seaborn
+]
 test = [
     "pytest ~= 7.2.2",
     "pytest-cov == 6.0.0",
     "pylint ~= 3.3.1"
 ]
 lint = [
+    "black ~= 25.1.0",
     "mypy ~= 1.13.0",
     "ruff ~= 0.8.0"
 ]

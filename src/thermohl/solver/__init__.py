@@ -18,6 +18,7 @@ from thermohl.solver.base import Args, Solver
 from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
+from thermohl.solver.slv3t_legacy import Solver3TL
 
 concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver1D]]
 
@@ -34,6 +35,8 @@ def _factory(
         solver = Solver1T
     elif heateq == "3t":
         solver = Solver3T
+    elif heateq == "3tl":
+        solver = Solver3TL
     elif heateq == "1d":
         solver = Solver1D
     else:
