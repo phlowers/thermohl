@@ -5,7 +5,7 @@ ENV_DIR=/home/${USER}/ENV
 mkdir -p $ENV_DIR
 
 # -- current env with link
-VENV=${ENV_DIR}/pallas-thermohl
+VENV=${ENV_DIR}/thermohl
 VLNK=.venv
 ln -sf $VENV $VLNK
 python3 -m venv $VENV

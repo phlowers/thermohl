@@ -36,7 +36,7 @@ contribution to the total variance of the output.
 To install the package using pip, execute the following command:
 
 ```shell script
-python -m pip install thermohl@git+https://github.com/rte-france/pallas-thermohl
+python -m pip install thermohl@git+https://github.com/phlowers/thermohl
 ```
 
 ### Using conda

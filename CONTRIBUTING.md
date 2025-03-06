@@ -14,9 +14,9 @@ If you consider contributing to this repository, please read the relevant sectio
 
 ## Questions and issues
 
-The best place to ask questions and report issues is the [Issue](https://github.com/rte-france/pallas-thermohl/issues/) section of the [Github repository](https://github.com/rte-france/pallas-thermohl).
+The best place to ask questions and report issues is the [Issue](https://github.com/phlowers/thermohl/issues/) section of the [Github repository](https://github.com/phlowers/thermohl).
 You can use the search function of Github to look for previous similar questions.
-For sensitive issues or to request private paid support, you can send a message to <opensource@mews-labs.com>.
+For sensitive issues or to request private paid support, you can send a message on the dedicated Slack channel.
 
 ## Contributing to the code
 
@@ -30,7 +30,7 @@ You will then need to submit a pull request (PR). To do so, you will need to:
 - On your local git repository, create a new branch dedicated to the bug fix or feature that you want to contribute.
 - Create as many commits as you'd like in this branch.
 - Push the branch to your fork on Github.
-- On Github's web interface, create a new pull request in the main ThermOHL repository at https://github.com/rte-france/pallas-thermohl, requesting to merge the branch on your fork into the main branch of the original ThermOHL repository.
+- On Github's web interface, create a new pull request in the main ThermOHL repository at https://github.com/phlowers/thermohl, requesting to merge the branch on your fork into the main branch of the original ThermOHL repository.
 - Until the pull request is accepted, the maintainers can edit the branch on your fork with you.
 - Once the pull request is merged, the branch can be deleted or forgotten.
 
