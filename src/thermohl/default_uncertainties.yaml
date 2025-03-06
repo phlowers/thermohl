@@ -1,0 +1,172 @@
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+lat:
+  dist: 'truncnorm'
+  min: 35.
+  max: 55.
+  std: 4.4E-04
+  relative_std: false
+lon:
+  dist: null
+  min: -4.9
+  max: +8.3
+alt:
+  dist: 'truncnorm'
+  min: 0.
+  max: 3000.
+  std: 10.
+  relative_std: false
+azm:
+  dist: 'wrapnorm'
+  std: 10.
+  relative_std: false
+month:
+  dist: null
+  min: 1
+  max: 12
+day:
+  dist: null
+  min: 1
+  max: 31
+  relative_std: false
+hour:
+  dist: 'truncnorm'
+  min: 0.
+  max: 24.
+  std: 0.25
+  relative_std: false
+Ta:
+  dist: 'truncnorm'
+  min: -40.
+  max: +50.
+  std: 2.
+  relative_std: false
+Pa:
+  dist: 'truncnorm'
+  min: 0.870E+05
+  max: 1.050E+05
+  std: 0.05
+  relative_std: True
+rh:
+  dist: 'truncnorm'
+  min: 0.
+  max: 1.
+  std: 0.05
+  relative_std: false
+pr:
+  dist: 'truncnorm'
+  min: 0.
+  max: 0.05
+  std: 7.0E-08
+  relative_std: false
+ws:
+  dist: 'truncnorm'
+  min: 0.
+  max: 100.
+  std: 0.1
+  relative_std: true
+wa:
+  dist: 'vonmises'
+  std: 10.
+  relative_std: false
+al:
+  dist: 'truncnorm'
+  min: 0.
+  max: 1.
+  std: 0.
+  relative_std: false
+tb:
+  dist: null
+  min: 0.
+  max: 1.
+I:
+  dist: 'truncnorm'
+  min: 0.
+  max: 4999.
+  std: 0.03
+  relative_std: true
+m:
+  dist: 'truncnorm'
+  min: 0.1
+  max: 5.0
+  std: 0.05
+  relative_std: true
+d:
+  dist: 'truncnorm'
+  min: 0.
+  max: 0.05
+  std: 0.008
+  relative_std: true
+D:
+  dist: 'truncnorm'
+  min: 0.005
+  max: 0.1
+  std: 0.008
+  relative_std: true
+a:
+  dist: 'truncnorm'
+  min: 0.
+  max: 5.0E-04
+  std: 2.5E-04
+  relative_std: true
+A:
+  dist: 'truncnorm'
+  min: 2.0E-05
+  max: 2.0E-03
+  std: 2.5E-04
+  relative_std: true
+R:
+  dist: 'truncnorm'
+  min: 0.02
+  max: 0.20
+  std: 0.
+  relative_std: false
+l:
+  dist: 'truncnorm'
+  min: 0.7
+  max: 1.5
+  std: 0.1
+  relative_std: false
+c:
+  dist: 'truncnorm'
+  min: 500.
+  max: 1000.
+  std: 0.
+  relative_std: false
+alpha:
+  dist: 'truncnorm'
+  min: 0.23
+  max: 0.93
+  std: 0.01
+  relative_std: false
+epsilon:
+  dist: null
+  min: 0.13
+  max: 0.83
+RDC20:
+  dist: 'truncnorm'
+  min: 1.0E-05
+  max: 1.0E-03
+  std: 0.03
+  relative_std: true
+km:
+  dist: null
+ki:
+  dist: null
+kl:
+  dist: null
+kq:
+  dist: null
+RDCHigh:
+  dist: null
+RDCLow:
+  dist: null
+THigh:
+  dist: null
+TLow:
+  dist: null
