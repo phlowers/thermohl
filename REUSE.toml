@@ -6,3 +6,8 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
 SPDX-License-Identifier = "MPL-2.0"
 
+[[annotations]]
+path = ["test/functional_test/cable_catalog.csv"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
+SPDX-License-Identifier = "MPL-2.0"
