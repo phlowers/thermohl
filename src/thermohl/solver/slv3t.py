@@ -18,10 +18,10 @@ from thermohl.utils import quasi_newton_2d
 
 
 def _profile_mom(
-    ts: floatArrayLike, tc: floatArrayLike, r: floatArrayLike, re: floatArrayLike
+        ts: floatArrayLike, tc: floatArrayLike, r: floatArrayLike, re: floatArrayLike
 ) -> floatArrayLike:
     """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
-    return ts + (tc - ts) * (1.0 - (r / re) ** 2)
+    return ts + (tc - ts) * (1.0 - (r / re)**2)
 
 
 def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArrayLike:
@@ -31,17 +31,17 @@ def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArra
 
 
 def _profile_bim_avg_coeffs(
-    ri: floatArrayLike, re: floatArrayLike
+        ri: floatArrayLike, re: floatArrayLike
 ) -> tuple[floatArrayLike, floatArrayLike]:
     ri2 = ri**2
     re2 = re**2
-    a = 0.5 * (re2 - ri2) ** 2 - re2 * ri2 * (2.0 * np.log(re / ri) - 1.0) - ri**4
+    a = 0.5 * (re2 - ri2)**2 - re2 * ri2 * (2.0 * np.log(re / ri) - 1.0) - ri**4
     b = 2.0 * re2 * (re2 - ri2) * _phi(re, ri, re)
     return a, b
 
 
 def _profile_bim_avg(
-    ts: floatArrayLike, tc: floatArrayLike, ri: floatArrayLike, re: floatArrayLike
+        ts: floatArrayLike, tc: floatArrayLike, ri: floatArrayLike, re: floatArrayLike
 ) -> floatArrayLike:
     """Analytical formulation for average temperature in _profile_bim."""
     a, b = _profile_bim_avg_coeffs(ri, re)
@@ -52,7 +52,7 @@ class Solver3T(Solver_):
 
     @staticmethod
     def _morgan_coefficients(
-        D: floatArrayLike, d: floatArrayLike, shape: Tuple[int, ...] = (1,)
+            D: floatArrayLike, d: floatArrayLike, shape: Tuple[int, ...] = (1,)
     ) -> Tuple[floatArray, floatArray, floatArray, intArray]:
         """
         Calculate coefficients for heat flux between surface and core in steady state.
@@ -82,21 +82,17 @@ class Solver3T(Solver_):
         D_ = D * np.ones_like(c)
         d_ = d * np.ones_like(c)
         i = np.where(d_ > 0.0)[0]
-        c[i] -= (d_[i] ** 2 / (D_[i] ** 2 - d_[i] ** 2)) * np.log(D_[i] / d_[i])
-        # if len(shape) == 1 and shape[0] == 1:
-        #     return c[0], D_[0], d_[0], i[0]
-        # else:
-        #     return c, D_, d_, i
+        c[i] -= (d_[i]**2 / (D_[i]**2 - d_[i]**2)) * np.log(D_[i] / d_[i])
         return c, D_, d_, i
 
     def __init__(
-        self,
-        dic: Optional[dict[str, Any]] = None,
-        joule: Type[PowerTerm] = PowerTerm,
-        solar: Type[PowerTerm] = PowerTerm,
-        convective: Type[PowerTerm] = PowerTerm,
-        radiative: Type[PowerTerm] = PowerTerm,
-        precipitation: Type[PowerTerm] = PowerTerm,
+            self,
+            dic: Optional[dict[str, Any]] = None,
+            joule: Type[PowerTerm] = PowerTerm,
+            solar: Type[PowerTerm] = PowerTerm,
+            convective: Type[PowerTerm] = PowerTerm,
+            radiative: Type[PowerTerm] = PowerTerm,
+            precipitation: Type[PowerTerm] = PowerTerm,
     ):
         super().__init__(dic, joule, solar, convective, radiative, precipitation)
         self.update()
@@ -126,6 +122,18 @@ class Solver3T(Solver_):
 
         self.args.compress()
 
+    def average(self, ts, tc):
+        """
+        Compute average temperature given surface and core temperature. This
+        formula is based on analytical solution in steady-state mode. For single
+        material, the formula reduces itself to an usual mean; for bi-material
+        conductors, we have geometrical terms to take into account.
+        """
+        ta = 0.5 * (ts + tc)
+        _, D, d, ix = self.mgc
+        ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
+        return ta
+
     def joule(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
         Calculate the Joule heating effect.
@@ -142,11 +150,8 @@ class Solver3T(Solver_):
         - It then adjusts the temperature at specific indices `ix` using a bimodal profile average.
         - Finally, it returns the Joule heating values based on the adjusted temperatures.
         """
-        # temperature is average temperature
-        temperature = 0.5 * (ts + tc)
-        c, D, d, ix = self.mgc
-        temperature[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
-        return self.jh.value(temperature)
+        ta = self.average(ts, tc)
+        return self.jh.value(ta)
 
     def balance(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -164,11 +169,11 @@ class Solver3T(Solver_):
         float or numpy.ndarray: The resulting thermal balance.
         """
         return (
-            self.joule(ts, tc)
-            + self.sh.value(ts)
-            - self.cc.value(ts)
-            - self.rc.value(ts)
-            - self.pc.value(ts)
+                self.joule(ts, tc)
+                + self.sh.value(ts)
+                - self.cc.value(ts)
+                - self.rc.value(ts)
+                - self.pc.value(ts)
         )
 
     def morgan(self, ts: floatArray, tc: floatArray) -> floatArray:
@@ -186,13 +191,13 @@ class Solver3T(Solver_):
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
     def steady_temperature(
-        self,
-        Tsg: Optional[floatArrayLike] = None,
-        Tcg: Optional[floatArrayLike] = None,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
-        return_err: bool = False,
-        return_power: bool = True,
+            self,
+            Tsg: Optional[floatArrayLike] = None,
+            Tcg: Optional[floatArrayLike] = None,
+            tol: float = DP.tol,
+            maxiter: int = DP.maxiter,
+            return_err: bool = False,
+            return_power: bool = True,
     ) -> pd.DataFrame:
         """
         Compute the steady-state temperature distribution.
@@ -238,9 +243,7 @@ class Solver3T(Solver_):
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
         # format output
-        z = 0.5 * (x + y)
-        c, D, d, ix = self.mgc
-        z[ix] = _profile_bim_avg(x[ix], y[ix], 0.5 * d[ix], 0.5 * D[ix])
+        z = self.average(x, y)
         df = pd.DataFrame(
             {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
         )
@@ -258,11 +261,11 @@ class Solver3T(Solver_):
         return df
 
     def transient_temperature(
-        self,
-        time: floatArray = np.array([]),
-        Ts0: Optional[floatArrayLike] = None,
-        Tc0: Optional[floatArrayLike] = None,
-        return_power: bool = False,
+            self,
+            time: floatArray = np.array([]),
+            Ts0: Optional[floatArrayLike] = None,
+            Tc0: Optional[floatArrayLike] = None,
+            return_power: bool = False,
     ) -> Dict[str, Any]:
         """
         Compute transient-state temperature.
@@ -420,14 +423,14 @@ class Solver3T(Solver_):
         return target_
 
     def steady_intensity(
-        self,
-        T: floatArrayLike = np.array([]),
-        target: strListLike = "auto",
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
-        return_err: bool = False,
-        return_temp: bool = True,
-        return_power: bool = True,
+            self,
+            T: floatArrayLike = np.array([]),
+            target: strListLike = "auto",
+            tol: float = DP.tol,
+            maxiter: int = DP.maxiter,
+            return_err: bool = False,
+            return_temp: bool = True,
+            return_power: bool = True,
     ) -> pd.DataFrame:
         """
         Compute the steady-state intensity for a given temperature profile.
@@ -528,8 +531,7 @@ class Solver3T(Solver_):
 
         if return_temp or return_power:
             ts, tc = _newtheader(x, y)
-            ta = 0.5 * (ts + tc)
-            ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
+            ta = self.average(ts, tc)
 
             if return_temp:
                 df[Solver_.Names.tsurf] = ts
@@ -537,7 +539,7 @@ class Solver3T(Solver_):
                 df[Solver_.Names.tcore] = tc
 
             if return_power:
-                df[Solver_.Names.pjle] = self.joule(ts, tc)
+                df[Solver_.Names.pjle] = self.jh.value(ta)
                 df[Solver_.Names.psol] = self.sh.value(ts)
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)
