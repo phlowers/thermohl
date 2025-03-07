@@ -339,7 +339,7 @@ class Solver3T(Solver_):
             for k in de.keys():
                 self.args[k] = de[k][i, :]
             self.update()
-            bal = self.balance(ts[i, :], tc[i, :])
+            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
             mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
             tc[i, :] = ta[i, :] + al * mrg
