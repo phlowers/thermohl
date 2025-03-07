@@ -39,7 +39,7 @@ doc = [
     "sphinx_rtd_theme ~= 3.0.2"]
 examples = [
     "matplotlib ~= 3.9.2",
-] # openpyxl, seaborn
+]
 test = [
     "pytest ~= 7.2.2",
     "pylint ~= 3.3.1"
