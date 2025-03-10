@@ -18,10 +18,10 @@ from thermohl.utils import quasi_newton_2d
 
 
 def _profile_mom(
-        ts: floatArrayLike, tc: floatArrayLike, r: floatArrayLike, re: floatArrayLike
+    ts: floatArrayLike, tc: floatArrayLike, r: floatArrayLike, re: floatArrayLike
 ) -> floatArrayLike:
     """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
-    return ts + (tc - ts) * (1.0 - (r / re)**2)
+    return ts + (tc - ts) * (1.0 - (r / re) ** 2)
 
 
 def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArrayLike:
@@ -31,17 +31,17 @@ def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArra
 
 
 def _profile_bim_avg_coeffs(
-        ri: floatArrayLike, re: floatArrayLike
+    ri: floatArrayLike, re: floatArrayLike
 ) -> tuple[floatArrayLike, floatArrayLike]:
     ri2 = ri**2
     re2 = re**2
-    a = 0.5 * (re2 - ri2)**2 - re2 * ri2 * (2.0 * np.log(re / ri) - 1.0) - ri**4
+    a = 0.5 * (re2 - ri2) ** 2 - re2 * ri2 * (2.0 * np.log(re / ri) - 1.0) - ri**4
     b = 2.0 * re2 * (re2 - ri2) * _phi(re, ri, re)
     return a, b
 
 
 def _profile_bim_avg(
-        ts: floatArrayLike, tc: floatArrayLike, ri: floatArrayLike, re: floatArrayLike
+    ts: floatArrayLike, tc: floatArrayLike, ri: floatArrayLike, re: floatArrayLike
 ) -> floatArrayLike:
     """Analytical formulation for average temperature in _profile_bim."""
     a, b = _profile_bim_avg_coeffs(ri, re)
@@ -50,21 +50,23 @@ def _profile_bim_avg(
 
 class Solver3T(Solver_):
 
-    @staticmethod
+    def __init__(
+        self,
+        dic: Optional[dict[str, Any]] = None,
+        joule: Type[PowerTerm] = PowerTerm,
+        solar: Type[PowerTerm] = PowerTerm,
+        convective: Type[PowerTerm] = PowerTerm,
+        radiative: Type[PowerTerm] = PowerTerm,
+        precipitation: Type[PowerTerm] = PowerTerm,
+    ):
+        super().__init__(dic, joule, solar, convective, radiative, precipitation)
+        self.update()
+
     def _morgan_coefficients(
-            D: floatArrayLike, d: floatArrayLike, shape: Tuple[int, ...] = (1,)
+        self,
     ) -> Tuple[floatArray, floatArray, floatArray, intArray]:
         """
         Calculate coefficients for heat flux between surface and core in steady state.
-
-        Parameters:
-        -----------
-        D : float or numpy.ndarray
-            The diameter of the core.
-        d : float or numpy.ndarray
-            The diameter of the surface.
-        shape : Tuple[int, ...], optional
-            The shape of the output arrays, default is (1,).
 
         Returns:
         --------
@@ -78,24 +80,12 @@ class Solver3T(Solver_):
             - i : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        c = 0.5 * np.ones(shape)
-        D_ = D * np.ones_like(c)
-        d_ = d * np.ones_like(c)
-        i = np.where(d_ > 0.0)[0]
-        c[i] -= (d_[i]**2 / (D_[i]**2 - d_[i]**2)) * np.log(D_[i] / d_[i])
-        return c, D_, d_, i
-
-    def __init__(
-            self,
-            dic: Optional[dict[str, Any]] = None,
-            joule: Type[PowerTerm] = PowerTerm,
-            solar: Type[PowerTerm] = PowerTerm,
-            convective: Type[PowerTerm] = PowerTerm,
-            radiative: Type[PowerTerm] = PowerTerm,
-            precipitation: Type[PowerTerm] = PowerTerm,
-    ):
-        super().__init__(dic, joule, solar, convective, radiative, precipitation)
-        self.update()
+        c = 0.5 * np.ones((self.args.max_len(),))
+        D = self.args.D * np.ones_like(c)
+        d = self.args.d * np.ones_like(c)
+        i = np.nonzero(d > 0.0)[0]
+        c[i] -= (d[i] ** 2 / (D[i] ** 2 - d[i] ** 2)) * np.log(D[i] / d[i])
+        return c, D, d, i
 
     def update(self) -> None:
         """
@@ -116,9 +106,7 @@ class Solver3T(Solver_):
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
 
-        self.mgc = Solver3T._morgan_coefficients(
-            self.args.D, self.args.d, (self.args.max_len(),)
-        )
+        self.mgc = self._morgan_coefficients()
 
         self.args.compress()
 
@@ -169,11 +157,11 @@ class Solver3T(Solver_):
         float or numpy.ndarray: The resulting thermal balance.
         """
         return (
-                self.joule(ts, tc)
-                + self.sh.value(ts)
-                - self.cc.value(ts)
-                - self.rc.value(ts)
-                - self.pc.value(ts)
+            self.joule(ts, tc)
+            + self.sh.value(ts)
+            - self.cc.value(ts)
+            - self.rc.value(ts)
+            - self.pc.value(ts)
         )
 
     def morgan(self, ts: floatArray, tc: floatArray) -> floatArray:
@@ -191,13 +179,13 @@ class Solver3T(Solver_):
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
     def steady_temperature(
-            self,
-            Tsg: Optional[floatArrayLike] = None,
-            Tcg: Optional[floatArrayLike] = None,
-            tol: float = DP.tol,
-            maxiter: int = DP.maxiter,
-            return_err: bool = False,
-            return_power: bool = True,
+        self,
+        Tsg: Optional[floatArrayLike] = None,
+        Tcg: Optional[floatArrayLike] = None,
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_power: bool = True,
     ) -> pd.DataFrame:
         """
         Compute the steady-state temperature distribution.
@@ -261,11 +249,11 @@ class Solver3T(Solver_):
         return df
 
     def transient_temperature(
-            self,
-            time: floatArray = np.array([]),
-            Ts0: Optional[floatArrayLike] = None,
-            Tc0: Optional[floatArrayLike] = None,
-            return_power: bool = False,
+        self,
+        time: floatArray = np.array([]),
+        Ts0: Optional[floatArrayLike] = None,
+        Tc0: Optional[floatArrayLike] = None,
+        return_power: bool = False,
     ) -> Dict[str, Any]:
         """
         Compute transient-state temperature.
@@ -376,7 +364,7 @@ class Solver3T(Solver_):
         return dr
 
     @staticmethod
-    def _check_target(target, max_len):
+    def _check_target(target, d, max_len):
         """
         Validates and processes the target temperature input.
 
@@ -395,7 +383,13 @@ class Solver3T(Solver_):
         """
         # check target
         if target == "auto":
-            target_ = None
+            d_ = d * np.ones(max_len)
+            target_ = np.array(
+                [
+                    Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
+                    for i in range(max_len)
+                ]
+            )
         elif isinstance(target, str):
             if target not in [
                 Solver_.Names.surf,
@@ -423,14 +417,14 @@ class Solver3T(Solver_):
         return target_
 
     def steady_intensity(
-            self,
-            T: floatArrayLike = np.array([]),
-            target: strListLike = "auto",
-            tol: float = DP.tol,
-            maxiter: int = DP.maxiter,
-            return_err: bool = False,
-            return_temp: bool = True,
-            return_power: bool = True,
+        self,
+        T: floatArrayLike = np.array([]),
+        target: strListLike = "auto",
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_temp: bool = True,
+        return_power: bool = True,
     ) -> pd.DataFrame:
         """
         Compute the steady-state intensity for a given temperature profile.
@@ -459,7 +453,7 @@ class Solver3T(Solver_):
         max_len = self.args.max_len()
         Tmax_ = T * np.ones(max_len)
 
-        target_ = self._check_target(target, max_len)
+        target_ = self._check_target(target, self.args.d, max_len)
 
         # pre-compute indexes
         c, D, d, ix = self.mgc
