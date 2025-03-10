@@ -17,7 +17,6 @@ from thermohl.solver import cner
 
 def cable_data(s: str) -> dict:
     f = os.path.join("test", "functional_test", "cable_catalog.csv")
-    # f = "cable_catalog.csv"
     df = pd.read_csv(f)
     if s in df["conductor"].values:
         return df[df["conductor"] == s].to_dict(orient="records")[0]
@@ -27,13 +26,18 @@ def cable_data(s: str) -> dict:
 
 def scn2dict(d: dict) -> dict:
     dic = cable_data(d["cable"])
-    for k in ["latitude", "longitude", "altitude"]:
-        dic[k] = d[k]
 
+    dic["lat"] = d["latitude"]
+    dic["lon"] = d["longitude"]
+    dic["alt"] = d["altitude"]
+    dic["azm"] = 90.
     dic["Ta"] = d["weather_temperature"]
     dic["ws"] = d["wind_speed"]
-    dic["wa"] = d["wind_angle"]
-    dic["az"] = 90.0
+    # in scenario file, wind angles are given regarding span, where in thermohl
+    # they are supposed to be regarding north, hence this conversion formula
+    dic["wa"] = np.rad2deg(
+        np.arcsin(np.sin(np.deg2rad(np.abs(dic["azm"] - d["wind_angle"]) % 180.0)))
+    )
     dic["alpha"] = 0.9
     dic["epsilon"] = 0.8
 
@@ -41,7 +45,7 @@ def scn2dict(d: dict) -> dict:
     dic["month"] = dt.month
     dic["day"] = dt.day
     dic["hour"] = (
-        dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
+            dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
     )
     if "iac" in d.keys():
         dic["I"] = d["iac"]
@@ -50,28 +54,27 @@ def scn2dict(d: dict) -> dict:
 
 
 def test_steady_temperature():
-    scn = yaml.safe_load(open("test/functional_test/scenario.yaml"))
-    # scn = yaml.safe_load(open("scenario.yaml"))
+    f = os.path.join("test", "functional_test", "scenario.yaml")
+    scn = yaml.safe_load(open(f))
     scn = scn["temperature"]["steady"]
 
     for d in scn:
-        for _, e in d.items():
+        for k, e in d.items():
             s = cner(scn2dict(e), heateq="3tl")
             r = s.steady_temperature()
 
-            assert np.allclose(r["t_surf"], e["T_surf"], atol=3.1)
-            assert np.allclose(r["t_avg"], e["T_mean"], atol=3.1)
-            assert np.allclose(r["t_core"], e["T_heart"], atol=3.1)
+            assert np.allclose(r["t_surf"], e["T_surf"], atol=0.05)
+            assert np.allclose(r["t_avg"], e["T_mean"], atol=0.05)
+            assert np.allclose(r["t_core"], e["T_heart"], atol=0.05)
 
 
 def test_steady_ampacity():
-    scn = yaml.safe_load(open("test/functional_test/scenario.yaml"))
-    # scn = yaml.safe_load(open("scenario.yaml"))
+    f = os.path.join("test", "functional_test", "scenario.yaml")
+    scn = yaml.safe_load(open(f))
     scn = scn["ampacity"]["steady"]
 
     for d in scn:
-        for _, e in d.items():
+        for k, e in d.items():
             s = cner(scn2dict(e), heateq="3tl")
             r = s.steady_intensity(T=e["Tmax_cable"])
-
-            assert np.allclose(r["I"], e["I_max"], atol=40.)
+            assert np.allclose(r["I"], e["I_max"], atol=0.05)
