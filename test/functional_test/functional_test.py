@@ -30,7 +30,7 @@ def scn2dict(d: dict) -> dict:
     dic["lat"] = d["latitude"]
     dic["lon"] = d["longitude"]
     dic["alt"] = d["altitude"]
-    dic["azm"] = 90.
+    dic["azm"] = 90.0
     dic["Ta"] = d["weather_temperature"]
     dic["ws"] = d["wind_speed"]
     # in scenario file, wind angles are given regarding span, where in thermohl
@@ -45,7 +45,7 @@ def scn2dict(d: dict) -> dict:
     dic["month"] = dt.month
     dic["day"] = dt.day
     dic["hour"] = (
-            dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
+        dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
     )
     if "iac" in d.keys():
         dic["I"] = d["iac"]
@@ -77,4 +77,5 @@ def test_steady_ampacity():
         for k, e in d.items():
             s = cner(scn2dict(e), heateq="3tl")
             r = s.steady_intensity(T=e["Tmax_cable"])
+
             assert np.allclose(r["I"], e["I_max"], atol=0.05)
