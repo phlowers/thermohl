@@ -5,17 +5,14 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple, Type, Optional, Dict, Any
+from typing import Tuple, Type, Optional, Any, Callable
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
-from thermohl.solver.slv1t import Solver1T
+from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.slv3t import Solver3T
-from thermohl.utils import quasi_newton_2d
 
 
 class Solver3TL(Solver3T):
