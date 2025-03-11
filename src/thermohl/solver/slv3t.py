@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple, Type, Optional, Dict, Any
+from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
 import pandas as pd
