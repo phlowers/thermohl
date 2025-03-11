@@ -9,7 +9,6 @@ from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
 import pandas as pd
-from black.trans import Callable
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
