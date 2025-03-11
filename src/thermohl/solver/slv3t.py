@@ -9,6 +9,7 @@ from typing import Tuple, Type, Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
+from black.trans import Callable
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
@@ -110,12 +111,20 @@ class Solver3T(Solver_):
 
         self.args.compress()
 
-    def average(self, ts, tc):
+    def average(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
-        Compute average temperature given surface and core temperature. This
-        formula is based on analytical solution in steady-state mode. For single
-        material, the formula reduces itself to an usual mean; for bi-material
-        conductors, we have geometrical terms to take into account.
+        Compute average temperature given surface and core temperature.
+
+        This formula is based on analytical solution in steady-state mode. For
+        single material, the formula reduces itself to an usual mean; for
+        bi-material conductors, we have geometrical terms to take into account.
+
+        Parameters:
+        ts (numpy.ndarray): Array of surface temperatures.
+        tc (numpy.ndarray): Array of core temperatures.
+
+        Returns:
+        float or numpy.ndarray: Array of average temperatures.
         """
         ta = 0.5 * (ts + tc)
         _, D, d, ix = self.mgc
@@ -134,9 +143,8 @@ class Solver3T(Solver_):
         float or numpy.ndarray: The calculated Joule heating values.
 
         Notes:
-        - The function computes the average temperature `temperature` as the mean of `ts` and `tc`.
-        - It then adjusts the temperature at specific indices `ix` using a bimodal profile average.
-        - Finally, it returns the Joule heating values based on the adjusted temperatures.
+        - The function computes the average temperature `temperature`.
+        - Returns the Joule heating values based on the adjusted temperatures.
         """
         ta = self.average(ts, tc)
         return self.jh.value(ta)
@@ -416,6 +424,45 @@ class Solver3T(Solver_):
             target_ = np.array(target)
         return target_
 
+    def _steady_intensity_header(
+        self, T: floatArrayLike, target: strListLike
+    ) -> Tuple[np.ndarray, Callable]:
+        """Format input for ampacity solver."""
+
+        max_len = self.args.max_len()
+        Tmax = T * np.ones(max_len)
+        target_ = self._check_target(target, self.args.d, max_len)
+
+        # pre-compute indexes
+        c, D, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
+
+        js = np.nonzero(target_ == Solver_.Names.surf)[0]
+        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
+        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        jx = np.intersect1d(ix, ja)
+
+        # get correct input for quasi-newton solver
+        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            ts = np.ones_like(tg) * np.nan
+            tc = np.ones_like(tg) * np.nan
+
+            ts[js] = Tmax[js]
+            tc[js] = tg[js]
+
+            ts[ja] = tg[ja]
+            tc[ja] = 2 * Tmax[ja] - ts[ja]
+            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
+
+            tc[jc] = Tmax[jc]
+            ts[jc] = tg[jc]
+
+            return ts, tc
+
+        return Tmax, newtheader
+
     def steady_intensity(
         self,
         T: floatArrayLike = np.array([]),
@@ -450,48 +497,14 @@ class Solver3T(Solver_):
             DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
 
-        max_len = self.args.max_len()
-        Tmax_ = T * np.ones(max_len)
-
-        target_ = self._check_target(target, self.args.d, max_len)
-
-        # pre-compute indexes
-        c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
-
-        if target_ is None:
-            target_ = np.array([Solver_.Names.avg for i in range(max_len)])
-            target_[ix] = Solver_.Names.core
-
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
-        jx = np.intersect1d(ix, ja)
-
-        def _newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
-            self.jh.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
-
-            ts[js] = Tmax_[js]
-            tc[js] = tg[js]
-
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax_[ja] - ts[ja]
-            tc[jx] = (b[jx] * Tmax_[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
-
-            tc[jc] = Tmax_[jc]
-            ts[jc] = tg[jc]
-
-            return ts, tc
+        Tmax, newtheader = self._steady_intensity_header(T, target)
 
         def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
-            ts, tc = _newtheader(i, tg)
+            ts, tc = newtheader(i, tg)
             return self.balance(ts, tc)
 
         def morgan(i: floatArray, tg: floatArray) -> floatArray:
-            ts, tc = _newtheader(i, tg)
+            ts, tc = newtheader(i, tg)
             return self.morgan(ts, tc)
 
         # solve system
@@ -503,12 +516,12 @@ class Solver3T(Solver_):
             type(self.rc),
             type(self.pc),
         )
-        r = s.steady_intensity(Tmax_, tol=1.0, maxiter=8, return_power=False)
+        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
         x, y, cnt, err = quasi_newton_2d(
             balance,
             morgan,
             r[Solver_.Names.transit].values,
-            Tmax_,
+            Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
             delta_x=1.0e-03,
@@ -524,7 +537,7 @@ class Solver3T(Solver_):
             df["err"] = err
 
         if return_temp or return_power:
-            ts, tc = _newtheader(x, y)
+            ts, tc = newtheader(x, y)
             ta = self.average(ts, tc)
 
             if return_temp:
