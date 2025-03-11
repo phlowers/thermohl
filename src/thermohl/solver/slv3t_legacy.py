@@ -54,7 +54,7 @@ class Solver3TL(Solver3T):
                 Indices where surface diameter `d_` is greater than 0.
         """
         d = self.args.d * np.ones((self.args.max_len(),))
-        i = np.where(d > 0.0)[0]
+        i = np.nonzero(d > 0.0)[0]
         c = 1 / 13 * np.ones_like(d)
         c[i] = 1 / 21
         return c, i
@@ -163,120 +163,6 @@ class Solver3TL(Solver3T):
             df[Solver_.Names.ppre] = self.pc.value(x)
 
         return df
-
-    def transient_temperature(
-        self,
-        time: floatArray = np.array([]),
-        Ts0: Optional[floatArrayLike] = None,
-        Tc0: Optional[floatArrayLike] = None,
-        return_power: bool = False,
-    ) -> Dict[str, Any]:
-        """
-        Compute transient-state temperature.
-
-        Parameters
-        ----------
-        time : numpy.ndarray
-            A 1D array with times (in seconds) when the temperature needs to be
-            computed. The array must contain increasing values (undefined
-            behaviour otherwise).
-        Ts0 : float
-            Initial surface temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        return_power : bool, optional
-            Return power term values. The default is False.
-
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary with temperature and other results (depending on inputs)
-            in the keys.
-
-        """
-        raise NotImplementedError
-
-        # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
-        if N < 2:
-            raise ValueError()
-
-        # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
-
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            I=reshape(self.args.I, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
-        )
-        del (month, day, hour)
-
-        # shortcuts for time-loop
-        c = self.mgc[0]
-        tpl = 2.0 * np.pi * self.args.l
-        imc = 1.0 / (self.args.m * self.args.c)
-
-        # init
-        ts = np.zeros((N, n))
-        ta = np.zeros((N, n))
-        tc = np.zeros((N, n))
-        ts[0, :] = Ts0
-        tc[0, :] = Tc0
-        ta[0, :] = 0.5 * (ts[0, :] + tc[0, :])
-
-        # main time loop
-        for i in range(1, len(time)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
-            self.update()
-            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
-            mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
-            tc[i, :] = ta[i, :] + 0.5 * mrg
-            ts[i, :] = tc[i, :] - mrg
-
-        # save results
-        dr = {
-            Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
-            Solver_.Names.tcore: tc,
-        }
-
-        if return_power:
-            for power in Solver_.Names.powers():
-                dr[power] = np.zeros_like(ts)
-
-            for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
-
-        if n == 1:
-            keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
-
-        return dr
 
     def steady_intensity(
         self,
