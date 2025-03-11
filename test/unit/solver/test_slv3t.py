@@ -224,16 +224,17 @@ def test_profile_bim_avg_coeffs_multiple_values():
 
 # Tests Solver3T
 def test_morgan_coefficients_basic():
-    D = np.array([1.0])
-    d = np.array([0.5])
-    shape = (1,)
     solver = Solver3T()
+    solver.args.D = np.array([1.0])
+    solver.args.d = np.array([0.5])
+    solver.update()
+
     expected_c = np.array([0.268951])
     expected_D = np.array([1.0])
     expected_d = np.array([0.5])
     expected_i = np.array([0])
 
-    result_c, result_D, result_d, result_i = solver._morgan_coefficients(D, d, shape)
+    result_c, result_D, result_d, result_i = solver._morgan_coefficients()
 
     np.testing.assert_array_almost_equal(result_c, expected_c)
     np.testing.assert_array_almost_equal(result_D, expected_D)
@@ -242,16 +243,17 @@ def test_morgan_coefficients_basic():
 
 
 def test_morgan_coefficients_multiple_values():
-    D = np.array([1.0, 2.5])
-    d = np.array([0.5, 1.0])
-    shape = (2,)
     solver = Solver3T()
+    solver.args.D = np.array([1.0, 2.5])
+    solver.args.d = np.array([0.5, 1.0])
+    solver.update()
+
     expected_c = np.array([0.268951, 0.325468])
     expected_D = np.array([1.0, 2.5])
     expected_d = np.array([0.5, 1.0])
     expected_i = np.array([0, 1])
 
-    result_c, result_D, result_d, result_i = solver._morgan_coefficients(D, d, shape)
+    result_c, result_D, result_d, result_i = solver._morgan_coefficients()
 
     np.testing.assert_array_almost_equal(result_c, expected_c)
     np.testing.assert_array_almost_equal(result_D, expected_D)
@@ -260,16 +262,17 @@ def test_morgan_coefficients_multiple_values():
 
 
 def test_morgan_coefficients_edge_case_zero_d():
-    D = np.array([1.0])
-    d = np.array([0.0])
-    shape = (1,)
     solver = Solver3T()
+    solver.args.D = np.array([1.0])
+    solver.args.d = np.array([0.0])
+    solver.update()
+
     expected_c = np.array([0.5])
     expected_D = np.array([1.0])
     expected_d = np.array([0.0])
     expected_i = np.array([])
 
-    result_c, result_D, result_d, result_i = solver._morgan_coefficients(D, d, shape)
+    result_c, result_D, result_d, result_i = solver._morgan_coefficients()
 
     np.testing.assert_array_almost_equal(result_c, expected_c)
     np.testing.assert_array_almost_equal(result_D, expected_D)
@@ -278,16 +281,17 @@ def test_morgan_coefficients_edge_case_zero_d():
 
 
 def test_morgan_coefficients_edge_case_equal_D_and_d():
-    D = np.array([1.0])
-    d = np.array([1.0])
-    shape = (1,)
     solver = Solver3T()
+    solver.args.D = np.array([1.0])
+    solver.args.d = np.array([1.0])
+    solver.update()
+
     expected_c = np.array([nan])
     expected_D = np.array([1.0])
     expected_d = np.array([1.0])
     expected_i = np.array([0])
 
-    result_c, result_D, result_d, result_i = solver._morgan_coefficients(D, d, shape)
+    result_c, result_D, result_d, result_i = solver._morgan_coefficients()
 
     np.testing.assert_array_almost_equal(result_c, expected_c)
     np.testing.assert_array_almost_equal(result_D, expected_D)
@@ -296,16 +300,17 @@ def test_morgan_coefficients_edge_case_equal_D_and_d():
 
 
 def test_morgan_coefficients_large_values():
-    D = np.array([1e6])
-    d = np.array([1e5])
-    shape = (1,)
     solver = Solver3T()
+    solver.args.D = np.array([1e6])
+    solver.args.d = np.array([1e5])
+    solver.update()
+
     expected_c = np.array([0.476742])
     expected_D = np.array([1e6])
     expected_d = np.array([1e5])
     expected_i = np.array([0])
 
-    result_c, result_D, result_d, result_i = solver._morgan_coefficients(D, d, shape)
+    result_c, result_D, result_d, result_i = solver._morgan_coefficients()
 
     np.testing.assert_array_almost_equal(result_c, expected_c)
     np.testing.assert_array_almost_equal(result_D, expected_D)

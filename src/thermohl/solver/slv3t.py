@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple, Type, Optional, Dict, Any
+from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
 import pandas as pd
@@ -50,21 +50,23 @@ def _profile_bim_avg(
 
 class Solver3T(Solver_):
 
-    @staticmethod
+    def __init__(
+        self,
+        dic: Optional[dict[str, Any]] = None,
+        joule: Type[PowerTerm] = PowerTerm,
+        solar: Type[PowerTerm] = PowerTerm,
+        convective: Type[PowerTerm] = PowerTerm,
+        radiative: Type[PowerTerm] = PowerTerm,
+        precipitation: Type[PowerTerm] = PowerTerm,
+    ):
+        super().__init__(dic, joule, solar, convective, radiative, precipitation)
+        self.update()
+
     def _morgan_coefficients(
-        D: floatArrayLike, d: floatArrayLike, shape: Tuple[int, ...] = (1,)
+        self,
     ) -> Tuple[floatArray, floatArray, floatArray, intArray]:
         """
         Calculate coefficients for heat flux between surface and core in steady state.
-
-        Parameters:
-        -----------
-        D : float or numpy.ndarray
-            The diameter of the core.
-        d : float or numpy.ndarray
-            The diameter of the surface.
-        shape : Tuple[int, ...], optional
-            The shape of the output arrays, default is (1,).
 
         Returns:
         --------
@@ -78,28 +80,12 @@ class Solver3T(Solver_):
             - i : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        c = 0.5 * np.ones(shape)
-        D_ = D * np.ones_like(c)
-        d_ = d * np.ones_like(c)
-        i = np.where(d_ > 0.0)[0]
-        c[i] -= (d_[i] ** 2 / (D_[i] ** 2 - d_[i] ** 2)) * np.log(D_[i] / d_[i])
-        # if len(shape) == 1 and shape[0] == 1:
-        #     return c[0], D_[0], d_[0], i[0]
-        # else:
-        #     return c, D_, d_, i
-        return c, D_, d_, i
-
-    def __init__(
-        self,
-        dic: Optional[dict[str, Any]] = None,
-        joule: Type[PowerTerm] = PowerTerm,
-        solar: Type[PowerTerm] = PowerTerm,
-        convective: Type[PowerTerm] = PowerTerm,
-        radiative: Type[PowerTerm] = PowerTerm,
-        precipitation: Type[PowerTerm] = PowerTerm,
-    ):
-        super().__init__(dic, joule, solar, convective, radiative, precipitation)
-        self.update()
+        c = 0.5 * np.ones((self.args.max_len(),))
+        D = self.args.D * np.ones_like(c)
+        d = self.args.d * np.ones_like(c)
+        i = np.nonzero(d > 0.0)[0]
+        c[i] -= (d[i] ** 2 / (D[i] ** 2 - d[i] ** 2)) * np.log(D[i] / d[i])
+        return c, D, d, i
 
     def update(self) -> None:
         """
@@ -120,11 +106,29 @@ class Solver3T(Solver_):
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
 
-        self.mgc = Solver3T._morgan_coefficients(
-            self.args.D, self.args.d, (self.args.max_len(),)
-        )
+        self.mgc = self._morgan_coefficients()
 
         self.args.compress()
+
+    def average(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
+        """
+        Compute average temperature given surface and core temperature.
+
+        This formula is based on analytical solution in steady-state mode. For
+        single material, the formula reduces itself to an usual mean; for
+        bi-material conductors, we have geometrical terms to take into account.
+
+        Parameters:
+        ts (numpy.ndarray): Array of surface temperatures.
+        tc (numpy.ndarray): Array of core temperatures.
+
+        Returns:
+        float or numpy.ndarray: Array of average temperatures.
+        """
+        ta = 0.5 * (ts + tc)
+        _, D, d, ix = self.mgc
+        ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
+        return ta
 
     def joule(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -138,15 +142,11 @@ class Solver3T(Solver_):
         float or numpy.ndarray: The calculated Joule heating values.
 
         Notes:
-        - The function computes the average temperature `temperature` as the mean of `ts` and `tc`.
-        - It then adjusts the temperature at specific indices `ix` using a bimodal profile average.
-        - Finally, it returns the Joule heating values based on the adjusted temperatures.
+        - The function computes the average temperature `temperature`.
+        - Returns the Joule heating values based on the adjusted temperatures.
         """
-        # temperature is average temperature
-        temperature = 0.5 * (ts + tc)
-        c, D, d, ix = self.mgc
-        temperature[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
-        return self.jh.value(temperature)
+        ta = self.average(ts, tc)
+        return self.jh.value(ta)
 
     def balance(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -238,9 +238,7 @@ class Solver3T(Solver_):
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
         # format output
-        z = 0.5 * (x + y)
-        c, D, d, ix = self.mgc
-        z[ix] = _profile_bim_avg(x[ix], y[ix], 0.5 * d[ix], 0.5 * D[ix])
+        z = self.average(x, y)
         df = pd.DataFrame(
             {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
         )
@@ -339,7 +337,7 @@ class Solver3T(Solver_):
             for k in de.keys():
                 self.args[k] = de[k][i, :]
             self.update()
-            bal = self.balance(ts[i, :], tc[i, :])
+            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
             mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
             tc[i, :] = ta[i, :] + al * mrg
@@ -373,7 +371,7 @@ class Solver3T(Solver_):
         return dr
 
     @staticmethod
-    def _check_target(target, max_len):
+    def _check_target(target, d, max_len):
         """
         Validates and processes the target temperature input.
 
@@ -392,7 +390,13 @@ class Solver3T(Solver_):
         """
         # check target
         if target == "auto":
-            target_ = None
+            d_ = d * np.ones(max_len)
+            target_ = np.array(
+                [
+                    Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
+                    for i in range(max_len)
+                ]
+            )
         elif isinstance(target, str):
             if target not in [
                 Solver_.Names.surf,
@@ -418,6 +422,45 @@ class Solver3T(Solver_):
                     raise ValueError()
             target_ = np.array(target)
         return target_
+
+    def _steady_intensity_header(
+        self, T: floatArrayLike, target: strListLike
+    ) -> Tuple[np.ndarray, Callable]:
+        """Format input for ampacity solver."""
+
+        max_len = self.args.max_len()
+        Tmax = T * np.ones(max_len)
+        target_ = self._check_target(target, self.args.d, max_len)
+
+        # pre-compute indexes
+        c, D, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
+
+        js = np.nonzero(target_ == Solver_.Names.surf)[0]
+        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
+        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        jx = np.intersect1d(ix, ja)
+
+        # get correct input for quasi-newton solver
+        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            ts = np.ones_like(tg) * np.nan
+            tc = np.ones_like(tg) * np.nan
+
+            ts[js] = Tmax[js]
+            tc[js] = tg[js]
+
+            ts[ja] = tg[ja]
+            tc[ja] = 2 * Tmax[ja] - ts[ja]
+            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
+
+            tc[jc] = Tmax[jc]
+            ts[jc] = tg[jc]
+
+            return ts, tc
+
+        return Tmax, newtheader
 
     def steady_intensity(
         self,
@@ -453,48 +496,14 @@ class Solver3T(Solver_):
             DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
 
-        max_len = self.args.max_len()
-        Tmax_ = T * np.ones(max_len)
-
-        target_ = self._check_target(target, max_len)
-
-        # pre-compute indexes
-        c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
-
-        if target_ is None:
-            target_ = np.array([Solver_.Names.avg for i in range(max_len)])
-            target_[ix] = Solver_.Names.core
-
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
-        jx = np.intersect1d(ix, ja)
-
-        def _newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
-            self.jh.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
-
-            ts[js] = Tmax_[js]
-            tc[js] = tg[js]
-
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax_[ja] - ts[ja]
-            tc[jx] = (b[jx] * Tmax_[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
-
-            tc[jc] = Tmax_[jc]
-            ts[jc] = tg[jc]
-
-            return ts, tc
+        Tmax, newtheader = self._steady_intensity_header(T, target)
 
         def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
-            ts, tc = _newtheader(i, tg)
+            ts, tc = newtheader(i, tg)
             return self.balance(ts, tc)
 
         def morgan(i: floatArray, tg: floatArray) -> floatArray:
-            ts, tc = _newtheader(i, tg)
+            ts, tc = newtheader(i, tg)
             return self.morgan(ts, tc)
 
         # solve system
@@ -506,12 +515,12 @@ class Solver3T(Solver_):
             type(self.rc),
             type(self.pc),
         )
-        r = s.steady_intensity(Tmax_, tol=1.0, maxiter=8, return_power=False)
+        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
         x, y, cnt, err = quasi_newton_2d(
             balance,
             morgan,
             r[Solver_.Names.transit].values,
-            Tmax_,
+            Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
             delta_x=1.0e-03,
@@ -527,9 +536,8 @@ class Solver3T(Solver_):
             df["err"] = err
 
         if return_temp or return_power:
-            ts, tc = _newtheader(x, y)
-            ta = 0.5 * (ts + tc)
-            ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
+            ts, tc = newtheader(x, y)
+            ta = self.average(ts, tc)
 
             if return_temp:
                 df[Solver_.Names.tsurf] = ts
@@ -537,7 +545,7 @@ class Solver3T(Solver_):
                 df[Solver_.Names.tcore] = tc
 
             if return_power:
-                df[Solver_.Names.pjle] = self.joule(ts, tc)
+                df[Solver_.Names.pjle] = self.jh.value(ta)
                 df[Solver_.Names.psol] = self.sh.value(ts)
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)
