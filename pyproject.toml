@@ -42,6 +42,7 @@ examples = [
 ] # openpyxl, seaborn
 test = [
     "pytest ~= 7.2.2",
+    "pytest-cov == 6.0.0",
     "pylint ~= 3.3.1"
 ]
 lint = [
@@ -54,9 +55,22 @@ dev = [
 
 [project.urls]
 "Homepage" = "https://github.com/phlowers/thermohl"
+"Issues" = "https://github.com/phlowers/thermohl/issues"
 
 [tool.mypy]
 strict = true
 ignore_missing_imports = true
 warn_return_any = false
 #plugins = "numpy.typing.mypy_plugin"
+
+[tool.coverage.run]
+branch = true
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_also = [
+    # Don't complain about abstract methods, they aren't run:
+    "@(abc\\.)?abstractmethod",
+    ]
+
+ignore_errors = true

@@ -9,6 +9,11 @@ SPDX-License-Identifier: MPL-2.0
 
 # ThermOHL
 
+[![MPL-2.0 License](https://img.shields.io/badge/license-MPL_2.0-blue.svg)](https://www.mozilla.org/en-US/MPL/2.0/)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=coverage)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
+
 _**Thermohl**_ is a python package allowing the computation of the temperature in overhead conductors for given
 transit intensity and environment parameters, or to compute the maximum possible transit intensity given a maximum
 temperature and environment parameters. A collection of models based on the Energy Balance Principle are available.
