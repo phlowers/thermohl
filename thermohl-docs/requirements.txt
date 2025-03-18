@@ -5,14 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-*~
-__pycache__
-.eggs
-*.egg-info
-.idea
-.spyproject
-.venv
-build
-dist
-doc/_build
-/thermohl-docs/site/
+mkdocs
+mkdocs-material
+mkdocstrings[python]
+markdown_extensions
+markdown-include
