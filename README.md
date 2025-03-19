@@ -54,31 +54,24 @@ Install the development dependencies and program scripts via `pip install -e .[d
 Build a new wheel via `python -m build --wheel`.
 This build a wheel in newly-created dist/ directory
 
-## Building the documentation
+## Building the documentation with mkdocs
 
-First, make sure you have sphinx and the Readthedocs theme installed.
+First, make sure you have mkdocs and the Readthedocs theme installed.
 
 If you use pip, open a terminal and enter the following commands:
 
 ```shell script
-pip install -e .[doc]
+cd thermohl-docs
+pip install -r requirements.txt
 ```
 
-If you use conda, open an Anaconda Powershell Prompt and enter the following commands:
+Then, in the same terminal, build the doc with:
 
-```shell script
-conda install sphinx
-conda install sphinx_rtd_theme
-```
+* `mkdocs serve` - Start the live-reloading docs server.
+* `mkdocs build` - Build the documentation site.
+* `mkdocs -h` - Print help message and exit.
 
-Then, in the same terminal or anaconda prompt, build the doc with:
-
-```shell script
-cd doc
-make html
-```
-
-The documentation can then be accessed from `doc/_build/html/index.html`.
+The documentation can then be accessed locally from http://127.0.0.1:8000.
 
 ## Simple usage
 
@@ -87,7 +80,7 @@ floats or 1D `numpy.ndarray` of integers or floats. It is important to note that
 Missing or `None` values in the input dictionary are replaced with a default value, available using
 `solver.default_values()`, which are read from `thermohl/default_values.yaml`.
 
-### Example 1:
+### Example 1
 
 This example uses the IEEE model with default values to compute the surface temperature (°C) of a conductor
 in steady regime along with the corresponding power terms (W.m<sup>-1</sup>) in the Energy Balance Principle.
@@ -107,7 +100,7 @@ Results from the solver are returned in a `pandas.DataFrame`:
 0  27.22858  0.273048  9.64051        6.5819     3.331658              0.0
 ```
 
-### Example 2:
+### Example 2
 
 This example uses the IEEE model to compute the maximum current intensity (A) that can be used in a conductor without
 exceeding a specified maximal temperature (°C), along with the corresponding power terms (W.m<sup>-1</sup>)

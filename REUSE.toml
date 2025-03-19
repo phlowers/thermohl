@@ -6,3 +6,8 @@ precedence = "aggregate"
 SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
 SPDX-License-Identifier = "MPL-2.0"
 
+[[annotations]]
+path = ["thermohl-docs/docs/_static/logos/*.ico", "thermohl-docs/docs/_static/logos/*.png"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
+SPDX-License-Identifier = "MPL-2.0"

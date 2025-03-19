@@ -1,0 +1,106 @@
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+site_name: ThermOHL
+site_url : http://thermohl.readthedocs.com
+repo_url: https://github.com/phlowers/thermohl
+copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
+
+theme:
+  name: material
+  palette:
+    # Palette toggle for light mode
+    - scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    # Palette toggle for dark mode
+    - scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+      - navigation.tabs # Force horizontal nav
+      - toc.integrate # Display Table of Content on the left of the screen
+      - palette.toggle # Display toggle button to switch bright/dark mode
+      - navigation.footer # Display footer nav
+
+  logo: _static/logos/phlowers_64x64.ico
+  favicon: _static/logos/phlowers_32x32.ico
+
+nav:
+  - Home: index.md
+  - Getting Started: getting-started.md
+  - Developer Guide:
+      - Models:
+          - Convective Cooling: docstring/Models/convective_cooling.md
+          - Power Term: docstring/Models/power_term.md
+          - Radiative Cooling: docstring/Models/radiative_cooling.md
+          - Solar heating: docstring/Models/solar_heating.md
+          - CIGRE:
+            - Air: docstring/Models/CIGRE/air.md
+            - Convective cooling: docstring/Models/CIGRE/convective_cooling.md
+            - Joule Heating: docstring/Models/CIGRE/joule_heating.md
+            - Radiative Cooling: docstring/Models/CIGRE/radiative_cooling.md
+            - Solar Heating: docstring/Models/CIGRE/solar_heating.md
+          - IEEE:
+            - Air: docstring/Models/IEEE/air.md
+            - Convective cooling: docstring/Models/IEEE/convective_cooling.md
+            - Joule Heating: docstring/Models/IEEE/joule_heating.md
+            - Radiative Cooling: docstring/Models/IEEE/radiative_cooling.md
+            - Solar Heating: docstring/Models/IEEE/solar_heating.md
+          - RTE:
+            - Air: docstring/Models/RTE/air.md
+            - Convective cooling: docstring/Models/RTE/convective_cooling.md
+            - Joule Heating: docstring/Models/RTE/joule_heating.md
+            - Radiative Cooling: docstring/Models/RTE/radiative_cooling.md
+            - Solar Heating: docstring/Models/RTE/solar_heating.md
+          - OLLA:
+            - Air: docstring/Models/OLLA/air.md
+            - Convective cooling: docstring/Models/OLLA/convective_cooling.md
+            - Joule Heating: docstring/Models/OLLA/joule_heating.md
+            - Radiative Cooling: docstring/Models/OLLA/radiative_cooling.md
+            - Solar Heating: docstring/Models/OLLA/solar_heating.md
+      - Solvers:
+          - Solver Base: docstring/Solvers/solver_base.md
+          - Solver 1 temperature: docstring/Solvers/Solver1T/solver_1_temperature.md
+          - Solver 3 temperature: docstring/Solvers/Solver3T/solver_3_temperature.md
+
+
+
+plugins:
+  - search
+  - markdownextradata # Used to include README.md in getting-started.md file
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: true
+
+markdown_extensions:
+  - markdown_include.include:
+      base_path: ..
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/phlowers
+      name: phlowers on Github
+    - icon: fontawesome/brands/x-twitter
+      link: https://x.com/rte_france
+      name: RTE France on Twitter
+    - icon: fontawesome/brands/youtube
+      link: https://www.youtube.com/user/myRTEtube
+      name: RTE France on Youtube
+    - icon: fontawesome/brands/linkedin
+      link: https://www.linkedin.com/company/rte_245681
+      name: RTE France on LinkedIn
+    - icon: fontawesome/brands/instagram
+      link: https://www.instagram.com/rte_france
+      name: RTE France on Instagram
