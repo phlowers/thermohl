@@ -10,7 +10,7 @@ from typing import Optional, Any
 import numpy as np
 
 from thermohl import floatArrayLike, intArrayLike
-from thermohl.power import _SRad, SolarHeatingBase
+from thermohl.power import SolarRadiation, SolarHeatingBase
 
 
 class SolarHeating(SolarHeatingBase):
@@ -62,7 +62,7 @@ class SolarHeating(SolarHeatingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        est = _SRad(
+        est = SolarRadiation(
             [
                 -4.22391e01,
                 +6.38044e01,

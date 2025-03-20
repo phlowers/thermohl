@@ -15,7 +15,7 @@ class RadiativeCooling(RadiativeCoolingBase):
 
     def __init__(
         self,
-        Ta: floatArrayLike,
+        Tambient: floatArrayLike,
         D: floatArrayLike,
         epsilon: floatArrayLike,
         sigma: float = 5.67e-08,
@@ -25,7 +25,7 @@ class RadiativeCooling(RadiativeCoolingBase):
 
         Parameters
         ----------
-        Ta : float or np.ndarray
+        Tambient : float or np.ndarray
             Ambient temperature (C).
         D : float or np.ndarray
             External diameter (m).
@@ -40,5 +40,5 @@ class RadiativeCooling(RadiativeCoolingBase):
 
         """
         super().__init__(
-            Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273.0, **kwargs
+            Tambient=Tambient, D=D, epsilon=epsilon, sigma=sigma, zerok=273.0, **kwargs
         )

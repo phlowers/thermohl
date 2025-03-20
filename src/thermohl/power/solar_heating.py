@@ -13,42 +13,41 @@ from thermohl import floatArrayLike, intArrayLike, sun
 from thermohl.power.power_term import PowerTerm
 
 
-class _SRad:
+class SolarRadiation:
 
     def __init__(self, clean: List[float], indus: List[float]):
         self.clean = clean
         self.indus = indus
 
-    def catm(self, x: floatArrayLike, trb: floatArrayLike) -> floatArrayLike:
+    def atmosphere_coefficients(self, solar_altitude: floatArrayLike, turbidity: floatArrayLike) -> floatArrayLike:
         """Compute coefficient for atmosphere turbidity."""
-        omt = 1.0 - trb
-        A = omt * self.clean[6] + trb * self.indus[6]
-        B = omt * self.clean[5] + trb * self.indus[5]
-        C = omt * self.clean[4] + trb * self.indus[4]
-        D = omt * self.clean[3] + trb * self.indus[3]
-        E = omt * self.clean[2] + trb * self.indus[2]
-        F = omt * self.clean[1] + trb * self.indus[1]
-        G = omt * self.clean[0] + trb * self.indus[0]
-        return A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+        A = (1.0 - turbidity) * self.clean[6] + turbidity * self.indus[6]
+        B = (1.0 - turbidity) * self.clean[5] + turbidity * self.indus[5]
+        C = (1.0 - turbidity) * self.clean[4] + turbidity * self.indus[4]
+        D = (1.0 - turbidity) * self.clean[3] + turbidity * self.indus[3]
+        E = (1.0 - turbidity) * self.clean[2] + turbidity * self.indus[2]
+        F = (1.0 - turbidity) * self.clean[1] + turbidity * self.indus[1]
+        G = (1.0 - turbidity) * self.clean[0] + turbidity * self.indus[0]
+        return A * solar_altitude**6 + B * solar_altitude**5 + C * solar_altitude**4 + D * solar_altitude**3 + E * solar_altitude**2 + F * solar_altitude**1 + G
 
     def __call__(
         self,
-        lat: floatArrayLike,
-        alt: floatArrayLike,
-        azm: floatArrayLike,
+        latitude: floatArrayLike,
+        altitude: floatArrayLike,
+        line_azimut: floatArrayLike,
         trb: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        sa = sun.solar_altitude(lat, month, day, hour)
-        sz = sun.solar_azimuth(lat, month, day, hour)
-        th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-        K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-        Q = self.catm(np.rad2deg(sa), trb)
-        sr = K * Q * np.sin(th)
-        return np.where(sr > 0.0, sr, 0.0)
+        solar_altitude = sun.solar_altitude(latitude, month, day, hour)
+        solar_azimut = sun.solar_azimuth(latitude, month, day, hour)
+        theta = np.arccos(np.cos(solar_altitude) * np.cos(solar_azimut - line_azimut))
+        K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude ** 2
+        Q = self.atmosphere_coefficients(np.rad2deg(solar_altitude), trb)
+        solar_radiation = K * Q * np.sin(theta)
+        return np.where(solar_radiation > 0.0, solar_radiation, 0.0)
 
 
 class SolarHeatingBase(PowerTerm):
@@ -65,7 +64,7 @@ class SolarHeatingBase(PowerTerm):
         hour: floatArrayLike,
         D: floatArrayLike,
         alpha: floatArrayLike,
-        est: _SRad,
+        est: SolarRadiation,
         srad: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):

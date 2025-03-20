@@ -13,9 +13,9 @@ from thermohl.power.radiative_cooling import RadiativeCoolingBase
 
 radiative_cooling_instances = [
     RadiativeCoolingBase(
-        Ta=np.array([25.0, 15.2]), D=np.array([1, 1.5]), epsilon=np.array([0.9, 0.8])
+        Tambient=np.array([25.0, 15.2]), D=np.array([1, 1.5]), epsilon=np.array([0.9, 0.8])
     ),
-    RadiativeCoolingBase(Ta=25, D=1, epsilon=0.9),
+    RadiativeCoolingBase(Tambient=25, D=1, epsilon=0.9),
 ]
 
 
@@ -49,7 +49,7 @@ def test_celsius2kelvin_array(radiative_cooling):
 
 
 def test_celsius2kelvin_with_custom_zerok():
-    radiative_cooling = RadiativeCoolingBase(Ta=25, D=1, epsilon=0.9, zerok=0)
+    radiative_cooling = RadiativeCoolingBase(Tambient=25, D=1, epsilon=0.9, zerok=0)
 
     assert radiative_cooling._celsius2kelvin(0) == 0
     assert radiative_cooling._celsius2kelvin(100) == 100

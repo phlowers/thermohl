@@ -9,7 +9,7 @@ import numpy as np
 import pytest
 
 from thermohl import sun
-from thermohl.power import _SRad
+from thermohl.power import SolarRadiation
 from thermohl.power.ieee import SolarHeating
 
 
@@ -34,7 +34,7 @@ def srad():
         -4.3446e-06,
         +1.3236e-08,
     ]
-    return _SRad(clean, indus)
+    return SolarRadiation(clean, indus)
 
 
 def test_srad_catm_scalar(srad):
@@ -50,7 +50,7 @@ def test_srad_catm_scalar(srad):
     G = omt * srad.clean[0] + trb * srad.indus[0]
     expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_coefficients(x, trb)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -68,7 +68,7 @@ def test_srad_catm_array(srad):
     G = omt * srad.clean[0] + trb * srad.indus[0]
     expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_coefficients(x, trb)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -85,7 +85,7 @@ def test_srad_call_scalar(srad):
     sz = sun.solar_azimuth(lat, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azm))
     K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_coefficients(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
@@ -106,7 +106,7 @@ def test_srad_call_array(srad):
     sz = sun.solar_azimuth(lat, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azm))
     K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_coefficients(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 

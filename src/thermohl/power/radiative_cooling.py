@@ -23,7 +23,7 @@ class RadiativeCoolingBase(PowerTerm):
 
     def __init__(
         self,
-        Ta: floatArrayLike,
+        Tambient: floatArrayLike,
         D: floatArrayLike,
         epsilon: floatArrayLike,
         sigma: float = 5.67e-08,
@@ -34,7 +34,7 @@ class RadiativeCoolingBase(PowerTerm):
 
         Parameters
         ----------
-        Ta : float or np.ndarray
+        Tambient : float or np.ndarray
             Ambient temperature (C).
         D : float or np.ndarray
             External diameter (m).
@@ -51,7 +51,7 @@ class RadiativeCoolingBase(PowerTerm):
 
         """
         self.zerok = zerok
-        self.Ta = self._celsius2kelvin(Ta)
+        self.Tambient = self._celsius2kelvin(Tambient)
         self.D = D
         self.epsilon = epsilon
         self.sigma = sigma

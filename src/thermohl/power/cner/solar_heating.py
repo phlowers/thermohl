@@ -8,7 +8,7 @@
 from typing import Optional, Any
 
 from thermohl import floatArrayLike, intArrayLike
-from thermohl.power import SolarHeatingBase, _SRad
+from thermohl.power import SolarHeatingBase, SolarRadiation
 
 
 class SolarHeating(SolarHeatingBase):
@@ -54,7 +54,7 @@ class SolarHeating(SolarHeatingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        est = _SRad(
+        est = SolarRadiation(
             [-42.0, +63.8, -1.922, 0.03469, -3.61e-04, +1.943e-06, -4.08e-09],
             [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
         )
