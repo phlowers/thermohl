@@ -10,3 +10,4 @@ mkdocs-material
 mkdocstrings[python]
 markdown_extensions
 markdown-include
+mkdocs-markdownextradata-plugin

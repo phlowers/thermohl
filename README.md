@@ -40,7 +40,7 @@ contribution to the total variance of the output.
 
 To install the package using pip, execute the following command:
 
-```shell script
+```
 python -m pip install thermohl@git+https://github.com/phlowers/thermohl
 ```
 
@@ -60,7 +60,7 @@ First, make sure you have mkdocs and the Readthedocs theme installed.
 
 If you use pip, open a terminal and enter the following commands:
 
-```shell script
+```
 cd thermohl-docs
 pip install -r requirements.txt
 ```

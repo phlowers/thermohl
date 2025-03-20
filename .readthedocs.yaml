@@ -17,4 +17,4 @@ python:
     - requirements: thermohl-docs/requirements.txt
 
 mkdocs:
-  configuration: thermohl-docs/mkdocs.yaml
+  configuration: thermohl-docs/mkdocs.yml

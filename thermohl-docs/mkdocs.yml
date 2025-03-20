@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 site_name: ThermOHL
-site_url : http://thermohl.readthedocs.com
+site_url : http://phlowers.readthedocs.io/projects/thermohl
 repo_url: https://github.com/phlowers/thermohl
 copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
 
@@ -78,14 +78,14 @@ plugins:
   - mkdocstrings:
       handlers:
         python:
+          paths: [../src] # Path to find sources in order to build docstring documentation
           options:
-            docstring_style: google
             docstring_options:
               ignore_init_summary: true
 
 markdown_extensions:
   - markdown_include.include:
-      base_path: ..
+      base_path: . # Base path to find README.md
 
 extra:
   social:
