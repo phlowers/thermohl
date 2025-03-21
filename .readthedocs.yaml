@@ -14,7 +14,10 @@ build:
 
 python:
   install:
-    - requirements: thermohl-docs/requirements.txt
+    - method: pip
+      path: .
+      extra_requirements:
+        - docs
 
 mkdocs:
   configuration: thermohl-docs/mkdocs.yml

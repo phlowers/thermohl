@@ -40,8 +40,8 @@ contribution to the total variance of the output.
 
 To install the package using pip, execute the following command:
 
-```
-python -m pip install thermohl@git+https://github.com/phlowers/thermohl
+```shell
+    python -m pip install thermohl@git+https://github.com/phlowers/thermohl
 ```
 
 ### Using conda
@@ -60,9 +60,9 @@ First, make sure you have mkdocs and the Readthedocs theme installed.
 
 If you use pip, open a terminal and enter the following commands:
 
-```
-cd thermohl-docs
-pip install -r requirements.txt
+```shell
+    cd thermohl-docs
+    pip install -r requirements.txt
 ```
 
 Then, in the same terminal, build the doc with:
