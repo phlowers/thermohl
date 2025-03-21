@@ -44,14 +44,16 @@ To install the package using pip, execute the following command:
     python -m pip install thermohl@git+https://github.com/phlowers/thermohl
 ```
 
-### Using conda
-
-(not available yet)
-
 ## Development
-Install the development dependencies and program scripts via `pip install -e .[dev]`.
+Install the development dependencies and program scripts via 
+```shell
+  pip install -e .[dev]
+```
 
-Build a new wheel via `python -m build --wheel`.
+Build a new wheel via 
+```shell
+  python -m build --wheel
+```
 This build a wheel in newly-created dist/ directory
 
 ## Building the documentation with mkdocs
@@ -60,9 +62,8 @@ First, make sure you have mkdocs and the Readthedocs theme installed.
 
 If you use pip, open a terminal and enter the following commands:
 
-```shell
-    cd thermohl-docs
-    pip install -r requirements.txt
+```shell 
+  pip install -e .[docs]
 ```
 
 Then, in the same terminal, build the doc with:
