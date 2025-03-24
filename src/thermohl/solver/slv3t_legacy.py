@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple, Type, Optional, Any, Callable
+from typing import Tuple, Type, Optional, Any, Callable, Final
 
 import numpy as np
 
@@ -33,28 +33,24 @@ class Solver3TL(Solver3T):
         """
         Calculate coefficients for heat flux between surface and core in steady state.
 
-        Parameters:
-        -----------
-        D : float or numpy.ndarray
-            The diameter of the core.
-        d : float or numpy.ndarray
-            The diameter of the surface.
-        shape : Tuple[int, ...], optional
-            The shape of the output arrays, default is (1,).
-
         Returns:
         --------
         Tuple[numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[int]]
-            - c : numpy.ndarray[float]
+            - heat_flux_coefficients : numpy.ndarray[float]
                 Coefficient array for heat flux.
-            - i : numpy.ndarray[int]
-                Indices where surface diameter `d_` is greater than 0.
+            - indices_non_zero_diameter : numpy.ndarray[int]
+                Indices where core diameter is greater than 0.
+                When conductors are uniform, core diameter is equal to 0.0.
+                When conductors are bimetallic, core diameter is greater than 0.0.
         """
-        d = self.args.d * np.ones((self.args.max_len(),))
-        i = np.nonzero(d > 0.0)[0]
-        c = 1 / 13 * np.ones_like(d)
-        c[i] = 1 / 21
-        return c, i
+        UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
+        BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
+
+        core_diameter_array = self.args.d * np.ones((self.args.max_len(),))
+        indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
+        heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(core_diameter_array)
+        heat_flux_coefficients[indices_non_zero_diameter] = BIMETALLIC_CONDUCTOR_COEFFICIENT
+        return heat_flux_coefficients, indices_non_zero_diameter
 
     def average(self, ts, tc):
         """
@@ -83,8 +79,8 @@ class Solver3TL(Solver3T):
         Returns:
         numpy.ndarray: Resulting array after applying the Morgan function.
         """
-        c = self.mgc[0]
-        return (tc - ts) - c * self.joule(ts, tc)
+        morgan_coefficient = self.mgc[0]
+        return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: strListLike
@@ -96,9 +92,9 @@ class Solver3TL(Solver3T):
         target_ = self._check_target(target, self.args.d, max_len)
 
         # pre-compute indexes
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]
+        average_indices = np.nonzero(target_ == Solver_.Names.avg)[0]
+        core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
             self.args.I = i
@@ -106,14 +102,14 @@ class Solver3TL(Solver3T):
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
 
-            ts[js] = Tmax[js]
-            tc[js] = tg[js]
+            ts[surface_indices] = Tmax[surface_indices]
+            tc[surface_indices] = tg[surface_indices]
 
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax[ja] - ts[ja]
+            ts[average_indices] = tg[average_indices]
+            tc[average_indices] = 2 * Tmax[average_indices] - ts[average_indices]
 
-            tc[jc] = Tmax[jc]
-            ts[jc] = tg[jc]
+            tc[core_indices] = Tmax[core_indices]
+            ts[core_indices] = tg[core_indices]
 
             return ts, tc
 
