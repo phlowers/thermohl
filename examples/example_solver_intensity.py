@@ -8,11 +8,9 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # -*- coding: utf-8 -*-
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import scipy.stats
 
 from thermohl import solver
 
@@ -44,7 +42,6 @@ def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
 
 
 if __name__ == "__main__":
-
     import matplotlib
 
     matplotlib.use("TkAgg")

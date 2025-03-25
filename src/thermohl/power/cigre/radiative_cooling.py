@@ -12,7 +12,6 @@ from thermohl.power import RadiativeCoolingBase
 
 
 class RadiativeCooling(RadiativeCoolingBase):
-
     def __init__(
         self,
         Ta: floatArrayLike,

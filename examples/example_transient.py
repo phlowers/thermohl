@@ -7,15 +7,12 @@
 
 # !/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from thermohl import solver
 
 if __name__ == "__main__":
-
     import matplotlib
 
     matplotlib.use("TkAgg")

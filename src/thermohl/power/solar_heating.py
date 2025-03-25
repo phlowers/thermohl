@@ -14,7 +14,6 @@ from thermohl.power.power_term import PowerTerm
 
 
 class _SRad:
-
     def __init__(self, clean: List[float], indus: List[float]):
         self.clean = clean
         self.indus = indus

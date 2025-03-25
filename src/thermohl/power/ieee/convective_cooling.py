@@ -7,7 +7,6 @@
 
 from typing import Any
 
-import numpy as np
 
 from thermohl import floatArrayLike
 from thermohl.power.convective_cooling import ConvectiveCoolingBase

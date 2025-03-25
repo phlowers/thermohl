@@ -7,9 +7,9 @@
 
 """Utility functions to compute different sun positions from a point on earth.
 
-    These positions usually depend on the point latitude and the time. The sun
-    position is then used to estimate the solar radiation in CIGRE and IEEE
-    models.
+These positions usually depend on the point latitude and the time. The sun
+position is then used to estimate the solar radiation in CIGRE and IEEE
+models.
 """
 
 import numpy as np
