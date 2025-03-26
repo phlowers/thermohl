@@ -5,13 +5,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Tuple, Type, Optional, Any, Callable, Final
+from typing import Tuple, Type, Optional, Any, Callable, Final, Dict
 
 import numpy as np
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_
+from thermohl.solver.base import Solver as Solver_, Args
 from thermohl.solver.slv3t import Solver3T
 
 
@@ -48,8 +48,12 @@ class Solver3TL(Solver3T):
 
         core_diameter_array = self.args.d * np.ones((self.args.max_len(),))
         indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
-        heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(core_diameter_array)
-        heat_flux_coefficients[indices_non_zero_diameter] = BIMETALLIC_CONDUCTOR_COEFFICIENT
+        heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(
+            core_diameter_array
+        )
+        heat_flux_coefficients[indices_non_zero_diameter] = (
+            BIMETALLIC_CONDUCTOR_COEFFICIENT
+        )
         return heat_flux_coefficients, indices_non_zero_diameter
 
     def average(self, ts, tc):
@@ -114,3 +118,79 @@ class Solver3TL(Solver3T):
             return ts, tc
 
         return Tmax, newtheader
+
+    def _morgan_transient(self):
+        """Morgan coefficients for transient temperature."""
+        c1, _ = self.mgc
+        c2 = 0.5 * np.ones_like(c1)
+        return c1, c2
+
+    def transient_temperature_legacy(
+        self,
+        time: floatArray = np.array([]),
+        Ts0: Optional[floatArrayLike] = None,
+        Tc0: Optional[floatArrayLike] = None,
+        tau: float = 500.0,
+        return_power: bool = False,
+    ) -> Dict[str, Any]:
+
+        # get sizes (n for input dict entries, N for time)
+        n = self.args.max_len()
+        N = len(time)
+        if N < 2:
+            raise ValueError()
+
+        # get initial temperature
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
+
+        # shortcuts for time-loop
+        imc = 1.0 / (self.args.m * self.args.c)
+
+        # init
+        ts = np.zeros((N, n))
+        ta = np.zeros((N, n))
+        tc = np.zeros((N, n))
+        dT = np.zeros((N, n))
+
+        ts[0, :] = Ts0
+        tc[0, :] = Tc0
+        ta[0, :] = self.average(ts[0, :], tc[0, :])
+        dT[0, :] = tc[0, :] - ts[0, :]
+
+        for i in range(1, len(time)):
+            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
+            dti = time[i] - time[i - 1]
+            ta[i, :] = ta[i - 1, :] + dti * imc * bal
+            dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
+                dti / tau * self.mgc[0] * self.jh.value(ta[i, :])
+            )
+            tc[i, :] = ta[i, :] + 0.5 * dT[i, :]
+            ts[i, :] = ta[i, :] - 0.5 * dT[i, :]
+
+        # save results
+        dr = {
+            Solver_.Names.time: time,
+            Solver_.Names.tsurf: ts,
+            Solver_.Names.tavg: ta,
+            Solver_.Names.tcore: tc,
+        }
+
+        if return_power:
+            for power in Solver_.Names.powers():
+                dr[power] = np.zeros_like(ts)
+
+            for i in range(len(time)):
+                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+
+        if n == 1:
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
+                dr[k] = dr[k][:, 0]
+
+        return dr

@@ -17,9 +17,7 @@ from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
 
-def _profile_mom(
-    ts: floatArrayLike, tc: floatArrayLike, r: floatArrayLike, re: floatArrayLike
-) -> floatArrayLike:
+def _profile_mom(ts: float, tc: float, r: floatArrayLike, re: float) -> floatArrayLike:
     """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
     return ts + (tc - ts) * (1.0 - (r / re) ** 2)
 
@@ -255,6 +253,15 @@ class Solver3T(Solver_):
 
         return df
 
+    def _morgan_transient(self):
+        """Morgan coefficients for transient temperature."""
+        c, D, d, ix = self.mgc
+        c1 = c / (2.0 * np.pi * self.args.l)
+        c2 = 0.5 * np.ones_like(c1)
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        c2[ix] = a / b
+        return c1, c2
+
     def transient_temperature(
         self,
         time: floatArray = np.array([]),
@@ -317,11 +324,7 @@ class Solver3T(Solver_):
         del (month, day, hour)
 
         # shortcuts for time-loop
-        c, D, d, ix = self.mgc
-        tpl = 2.0 * np.pi * self.args.l
-        al = 0.5 * np.ones(n)
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
-        al[ix] = a / b
+        c1, c2 = self._morgan_transient()
         imc = 1.0 / (self.args.m * self.args.c)
 
         # init
@@ -330,7 +333,7 @@ class Solver3T(Solver_):
         tc = np.zeros((N, n))
         ts[0, :] = Ts0
         tc[0, :] = Tc0
-        ta[0, :] = 0.5 * (ts[0, :] + tc[0, :])
+        ta[0, :] = self.average(ts[0, :], tc[0, :])
 
         # main time loop
         for i in range(1, len(time)):
@@ -339,8 +342,8 @@ class Solver3T(Solver_):
             self.update()
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
-            mrg = c * (self.jh.value(ta[i, :]) - bal) / tpl
-            tc[i, :] = ta[i, :] + al * mrg
+            mrg = c1 * (self.jh.value(ta[i, :]) - bal)
+            tc[i, :] = ta[i, :] + c2 * mrg
             ts[i, :] = tc[i, :] - mrg
 
         # save results
