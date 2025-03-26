@@ -262,6 +262,33 @@ class Solver3T(Solver_):
         c2[ix] = a / b
         return c1, c2
 
+    def _transient_temperature_results(self, time, ts, ta, tc, return_power, n):
+        dr = {
+            Solver_.Names.time: time,
+            Solver_.Names.tsurf: ts,
+            Solver_.Names.tavg: ta,
+            Solver_.Names.tcore: tc,
+        }
+
+        if return_power:
+            for power in Solver_.Names.powers():
+                dr[power] = np.zeros_like(ts)
+
+            for i in range(len(time)):
+                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+
+        if n == 1:
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
+                dr[k] = dr[k][:, 0]
+
+        return dr
+
     def transient_temperature(
         self,
         time: floatArray = np.array([]),
@@ -349,32 +376,7 @@ class Solver3T(Solver_):
             tc[i, :] = ta[i, :] + c2 * mrg
             ts[i, :] = tc[i, :] - mrg
 
-        # save results
-        dr = {
-            Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
-            Solver_.Names.tcore: tc,
-        }
-
-        if return_power:
-            for power in Solver_.Names.powers():
-                dr[power] = np.zeros_like(ts)
-
-            for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
-
-        if n == 1:
-            keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
-
-        return dr
+        return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
 
     @staticmethod
     def _check_target(target, d, max_len):
