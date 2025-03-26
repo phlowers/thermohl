@@ -11,11 +11,13 @@ import os.path
 import numpy as np
 import pandas as pd
 import yaml
+from typing import List, Dict
 
 from thermohl.solver import cner
 
 
 def cable_data(s: str) -> dict:
+    """Get cable/conductor data from file."""
     f = os.path.join("test", "functional_test", "cable_catalog.csv")
     df = pd.read_csv(f)
     if s in df["conductor"].values:
@@ -24,7 +26,15 @@ def cable_data(s: str) -> dict:
         raise ValueError(f"Conductor {s} not found in file {f}.")
 
 
+def scenario(key: str, mode: str) -> List[Dict]:
+    f = os.path.join("test", "functional_test", "scenario.yaml")
+    y = yaml.safe_load(open(f))
+    return y[key][mode]
+
+
 def scn2dict(d: dict) -> dict:
+    """Convert scenario to thermohl input."""
+
     dic = cable_data(d["cable"])
 
     dic["lat"] = d["latitude"]
@@ -54,11 +64,7 @@ def scn2dict(d: dict) -> dict:
 
 
 def test_steady_temperature():
-    f = os.path.join("test", "functional_test", "scenario.yaml")
-    scn = yaml.safe_load(open(f))
-    scn = scn["temperature"]["steady"]
-
-    for d in scn:
+    for d in scenario("temperature", "steady"):
         for _, e in d.items():
             s = cner(scn2dict(e), heateq="3tl")
             r = s.steady_temperature()
@@ -69,13 +75,56 @@ def test_steady_temperature():
 
 
 def test_steady_ampacity():
-    f = os.path.join("test", "functional_test", "scenario.yaml")
-    scn = yaml.safe_load(open(f))
-    scn = scn["ampacity"]["steady"]
-
-    for d in scn:
+    for d in scenario("ampacity", "steady"):
         for _, e in d.items():
             s = cner(scn2dict(e), heateq="3tl")
             r = s.steady_intensity(T=e["Tmax_cable"])
 
             assert np.allclose(r["I"], e["I_max"], atol=0.05)
+
+
+def test_transient_temperature():
+
+    atol = 0.5
+
+    # this is hard-coded, maybe it should be put in the yaml file ...
+    tau = 600.0
+    dt = 10.0
+    minute = 60
+
+    for d in scenario("temperature", "transient"):
+        for _, e in d.items():
+
+            # solver
+            s = cner(scn2dict(e), heateq="3tl")
+
+            # initial steady state
+            s.args["I"] = e["I0_cable"]
+            s.update()
+            ri = s.steady_temperature()
+
+            # final steady state
+            s.args["I"] = e["iac"]
+            s.update()
+            rf = s.steady_temperature(Tsg=e["T_mean_final"], Tcg=e["T_mean_final"])
+
+            # time
+            time = np.arange(0.0, 1800.0, dt)
+
+            # transient temperature (linearized)
+            rl = s.transient_temperature_legacy(
+                time=time, Ts0=ri["t_surf"], Tc0=ri["t_core"], tau=tau
+            )
+
+            # check final temp
+            assert np.isclose(e["T_mean_final"], rf["t_avg"][0], atol=atol)
+
+            # check transient temp
+            for k1, k2 in zip(
+                ["T_surf_transient", "T_mean_transient", "T_heart_transient"],
+                ["t_surf", "t_avg", "t_core"],
+            ):
+                expected_time = np.array(list(e[k1].keys())) * minute
+                expected_temp = np.array(list(e[k1].values()))
+                estimated_temp = np.interp(expected_time, rl["time"], rl[k2])
+                assert np.allclose(expected_temp, estimated_temp, atol=atol)
