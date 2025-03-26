@@ -68,7 +68,8 @@ nav:
       - Solvers:
           - Solver Base: docstring/Solvers/solver_base.md
           - Solver 1 temperature: docstring/Solvers/Solver1T/solver_1_temperature.md
-          - Solver 3 temperature: docstring/Solvers/Solver3T/solver_3_temperature.md
+          - Solver 3 temperatures: docstring/Solvers/Solver3T/solver_3_temperature.md
+          - Solver 3 temperatures RTE: docstring/Solvers/Solver3TL/solver_3_temperature_rte.md
 
 
 
