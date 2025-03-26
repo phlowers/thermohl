@@ -281,6 +281,9 @@ class Solver3T(Solver_):
         Ts0 : float
             Initial surface temperature. If set to None, the ambient temperature from
             internal dict will be used. The default is None.
+        Tc0 : float
+            Initial core temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
         return_power : bool, optional
             Return power term values. The default is False.
 

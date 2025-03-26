@@ -130,9 +130,36 @@ class Solver3TL(Solver3T):
         time: floatArray = np.array([]),
         Ts0: Optional[floatArrayLike] = None,
         Tc0: Optional[floatArrayLike] = None,
-        tau: float = 500.0,
+        tau: float = 600.0,
         return_power: bool = False,
     ) -> Dict[str, Any]:
+        """
+        Compute transient-state temperature with legacy method.
+
+        Parameters
+        ----------
+        time : numpy.ndarray
+            A 1D array with times (in seconds) when the temperature needs to be
+            computed. The array must contain increasing values (undefined
+            behaviour otherwise).
+        Ts0 : float
+            Initial surface temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
+        Tc0 : float
+            Initial core temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
+        tau: float
+            A time-constant to add some inertia. The default is 600.
+        return_power : bool, optional
+            Return power term values. The default is False.
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary with temperature and other results (depending on inputs)
+            in the keys.
+
+        """
 
         # get sizes (n for input dict entries, N for time)
         n = self.args.max_len()
