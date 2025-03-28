@@ -20,7 +20,6 @@ _R = _kb * _Na
 
 
 class Air:
-
     @staticmethod
     def heat_capacity(T: floatArrayLike = _T0) -> floatArrayLike:
         """In J.kg**-1.K**-1"""
@@ -28,7 +27,6 @@ class Air:
 
 
 class Water:
-
     @staticmethod
     def boiling_point(p: floatArrayLike = _p0) -> floatArrayLike:
         """Using Clausius–Clapeyron equation; in K."""
@@ -184,7 +182,6 @@ class Water:
 
 
 class Ice:
-
     @staticmethod
     def heat_capacity() -> float:
         """In J.kg**-1.K**-1"""

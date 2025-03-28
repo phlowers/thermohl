@@ -13,9 +13,12 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thermohl"
-version = "2024.0.0"
+version = "1.3.0"
 authors = [
     { name = "Eurobios Mews Labs", email = "emmanuel.cieren@mews-labs.com" },
+    { name = "Adrien GOELLER" },
+    { name = "Jeremy VERNAY" },
+    { name = "Francois SAINTIER" }
 ]
 description = "Calculations relative to temperature and ampacity in overhead conductors."
 license = "MPL-2.0"

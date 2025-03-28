@@ -8,16 +8,12 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # -*- coding: utf-8 -*-
-import datetime
 
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
 
 from thermohl import rain
 from thermohl import solver
-from thermohl import sun
-from thermohl import utils
 
 
 def dico():
