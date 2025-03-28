@@ -8,7 +8,6 @@
 import pytest
 import numpy as np
 
-from thermohl.power import radiative_cooling
 from thermohl.power.radiative_cooling import RadiativeCoolingBase
 
 radiative_cooling_instances = [
