@@ -10,22 +10,7 @@ name: 🚀 Build upload on test-pypi
 
 on:
   release:
-    types: [prereleased]
-  workflow_dispatch:
-    inputs:
-      devVersion:
-        description: 'Development version'
-        required: true
-        type: integer
-        default: '0'
-      logLevel:
-        description: 'Log level'
-        required: true
-        default: 'warning'
-
-env:
-  PACKAGE_BUILD_TEST: ${{ github.event.inputs.devVersion }}
-
+    types: [published]
 
 jobs:
   release-ci:
@@ -79,7 +64,7 @@ jobs:
         run: |
           python -m build
 
-  publish-to-testpypi:
+  publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to TestPyPI
     runs-on: ubuntu-latest
     needs:
@@ -91,8 +76,8 @@ jobs:
     # Dedicated environments with protections for publishing are strongly recommended.
     # For more information, see: https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment#deployment-protection-rules
     environment:
-      name: testpypi
-      url: https://test.pypi.org/p/thermohl
+      name: pypi
+      url: https://pypi.org/p/thermohl
       # OPTIONAL: uncomment and update to include your PyPI project URL in the deployment status:
       # url: https://pypi.org/p/YOURPROJECT
       #
@@ -120,8 +105,5 @@ jobs:
         run: |
           python -m build
 
-      - name: 🚀 Publish release distributions to TestPyPI
+      - name: 🚀 Publish release distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          repository-url: https://test.pypi.org/legacy/
-
