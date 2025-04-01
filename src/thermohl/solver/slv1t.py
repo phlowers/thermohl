@@ -20,6 +20,31 @@ from thermohl.utils import bisect_v
 
 class Solver1T(Solver_):
 
+    def _steady_return_opt(
+        self,
+        return_err: bool,
+        return_power: bool,
+        T: np.ndarray,
+        err: np.ndarray,
+        df: pd.DataFrame,
+    ):
+        """Add error and/or power values to pd.Dataframe returned in
+        steady_temperature and steady_intensity methods."""
+
+        # add convergence error if asked
+        if return_err:
+            df[Solver_.Names.err] = err
+
+        # add power values if asked
+        if return_power:
+            df[Solver_.Names.pjle] = self.jh.value(T)
+            df[Solver_.Names.psol] = self.sh.value(T)
+            df[Solver_.Names.pcnv] = self.cc.value(T)
+            df[Solver_.Names.prad] = self.rc.value(T)
+            df[Solver_.Names.ppre] = self.pc.value(T)
+
+        return df
+
     def steady_temperature(
         self,
         Tmin: float = DP.tmin,
@@ -67,16 +92,7 @@ class Solver1T(Solver_):
 
         # format output
         df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
-
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+        df = self._steady_return_opt(return_err, return_power, T, err, df)
 
         return df
 
@@ -249,15 +265,6 @@ class Solver1T(Solver_):
 
         # format output
         df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
-
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+        df = self._steady_return_opt(return_err, return_power, T_, err, df)
 
         return df
