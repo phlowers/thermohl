@@ -56,7 +56,12 @@ class Solver1T(Solver_):
 
         # solve with bisection
         T, err = bisect_v(
-            lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
+            lambda x: -self.balance(x),
+            Tmin,
+            Tmax,
+            self._min_shape(),
+            tol=tol,
+            maxiter=maxiter,
         )
 
         # format output
@@ -101,7 +106,7 @@ class Solver1T(Solver_):
         """
 
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
+        n = self._min_shape()[0]
         N = len(time)
         if N < 2:
             raise ValueError("The length of the time array must be at least 2.")
@@ -222,7 +227,7 @@ class Solver1T(Solver_):
         transit = self.args.I
 
         # solve with bisection
-        shape = (self.args.max_len(),)
+        shape = self._min_shape()
         T_ = T * np.ones(shape)
         jh = (
             self.cc.value(T_)

@@ -46,7 +46,7 @@ class Solver3TL(Solver3T):
         UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
         BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
 
-        core_diameter_array = self.args.d * np.ones((self.args.max_len(),))
+        core_diameter_array = self.args.d * np.ones(self._min_shape())
         indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
         heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(
             core_diameter_array
@@ -91,9 +91,9 @@ class Solver3TL(Solver3T):
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
-        max_len = self.args.max_len()
-        Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
+        shape = self._min_shape()
+        Tmax = T * np.ones(shape)
+        target_ = self._check_target(target, self.args.d, shape[0])
 
         # pre-compute indexes
         surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]
@@ -162,7 +162,7 @@ class Solver3TL(Solver3T):
         """
 
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
+        n = self._min_shape()[0]
         N = len(time)
         if N < 2:
             raise ValueError()

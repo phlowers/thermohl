@@ -9,7 +9,7 @@
 
 import datetime
 from abc import ABC, abstractmethod
-from typing import Tuple, Type, Any, Optional, KeysView, Dict
+from typing import Tuple, Type, Any, Optional, Dict, KeysView
 
 import numpy as np
 import pandas as pd
@@ -53,6 +53,8 @@ class Args:
         for k in dic:
             if k in keys and dic[k] is not None:
                 self[k] = dic[k]
+        # check for shape incompatibilities
+        _ = self.shape()
 
     def _set_default_values(self) -> None:
         """Set default values."""
@@ -115,53 +117,52 @@ class Args:
     def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
 
-    def max_len(self) -> int:
+    def shape(self) -> Tuple[int, ...]:
         """
-        Calculate the maximum length of the values in the dictionary.
+        Compute the maximum effective shape of values in current instance.
 
-        This method iterates over all keys in the dictionary and determines the maximum length
-        of the values associated with those keys.
-        If a value is not of a type that has a length, it is ignored.
+        Members of Args can be float of arrays. If arrays, they must be
+        one-diemnsional. Float and 1d array can coexist, but all arrays should
+        have the same shape/size.
 
-        Returns:
-            int: The maximum length of the values in the dictionary. If the dictionary is empty
-            or all values are of types that do not have a length, the method returns 1.
+        This method iterates over all keys in the instance's __dict__ and
+        computes the maximum length of the values associated with those keys.
+
+        If incompatible shapes are encountered, an exception is raised (ValueError).
+
         """
-        n = 1
+        shape_ = ()
         for k in self.keys():
-            try:
-                n = max(n, len(self[k]))
-            except TypeError:
-                pass
-        return n
+            s = np.array(self[k]).shape
+            d = len(s)
+            er = f"Key {k} has a {s} shape when main shape is {shape_}"
+            if d == 0:
+                continue
+            if d == 1:
+                if shape_ == ():
+                    shape_ = s
+                elif len(shape_) == 1:
+                    if shape_ != s:
+                        raise ValueError(er)
+                else:
+                    raise ValueError(er)
+            else:
+                raise ValueError(
+                    f"Key {k} has a {s} shape, only float and 1-dim arrays are accepted"
+                )
+        return shape_
 
-    def extend_to_max_len(self) -> None:
-        """
-        Extend all elements in the dictionary to the maximum length.
-
-        This method iterates over all keys in the dictionary and checks if the
-        corresponding value is a numpy ndarray. If it is, it checks if its length
-        matches the maximum length obtained from the `max_len` method.
-        If the length matches, it creates a copy of the array.
-        If the length does not match or for non-ndarray values, it creates
-        a new numpy array of the maximum length, filled with the original value
-        and having the same data type.
-
-        Returns:
-            None
-        """
-        n = self.max_len()
+    def extend(self, shape: Tuple[int, ...] = None) -> None:
+        # get shape
+        if shape is None:
+            shape = self.shape()
+        # complete if necessary
+        if len(shape) == 0:
+            shape = (1,)
+        # create a copy dict with scaled array
         for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                t = self[k].dtype
-                c = len(self[k]) == n
-            else:
-                t = type(self[k])
-                c = False
-            if c:
-                self[k] = self[k][:]
-            else:
-                self[k] = self[k] * np.ones((n,), dtype=t)
+            a = np.array(self[k])
+            self[k] = a * np.ones(shape, dtype=a.dtype)
 
     def compress(self) -> None:
         """
@@ -172,10 +173,9 @@ class Args:
             None
         """
         for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                u = np.unique(self[k])
-                if len(u) == 1:
-                    self[k] = u[0]
+            u = np.unique(self[k])
+            if len(u) == 1:
+                self[k] = u[0]
 
 
 class Solver(ABC):
@@ -246,7 +246,7 @@ class Solver(ABC):
 
         """
         self.args = Args(dic)
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh = joule(**self.args.__dict__)
         self.sh = solar(**self.args.__dict__)
         self.cc = convective(**self.args.__dict__)
@@ -254,8 +254,14 @@ class Solver(ABC):
         self.pc = precipitation(**self.args.__dict__)
         self.args.compress()
 
+    def _min_shape(self) -> Tuple[int, ...]:
+        shape = self.args.shape()
+        if shape == ():
+            shape = (1,)
+        return shape
+
     def update(self) -> None:
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)

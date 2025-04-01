@@ -78,7 +78,7 @@ class Solver3T(Solver_):
             - i : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        c = 0.5 * np.ones((self.args.max_len(),))
+        c = 0.5 * np.ones(self._min_shape())
         D = self.args.D * np.ones_like(c)
         d = self.args.d * np.ones_like(c)
         i = np.nonzero(d > 0.0)[0]
@@ -97,7 +97,7 @@ class Solver3T(Solver_):
         Returns:
             None
         """
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
@@ -215,7 +215,7 @@ class Solver3T(Solver_):
         """
 
         # if no guess provided, use ambient temp
-        shape = (self.args.max_len(),)
+        shape = self._min_shape()
         Tsg = Tsg if Tsg is not None else 1.0 * self.args.Ta
         Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.Ta)
         Tsg_ = Tsg * np.ones(shape)
@@ -322,7 +322,7 @@ class Solver3T(Solver_):
 
         """
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
+        n = self._min_shape()[0]
         N = len(time)
         if N < 2:
             raise ValueError()
@@ -436,9 +436,9 @@ class Solver3T(Solver_):
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
-        max_len = self.args.max_len()
-        Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
+        shape = self._min_shape()
+        Tmax = T * np.ones(shape)
+        target_ = self._check_target(target, self.args.d, shape[0])
 
         # pre-compute indexes
         c, D, d, ix = self.mgc
