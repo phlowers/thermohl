@@ -291,12 +291,12 @@ class Solver(ABC):
         raise NotImplementedError
 
 
-def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
+def reshape(input_var: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
     """
     Reshape the input array to the specified dimensions (nr, nc) if possible.
 
     Args:
-        input_array (numberArrayLike): Input array to be reshaped.
+        input (numberArrayLike): Variable to be reshaped.
         nb_row (int): Desired number of rows for the reshaped array.
         nb_columns (int): Desired number of columns for the reshaped array.
 
@@ -305,24 +305,29 @@ def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numbe
             returns an array filled with the input_value repeated to fill the dimension (nb_row, nb_columns).
 
     Raises:
-        AttributeError: If the input_array has an invalid shape that cannot be reshaped.
+        ValueError: If the input has an invalid shape that cannot be reshaped.
     """
-    reshaped_array = ndarray
-    try:
-        input_shape = input_array.shape
-        if len(input_shape) == 1:
-            if nb_row == input_shape[0]:
-                reshaped_array = np.column_stack(nb_columns * (input_array,))
-            elif nb_columns == input_shape[0]:
-                reshaped_array = np.vstack(nb_row * (input_array,))
-        elif len(input_shape) == 0:
-            raise AttributeError()
-        else:
-            reshaped_array = np.reshape(input_array, (nb_row, nb_columns))
-    except AttributeError:
+
+    input_array = np.array(input_var)
+    input_shape = input_array.shape
+
+    msg = f"Input array has incompatible shape {input_shape} with specified number of rows ({nb_row}) and/or columns ({nb_columns})."
+
+    if len(input_shape) == 0:
         reshaped_array = input_array * np.ones(
-            (nb_row, nb_columns), dtype=type(input_array)
+            (nb_row, nb_columns), dtype=input_array.dtype
         )
+    elif len(input_shape) == 1:
+        if nb_row == input_shape[0]:
+            reshaped_array = np.column_stack(nb_columns * (input_array,))
+        elif nb_columns == input_shape[0]:
+            reshaped_array = np.vstack(nb_row * (input_array,))
+        else:
+            raise ValueError(msg)
+    elif input_shape == (nb_row, nb_columns):
+        return input_array
+    else:
+        raise ValueError(msg)
     return reshaped_array
 
 
