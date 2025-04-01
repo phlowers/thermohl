@@ -209,6 +209,52 @@ class Solver3T(Solver_):
 
         return df
 
+    def _morgan_transient(self):
+        """Morgan coefficients for transient temperature."""
+        c, D, d, ix = self.mgc
+        c1 = c / (2.0 * np.pi * self.args.l)
+        c2 = 0.5 * np.ones_like(c1)
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        c2[ix] = a / b
+        return c1, c2
+
+    def _transient_temperature_results(
+        self,
+        time: np.ndarray,
+        ts: np.ndarray,
+        ta: np.ndarray,
+        tc: np.ndarray,
+        return_power: bool,
+        n: int,
+    ):
+        """Format transient temperature results."""
+        dr = {
+            Solver_.Names.time: time,
+            Solver_.Names.tsurf: ts,
+            Solver_.Names.tavg: ta,
+            Solver_.Names.tcore: tc,
+        }
+
+        if return_power:
+            for power in Solver_.Names.powers():
+                dr[power] = np.zeros_like(ts)
+
+            for i in range(len(time)):
+                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+
+        if n == 1:
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
+                dr[k] = dr[k][:, 0]
+
+        return dr
+
+
     def steady_temperature(
         self,
         Tsg: Optional[floatArrayLike] = None,
@@ -270,41 +316,88 @@ class Solver3T(Solver_):
 
         return df
 
-    def _morgan_transient(self):
-        """Morgan coefficients for transient temperature."""
-        c, D, d, ix = self.mgc
-        c1 = c / (2.0 * np.pi * self.args.l)
-        c2 = 0.5 * np.ones_like(c1)
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
-        c2[ix] = a / b
-        return c1, c2
+    def steady_intensity(
+        self,
+        T: floatArrayLike = np.array([]),
+        target: strListLike = "auto",
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_temp: bool = True,
+        return_power: bool = True,
+    ) -> pd.DataFrame:
+        """
+        Compute the steady-state intensity for a given temperature profile.
+        Parameters:
+        -----------
+        T : float or numpy.ndarray, optional
+            Initial temperature profile. Default is an empty numpy array.
+        target : str or List[str], optional
+            Target specification for the solver. Default is "auto".
+        tol : float, optional
+            Tolerance for the solver. Default is DP.tol.
+        maxiter : int, optional
+            Maximum number of iterations for the solver. Default is DP.maxiter.
+        return_err : bool, optional
+            If True, return the error in the output DataFrame. Default is False.
+        return_temp : bool, optional
+            If True, return the temperature profiles in the output DataFrame. Default is True.
+        return_power : bool, optional
+            If True, return the power profiles in the output DataFrame. Default is True.
+        Returns:
+        --------
+        pd.DataFrame
+            DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
+        """
 
-    def _transient_temperature_results(self, time, ts, ta, tc, return_power, n):
-        dr = {
-            Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
-            Solver_.Names.tcore: tc,
-        }
+        Tmax, newtheader = self._steady_intensity_header(T, target)
 
-        if return_power:
-            for power in Solver_.Names.powers():
-                dr[power] = np.zeros_like(ts)
+        def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
+            ts, tc = newtheader(i, tg)
+            return self.balance(ts, tc)
 
-            for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+        def morgan(i: floatArray, tg: floatArray) -> floatArray:
+            ts, tc = newtheader(i, tg)
+            return self.morgan(ts, tc)
 
-        if n == 1:
-            keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
+        # solve system
+        s = Solver1T(
+            self.args.__dict__,
+            type(self.jh),
+            type(self.sh),
+            type(self.cc),
+            type(self.rc),
+            type(self.pc),
+        )
+        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
+        x, y, cnt, err = quasi_newton_2d(
+            balance,
+            morgan,
+            r[Solver_.Names.transit].values,
+            Tmax,
+            relative_tolerance=tol,
+            max_iterations=maxiter,
+            delta_x=1.0e-03,
+            delta_y=1.0e-03,
+        )
+        if np.max(err) > tol or cnt == maxiter:
+            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
-        return dr
+        # format output
+        df = pd.DataFrame({Solver_.Names.transit: x})
+        if return_temp or return_power:
+            ts, tc = newtheader(x, y)
+            ta = self.average(ts, tc)
+            if return_temp:
+                df[Solver_.Names.tsurf] = ts
+                df[Solver_.Names.tavg] = ta
+                df[Solver_.Names.tcore] = tc
+        else:
+            ts = None
+            ta = None
+        df = self._steady_return_opt(return_err, return_power, ts, ta, err, df)
+
+        return df
 
     def transient_temperature(
         self,
@@ -487,85 +580,3 @@ class Solver3T(Solver_):
 
         return Tmax, newtheader
 
-    def steady_intensity(
-        self,
-        T: floatArrayLike = np.array([]),
-        target: strListLike = "auto",
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
-        return_err: bool = False,
-        return_temp: bool = True,
-        return_power: bool = True,
-    ) -> pd.DataFrame:
-        """
-        Compute the steady-state intensity for a given temperature profile.
-        Parameters:
-        -----------
-        T : float or numpy.ndarray, optional
-            Initial temperature profile. Default is an empty numpy array.
-        target : str or List[str], optional
-            Target specification for the solver. Default is "auto".
-        tol : float, optional
-            Tolerance for the solver. Default is DP.tol.
-        maxiter : int, optional
-            Maximum number of iterations for the solver. Default is DP.maxiter.
-        return_err : bool, optional
-            If True, return the error in the output DataFrame. Default is False.
-        return_temp : bool, optional
-            If True, return the temperature profiles in the output DataFrame. Default is True.
-        return_power : bool, optional
-            If True, return the power profiles in the output DataFrame. Default is True.
-        Returns:
-        --------
-        pd.DataFrame
-            DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
-        """
-
-        Tmax, newtheader = self._steady_intensity_header(T, target)
-
-        def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
-            ts, tc = newtheader(i, tg)
-            return self.balance(ts, tc)
-
-        def morgan(i: floatArray, tg: floatArray) -> floatArray:
-            ts, tc = newtheader(i, tg)
-            return self.morgan(ts, tc)
-
-        # solve system
-        s = Solver1T(
-            self.args.__dict__,
-            type(self.jh),
-            type(self.sh),
-            type(self.cc),
-            type(self.rc),
-            type(self.pc),
-        )
-        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
-        x, y, cnt, err = quasi_newton_2d(
-            balance,
-            morgan,
-            r[Solver_.Names.transit].values,
-            Tmax,
-            relative_tolerance=tol,
-            max_iterations=maxiter,
-            delta_x=1.0e-03,
-            delta_y=1.0e-03,
-        )
-        if np.max(err) > tol or cnt == maxiter:
-            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
-
-        # format output
-        df = pd.DataFrame({Solver_.Names.transit: x})
-        if return_temp or return_power:
-            ts, tc = newtheader(x, y)
-            ta = self.average(ts, tc)
-            if return_temp:
-                df[Solver_.Names.tsurf] = ts
-                df[Solver_.Names.tavg] = ta
-                df[Solver_.Names.tcore] = tc
-        else:
-            ts = None
-            ta = None
-        df = self._steady_return_opt(return_err, return_power, ts, ta, err, df)
-
-        return df

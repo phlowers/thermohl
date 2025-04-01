@@ -96,6 +96,75 @@ class Solver1T(Solver_):
 
         return df
 
+    def steady_intensity(
+        self,
+        T: floatArrayLike = np.array([]),
+        Imin: float = DP.imin,
+        Imax: float = DP.imax,
+        tol: float = DP.tol,
+        maxiter: int = DP.maxiter,
+        return_err: bool = False,
+        return_power: bool = True,
+    ) -> pd.DataFrame:
+        """Compute steady-state max intensity.
+
+        Compute the maximum intensity that can be run in a conductor without
+        exceeding the temperature given in argument.
+
+        Parameters
+        ----------
+        T : float or numpy.ndarray
+            Maximum temperature.
+        Imin : float, optional
+            Lower bound for intensity. The default is 0.
+        Imax : float, optional
+            Upper bound for intensity. The default is 9999.
+        tol : float, optional
+            Tolerance for temperature error. The default is 1.0E-06.
+        maxiter : int, optional
+            Max number of iteration. The default is 64.
+        return_err : bool, optional
+            Return final error on intensity to check convergence. The default is False.
+        return_power : bool, optional
+            Return power term values. The default is True.
+
+        Returns
+        -------
+        pandas.DataFrame
+            A dataframe with maximum intensity and other results (depending on inputs)
+            in the columns.
+
+        """
+
+        # save transit in arg
+        transit = self.args.I
+
+        # solve with bisection
+        shape = self._min_shape()
+        T_ = T * np.ones(shape)
+        jh = (
+            self.cc.value(T_)
+            + self.rc.value(T_)
+            + self.pc.value(T_)
+            - self.sh.value(T_)
+        )
+
+        def fun(i: floatArray) -> floatArrayLike:
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            return self.jh.value(T_) - jh
+
+        A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
+
+        # restore previous transit
+        self.args.I = transit
+
+        # format output
+        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
+        df = self._steady_return_opt(return_err, return_power, T_, err, df)
+
+        return df
+
     def transient_temperature(
         self,
         time: floatArray = np.array([]),
@@ -200,71 +269,4 @@ class Solver1T(Solver_):
 
         return dr
 
-    def steady_intensity(
-        self,
-        T: floatArrayLike = np.array([]),
-        Imin: float = DP.imin,
-        Imax: float = DP.imax,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
-        return_err: bool = False,
-        return_power: bool = True,
-    ) -> pd.DataFrame:
-        """Compute steady-state max intensity.
 
-        Compute the maximum intensity that can be run in a conductor without
-        exceeding the temperature given in argument.
-
-        Parameters
-        ----------
-        T : float or numpy.ndarray
-            Maximum temperature.
-        Imin : float, optional
-            Lower bound for intensity. The default is 0.
-        Imax : float, optional
-            Upper bound for intensity. The default is 9999.
-        tol : float, optional
-            Tolerance for temperature error. The default is 1.0E-06.
-        maxiter : int, optional
-            Max number of iteration. The default is 64.
-        return_err : bool, optional
-            Return final error on intensity to check convergence. The default is False.
-        return_power : bool, optional
-            Return power term values. The default is True.
-
-        Returns
-        -------
-        pandas.DataFrame
-            A dataframe with maximum intensity and other results (depending on inputs)
-            in the columns.
-
-        """
-
-        # save transit in arg
-        transit = self.args.I
-
-        # solve with bisection
-        shape = self._min_shape()
-        T_ = T * np.ones(shape)
-        jh = (
-            self.cc.value(T_)
-            + self.rc.value(T_)
-            + self.pc.value(T_)
-            - self.sh.value(T_)
-        )
-
-        def fun(i: floatArray) -> floatArrayLike:
-            self.args.I = i
-            self.jh.__init__(**self.args.__dict__)
-            return self.jh.value(T_) - jh
-
-        A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
-
-        # restore previous transit
-        self.args.I = transit
-
-        # format output
-        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
-        df = self._steady_return_opt(return_err, return_power, T_, err, df)
-
-        return df
