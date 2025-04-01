@@ -95,7 +95,7 @@ def test_steady_1d_mix():
     n = 61
     for s in _solvers():
         s.args.Ta = np.linspace(-10, +50, n)
-        s.args.I = np.array([199.0])
+        s.args.I = np.array(199.0)
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
