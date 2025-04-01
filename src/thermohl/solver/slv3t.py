@@ -12,7 +12,7 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, Args, _set_dates, reshape
+from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, Args
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
@@ -501,6 +501,7 @@ class Solver3T(Solver_):
         time: floatArray = np.array([]),
         Ts0: Optional[floatArrayLike] = None,
         Tc0: Optional[floatArrayLike] = None,
+        dynamic: dict = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -531,51 +532,31 @@ class Solver3T(Solver_):
         # get sizes (n for input dict entries, N for time)
         n = self._min_shape()[0]
         N = len(time)
-        if N < 2:
-            raise ValueError()
 
-        # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
+        # process dynamic values
+        dynamic_ = self._transient_process_dynamic(time, n, dynamic)
 
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            I=reshape(self.args.I, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
-        )
-        del (month, day, hour)
+        # save args
+        args = self.args.__dict__.copy()
 
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
         imc = 1.0 / (self.args.m * self.args.c)
 
-        # init
+        # initial conditions
         ts = np.zeros((N, n))
         ta = np.zeros((N, n))
         tc = np.zeros((N, n))
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
         ts[0, :] = Ts0
         tc[0, :] = Tc0
         ta[0, :] = self.average(ts[0, :], tc[0, :])
 
-        # main time loop
-        for i in range(1, len(time)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
+        # time loop
+        for i in range(1, N):
+            for k, v in dynamic_.items():
+                self.args[k] = v[i, :]
             self.update()
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
@@ -583,4 +564,10 @@ class Solver3T(Solver_):
             tc[i, :] = ta[i, :] + c2 * mrg
             ts[i, :] = tc[i, :] - mrg
 
-        return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
+        # get results
+        dr = self._transient_temperature_results(time, ts, ta, tc, return_power, n)
+
+        # restore args
+        self.args = Args(args)
+
+        return dr
