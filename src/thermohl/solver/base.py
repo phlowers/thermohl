@@ -368,10 +368,7 @@ def _set_dates(
 
     td = np.array(
         [datetime.timedelta()]
-        + [
-            datetime.timedelta(seconds=float(time[i] - time[i - 1]))
-            for i in range(1, N)
-        ]
+        + [datetime.timedelta(seconds=float(time[i] - time[0])) for i in range(1, N)]
     )
 
     for j in range(n):
