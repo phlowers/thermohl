@@ -220,6 +220,6 @@ def test_solar_heating():
     alpha = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
-    s = cner.SolarHeating(lat, azm, month, day, hour, D, alpha, srad=None)
+    s = cner.SolarHeating(lat, azm, month, day, hour, D, alpha)
 
     assert np.allclose(p, s.value(ones), 0.1)

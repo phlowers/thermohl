@@ -21,7 +21,7 @@ class SolarHeating(SolarHeatingBase):
         hour: floatArrayLike,
         D: floatArrayLike,
         alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
         r"""Build with args.
@@ -45,8 +45,9 @@ class SolarHeating(SolarHeatingBase):
             external diameter.
         alpha : np.ndarray
             Solar absorption coefficient.
-        srad : xxx
-            xxx
+        srad : float or np.ndarray
+            Solar irradiance. Default is nan. If nan value is estimated using
+            all other input.
 
         Returns
         -------
