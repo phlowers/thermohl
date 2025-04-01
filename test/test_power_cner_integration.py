@@ -184,13 +184,13 @@ def test_compare_power():
     ds = pd.concat(len(T) * (ds,)).reset_index(drop=True)
     T = np.concatenate([n * (t,) for t in T])
 
-    from thermohl.utils import df2dct
+    from thermohl.utils import df2dict
 
-    d1 = df2dct(ds)
+    d1 = df2dict(ds)
     ds["wa"] = np.rad2deg(
         np.arcsin(np.sin(np.deg2rad(np.abs(ds["azm"] - ds["wa"]) % 180.0)))
     )
-    d2 = df2dct(ds)
+    d2 = df2dict(ds)
     del (ds, n)
 
     pj = cner.JouleHeating(**d1)
