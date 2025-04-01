@@ -16,59 +16,59 @@ def test_max_len_with_mixed_types():
     dic = {
         "lat": np.array([45.0, 46.0]),
         "lon": 10.0,
-        "alt": np.array([20.0, 25.0, 30.0]),
+        "alt": np.array([20.0, 25.0]),
     }
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.shape()
 
-    assert result == 3
+    assert result == (2,)
 
 
-def test_max_len_with_ndarray():
+def test_shape_with_ndarray():
     dic = {"lat": np.array([45.0, 46.0]), "lon": np.array([10.0, 11.0])}
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.shape()
 
-    assert result == 2
+    assert result == (2,)
 
 
-def test_max_len_with_scalar():
+def test_shape_with_scalar():
     dic = {"lat": 45.0, "lon": 10.0}
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.shape()
 
-    assert result == 1
+    assert result == ()
 
 
-def test_max_len_with_empty_dict():
+def test_shape_with_empty_dict():
     args = Args({})
 
-    result = args.max_len()
+    result = args.shape()
 
-    assert result == 1
+    assert result == ()
 
 
-def test_max_len_with_varied_lengths():
+def test_shape_with_varied_lengths():
     dic = {
         "lat": np.array([45.0, 46.0]),
         "lon": np.array([10.0]),
         "alt": np.array([20.0, 25.0, 30.0]),
     }
-    args = Args(dic)
+    try:
+        args = Args(dic)
+        assert False
+    except ValueError:
+        pass
 
-    result = args.max_len()
 
-    assert result == 3
-
-
-def test_extend_to_max_len_with_nd_array():
+def test_extend_with_nd_array():
     dic = {"lat": np.array([45.0, 46.0]), "lon": 10.0}
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.lat, ndarray)
     assert isinstance(args.lon, ndarray)
@@ -78,11 +78,11 @@ def test_extend_to_max_len_with_nd_array():
     np.testing.assert_array_equal(args.lon, np.array([10.0, 10.0]))
 
 
-def test_extend_to_max_len_with_scalar():
+def test_extend_with_scalar():
     dic = {"lat": 45.0, "lon": 10.0}
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.lat, ndarray)
     assert isinstance(args.lon, ndarray)
@@ -92,11 +92,11 @@ def test_extend_to_max_len_with_scalar():
     np.testing.assert_array_equal(args.lon, np.array([10.0]))
 
 
-def test_extend_to_max_len_with_mixed_types():
-    dic = {"lat": np.array([45.0, 46.0]), "lon": 10.0, "alt": np.array([20.0])}
+def test_extend_with_mixed_types():
+    dic = {"lat": np.array([45.0, 46.0]), "lon": 10.0, "alt": np.array(20.0)}
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.lat, ndarray)
     assert isinstance(args.lon, ndarray)
@@ -109,10 +109,10 @@ def test_extend_to_max_len_with_mixed_types():
     np.testing.assert_array_equal(args.alt, np.array([20.0, 20.0]))
 
 
-def test_extend_to_max_len_with_empty_dict():
+def test_extend_with_empty_dict():
     args = Args({})
 
-    args.extend_to_max_len()
+    args.extend()
 
     for key in args.keys():
         assert isinstance(args[key], (float, int, ndarray))
@@ -164,7 +164,7 @@ def test_compress_with_empty_dict():
     args.compress()
 
     for key in args.keys():
-        assert isinstance(args[key], (float, int, ndarray))
+        assert isinstance(args[key], (float, int, np.integer, np.floating, ndarray))
         if isinstance(args[key], ndarray):
             assert len(args[key]) == 1
 
