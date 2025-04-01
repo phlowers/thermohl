@@ -62,9 +62,9 @@ class Args:
         self.alt = 0.0  # altitude (m)
         self.azm = 0.0  # azimuth (deg)
 
-        self.month = 3  # month number (1=Jan, 2=Feb, ...)
+        self.month = 3  # month number (1=Jan, 2=Feb ...)
         self.day = 21  # day of the month
-        self.hour = 12  # hour of the day (in [0, 23] range)
+        self.hour = 12.0  # hour of the day (in [0, 23] range)
 
         self.Ta = 15.0  # ambient temperature (C)
         self.Pa = 1.0e05  # ambient pressure (Pa)
@@ -73,8 +73,8 @@ class Args:
         self.ws = 0.0  # wind speed (m.s**-1)
         self.wa = 90.0  # wind angle (deg, regarding north)
         self.al = 0.8  # albedo (1)
-        # coefficient for air pollution from 0 (clean) to 1 (polluted)
-        self.tb = 0.1
+        self.tb = 0.1  # turbidity (coefficient for air pollution from 0 -clean- to 1 -polluted-)
+        self.srad = float("nan")  # solar irradiance (in W.m**-2)
 
         self.I = 100.0  # transit intensity (A)
 
