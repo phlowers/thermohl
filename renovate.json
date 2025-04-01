@@ -1,0 +1,25 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:base"
+  ],
+  "packageRules": [
+    {
+      "matchPackagePatterns": ["^numpy$", "^pandas$"],
+      "groupName": "scientific-python",
+      "groupSlug": "scientific-python"
+    }
+  ],
+  "python": {
+    "enabled": true,
+    "pip_requirements": {
+      "fileMatch": ["^pyproject\\.toml$"]
+    }
+  },
+  "schedule": ["every weekend"],
+  "prHourlyLimit": 4,
+  "prConcurrentLimit": 16,
+  "rangeStrategy": "pin",
+  "semanticCommits": "enabled",
+  "labels": ["dependencies"]
+} 
