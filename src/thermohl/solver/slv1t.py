@@ -169,6 +169,7 @@ class Solver1T(Solver_):
         self,
         time: floatArray = np.array([]),
         T0: Optional[float] = None,
+        dynamic: dict = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -194,49 +195,25 @@ class Solver1T(Solver_):
         # get sizes (n for input dict entries, N for time)
         n = self._min_shape()[0]
         N = len(time)
-        if N < 2:
-            raise ValueError("The length of the time array must be at least 2.")
 
-        # get initial temperature
-        if T0 is None:
-            T0 = (
-                self.args.Ta
-                if isinstance(self.args.Ta, numbers.Number)
-                else self.args.Ta[0]
-            )
-
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
-
-        # Two dicts, one (dc) with static quantities (with all elements of size n), the other (de)
-        # with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            I=reshape(self.args.I, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
-        )
-        del (month, day, hour)
+        # process dynamic values
+        dynamic_ = self._transient_process_dynamic(time, n, dynamic)
 
         # shortcuts for time-loop
         imc = 1.0 / (self.args.m * self.args.c)
 
-        # init
+        # save args
+        args = self.args.__dict__.copy()
+
+        # initial conditions
         T = np.zeros((N, n))
+        if T0 is None:
+            T0 = self.args.Ta
         T[0, :] = T0
 
-        # main time loop
-        for i in range(1, len(time)):
-            for k, v in de.items():
+        # time loop
+        for i in range(1, N):
+            for k, v in dynamic_.items():
                 self.args[k] = v[i, :]
             self.update()
             T[i, :] = (
@@ -244,15 +221,15 @@ class Solver1T(Solver_):
             )
 
         # save results
-        dr = dict(time=time, T=T)
+        dr = {Solver_.Names.time: time, Solver_.Names.temp: T}
 
-        # manage return dict 2 : powers
+        # add power to return dict if needed
         if return_power:
             for c in Solver_.Names.powers():
                 dr[c] = np.zeros_like(T)
             for i in range(N):
-                for k in de.keys():
-                    self.args[k] = de[k][i, :]
+                for k, v in dynamic_.items():
+                    self.args[k] = v[i, :]
                 self.update()
                 dr[Solver_.Names.pjle][i, :] = self.jh.value(T[i, :])
                 dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
@@ -260,13 +237,14 @@ class Solver1T(Solver_):
                 dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
 
-        # squeeze return values if n is 1
+        # squeeze values in return dict (if n is 1)
         if n == 1:
             keys = list(dr.keys())
             keys.remove(Solver_.Names.time)
             for k in keys:
                 dr[k] = dr[k][:, 0]
 
+        # restore args
+        self.args = Args(args)
+
         return dr
-
-
