@@ -178,17 +178,19 @@ class Solver3TL(Solver3T):
         # shortcuts for time-loop
         imc = 1.0 / (self.args.m * self.args.c)
 
-        # init
+        # initial conditions
         ts = np.zeros((N, n))
         ta = np.zeros((N, n))
         tc = np.zeros((N, n))
         dT = np.zeros((N, n))
-
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
         ts[0, :] = Ts0
         tc[0, :] = Tc0
         ta[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]
 
+        # time loop
         for i in range(1, len(time)):
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             dti = time[i] - time[i - 1]
