@@ -11,8 +11,8 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, Args
-from thermohl.solver.slv3t import Solver3T
+from thermohl.solver.base import Solver as Solver_
+from thermohl.solver.slv3t import Solver3T, _check_target
 
 
 class Solver3TL(Solver3T):
@@ -86,6 +86,8 @@ class Solver3TL(Solver3T):
         morgan_coefficient = self.mgc[0]
         return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
 
+    # ==========================================================================
+
     def _steady_intensity_header(
         self, T: floatArrayLike, target: strListLike
     ) -> Tuple[np.ndarray, Callable]:
@@ -93,7 +95,7 @@ class Solver3TL(Solver3T):
 
         shape = self._min_shape()
         Tmax = T * np.ones(shape)
-        target_ = self._check_target(target, self.args.d, shape[0])
+        target_ = _check_target(target, self.args.d, shape[0])
 
         # pre-compute indexes
         surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]
@@ -124,6 +126,8 @@ class Solver3TL(Solver3T):
         c1, _ = self.mgc
         c2 = 0.5 * np.ones_like(c1)
         return c1, c2
+
+    # ==========================================================================
 
     def transient_temperature_legacy(
         self,
