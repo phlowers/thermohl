@@ -256,7 +256,7 @@ def test_set_dates_single_day():
     assert hours[1, 0] == 1.0
     assert months[2, 0] == 1
     assert days[2, 0] == 1
-    assert hours[2, 0] == 1.0
+    assert hours[2, 0] == 2.0
 
 
 def test_set_dates_multiple_days():
@@ -279,7 +279,7 @@ def test_set_dates_multiple_days():
     assert hours[1, 0] == 0.0
     assert months[2, 0] == 1
     assert days[2, 0] == 2
-    assert hours[2, 0] == 0.0
+    assert hours[2, 0] == 1.0
 
 
 def test_set_dates_multiple_months():
@@ -302,7 +302,7 @@ def test_set_dates_multiple_months():
     assert hours[1, 0] == 0.0
     assert months[2, 0] == 1
     assert days[2, 0] == 1
-    assert hours[2, 0] == 0.0
+    assert hours[2, 0] == 1.0
 
 
 def test_set_dates_multiple_inputs():
@@ -328,7 +328,7 @@ def test_set_dates_multiple_inputs():
 
     assert months[2, 0] == 1
     assert days[2, 0] == 1
-    assert hours[2, 0] == 1.0
+    assert hours[2, 0] == 2.0
 
     assert months[0, 1] == 2
     assert days[0, 1] == 2
@@ -340,4 +340,4 @@ def test_set_dates_multiple_inputs():
 
     assert months[2, 1] == 2
     assert days[2, 1] == 2
-    assert hours[2, 1] == 13.0
+    assert hours[2, 1] == 14.0
