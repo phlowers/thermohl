@@ -225,8 +225,8 @@ def test_reshape_scalar_to_2d():
     np.testing.assert_array_equal(result, expected)
 
 
-def test_reshape_invalid_shape():
-    array = np.array(0)  # ([1.0, 2.0, 3.0])
+def test_reshape_another_scalar_to_2d():
+    array = np.array(0)
     nb_row = 2
     nb_columns = 2
     expected = np.array([[0, 0], [0, 0]])
@@ -234,6 +234,17 @@ def test_reshape_invalid_shape():
     result = reshape(array, nb_row, nb_columns)
 
     np.testing.assert_array_equal(result, expected)
+
+
+def test_reshape_invalid_shape():
+    array = np.array([1.0, 2.0, 3.0])
+    nb_row = 2
+    nb_columns = 2
+    try:
+        reshape(array, nb_row, nb_columns)
+        assert False
+    except ValueError:
+        pass
 
 
 def test_set_dates_single_day():
