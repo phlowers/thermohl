@@ -12,7 +12,7 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
+from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, Args, _set_dates, reshape
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
@@ -44,6 +44,61 @@ def _profile_bim_avg(
     """Analytical formulation for average temperature in _profile_bim."""
     a, b = _profile_bim_avg_coeffs(ri, re)
     return tc - (a / b) * (tc - ts)
+
+
+def _check_target(target, d, max_len):
+    """
+    Validates and processes the target temperature input for ampacity computations.
+
+    Parameters:
+    target (str or list): The target temperature(s) to be validated. It can be:
+        - "auto": which sets the target to None.
+        - A string: which should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
+        - A list of strings: where each string should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
+    max_len (int): The expected length of the target list if target is a list.
+
+    Returns:
+    numpy.ndarray: An array of target temperatures if the input is valid.
+
+    Raises:
+    ValueError: If the target is a string not in the allowed values, or if the
+    target list length does not match max_len, or if any element in the target
+    list is not in the allowed values.
+    """
+
+    if target == "auto":
+        d_ = d * np.ones(max_len)
+        target_ = np.array(
+            [
+                Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
+                for i in range(max_len)
+            ]
+        )
+    elif isinstance(target, str):
+        if target not in [
+            Solver_.Names.surf,
+            Solver_.Names.avg,
+            Solver_.Names.core,
+        ]:
+            raise ValueError(
+                f"Target temperature should be in "
+                f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
+                f" got {target} instead."
+            )
+        else:
+            target_ = np.array([target for _ in range(max_len)])
+    else:
+        if len(target) != max_len:
+            raise ValueError()
+        for t in target:
+            if t not in [
+                Solver_.Names.surf,
+                Solver_.Names.avg,
+                Solver_.Names.core,
+            ]:
+                raise ValueError()
+        target_ = np.array(target)
+    return target_
 
 
 class Solver3T(Solver_):
@@ -183,6 +238,8 @@ class Solver3T(Solver_):
         c, _, _, _ = self.mgc
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
+    # ==========================================================================
+
     def _steady_return_opt(
         self,
         return_err: bool,
@@ -208,6 +265,45 @@ class Solver3T(Solver_):
             df[Solver_.Names.ppre] = self.pc.value(Ts)
 
         return df
+
+    def _steady_intensity_header(
+        self, T: floatArrayLike, target: strListLike
+    ) -> Tuple[np.ndarray, Callable]:
+        """Format input for ampacity solver."""
+
+        shape = self._min_shape()
+        Tmax = T * np.ones(shape)
+        target_ = _check_target(target, self.args.d, shape[0])
+
+        # pre-compute indexes
+        c, D, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
+
+        js = np.nonzero(target_ == Solver_.Names.surf)[0]
+        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
+        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        jx = np.intersect1d(ix, ja)
+
+        # get correct input for quasi-newton solver
+        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            ts = np.ones_like(tg) * np.nan
+            tc = np.ones_like(tg) * np.nan
+
+            ts[js] = Tmax[js]
+            tc[js] = tg[js]
+
+            ts[ja] = tg[ja]
+            tc[ja] = 2 * Tmax[ja] - ts[ja]
+            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
+
+            tc[jc] = Tmax[jc]
+            ts[jc] = tg[jc]
+
+            return ts, tc
+
+        return Tmax, newtheader
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
@@ -254,6 +350,7 @@ class Solver3T(Solver_):
 
         return dr
 
+    # ==========================================================================
 
     def steady_temperature(
         self,
@@ -487,96 +584,3 @@ class Solver3T(Solver_):
             ts[i, :] = tc[i, :] - mrg
 
         return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
-
-    @staticmethod
-    def _check_target(target, d, max_len):
-        """
-        Validates and processes the target temperature input.
-
-        Parameters:
-        target (str or list): The target temperature(s) to be validated. It can be:
-            - "auto": which sets the target to None.
-            - A string: which should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
-            - A list of strings: where each string should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
-        max_len (int): The expected length of the target list if target is a list.
-
-        Returns:
-        numpy.ndarray: An array of target temperatures if the input is valid.
-
-        Raises:
-        ValueError: If the target is a string not in the allowed values, or if the target list length does not match max_len, or if any element in the target list is not in the allowed values.
-        """
-        # check target
-        if target == "auto":
-            d_ = d * np.ones(max_len)
-            target_ = np.array(
-                [
-                    Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
-                    for i in range(max_len)
-                ]
-            )
-        elif isinstance(target, str):
-            if target not in [
-                Solver_.Names.surf,
-                Solver_.Names.avg,
-                Solver_.Names.core,
-            ]:
-                raise ValueError(
-                    f"Target temperature should be in "
-                    f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
-                    f" got {target} instead."
-                )
-            else:
-                target_ = np.array([target for _ in range(max_len)])
-        else:
-            if len(target) != max_len:
-                raise ValueError()
-            for t in target:
-                if t not in [
-                    Solver_.Names.surf,
-                    Solver_.Names.avg,
-                    Solver_.Names.core,
-                ]:
-                    raise ValueError()
-            target_ = np.array(target)
-        return target_
-
-    def _steady_intensity_header(
-        self, T: floatArrayLike, target: strListLike
-    ) -> Tuple[np.ndarray, Callable]:
-        """Format input for ampacity solver."""
-
-        shape = self._min_shape()
-        Tmax = T * np.ones(shape)
-        target_ = self._check_target(target, self.args.d, shape[0])
-
-        # pre-compute indexes
-        c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
-
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
-        jx = np.intersect1d(ix, ja)
-
-        # get correct input for quasi-newton solver
-        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
-            self.jh.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
-
-            ts[js] = Tmax[js]
-            tc[js] = tg[js]
-
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax[ja] - ts[ja]
-            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
-
-            tc[jc] = Tmax[jc]
-            ts[jc] = tg[jc]
-
-            return ts, tc
-
-        return Tmax, newtheader
-
