@@ -260,6 +260,37 @@ class Solver(ABC):
             shape = (1,)
         return shape
 
+    def _transient_process_dynamic(
+        self, time: np.ndarray, n: int, dynamic: dict = None
+    ):
+        """Code factorization for transient temperature computations.
+
+        This methods prepare a dict with dynamic values to use in the
+        compute time loop.
+        """
+        if len(time) < 2:
+            raise ValueError("The length of the time array must be at least 2.")
+
+        # get month, day and hours in range with time
+        month, day, hour = _set_dates(
+            self.args.month, self.args.day, self.args.hour, time, n
+        )
+
+        # put dynamic values in a separate dict which will be used
+        # through the time loop
+        dynamic_ = {
+            "month": month,
+            "day": day,
+            "hour": hour,
+        }
+
+        if dynamic is None:
+            dynamic = {}
+        for k, v in dynamic.items():
+            dynamic_[k] = reshape(v, len(time), n)
+
+        return dynamic_
+
     def update(self) -> None:
         self.args.extend()
         self.jh.__init__(**self.args.__dict__)
