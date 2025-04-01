@@ -183,6 +183,32 @@ class Solver3T(Solver_):
         c, _, _, _ = self.mgc
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
+    def _steady_return_opt(
+        self,
+        return_err: bool,
+        return_power: bool,
+        Ts: np.ndarray,
+        Ta: np.ndarray,
+        err: np.ndarray,
+        df: pd.DataFrame,
+    ):
+        """Add error and/or power values to pd.Dataframe returned in
+        steady_temperature and steady_intensity methods."""
+
+        # add convergence error if asked
+        if return_err:
+            df[Solver_.Names.err] = err
+
+        # add power values if asked
+        if return_power:
+            df[Solver_.Names.pjle] = self.jh.value(Ta)
+            df[Solver_.Names.psol] = self.sh.value(Ts)
+            df[Solver_.Names.pcnv] = self.cc.value(Ts)
+            df[Solver_.Names.prad] = self.rc.value(Ts)
+            df[Solver_.Names.ppre] = self.pc.value(Ts)
+
+        return df
+
     def steady_temperature(
         self,
         Tsg: Optional[floatArrayLike] = None,
@@ -240,16 +266,7 @@ class Solver3T(Solver_):
         df = pd.DataFrame(
             {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
         )
-
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.joule(x, y)
-            df[Solver_.Names.psol] = self.sh.value(x)
-            df[Solver_.Names.pcnv] = self.cc.value(x)
-            df[Solver_.Names.prad] = self.rc.value(x)
-            df[Solver_.Names.ppre] = self.pc.value(x)
+        df = self._steady_return_opt(return_err, return_power, x, z, err, df)
 
         return df
 
@@ -539,24 +556,16 @@ class Solver3T(Solver_):
 
         # format output
         df = pd.DataFrame({Solver_.Names.transit: x})
-
-        if return_err:
-            df["err"] = err
-
         if return_temp or return_power:
             ts, tc = newtheader(x, y)
             ta = self.average(ts, tc)
-
             if return_temp:
                 df[Solver_.Names.tsurf] = ts
                 df[Solver_.Names.tavg] = ta
                 df[Solver_.Names.tcore] = tc
-
-            if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ta)
-                df[Solver_.Names.psol] = self.sh.value(ts)
-                df[Solver_.Names.pcnv] = self.cc.value(ts)
-                df[Solver_.Names.prad] = self.rc.value(ts)
-                df[Solver_.Names.ppre] = self.pc.value(ts)
+        else:
+            ts = None
+            ta = None
+        df = self._steady_return_opt(return_err, return_power, ts, ta, err, df)
 
         return df
