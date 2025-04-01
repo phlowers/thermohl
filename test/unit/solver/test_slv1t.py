@@ -9,7 +9,6 @@ import pytest
 import numpy as np
 import pandas as pd
 from thermohl.solver.slv1t import Solver1T
-from thermohl.solver.base import Args, _DEFPARAM as DP
 
 
 @pytest.fixture

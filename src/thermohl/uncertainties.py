@@ -7,6 +7,7 @@
 
 # mypy: ignore-errors
 """Tools to perform Monte Carlo simulations using the thermOHL steady solvers with uncertain input parameters."""
+
 from typing import Union, Tuple
 
 import numpy as np
@@ -97,7 +98,6 @@ def _generate_samples(
 
     # loop on dict
     for j, k in enumerate(dc):
-
         if k not in du.keys():
             continue
         dist = du[k]["dist"]
@@ -439,7 +439,6 @@ def sensitivity(
 
     # for each entry, compute
     for i in range(n):
-
         # first sample
         smp = _generate_samples(dc, i, du, ns, check=False)
         s.dc = smp

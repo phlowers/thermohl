@@ -19,7 +19,6 @@ from thermohl.utils import bisect_v
 
 
 class Solver1T(Solver_):
-
     def steady_temperature(
         self,
         Tmin: float = DP.tmin,
