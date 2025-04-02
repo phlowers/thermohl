@@ -24,7 +24,7 @@ class SolarHeating(ieee.SolarHeating):
         hour: floatArrayLike,
         D: floatArrayLike,
         alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -38,7 +38,7 @@ class SolarHeating(ieee.SolarHeating):
         lat : float or np.ndarray
             Latitude.
         alt : float or np.ndarray
-             Lltitude.
+             Longitude.
         azm : float or np.ndarray
             Azimuth.
         month : int or np.ndarray
@@ -52,8 +52,9 @@ class SolarHeating(ieee.SolarHeating):
             external diameter.
         alpha : float or np.ndarray
             Solar absorption coefficient.
-        srad : xxx
-            xxx
+        srad : float or np.ndarray
+            Solar irradiance. Default is nan. If nan value is estimated using
+            all other input.
 
         Returns
         -------

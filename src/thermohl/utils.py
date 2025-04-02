@@ -101,7 +101,7 @@ def add_default_uncertainties(dat: dict, warning: bool = False) -> dict:
     return _dict_completion(dat, fil, check=False, warning=warning)
 
 
-def df2dct(df: pd.DataFrame) -> dict:
+def df2dict(df: pd.DataFrame) -> dict:
     """Convert a pandas.DataFrame to a dictionary.
 
     Would be an equivalent to df.to_dict(orient='numpy.ndarray') if it existed.

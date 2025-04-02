@@ -13,7 +13,6 @@ from typing import Tuple, Type, Any, Optional, KeysView, Dict
 
 import numpy as np
 import pandas as pd
-from numpy import ndarray
 
 from thermohl import (
     floatArrayLike,
@@ -53,6 +52,8 @@ class Args:
         for k in dic:
             if k in keys and dic[k] is not None:
                 self[k] = dic[k]
+        # check for shape incompatibilities
+        _ = self.shape()
 
     def _set_default_values(self) -> None:
         """Set default values."""
@@ -62,9 +63,9 @@ class Args:
         self.alt = 0.0  # altitude (m)
         self.azm = 0.0  # azimuth (deg)
 
-        self.month = 3  # month number (1=Jan, 2=Feb, ...)
+        self.month = 3  # month number (1=Jan, 2=Feb ...)
         self.day = 21  # day of the month
-        self.hour = 12  # hour of the day (in [0, 23] range)
+        self.hour = 12.0  # hour of the day (in [0, 23] range)
 
         self.Ta = 15.0  # ambient temperature (C)
         self.Pa = 1.0e05  # ambient pressure (Pa)
@@ -73,8 +74,8 @@ class Args:
         self.ws = 0.0  # wind speed (m.s**-1)
         self.wa = 90.0  # wind angle (deg, regarding north)
         self.al = 0.8  # albedo (1)
-        # coefficient for air pollution from 0 (clean) to 1 (polluted)
-        self.tb = 0.1
+        self.tb = 0.1  # turbidity (coefficient for air pollution from 0 -clean- to 1 -polluted-)
+        self.srad = float("nan")  # solar irradiance (in W.m**-2)
 
         self.I = 100.0  # transit intensity (A)
 
@@ -115,53 +116,52 @@ class Args:
     def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
 
-    def max_len(self) -> int:
+    def shape(self) -> Tuple[int, ...]:
         """
-        Calculate the maximum length of the values in the dictionary.
+        Compute the maximum effective shape of values in current instance.
 
-        This method iterates over all keys in the dictionary and determines the maximum length
-        of the values associated with those keys.
-        If a value is not of a type that has a length, it is ignored.
+        Members of Args can be float of arrays. If arrays, they must be
+        one-dimensional. Float and 1d array can coexist, but all arrays should
+        have the same shape/size.
 
-        Returns:
-            int: The maximum length of the values in the dictionary. If the dictionary is empty
-            or all values are of types that do not have a length, the method returns 1.
+        This method iterates over all keys in the instance's __dict__ and
+        computes the maximum length of the values associated with those keys.
+
+        If incompatible shapes are encountered, an exception is raised (ValueError).
+
         """
-        n = 1
+        shape_ = ()
         for k in self.keys():
-            try:
-                n = max(n, len(self[k]))
-            except TypeError:
-                pass
-        return n
+            s = np.array(self[k]).shape
+            d = len(s)
+            er = f"Key {k} has a {s} shape when main shape is {shape_}"
+            if d == 0:
+                continue
+            if d == 1:
+                if shape_ == ():
+                    shape_ = s
+                elif len(shape_) == 1:
+                    if shape_ != s:
+                        raise ValueError(er)
+                else:
+                    raise ValueError(er)
+            else:
+                raise ValueError(
+                    f"Key {k} has a {s} shape, only float and 1-dim arrays are accepted"
+                )
+        return shape_
 
-    def extend_to_max_len(self) -> None:
-        """
-        Extend all elements in the dictionary to the maximum length.
-
-        This method iterates over all keys in the dictionary and checks if the
-        corresponding value is a numpy ndarray. If it is, it checks if its length
-        matches the maximum length obtained from the `max_len` method.
-        If the length matches, it creates a copy of the array.
-        If the length does not match or for non-ndarray values, it creates
-        a new numpy array of the maximum length, filled with the original value
-        and having the same data type.
-
-        Returns:
-            None
-        """
-        n = self.max_len()
+    def extend(self, shape: Tuple[int, ...] = None) -> None:
+        # get shape
+        if shape is None:
+            shape = self.shape()
+        # complete if necessary
+        if len(shape) == 0:
+            shape = (1,)
+        # create a copy dict with scaled array
         for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                t = self[k].dtype
-                c = len(self[k]) == n
-            else:
-                t = type(self[k])
-                c = False
-            if c:
-                self[k] = self[k][:]
-            else:
-                self[k] = self[k] * np.ones((n,), dtype=t)
+            a = np.array(self[k])
+            self[k] = a * np.ones(shape, dtype=a.dtype)
 
     def compress(self) -> None:
         """
@@ -172,10 +172,9 @@ class Args:
             None
         """
         for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                u = np.unique(self[k])
-                if len(u) == 1:
-                    self[k] = u[0]
+            u = np.unique(self[k])
+            if len(u) == 1:
+                self[k] = u[0]
 
 
 class Solver(ABC):
@@ -246,7 +245,7 @@ class Solver(ABC):
 
         """
         self.args = Args(dic)
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh = joule(**self.args.__dict__)
         self.sh = solar(**self.args.__dict__)
         self.cc = convective(**self.args.__dict__)
@@ -254,8 +253,45 @@ class Solver(ABC):
         self.pc = precipitation(**self.args.__dict__)
         self.args.compress()
 
+    def _min_shape(self) -> Tuple[int, ...]:
+        shape = self.args.shape()
+        if shape == ():
+            shape = (1,)
+        return shape
+
+    def _transient_process_dynamic(
+        self, time: np.ndarray, n: int, dynamic: dict = None
+    ):
+        """Code factorization for transient temperature computations.
+
+        This methods prepare a dict with dynamic values to use in the
+        compute time loop.
+        """
+        if len(time) < 2:
+            raise ValueError("The length of the time array must be at least 2.")
+
+        # get month, day and hours in range with time
+        month, day, hour = _set_dates(
+            self.args.month, self.args.day, self.args.hour, time, n
+        )
+
+        # put dynamic values in a separate dict which will be used
+        # through the time loop
+        dynamic_ = {
+            "month": month,
+            "day": day,
+            "hour": hour,
+        }
+
+        if dynamic is None:
+            dynamic = {}
+        for k, v in dynamic.items():
+            dynamic_[k] = reshape(v, len(time), n)
+
+        return dynamic_
+
     def update(self) -> None:
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
@@ -285,12 +321,12 @@ class Solver(ABC):
         raise NotImplementedError
 
 
-def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
+def reshape(input_var: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
     """
     Reshape the input array to the specified dimensions (nr, nc) if possible.
 
     Args:
-        input_array (numberArrayLike): Input array to be reshaped.
+        input_var (numberArrayLike): Variable to be reshaped.
         nb_row (int): Desired number of rows for the reshaped array.
         nb_columns (int): Desired number of columns for the reshaped array.
 
@@ -299,24 +335,29 @@ def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numbe
             returns an array filled with the input_value repeated to fill the dimension (nb_row, nb_columns).
 
     Raises:
-        AttributeError: If the input_array has an invalid shape that cannot be reshaped.
+        ValueError: If the input has an invalid shape that cannot be reshaped.
     """
-    reshaped_array = ndarray
-    try:
-        input_shape = input_array.shape
-        if len(input_shape) == 1:
-            if nb_row == input_shape[0]:
-                reshaped_array = np.column_stack(nb_columns * (input_array,))
-            elif nb_columns == input_shape[0]:
-                reshaped_array = np.vstack(nb_row * (input_array,))
-        elif len(input_shape) == 0:
-            raise AttributeError()
-        else:
-            reshaped_array = np.reshape(input_array, (nb_row, nb_columns))
-    except AttributeError:
+
+    input_array = np.array(input_var)
+    input_shape = input_array.shape
+
+    msg = f"Input array has incompatible shape {input_shape} with specified number of rows ({nb_row}) and/or columns ({nb_columns})."
+
+    if len(input_shape) == 0:
         reshaped_array = input_array * np.ones(
-            (nb_row, nb_columns), dtype=type(input_array)
+            (nb_row, nb_columns), dtype=input_array.dtype
         )
+    elif len(input_shape) == 1:
+        if nb_row == input_shape[0]:
+            reshaped_array = np.column_stack(nb_columns * (input_array,))
+        elif nb_columns == input_shape[0]:
+            reshaped_array = np.vstack(nb_row * (input_array,))
+        else:
+            raise ValueError(msg)
+    elif input_shape == (nb_row, nb_columns):
+        return input_array
+    else:
+        raise ValueError(msg)
     return reshaped_array
 
 
@@ -362,10 +403,7 @@ def _set_dates(
 
     td = np.array(
         [datetime.timedelta()]
-        + [
-            datetime.timedelta(seconds=float(time[i] - time[i - 1]))
-            for i in range(1, N)
-        ]
+        + [datetime.timedelta(seconds=float(time[i] - time[0])) for i in range(1, N)]
     )
 
     for j in range(n):

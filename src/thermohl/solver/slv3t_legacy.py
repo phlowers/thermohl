@@ -12,7 +12,7 @@ import numpy as np
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
 from thermohl.solver.base import Solver as Solver_
-from thermohl.solver.slv3t import Solver3T
+from thermohl.solver.slv3t import Solver3T, _check_target
 
 
 class Solver3TL(Solver3T):
@@ -46,7 +46,7 @@ class Solver3TL(Solver3T):
         UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
         BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
 
-        core_diameter_array = self.args.d * np.ones((self.args.max_len(),))
+        core_diameter_array = self.args.d * np.ones(self._min_shape())
         indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
         heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(
             core_diameter_array
@@ -86,14 +86,16 @@ class Solver3TL(Solver3T):
         morgan_coefficient = self.mgc[0]
         return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
 
+    # ==========================================================================
+
     def _steady_intensity_header(
         self, T: floatArrayLike, target: strListLike
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
-        max_len = self.args.max_len()
-        Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
+        shape = self._min_shape()
+        Tmax = T * np.ones(shape)
+        target_ = _check_target(target, self.args.d, shape[0])
 
         # pre-compute indexes
         surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]
@@ -124,6 +126,8 @@ class Solver3TL(Solver3T):
         c1, _ = self.mgc
         c2 = 0.5 * np.ones_like(c1)
         return c1, c2
+
+    # ==========================================================================
 
     def transient_temperature_legacy(
         self,
@@ -162,7 +166,7 @@ class Solver3TL(Solver3T):
         """
 
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
+        n = self._min_shape()[0]
         N = len(time)
         if N < 2:
             raise ValueError()
@@ -174,17 +178,19 @@ class Solver3TL(Solver3T):
         # shortcuts for time-loop
         imc = 1.0 / (self.args.m * self.args.c)
 
-        # init
+        # initial conditions
         ts = np.zeros((N, n))
         ta = np.zeros((N, n))
         tc = np.zeros((N, n))
         dT = np.zeros((N, n))
-
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
         ts[0, :] = Ts0
         tc[0, :] = Tc0
         ta[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]
 
+        # time loop
         for i in range(1, len(time)):
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             dti = time[i] - time[i - 1]
