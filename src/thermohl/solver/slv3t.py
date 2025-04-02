@@ -13,7 +13,11 @@ from pyntb.optimize import qnewt2d_v
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
+from thermohl.solver.base import (
+    Solver as Solver_,
+    _DEFPARAM as DP,
+    Args,
+)
 from thermohl.solver.slv1t import Solver1T
 
 
@@ -44,6 +48,61 @@ def _profile_bim_avg(
     """Analytical formulation for average temperature in _profile_bim."""
     a, b = _profile_bim_avg_coeffs(ri, re)
     return tc - (a / b) * (tc - ts)
+
+
+def _check_target(target, d, max_len):
+    """
+    Validates and processes the target temperature input for ampacity computations.
+
+    Parameters:
+    target (str or list): The target temperature(s) to be validated. It can be:
+        - "auto": which sets the target to None.
+        - A string: which should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
+        - A list of strings: where each string should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
+    max_len (int): The expected length of the target list if target is a list.
+
+    Returns:
+    numpy.ndarray: An array of target temperatures if the input is valid.
+
+    Raises:
+    ValueError: If the target is a string not in the allowed values, or if the
+    target list length does not match max_len, or if any element in the target
+    list is not in the allowed values.
+    """
+
+    if target == "auto":
+        d_ = d * np.ones(max_len)
+        target_ = np.array(
+            [
+                Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
+                for i in range(max_len)
+            ]
+        )
+    elif isinstance(target, str):
+        if target not in [
+            Solver_.Names.surf,
+            Solver_.Names.avg,
+            Solver_.Names.core,
+        ]:
+            raise ValueError(
+                f"Target temperature should be in "
+                f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
+                f" got {target} instead."
+            )
+        else:
+            target_ = np.array([target for _ in range(max_len)])
+    else:
+        if len(target) != max_len:
+            raise ValueError()
+        for t in target:
+            if t not in [
+                Solver_.Names.surf,
+                Solver_.Names.avg,
+                Solver_.Names.core,
+            ]:
+                raise ValueError()
+        target_ = np.array(target)
+    return target_
 
 
 class Solver3T(Solver_):
@@ -78,7 +137,7 @@ class Solver3T(Solver_):
             - i : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        c = 0.5 * np.ones((self.args.max_len(),))
+        c = 0.5 * np.ones(self._min_shape())
         D = self.args.D * np.ones_like(c)
         d = self.args.d * np.ones_like(c)
         i = np.nonzero(d > 0.0)[0]
@@ -97,7 +156,7 @@ class Solver3T(Solver_):
         Returns:
             None
         """
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.jh.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
@@ -183,6 +242,120 @@ class Solver3T(Solver_):
         c, _, _, _ = self.mgc
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
+    # ==========================================================================
+
+    def _steady_return_opt(
+        self,
+        return_err: bool,
+        return_power: bool,
+        Ts: np.ndarray,
+        Ta: np.ndarray,
+        err: np.ndarray,
+        df: pd.DataFrame,
+    ):
+        """Add error and/or power values to pd.Dataframe returned in
+        steady_temperature and steady_intensity methods."""
+
+        # add convergence error if asked
+        if return_err:
+            df[Solver_.Names.err] = err
+
+        # add power values if asked
+        if return_power:
+            df[Solver_.Names.pjle] = self.jh.value(Ta)
+            df[Solver_.Names.psol] = self.sh.value(Ts)
+            df[Solver_.Names.pcnv] = self.cc.value(Ts)
+            df[Solver_.Names.prad] = self.rc.value(Ts)
+            df[Solver_.Names.ppre] = self.pc.value(Ts)
+
+        return df
+
+    def _steady_intensity_header(
+        self, T: floatArrayLike, target: strListLike
+    ) -> Tuple[np.ndarray, Callable]:
+        """Format input for ampacity solver."""
+
+        shape = self._min_shape()
+        Tmax = T * np.ones(shape)
+        target_ = _check_target(target, self.args.d, shape[0])
+
+        # pre-compute indexes
+        c, D, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
+
+        js = np.nonzero(target_ == Solver_.Names.surf)[0]
+        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
+        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        jx = np.intersect1d(ix, ja)
+
+        # get correct input for quasi-newton solver
+        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
+            self.args.I = i
+            self.jh.__init__(**self.args.__dict__)
+            ts = np.ones_like(tg) * np.nan
+            tc = np.ones_like(tg) * np.nan
+
+            ts[js] = Tmax[js]
+            tc[js] = tg[js]
+
+            ts[ja] = tg[ja]
+            tc[ja] = 2 * Tmax[ja] - ts[ja]
+            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
+
+            tc[jc] = Tmax[jc]
+            ts[jc] = tg[jc]
+
+            return ts, tc
+
+        return Tmax, newtheader
+
+    def _morgan_transient(self):
+        """Morgan coefficients for transient temperature."""
+        c, D, d, ix = self.mgc
+        c1 = c / (2.0 * np.pi * self.args.l)
+        c2 = 0.5 * np.ones_like(c1)
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        c2[ix] = a / b
+        return c1, c2
+
+    def _transient_temperature_results(
+        self,
+        time: np.ndarray,
+        ts: np.ndarray,
+        ta: np.ndarray,
+        tc: np.ndarray,
+        return_power: bool,
+        n: int,
+    ):
+        """Format transient temperature results."""
+        dr = {
+            Solver_.Names.time: time,
+            Solver_.Names.tsurf: ts,
+            Solver_.Names.tavg: ta,
+            Solver_.Names.tcore: tc,
+        }
+
+        if return_power:
+            for power in Solver_.Names.powers():
+                dr[power] = np.zeros_like(ts)
+
+            for i in range(len(time)):
+                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
+                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+
+        if n == 1:
+            keys = list(dr.keys())
+            keys.remove(Solver_.Names.time)
+            for k in keys:
+                dr[k] = dr[k][:, 0]
+
+        return dr
+
+    # ==========================================================================
+
     def steady_temperature(
         self,
         Tsg: Optional[floatArrayLike] = None,
@@ -215,7 +388,7 @@ class Solver3T(Solver_):
         """
 
         # if no guess provided, use ambient temp
-        shape = (self.args.max_len(),)
+        shape = self._min_shape()
         Tsg = Tsg if Tsg is not None else 1.0 * self.args.Ta
         Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.Ta)
         Tsg_ = Tsg * np.ones(shape)
@@ -240,235 +413,9 @@ class Solver3T(Solver_):
         df = pd.DataFrame(
             {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
         )
-
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.joule(x, y)
-            df[Solver_.Names.psol] = self.sh.value(x)
-            df[Solver_.Names.pcnv] = self.cc.value(x)
-            df[Solver_.Names.prad] = self.rc.value(x)
-            df[Solver_.Names.ppre] = self.pc.value(x)
+        df = self._steady_return_opt(return_err, return_power, x, z, err, df)
 
         return df
-
-    def _morgan_transient(self):
-        """Morgan coefficients for transient temperature."""
-        c, D, d, ix = self.mgc
-        c1 = c / (2.0 * np.pi * self.args.l)
-        c2 = 0.5 * np.ones_like(c1)
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
-        c2[ix] = a / b
-        return c1, c2
-
-    def _transient_temperature_results(self, time, ts, ta, tc, return_power, n):
-        dr = {
-            Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
-            Solver_.Names.tcore: tc,
-        }
-
-        if return_power:
-            for power in Solver_.Names.powers():
-                dr[power] = np.zeros_like(ts)
-
-            for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
-
-        if n == 1:
-            keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
-
-        return dr
-
-    def transient_temperature(
-        self,
-        time: floatArray = np.array([]),
-        Ts0: Optional[floatArrayLike] = None,
-        Tc0: Optional[floatArrayLike] = None,
-        return_power: bool = False,
-    ) -> Dict[str, Any]:
-        """
-        Compute transient-state temperature.
-
-        Parameters
-        ----------
-        time : numpy.ndarray
-            A 1D array with times (in seconds) when the temperature needs to be
-            computed. The array must contain increasing values (undefined
-            behaviour otherwise).
-        Ts0 : float
-            Initial surface temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        Tc0 : float
-            Initial core temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        return_power : bool, optional
-            Return power term values. The default is False.
-
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary with temperature and other results (depending on inputs)
-            in the keys.
-
-        """
-        # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
-        if N < 2:
-            raise ValueError()
-
-        # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
-
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            I=reshape(self.args.I, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
-        )
-        del (month, day, hour)
-
-        # shortcuts for time-loop
-        c1, c2 = self._morgan_transient()
-        imc = 1.0 / (self.args.m * self.args.c)
-
-        # init
-        ts = np.zeros((N, n))
-        ta = np.zeros((N, n))
-        tc = np.zeros((N, n))
-        ts[0, :] = Ts0
-        tc[0, :] = Tc0
-        ta[0, :] = self.average(ts[0, :], tc[0, :])
-
-        # main time loop
-        for i in range(1, len(time)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
-            self.update()
-            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
-            mrg = c1 * (self.jh.value(ta[i, :]) - bal)
-            tc[i, :] = ta[i, :] + c2 * mrg
-            ts[i, :] = tc[i, :] - mrg
-
-        return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
-
-    @staticmethod
-    def _check_target(target, d, max_len):
-        """
-        Validates and processes the target temperature input.
-
-        Parameters:
-        target (str or list): The target temperature(s) to be validated. It can be:
-            - "auto": which sets the target to None.
-            - A string: which should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
-            - A list of strings: where each string should be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
-        max_len (int): The expected length of the target list if target is a list.
-
-        Returns:
-        numpy.ndarray: An array of target temperatures if the input is valid.
-
-        Raises:
-        ValueError: If the target is a string not in the allowed values, or if the target list length does not match max_len, or if any element in the target list is not in the allowed values.
-        """
-        # check target
-        if target == "auto":
-            d_ = d * np.ones(max_len)
-            target_ = np.array(
-                [
-                    Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
-                    for i in range(max_len)
-                ]
-            )
-        elif isinstance(target, str):
-            if target not in [
-                Solver_.Names.surf,
-                Solver_.Names.avg,
-                Solver_.Names.core,
-            ]:
-                raise ValueError(
-                    f"Target temperature should be in "
-                    f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
-                    f" got {target} instead."
-                )
-            else:
-                target_ = np.array([target for _ in range(max_len)])
-        else:
-            if len(target) != max_len:
-                raise ValueError()
-            for t in target:
-                if t not in [
-                    Solver_.Names.surf,
-                    Solver_.Names.avg,
-                    Solver_.Names.core,
-                ]:
-                    raise ValueError()
-            target_ = np.array(target)
-        return target_
-
-    def _steady_intensity_header(
-        self, T: floatArrayLike, target: strListLike
-    ) -> Tuple[np.ndarray, Callable]:
-        """Format input for ampacity solver."""
-
-        max_len = self.args.max_len()
-        Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
-
-        # pre-compute indexes
-        c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
-
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
-        jx = np.intersect1d(ix, ja)
-
-        # get correct input for quasi-newton solver
-        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
-            self.jh.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
-
-            ts[js] = Tmax[js]
-            tc[js] = tg[js]
-
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax[ja] - ts[ja]
-            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
-
-            tc[jc] = Tmax[jc]
-            ts[jc] = tg[jc]
-
-            return ts, tc
-
-        return Tmax, newtheader
 
     def steady_intensity(
         self,
@@ -539,24 +486,92 @@ class Solver3T(Solver_):
 
         # format output
         df = pd.DataFrame({Solver_.Names.transit: x})
-
-        if return_err:
-            df["err"] = err
-
         if return_temp or return_power:
             ts, tc = newtheader(x, y)
             ta = self.average(ts, tc)
-
             if return_temp:
                 df[Solver_.Names.tsurf] = ts
                 df[Solver_.Names.tavg] = ta
                 df[Solver_.Names.tcore] = tc
-
-            if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ta)
-                df[Solver_.Names.psol] = self.sh.value(ts)
-                df[Solver_.Names.pcnv] = self.cc.value(ts)
-                df[Solver_.Names.prad] = self.rc.value(ts)
-                df[Solver_.Names.ppre] = self.pc.value(ts)
+        else:
+            ts = None
+            ta = None
+        df = self._steady_return_opt(return_err, return_power, ts, ta, err, df)
 
         return df
+
+    def transient_temperature(
+        self,
+        time: floatArray = np.array([]),
+        Ts0: Optional[floatArrayLike] = None,
+        Tc0: Optional[floatArrayLike] = None,
+        dynamic: dict = None,
+        return_power: bool = False,
+    ) -> Dict[str, Any]:
+        """
+        Compute transient-state temperature.
+
+        Parameters
+        ----------
+        time : numpy.ndarray
+            A 1D array with times (in seconds) when the temperature needs to be
+            computed. The array must contain increasing values (undefined
+            behaviour otherwise).
+        Ts0 : float
+            Initial surface temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
+        Tc0 : float
+            Initial core temperature. If set to None, the ambient temperature from
+            internal dict will be used. The default is None.
+        return_power : bool, optional
+            Return power term values. The default is False.
+
+        Returns
+        -------
+        Dict[str, Any]
+            A dictionary with temperature and other results (depending on inputs)
+            in the keys.
+
+        """
+        # get sizes (n for input dict entries, N for time)
+        n = self._min_shape()[0]
+        N = len(time)
+
+        # process dynamic values
+        dynamic_ = self._transient_process_dynamic(time, n, dynamic)
+
+        # save args
+        args = self.args.__dict__.copy()
+
+        # shortcuts for time-loop
+        c1, c2 = self._morgan_transient()
+        imc = 1.0 / (self.args.m * self.args.c)
+
+        # initial conditions
+        ts = np.zeros((N, n))
+        ta = np.zeros((N, n))
+        tc = np.zeros((N, n))
+        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
+        ts[0, :] = Ts0
+        tc[0, :] = Tc0
+        ta[0, :] = self.average(ts[0, :], tc[0, :])
+
+        # time loop
+        for i in range(1, N):
+            for k, v in dynamic_.items():
+                self.args[k] = v[i, :]
+            self.update()
+            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
+            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
+            mrg = c1 * (self.jh.value(ta[i, :]) - bal)
+            tc[i, :] = ta[i, :] + c2 * mrg
+            ts[i, :] = tc[i, :] - mrg
+
+        # get results
+        dr = self._transient_temperature_results(time, ts, ta, tc, return_power, n)
+
+        # restore args
+        self.args = Args(args)
+
+        return dr

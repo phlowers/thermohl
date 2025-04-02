@@ -48,7 +48,7 @@ class SolarHeating(PowerTerm):
         hour: floatArrayLike,
         D: floatArrayLike,
         alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -74,8 +74,9 @@ class SolarHeating(PowerTerm):
             external diameter.
         alpha : float or np.ndarray
             Solar absorption coefficient.
-        srad : xxx
-            xxx.
+        srad : float or np.ndarray
+            Solar irradiance. Default is nan. If nan value is estimated using
+            all other input.
 
 
         Returns
@@ -85,7 +86,7 @@ class SolarHeating(PowerTerm):
 
         """
         self.alpha = alpha
-        if srad is None:
+        if np.all(np.isnan(srad)):
             self.srad = SolarHeating._solar_radiation(
                 np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour
             )
