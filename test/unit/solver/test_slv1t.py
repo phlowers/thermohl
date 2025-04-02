@@ -5,9 +5,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
+
 from thermohl.solver.slv1t import Solver1T
 
 

@@ -10,12 +10,12 @@ from typing import Dict, Any, Optional
 
 import numpy as np
 import pandas as pd
+from pyntb.optimize import bisect_v
 
 from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
-from thermohl.utils import bisect_v
 
 
 class Solver1T(Solver_):

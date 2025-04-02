@@ -7,8 +7,8 @@
 
 from typing import Optional, Any
 
-from thermohl.power import ieee
 from thermohl import floatArrayLike, intArrayLike
+from thermohl.power import ieee
 
 
 class SolarHeating(ieee.SolarHeating):

@@ -9,12 +9,12 @@ from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
 import pandas as pd
+from pyntb.optimize import qnewt2d_v
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
 from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
 from thermohl.solver.slv1t import Solver1T
-from thermohl.utils import quasi_newton_2d
 
 
 def _profile_mom(ts: float, tc: float, r: floatArrayLike, re: float) -> floatArrayLike:
@@ -222,15 +222,15 @@ class Solver3T(Solver_):
         Tcg_ = Tcg * np.ones(shape)
 
         # solve system
-        x, y, cnt, err = quasi_newton_2d(
+        x, y, cnt, err = qnewt2d_v(
             f1=self.balance,
             f2=self.morgan,
             x0=Tsg_,
             y0=Tcg_,
-            relative_tolerance=tol,
-            max_iterations=maxiter,
-            delta_x=1.0e-03,
-            delta_y=1.0e-03,
+            rtol=tol,
+            maxiter=maxiter,
+            dx=1.0e-03,
+            dy=1.0e-03,
         )
         if np.max(err) > tol or cnt == maxiter:
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
@@ -524,15 +524,15 @@ class Solver3T(Solver_):
             type(self.pc),
         )
         r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
-        x, y, cnt, err = quasi_newton_2d(
+        x, y, cnt, err = qnewt2d_v(
             balance,
             morgan,
             r[Solver_.Names.transit].values,
             Tmax,
-            relative_tolerance=tol,
-            max_iterations=maxiter,
-            delta_x=1.0e-03,
-            delta_y=1.0e-03,
+            rtol=tol,
+            maxiter=maxiter,
+            dx=1.0e-03,
+            dy=1.0e-03,
         )
         if np.max(err) > tol or cnt == maxiter:
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")

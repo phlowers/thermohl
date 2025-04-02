@@ -5,8 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import pytest
 import numpy as np
+import pytest
 
 from thermohl.power.cigre import Air
 

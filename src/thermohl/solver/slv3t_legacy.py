@@ -11,7 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, Args
+from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.slv3t import Solver3T
 
 

@@ -8,6 +8,7 @@
 """Thermodynamics quantities. Values from Wikipedia unless specified."""
 
 import numpy as np
+
 from thermohl import floatArrayLike
 
 # Standard temperature and pressure from EPA and NIST; _T0 in K, _p0 in Pa

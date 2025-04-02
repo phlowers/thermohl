@@ -7,7 +7,7 @@
 
 import numpy as np
 
-from thermohl.utils import bisect_v, quasi_newton_2d
+from pyntb.optimize import bisect_v, qnewt2d_v
 
 _nprs = 3141592654
 
@@ -69,7 +69,7 @@ def test_bisect_array():
 
 
 #
-def test_quasi_newton_2d_convergence():
+def test_qnewt2d_v_convergence():
     np.random.seed(_nprs)
     size = 10
     tol = 1.0e-12
@@ -85,15 +85,15 @@ def test_quasi_newton_2d_convergence():
 
     xg = np.ones((size,))
     yg = np.ones((size,))
-    x, y, count, err = quasi_newton_2d(
+    x, y, count, err = qnewt2d_v(
         f1=f1,
         f2=f2,
         x0=xg,
         y0=yg,
-        relative_tolerance=tol,
-        max_iterations=999,
-        delta_x=1.0e-09,
-        delta_y=1.0e-09,
+        rtol=tol,
+        maxiter=999,
+        dx=1.0e-09,
+        dy=1.0e-09,
     )
 
     assert np.logical_and(
@@ -102,7 +102,7 @@ def test_quasi_newton_2d_convergence():
     assert count == 999
 
 
-def test_quasi_newton_2d_no_convergence():
+def test_qnewt2d_v_no_convergence():
     np.random.seed(_nprs)
     size = 10
     tol = 1.0e-12
@@ -118,15 +118,15 @@ def test_quasi_newton_2d_no_convergence():
 
     xg = np.ones((size,))
     yg = np.ones((size,))
-    x, y, count, err = quasi_newton_2d(
+    x, y, count, err = qnewt2d_v(
         f1=f1,
         f2=f2,
         x0=xg,
         y0=yg,
-        relative_tolerance=tol,
-        max_iterations=1,  # Set max iterations to 1 to force no convergence
-        delta_x=1.0e-09,
-        delta_y=1.0e-09,
+        rtol=tol,
+        maxiter=1,  # Set max iterations to 1 to force no convergence
+        dx=1.0e-09,
+        dy=1.0e-09,
     )
 
     assert count == 1
@@ -135,7 +135,7 @@ def test_quasi_newton_2d_no_convergence():
     )
 
 
-def test_quasi_newton_2d_large_system():
+def test_qnewt2d_v_large_system():
     np.random.seed(_nprs)
     size = 1000
     tol = 1.0e-12
@@ -151,15 +151,15 @@ def test_quasi_newton_2d_large_system():
 
     xg = np.ones((size,))
     yg = np.ones((size,))
-    x, y, count, err = quasi_newton_2d(
+    x, y, count, err = qnewt2d_v(
         f1=f1,
         f2=f2,
         x0=xg,
         y0=yg,
-        relative_tolerance=tol,
-        max_iterations=999,
-        delta_x=1.0e-09,
-        delta_y=1.0e-09,
+        rtol=tol,
+        maxiter=999,
+        dx=1.0e-09,
+        dy=1.0e-09,
     )
 
     assert np.logical_and(

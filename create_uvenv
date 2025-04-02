@@ -1,0 +1,35 @@
+#!/bin/bash
+# SPDX-FileCopyrightText: 2025 Mews Labs (https://www.mews-labs.com)
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+# -- dir for all envs
+ENV_DIR=/home/${USER}/ENV
+mkdir -p $ENV_DIR
+
+# -- current env with link
+VENV=${ENV_DIR}/mewslabs-thermohl-uv
+VLNK=.venv
+ln -sf $VENV $VLNK
+uv venv $VENV  # --python 3.11
+source $VENV/bin/activate
+# .venv\Scripts\activate
+
+# -- upgrade pip
+uv pip install --upgrade pip
+
+# -- install local package
+rm -rf build
+uv pip install .[examples,dev]
+
+# -- end text
+echo "---"
+echo -e "\e[1mto start the environment, type :\e[0m"
+echo "source ${VENV}/bin/activate"
+echo ""
+echo -e "\e[1mto stop the environment, type :\e[0m"
+echo "deactivate"
