@@ -12,10 +12,8 @@ name: SonarCloud analysis
 
 on:
   workflow_run:
-    workflows:
-      - SonarCloud Build
-    types:
-      - completed
+    workflows: [SonarCloud Build]
+    types: [completed]
 
 jobs:
   SonarCloudAnalysis:
@@ -65,14 +63,7 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
-
-      - name: Cache Python packages
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-pip
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
