@@ -1,0 +1,85 @@
+# SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+#
+# This Source Code Form is subject to the terms of the Mozilla Public
+# License, v. 2.0. If a copy of the MPL was not distributed with this
+# file, You can obtain one at http://mozilla.org/MPL/2.0/.
+# SPDX-License-Identifier: MPL-2.0
+
+name: SonarCloud Build
+
+on: push
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    if: ${{ (github.event_name != 'pull_request_target' && github.actor != 'dependabot[bot]') || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Cache SonarCloud packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.sonar/cache
+          key: ${{ runner.os }}-sonar
+          restore-keys: ${{ runner.os }}-sonar
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: 3.11
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade build
+
+      - name: Install security check tools
+        run: |
+          pip install bandit safety
+
+      - name: Security check with bandit
+        run: |
+          bandit -r thermohl/ -f json -o bandit-results.json || true
+
+      - name: Check dependencies vulnerabilities with safety
+        run: |
+          safety check --json --output safety-results.json || true
+
+      - name: Build and analyze (Pull Request)
+        if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m build
+
+      - name: Build and analyze (Push)
+        if: ${{ github.event_name == 'push' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python -m build
+
+      - name: Save PR number to file
+        if: github.event_name == 'pull_request'
+        run: echo ${{ github.event.number }} > PR_NUMBER.txt
+
+      - name: Archive PR number
+        if: github.event_name == 'pull_request'
+        uses: actions/upload-artifact@v4
+        with:
+          name: PR_NUMBER
+          path: PR_NUMBER.txt
+
+      - name: Archive security reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: security-reports
+          path: |
+            bandit-results.json
+            safety-results.json
