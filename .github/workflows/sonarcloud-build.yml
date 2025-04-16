@@ -22,34 +22,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Cache SonarCloud packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.sonar/cache
-          key: ${{ runner.os }}-sonar
-          restore-keys: ${{ runner.os }}-sonar
-
       - name: Set up Python 3.11
         uses: actions/setup-python@v5
         with:
           python-version: 3.11
+          cache: 'pip'
 
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade build
-
-      - name: Install security check tools
-        run: |
-          pip install bandit safety
-
-      - name: Security check with bandit
-        run: |
-          bandit -r thermohl/ -f json -o bandit-results.json || true
-
-      - name: Check dependencies vulnerabilities with safety
-        run: |
-          safety check --json --output safety-results.json || true
 
       - name: Build and analyze (Pull Request)
         if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
@@ -75,11 +57,3 @@ jobs:
         with:
           name: PR_NUMBER
           path: PR_NUMBER.txt
-
-      - name: Archive security reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: security-reports
-          path: |
-            bandit-results.json
-            safety-results.json
