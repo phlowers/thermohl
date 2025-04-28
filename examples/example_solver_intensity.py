@@ -26,7 +26,7 @@ def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
         dict(label="ieee", model=solver.ieee(dct)),
         dict(label="olla", model=solver.olla(dct, multi=False)),
         dict(label="ollm", model=solver.olla(dct, multi=True)),
-        dict(label="cner", model=solver.cner(dct)),
+        dict(label="rte", model=solver.rte(dct)),
     ]
     dfi = pd.DataFrame(dct)
 
@@ -75,7 +75,7 @@ if __name__ == "__main__":
         dict(label="ieee", model=solver.ieee(dct)),
         dict(label="olla", model=solver.olla(dct, multi=False)),
         dict(label="ollm", model=solver.olla(dct, multi=True)),
-        dict(label="cner", model=solver.cner(dct)),
+        dict(label="rte", model=solver.rte(dct)),
     ]
 
     fig, ax = plt.subplots(nrows=2, ncols=5)

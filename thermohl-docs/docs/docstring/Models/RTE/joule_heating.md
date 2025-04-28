@@ -8,4 +8,4 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 # JouleHeating
-::: thermohl.power.cner.joule_heating.JouleHeating
+::: thermohl.power.rte.joule_heating.JouleHeating

@@ -8,12 +8,12 @@
 import numpy as np
 import pandas as pd
 
-from thermohl.power import cner
+from thermohl.power import rte
 from thermohl.solver import Args
 
 
 class ExcelSheet:
-    """Object to compare power terms from cner's excel sheet version 7."""
+    """Object to compare power terms from rte's excel sheet version 7."""
 
     def __init__(self, dic):
         self.args = Args(dic)
@@ -193,10 +193,10 @@ def test_compare_power():
     d2 = df2dct(ds)
     del (ds, n)
 
-    pj = cner.JouleHeating(**d1)
-    ps = cner.SolarHeating(**d1)
-    pc = cner.ConvectiveCooling(**d1)
-    pr = cner.RadiativeCooling(**d1)
+    pj = rte.JouleHeating(**d1)
+    ps = rte.SolarHeating(**d1)
+    pc = rte.ConvectiveCooling(**d1)
+    pr = rte.RadiativeCooling(**d1)
     ex = ExcelSheet(d2)
 
     assert np.allclose(ex.joule_heating(T), pj.value(T))
@@ -220,6 +220,6 @@ def test_solar_heating():
     alpha = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
-    s = cner.SolarHeating(lat, azm, month, day, hour, D, alpha, srad=None)
+    s = rte.SolarHeating(lat, azm, month, day, hour, D, alpha, srad=None)
 
     assert np.allclose(p, s.value(ones), 0.1)

@@ -57,7 +57,7 @@ if __name__ == "__main__":
     slv = dict(
         cigre=solver.cigre(dct),
         ieee=solver.ieee(dct),
-        cner=solver.cner(dct),
+        rte=solver.rte(dct),
     )
 
     # solve and plot, add steady to check differences
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
     # only rte but with core temp
     plt.figure()
-    elm = slv["cner"]
+    elm = slv["rte"]
     elm.dc["I"] = I
     df = elm.steady_temperature(return_avg=True, return_core=True)
     elm.dc["I"] = np.nan

@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Power terms implementation matching cner's Excel sheet.
+"""Power terms implementation matching rte's Excel sheet.
 
 See NT-RD-CNER-DL-SLA-20-00215.
 """
