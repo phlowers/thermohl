@@ -27,7 +27,7 @@ Three different solvers are available in the package:
 - computation of the maximum possible steady-state transit intensity.
 
 All solvers are based on the Energy Balance Principle, where the various power terms are calculated from one of four
-available models: a CIGRE and an IEEE model as well as two RTE-specific models, OLLA and CNER.
+available models: a CIGRE and an IEEE model as well as two RTE-specific models, OLLA (R&D) and RTE.
 
 Both steady-state solvers can be used for probabilistic simulations with random input parameters using the Monte Carlo
 method. Uncertainty quantification can be performed through statistics on the random simulation outputs, as well as

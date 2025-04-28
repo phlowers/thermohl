@@ -14,7 +14,7 @@ from thermohl import solver
 def _solvers():
     li = []
     for ht in ["1t", "3t"]:
-        for m in ["cner", "cigre", "ieee", "olla"]:
+        for m in ["rte", "cigre", "ieee", "olla"]:
             li.append(solver._factory(dic=None, heateq=ht, model=m))
     return li
 

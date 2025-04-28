@@ -16,7 +16,7 @@ def _solvers(dic=None):
     return [
         solver._factory(dic=dic, heateq=he, model=m)
         for he in ["3t", "3tl"]
-        for m in ["cner", "cigre", "ieee", "olla"]
+        for m in ["rte", "cigre", "ieee", "olla"]
     ]
 
 

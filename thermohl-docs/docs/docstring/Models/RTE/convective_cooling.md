@@ -8,4 +8,4 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 # ConvectiveCooling
-::: thermohl.power.cner.convective_cooling.ConvectiveCooling
+::: thermohl.power.rte.convective_cooling.ConvectiveCooling
