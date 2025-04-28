@@ -7,7 +7,7 @@
 
 import numpy as np
 
-from thermohl.power.cner import Air
+from thermohl.power.rte import Air
 
 
 def test_volumic_mass_scalar():

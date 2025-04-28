@@ -8,7 +8,7 @@
 import pytest
 import numpy as np
 
-from thermohl.power.cner import ConvectiveCooling
+from thermohl.power.rte import ConvectiveCooling
 
 
 conv_cool_instances = [

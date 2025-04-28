@@ -10,7 +10,7 @@
 from typing import Dict, Any, Optional, Union, Type
 
 from thermohl.power import cigre as cigrep
-from thermohl.power import cner as cnerp
+from thermohl.power import rte as rtep
 from thermohl.power import ieee as ieeep
 from thermohl.power import olla as ollap
 
@@ -20,7 +20,7 @@ from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver1D]]
+concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]]
 
 
 def default_values() -> Dict[str, Any]:
@@ -66,13 +66,13 @@ def _factory(
             ollap.ConvectiveCooling,
             ollap.RadiativeCooling,
         )
-    elif model == "cner":
+    elif model == "rte":
         return solver(
             dic,
-            cnerp.JouleHeating,
-            cnerp.SolarHeating,
-            cnerp.ConvectiveCooling,
-            cnerp.RadiativeCooling,
+            rtep.JouleHeating,
+            rtep.SolarHeating,
+            rtep.ConvectiveCooling,
+            rtep.RadiativeCooling,
         )
     else:
         raise ValueError()
@@ -120,8 +120,8 @@ def olla(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
     return _factory(dic, heateq=heateq, model="olla")
 
 
-def cner(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
-    """Get a Solver using RTE-cner models.
+def rte(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
+    """Get a Solver using RTE models.
 
     Parameters
     ----------
@@ -131,4 +131,4 @@ def cner(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
         Input heat equation.
 
     """
-    return _factory(dic, heateq=heateq, model="cner")
+    return _factory(dic, heateq=heateq, model="rte")
