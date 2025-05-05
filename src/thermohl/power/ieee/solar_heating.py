@@ -7,7 +7,6 @@
 
 from typing import Optional, Any
 
-
 from thermohl import floatArrayLike, intArrayLike
 from thermohl.power import _SRad, SolarHeatingBase
 

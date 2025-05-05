@@ -13,7 +13,6 @@ from typing import Tuple, Type, Any, Optional, Dict, KeysView
 
 import numpy as np
 import pandas as pd
-from numpy import ndarray
 
 from thermohl import (
     floatArrayLike,
