@@ -8,7 +8,7 @@
 import numpy as np
 import pytest
 
-from thermohl.power.cner import JouleHeating
+from thermohl.power.rte import JouleHeating
 
 joule_heating_instances = [
     JouleHeating(

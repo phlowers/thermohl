@@ -8,4 +8,4 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 # Air
-::: thermohl.power.cner.air.Air
+::: thermohl.power.rte.air.Air

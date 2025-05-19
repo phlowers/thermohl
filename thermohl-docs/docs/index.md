@@ -21,7 +21,7 @@ Three temperature models are currently available:
 
 * one using CIGRE recommendations, 
 * one using an IEEE standard,
-* two other from RTE (OLLA and CNER). 
+* two others from RTE (R&D olla and RTE). 
 
 Steady-state versions cover both temperature and transit solver; concerning transient version, only the temperature is
 implemented. Probabilistic simulations with random inputs are only possible with the steady-state solvers.
