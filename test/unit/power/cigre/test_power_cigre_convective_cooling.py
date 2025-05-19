@@ -8,9 +8,8 @@
 import numpy as np
 import pytest
 
-from thermohl.power.cigre import ConvectiveCooling
 from thermohl.power.cigre import Air
-
+from thermohl.power.cigre import ConvectiveCooling
 
 conv_cool_instances = [
     (

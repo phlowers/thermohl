@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from .radiative_cooling import RadiativeCoolingBase
-
 from .power_term import PowerTerm
+from .radiative_cooling import RadiativeCoolingBase
 from .solar_heating import _SRad, SolarHeatingBase

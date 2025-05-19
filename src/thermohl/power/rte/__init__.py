@@ -5,11 +5,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Power terms implementation matching rte's Excel sheet.
-"""
+"""Power terms implementation matching rte's Excel sheet."""
 
 from .air import Air
-from .solar_heating import SolarHeating
 from .convective_cooling import ConvectiveCooling
 from .joule_heating import JouleHeating
 from .radiative_cooling import RadiativeCooling
+from .solar_heating import SolarHeating

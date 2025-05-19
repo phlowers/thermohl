@@ -86,6 +86,7 @@ def test_consistency():
                 target=t,
                 return_err=True,
                 return_power=True,
+                return_temp=True,
                 tol=1.0e-09,
                 maxiter=64,
             )

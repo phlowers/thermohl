@@ -9,18 +9,19 @@
 
 from typing import Dict, Any, Optional, Union, Type
 
-from thermohl.power import cigre as cigrep
-from thermohl.power import rte as rtep
-from thermohl.power import ieee as ieeep
-from thermohl.power import olla as ollap
-
+from thermohl.power import cigre as _cigre
+from thermohl.power import ieee as _ieee
+from thermohl.power import olla as _olla
+from thermohl.power import rte as _rte
 from thermohl.solver.base import Args, Solver
 from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]]
+concreteSolverType = Union[
+    Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]
+]
 
 
 def default_values() -> Dict[str, Any]:
@@ -45,34 +46,34 @@ def _factory(
     if model == "cigre":
         return solver(
             dic,
-            cigrep.JouleHeating,
-            cigrep.SolarHeating,
-            cigrep.ConvectiveCooling,
-            cigrep.RadiativeCooling,
+            _cigre.JouleHeating,
+            _cigre.SolarHeating,
+            _cigre.ConvectiveCooling,
+            _cigre.RadiativeCooling,
         )
     elif model == "ieee":
         return solver(
             dic,
-            ieeep.JouleHeating,
-            ieeep.SolarHeating,
-            ieeep.ConvectiveCooling,
-            ieeep.RadiativeCooling,
+            _ieee.JouleHeating,
+            _ieee.SolarHeating,
+            _ieee.ConvectiveCooling,
+            _ieee.RadiativeCooling,
         )
     elif model == "olla":
         return solver(
             dic,
-            ollap.JouleHeating,
-            ollap.SolarHeating,
-            ollap.ConvectiveCooling,
-            ollap.RadiativeCooling,
+            _olla.JouleHeating,
+            _olla.SolarHeating,
+            _olla.ConvectiveCooling,
+            _olla.RadiativeCooling,
         )
     elif model == "rte":
         return solver(
             dic,
-            rtep.JouleHeating,
-            rtep.SolarHeating,
-            rtep.ConvectiveCooling,
-            rtep.RadiativeCooling,
+            _rte.JouleHeating,
+            _rte.SolarHeating,
+            _rte.ConvectiveCooling,
+            _rte.RadiativeCooling,
         )
     else:
         raise ValueError()
