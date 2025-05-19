@@ -97,7 +97,7 @@ class JouleHeating(PowerTerm):
 
         This method calculates the skin-effect coefficient based on the given
         resistance (rdc) and the object's attributes. The calculation is an
-        approximation as described in the document [NT-RD-CNER-DL-SLA-20-00215].
+        approximation as described in the RTE's document.
 
         Parameters:
         rdc (float or np.ndarray): The resistance value(s) for which the skin-effect
@@ -106,7 +106,6 @@ class JouleHeating(PowerTerm):
         Returns:
         floatArrayLike: The computed skin-effect coefficient(s).
         """
-        # Note: approx version as in [NT-RD-CNER-DL-SLA-20-00215]
         z = (
             8
             * np.pi

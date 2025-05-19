@@ -15,7 +15,7 @@ import pandas as pd
 
 from thermohl import solver
 from thermohl.power import cigre
-from thermohl.power import cner
+from thermohl.power import rte
 from thermohl.power import ieee
 from thermohl.power import olla
 
@@ -23,7 +23,7 @@ from thermohl.power import olla
 def plot_joule_heating(dic):
     mdl = [
         dict(label="cigre", model=cigre.JouleHeating(**dic)),
-        dict(label="cner", model=cner.JouleHeating(**dic)),
+        dict(label="rte", model=rte.JouleHeating(**dic)),
         dict(label="ieee", model=ieee.JouleHeating(**dic)),
         dict(label="olla", model=olla.JouleHeating(**dic)),
     ]
@@ -43,7 +43,7 @@ def plot_joule_heating(dic):
 def plot_solar_heating(dic):
     mdl = [
         dict(label="cigre", cm=cm.spring, model=cigre.SolarHeating(**dic)),
-        dict(label="cner", cm=cm.summer, model=cner.SolarHeating(**dic)),
+        dict(label="rte", cm=cm.summer, model=rte.SolarHeating(**dic)),
         dict(label="ieee", cm=cm.autumn, model=ieee.SolarHeating(**dic)),
         dict(label="olla", cm=cm.winter, model=olla.SolarHeating(**dic)),
     ]
@@ -110,7 +110,7 @@ def plot_convective_cooling(dic):
     # olla not tested here since olla's convective cooling is the same as ieee's one
     mdl = [
         dict(label="cigre", cm=cm.spring, model=cigre.ConvectiveCooling(**dic)),
-        dict(label="cner", cm=cm.summer, model=cner.ConvectiveCooling(**dic)),
+        dict(label="rte", cm=cm.summer, model=rte.ConvectiveCooling(**dic)),
         dict(label="ieee", cm=cm.autumn, model=ieee.ConvectiveCooling(**dic)),
         dict(label="olla", cm=cm.winter, model=olla.ConvectiveCooling(**dic)),
     ]
@@ -149,7 +149,7 @@ def plot_radiative_cooling(dic):
     Ta = np.linspace(-20, 50, 8)
     cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(Ta) + 2)[1:-1])
 
-    # cner is not displayed since it is the same as ieee
+    # rte is not displayed since it is the same as ieee
 
     plt.figure()
     plt.plot(np.nan, np.nan, ls="-", c="gray", label="cigre")

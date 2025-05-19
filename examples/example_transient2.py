@@ -58,7 +58,7 @@ if __name__ == "__main__":
     slv = dict(
         cigre=solver.cigre(dct),
         ieee=solver.ieee(dct),
-        cner=solver.cner(dct),
+        rte=solver.rte(dct),
     )
 
     # solve and plot, add steady to check differences

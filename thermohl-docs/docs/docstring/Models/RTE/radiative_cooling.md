@@ -8,4 +8,4 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 # RadiativeCooling
-::: thermohl.power.cner.radiative_cooling.RadiativeCooling
+::: thermohl.power.rte.radiative_cooling.RadiativeCooling

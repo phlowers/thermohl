@@ -5,10 +5,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from thermohl.power import cner
+from thermohl.power import rte
 
 
-class JouleHeating(cner.JouleHeating):
+class JouleHeating(rte.JouleHeating):
     """Joule heating term."""
 
     pass
