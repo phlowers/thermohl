@@ -10,7 +10,7 @@ from typing import Any
 import numpy as np
 
 from thermohl import floatArrayLike
-from thermohl.power.cner import Air
+from thermohl.power.rte import Air
 from thermohl.power.convective_cooling import ConvectiveCoolingBase
 
 

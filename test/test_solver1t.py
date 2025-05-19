@@ -15,7 +15,7 @@ _nprs = 123456
 def _solvers(dic=None):
     return [
         solver._factory(dic=dic, heateq="1t", model=m)
-        for m in ["cner", "cigre", "ieee", "olla"]
+        for m in ["rte", "cigre", "ieee", "olla"]
     ]
 
 

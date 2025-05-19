@@ -8,4 +8,4 @@ SPDX-License-Identifier: MPL-2.0
 -->
 
 # SolarHeating
-::: thermohl.power.cner.solar_heating.SolarHeating
+::: thermohl.power.rte.solar_heating.SolarHeating
