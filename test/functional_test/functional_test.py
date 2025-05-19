@@ -7,11 +7,11 @@
 
 import datetime
 import os.path
+from typing import List, Dict
 
 import numpy as np
 import pandas as pd
 import yaml
-from typing import List, Dict
 
 from thermohl.solver import rte
 

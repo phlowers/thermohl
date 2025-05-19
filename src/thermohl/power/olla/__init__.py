@@ -5,8 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Power terms implementation using RTE's olla project choices.
-"""
+"""Power terms implementation using RTE's olla project choices."""
 
 from .air import Air
 from .convective_cooling import ConvectiveCooling
