@@ -10,16 +10,18 @@
 from typing import Dict, Any, Optional, Union, Type
 
 from thermohl.power import cigre as _cigre
-from thermohl.power import rte as _rte
 from thermohl.power import ieee as _ieee
 from thermohl.power import olla as _olla
+from thermohl.power import rte as _rte
 from thermohl.solver.base import Args, Solver
 from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]]
+concreteSolverType = Union[
+    Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]
+]
 
 
 def default_values() -> Dict[str, Any]:
