@@ -7,13 +7,13 @@
 
 import datetime
 import os.path
-from typing import List, Dict
 
 import numpy as np
 import pandas as pd
 import yaml
+from typing import List, Dict
 
-from thermohl.solver import cner
+from thermohl.solver import rte
 
 
 def cable_data(s: str) -> dict:
@@ -66,7 +66,7 @@ def scn2dict(d: dict) -> dict:
 def test_steady_temperature():
     for d in scenario("temperature", "steady"):
         for _, e in d.items():
-            s = cner(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heateq="3tl")
             r = s.steady_temperature(return_power=False)
 
             assert np.allclose(r["t_surf"], e["T_surf"], atol=0.05)
@@ -93,7 +93,7 @@ def test_steady_temperature_batch():
         inplace=True,
     )
 
-    s = cner(din, heateq="3tl")
+    s = rte(din, heateq="3tl")
     r = s.steady_temperature(return_power=False)
     assert np.allclose(r.values, dref.values, atol=0.05)
 
@@ -101,7 +101,7 @@ def test_steady_temperature_batch():
 def test_steady_ampacity():
     for d in scenario("ampacity", "steady"):
         for _, e in d.items():
-            s = cner(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heateq="3tl")
             r = s.steady_intensity(T=e["Tmax_cable"])
 
             assert np.allclose(r["I"], e["I_max"], atol=0.05)
@@ -122,7 +122,7 @@ def test_steady_ampacity_batch():
     din = pd.concat(din).reset_index(drop=True)
     dref = pd.concat(dref).reset_index(drop=True)
 
-    s = cner(din, heateq="3tl")
+    s = rte(din, heateq="3tl")
     r = s.steady_intensity(T=dref["Tmax_cable"], return_power=False)
     assert np.allclose(r["I"].values, dref["I_max"].values, atol=0.05)
 
@@ -140,7 +140,7 @@ def test_transient_temperature():
         for _, e in d.items():
 
             # solver
-            s = cner(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heateq="3tl")
 
             # initial steady state
             s.args["I"] = e["I0_cable"]
@@ -204,7 +204,7 @@ def test_transient_temperature_batch():
     dref["t_avg_final"] = np.array(dref["t_avg_final"])
 
     # solver
-    s = cner(din, heateq="3tl")
+    s = rte(din, heateq="3tl")
 
     # initial steady state
     s.args["I"] = I0
