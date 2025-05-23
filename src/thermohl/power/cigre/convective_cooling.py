@@ -160,12 +160,12 @@ class ConvectiveCooling(PowerTerm):
             m2[ia] = 0.188
         return A2 * gp**m2
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -174,12 +174,12 @@ class ConvectiveCooling(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        Tf = 0.5 * (T + self.Ta)
-        Td = T - self.Ta
+        Tf = 0.5 * (conductor_temperature + self.Ta)
+        Td = conductor_temperature - self.Ta
         nu = Air.kinematic_viscosity(Tf)
         # nu[nu < 1.0E-06] = 1.0E-06
         lm = Air.thermal_conductivity(Tf)
         # lm[lm < 0.01] = 0.01
         nf = self._nu_forced(Tf, nu)
         nn = self._nu_natural(Tf, Td, nu)
-        return np.pi * lm * (T - self.Ta) * np.maximum(nf, nn)
+        return np.pi * lm * (conductor_temperature - self.Ta) * np.maximum(nf, nn)

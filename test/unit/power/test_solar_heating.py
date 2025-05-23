@@ -154,7 +154,11 @@ solar_heating_instances = [
 )
 def test_solar_heating_value_scalar(solar_heating):
     T = 50.0
-    expected = solar_heating.alpha * solar_heating.srad * solar_heating.D
+    expected = (
+        solar_heating.absorption_coefficient
+        * solar_heating.solar_radiation
+        * solar_heating.conductor_diameter_m
+    )
 
     result = solar_heating.value(T)
 
@@ -171,7 +175,11 @@ def test_solar_heating_value_scalar(solar_heating):
 )
 def test_solar_heating_value_array(solar_heating):
     T = np.array([50.0, 60.0])
-    expected = solar_heating.alpha * solar_heating.srad * solar_heating.D
+    expected = (
+        solar_heating.absorption_coefficient
+        * solar_heating.solar_radiation
+        * solar_heating.conductor_diameter_m
+    )
 
     result = solar_heating.value(T)
 

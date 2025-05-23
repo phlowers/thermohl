@@ -74,13 +74,13 @@ class JouleHeating(PowerTerm):
         self.T20 = T20
         self.f = f
 
-    def _rdc(self, T: floatArrayLike) -> floatArrayLike:
+    def _rdc(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """
         Compute resistance per unit length for direct current.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Temperature array or value at which to compute the resistance.
 
         Returns
@@ -88,7 +88,7 @@ class JouleHeating(PowerTerm):
         float or np.ndarray
             Resistance per unit length for direct current at the given temperature(s).
         """
-        dt = T - self.T20
+        dt = conductor_temperature - self.T20
         return self.RDC20 * (1.0 + self.kl * dt + self.kq * dt**2)
 
     def _ks(self, rdc: floatArrayLike) -> floatArrayLike:
@@ -165,12 +165,12 @@ class JouleHeating(PowerTerm):
             kem = kem[0]
         return kem
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -179,7 +179,7 @@ class JouleHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        rdc = self._rdc(T)
+        rdc = self._rdc(conductor_temperature)
         ks = self._ks(rdc)
         rac = self.kem * ks * rdc
         return rac * self.I**2

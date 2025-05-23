@@ -93,14 +93,14 @@ class SolarHeating(PowerTerm):
             self.srad = srad
         self.D = D
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -109,7 +109,7 @@ class SolarHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return self.alpha * self.srad * self.D * np.ones_like(T)
+        return self.alpha * self.srad * self.D * np.ones_like(conductor_temperature)
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""

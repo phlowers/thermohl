@@ -21,7 +21,7 @@ class PowerTerm(ABC):
     def __init__(self, **kwargs: Any):
         pass
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute power term value in function of temperature.
 
         Usually this function should be overridden in children classes; if it is
@@ -29,7 +29,7 @@ class PowerTerm(ABC):
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature (C).
 
         Returns
@@ -38,7 +38,7 @@ class PowerTerm(ABC):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return np.zeros_like(T) if not np.isscalar(T) else 0.0
+        return np.zeros_like(conductor_temperature) if not np.isscalar(conductor_temperature) else 0.0
 
     def derivative(
         self, conductor_temperature: floatArrayLike, dT: float = _dT

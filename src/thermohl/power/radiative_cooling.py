@@ -18,8 +18,8 @@ from thermohl.power.power_term import PowerTerm
 class RadiativeCoolingBase(PowerTerm):
     """Generic power term for radiative cooling."""
 
-    def _celsius2kelvin(self, T: floatArrayLike) -> floatArrayLike:
-        return T + self.zerok
+    def _celsius2kelvin(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
+        return conductor_temperature + self.zerok
 
     def __init__(
         self,
@@ -56,12 +56,12 @@ class RadiativeCoolingBase(PowerTerm):
         self.epsilon = epsilon
         self.sigma = sigma
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature (C).
 
         Returns
@@ -75,7 +75,7 @@ class RadiativeCoolingBase(PowerTerm):
             * self.sigma
             * self.epsilon
             * self.D
-            * (self._celsius2kelvin(T) ** 4 - self.Ta**4)
+            * (self._celsius2kelvin(conductor_temperature) ** 4 - self.Ta**4)
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
