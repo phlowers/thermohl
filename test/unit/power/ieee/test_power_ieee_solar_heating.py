@@ -24,9 +24,9 @@ def test_solar_heating_init_scalar():
 
     solar_heating = SolarHeating(lat, alt, azm, tb, month, day, hour, D, alpha, srad)
 
-    assert solar_heating.alpha == alpha
-    assert np.isclose(solar_heating.srad, srad)
-    assert np.isclose(solar_heating.D, D)
+    assert solar_heating.absorption_coefficient == alpha
+    assert np.isclose(solar_heating.solar_radiation, srad)
+    assert np.isclose(solar_heating.conductor_diameter_m, D)
 
 
 def test_solar_heating_init_array():
@@ -43,9 +43,9 @@ def test_solar_heating_init_array():
 
     solar_heating = SolarHeating(lat, alt, azm, tb, month, day, hour, D, alpha, srad)
 
-    assert np.allclose(solar_heating.alpha, alpha)
-    assert np.allclose(solar_heating.srad, srad)
-    assert np.allclose(solar_heating.D, D)
+    assert np.allclose(solar_heating.absorption_coefficient, alpha)
+    assert np.allclose(solar_heating.solar_radiation, srad)
+    assert np.allclose(solar_heating.conductor_diameter_m, D)
 
 
 def test_solar_heating_init_mixed():
@@ -62,9 +62,9 @@ def test_solar_heating_init_mixed():
 
     solar_heating = SolarHeating(lat, alt, azm, tb, month, day, hour, D, alpha, srad)
 
-    assert solar_heating.alpha == alpha
-    assert np.allclose(solar_heating.srad, srad)
-    assert np.isclose(solar_heating.D, D)
+    assert solar_heating.absorption_coefficient == alpha
+    assert np.allclose(solar_heating.solar_radiation, srad)
+    assert np.isclose(solar_heating.conductor_diameter_m, D)
 
 
 def test_solar_heating_init_no_srad():
@@ -80,6 +80,6 @@ def test_solar_heating_init_no_srad():
 
     solar_heating = SolarHeating(lat, alt, azm, tb, month, day, hour, D, alpha)
 
-    assert solar_heating.alpha == alpha
-    assert solar_heating.srad is not None
-    assert np.isclose(solar_heating.D, D)
+    assert solar_heating.absorption_coefficient == alpha
+    assert solar_heating.solar_radiation is not None
+    assert np.isclose(solar_heating.conductor_diameter_m, D)

@@ -82,5 +82,16 @@ class SolarHeating(SolarHeatingBase):
             ],
         )
         super().__init__(
-            lat, alt, azm, tb, month, day, hour, D, alpha, est, srad, **kwargs
+            latitude_deg=lat,
+            altitude_m=alt,
+            azimuth_deg=azm,
+            turbidity_factor=tb,
+            month=month,
+            day=day,
+            hour=hour,
+            conductor_diameter_m=D,
+            absorption_coefficient=alpha,
+            solar_radiation_estimator=est,
+            precomputed_solar_radiation=srad,
+            **kwargs
         )

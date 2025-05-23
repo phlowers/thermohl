@@ -62,16 +62,16 @@ class SolarHeating(SolarHeatingBase):
             if k in kwargs.keys():
                 kwargs.pop(k)
         super().__init__(
-            lat=lat,
-            alt=0.0,
-            azm=azm,
-            tb=0.0,
+            latitude_deg=lat,
+            altitude_m=0.0,
+            azimuth_deg=azm,
+            turbidity_factor=0.0,
             month=month,
             day=day,
             hour=hour,
-            D=D,
-            alpha=alpha,
-            est=est,
-            srad=srad,
+            conductor_diameter_m=D,
+            absorption_coefficient=alpha,
+            solar_radiation_estimator=est,
+            precomputed_solar_radiation=srad,
             **kwargs,
         )

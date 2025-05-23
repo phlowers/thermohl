@@ -49,12 +49,12 @@ class JouleHeating(PowerTerm):
         self.RDC20 = RDC20
         self.T20 = T20
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -63,7 +63,7 @@ class JouleHeating(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.I**2
+        return self.km * self.RDC20 * (1.0 + self.kl * (conductor_temperature - self.T20)) * self.I**2
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.

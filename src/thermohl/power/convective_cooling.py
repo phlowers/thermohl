@@ -98,12 +98,12 @@ class ConvectiveCoolingBase(PowerTerm):
         """
         return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td) ** 1.25
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -112,7 +112,7 @@ class ConvectiveCoolingBase(PowerTerm):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        Tf = 0.5 * (T + self.Ta)
-        Td = T - self.Ta
+        Tf = 0.5 * (conductor_temperature + self.Ta)
+        Td = conductor_temperature - self.Ta
         vm = self.rho(Tf, self.alt)
         return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))
