@@ -245,7 +245,8 @@ class Solver3T(Solver_):
     def tau(self, ts: floatArray, tc: floatArray, dt=1.0e-05) -> floatArrayLike:
         """Estimation of a time-constant by linearization of the EDO."""
         db = (
-            -self.balance(ts - dt, tc)
+            self.balance(ts + dt, tc)
+            - self.balance(ts - dt, tc)
             + self.balance(ts, tc + dt)
             - self.balance(ts, tc - dt)
         ) / (2 * dt)
