@@ -560,7 +560,7 @@ class Solver3T(Solver_):
         # time loop
         for i in range(1, N):
             for k, v in dynamic_.items():
-                self.args[k] = v[i, :]
+                self.args[k] = v[i - 1, :]
             self.update()
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
