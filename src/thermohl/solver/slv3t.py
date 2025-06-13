@@ -567,7 +567,7 @@ class Solver3T(Solver_):
         tc[0, :] = Tc0
         ta[0, :] = self.average(ts[0, :], tc[0, :])
 
-        tx = ts[0, :] - tc[0, :]
+        tx = tc[0, :] - ts[0, :]
         ty = c2 * ts[0, :] + (1 - c2) * tc[0, :]
 
         # time loop
