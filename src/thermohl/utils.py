@@ -118,7 +118,7 @@ def df2dct(df: pd.DataFrame) -> dict:
     q = df.to_dict(orient="list")
     for k in q.keys():
         if len(q[k]) > 1:
-            q[k] = np.array(q[k])
+            q[k] = np.asarray(q[k])
         else:
             q[k] = q[k][0]
     return q
@@ -172,8 +172,12 @@ def bisect_v(
     array([1., 2., 3., 4.])
 
     """
-    a_ = a * np.ones(shape)
-    b_ = b * np.ones(shape)
+    # Convert shape to tuple if it's a single integer
+    if isinstance(shape, int):
+        shape = (shape,)
+    
+    a_ = np.full(shape, a, dtype=np.float64)
+    b_ = np.full(shape, b, dtype=np.float64)
 
     err = np.abs(b - a)
     count = 1

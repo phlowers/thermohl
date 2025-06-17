@@ -159,9 +159,9 @@ class Args:
                 t = type(self[k])
                 c = False
             if c:
-                self[k] = self[k][:]
+                self[k] = self[k].copy()
             else:
-                self[k] = self[k] * np.ones((n,), dtype=t)
+                self[k] = np.full((n,), self[k], dtype=t)
 
     def compress(self) -> None:
         """
@@ -314,9 +314,7 @@ def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numbe
         else:
             reshaped_array = np.reshape(input_array, (nb_row, nb_columns))
     except AttributeError:
-        reshaped_array = input_array * np.ones(
-            (nb_row, nb_columns), dtype=type(input_array)
-        )
+        reshaped_array = np.full((nb_row, nb_columns), input_array, dtype=type(input_array))
     return reshaped_array
 
 
