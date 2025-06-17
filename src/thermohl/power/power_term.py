@@ -38,7 +38,7 @@ class PowerTerm(ABC):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        return np.zeros_like(T) if not np.isscalar(T) else 0.0
+        return np.zeros_like(T) if np.ndim(T) > 0 else 0.0
 
     def derivative(
         self, conductor_temperature: floatArrayLike, dT: float = _dT

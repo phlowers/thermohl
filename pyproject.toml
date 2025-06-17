@@ -33,11 +33,10 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 dependencies = [
-    "numpy ~= 1.26.4",
-    "pandas ~= 2.2.3",
-    "scipy ~= 1.13.1",
-    "pyyaml ~= 6.0.2",
-    "setuptools"
+    "numpy >= 1.26.4",
+    "pandas >= 2.2.3",
+    "scipy >= 1.13.1",
+    "pyyaml >= 6.0.2",
 ]
 
 [project.optional-dependencies]
