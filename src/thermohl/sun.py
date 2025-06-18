@@ -16,6 +16,35 @@ import numpy as np
 from thermohl import floatArrayLike, intArrayLike
 
 
+
+def utc2solar_hour(hour, minute=0., second=0., lon=0.):
+    """convert utc hour to solar hour adding the longitude contribution
+
+    If more than one input are numpy arrays, they should have the same size.
+
+    Parameters
+    ----------
+    hour : float or numpy.ndarray
+        Hour of the day (solar, must be between 0 and 23).
+    minute : float or numpy.ndarray, optional
+        Minutes on the clock. The default is 0.
+    second : float or numpy.ndarray, optional
+        Seconds on the clock. The default is 0.
+    lon : float or numpy.ndarray, optional
+        Longitude (in rad). The default is 0.
+
+    Returns
+    -------
+    float or numpy.ndarray
+        solar hour
+
+    """
+    # add 4 min (1/15 of an hour) for every degree of east longitude
+    solar_hour = hour % 24 + minute / 60. + second / 3600. + np.rad2deg(lon) / 15.
+    return solar_hour
+
+
+
 def hour_angle(
     hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
 ) -> floatArrayLike:
