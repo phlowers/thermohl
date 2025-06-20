@@ -92,11 +92,11 @@ class SolarHeatingBase(PowerTerm):
         D: floatArrayLike,
         alpha: floatArrayLike,
         est: _SRad,
-        srad: Optional[floatArrayLike] = None,
+        srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
         self.alpha = alpha
-        if srad is None:
+        if np.all(np.isnan(srad)):
             self.srad = est(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
         else:
             self.srad = np.maximum(srad, 0.0)
