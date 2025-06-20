@@ -8,9 +8,9 @@
 
 name: 🚀 Build upload on PyPi
 
-on:
-  release:
-    types: [released]
+on: [ ]
+# release:
+#   types: [released]
 
 jobs:
   test-and-build-all-os:
