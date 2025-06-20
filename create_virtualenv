@@ -8,7 +8,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # -- dir for all envs
-ENV_DIR=/home/${USER}/ENV
+ENV_DIR=${ENV_DIR:-$HOME/ENV}
 mkdir -p $ENV_DIR
 
 # -- current env with link
