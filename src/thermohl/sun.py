@@ -17,8 +17,8 @@ import numpy as np
 from thermohl import floatArrayLike, intArrayLike
 
 
-
-def utc2solar_hour(hour, minute=0., second=0., lon=0.):
+def utc2solar_hour(hour: floatArrayLike, minute: floatArrayLike = 0., second: floatArrayLike = 0.,
+                   lon: floatArrayLike = 0.):
     """convert utc hour to solar hour adding the longitude contribution
 
     If more than one input are numpy arrays, they should have the same size.
@@ -47,7 +47,7 @@ def utc2solar_hour(hour, minute=0., second=0., lon=0.):
 
 
 def hour_angle(
-    hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
+        hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
 ) -> floatArrayLike:
     """Compute hour angle.
 
@@ -72,7 +72,8 @@ def hour_angle(
     return np.radians(15.0 * (solar_hour - 12.0))
 
 
-_csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
+# Cumulative days of the year at start of each month
+_CSM = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
 
 
 def solar_declination(month: intArrayLike, day: intArrayLike) -> floatArrayLike:
@@ -93,7 +94,7 @@ def solar_declination(month: intArrayLike, day: intArrayLike) -> floatArrayLike:
         Solar declination in radians.
 
     """
-    doy = _csm[month - 1] + day
+    doy = _CSM[month - 1] + day
     return np.deg2rad(23.46) * np.sin(2.0 * np.pi * (doy + 284) / 365.0)
 
 
