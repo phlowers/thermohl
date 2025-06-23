@@ -238,6 +238,16 @@ class Solver3T(Solver_):
         c, _, _, _ = self.mgc
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
 
+    def tau(self, ts: floatArray, tc: floatArray, dt=1.0e-05) -> floatArrayLike:
+        """Estimation of a time-constant by linearization of the EDO."""
+        db = (
+            self.balance(ts + dt, tc)
+            - self.balance(ts - dt, tc)
+            + self.balance(ts, tc + dt)
+            - self.balance(ts, tc - dt)
+        ) / (2 * dt)
+        return -(self.args.m * self.args.c) / db
+
     # ==========================================================================
 
     def _steady_return_opt(
@@ -553,16 +563,23 @@ class Solver3T(Solver_):
         tc[0, :] = Tc0
         ta[0, :] = self.average(ts[0, :], tc[0, :])
 
+        tx = tc[0, :] - ts[0, :]
+        ty = c2 * ts[0, :] + (1 - c2) * tc[0, :]
+
         # time loop
         for i in range(1, N):
             for k, v in dynamic_.items():
-                self.args[k] = v[i, :]
+                self.args[k] = v[i - 1, :]
             self.update()
+            dt = time[i] - time[i - 1]
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
-            mrg = c1 * (self.jh.value(ta[i, :]) - bal)
-            tc[i, :] = ta[i, :] + c2 * mrg
-            ts[i, :] = tc[i, :] - mrg
+            tau = self.tau(ts[i - 1, :], tc[i - 1, :])
+            ta[i, :] = ta[i - 1, :] + dt * bal * imc
+            morgan = c1 * (self.jh.value(ta[i, :]) - bal)
+            tx = tx + dt * (-tx + morgan) / (tau * 0.3)
+            ty = ty + dt * (-ty + ta[i - 1, :]) / (tau * 0.02)
+            tc[i, :] = c2 * tx + ty
+            ts[i, :] = ty - (1 - c2) * tx
 
         # get results
         dr = self._transient_temperature_results(time, ts, ta, tc, return_power, n)
