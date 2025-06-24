@@ -52,6 +52,7 @@ Install the development dependencies and program scripts via
 
 Build a new wheel via 
 ```shell
+  pip install build
   python -m build --wheel
 ```
 This build a wheel in newly-created dist/ directory
