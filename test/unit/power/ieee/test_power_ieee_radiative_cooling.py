@@ -5,11 +5,11 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import pytest
 import numpy as np
+import pytest
 
-from thermohl.power.ieee import RadiativeCooling
 from thermohl import solver
+from thermohl.power.ieee import RadiativeCooling
 
 
 def set_default_values_scalar():

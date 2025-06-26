@@ -29,14 +29,15 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
     return a
 
 
-def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
+def _traargs(s: solver.Solver, ds: pd.DataFrame, t: np.ndarray, dyn: dict):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
+        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values, dynamic=dyn)
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
             Ts0=ds[solver.Solver.Names.tsurf].values,
             Tc0=ds[solver.Solver.Names.tcore].values,
+            dynamic=dyn,
         )
     else:
         raise NotImplementedError
@@ -95,7 +96,7 @@ def test_steady_1d_mix():
     n = 61
     for s in _solvers():
         s.args.Ta = np.linspace(-10, +50, n)
-        s.args.I = np.array([199.0])
+        s.args.I = np.array(199.0)
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
@@ -104,13 +105,11 @@ def test_steady_1d_mix():
         assert len(i) == n
 
 
-def test_transient_0():
+def test_transient_no_dyn():
     for s in _solvers():
         t = np.linspace(0, 3600, 361)
-        I = 199 * np.ones_like(t)
-
         ds = s.steady_temperature()
-        a = _traargs(s, ds, t, I)
+        a = _traargs(s, ds, t, None)
 
         r = s.transient_temperature(**a)
         assert len(r.pop("time")) == len(t)
@@ -131,10 +130,16 @@ def test_transient_1():
         s.update()
 
         t = np.linspace(0, 3600, 361)
-        I = 199 * np.ones_like(t)
+        d = {
+            "I": 199 * np.ones_like(t),
+            "Ta": 33.0,
+            "Pa": np.array(1.013e05),
+            "ws": 2.0 * np.ones(n),
+            "wa": np.ones((len(t), n)),
+        }
 
         ds = s.steady_temperature()
-        a = _traargs(s, ds, t, I)
+        a = _traargs(s, ds, t, d)
 
         r = s.transient_temperature(**a)
         assert len(r.pop("time")) == len(t)

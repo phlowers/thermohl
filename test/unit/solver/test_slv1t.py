@@ -5,9 +5,10 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import pytest
 import numpy as np
 import pandas as pd
+import pytest
+
 from thermohl.solver.slv1t import Solver1T
 
 
@@ -87,9 +88,9 @@ def test_transient_temperature_default(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "t" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["t"]) == len(time)
 
 
 def test_transient_temperature_with_initial_temp(solver):
@@ -100,10 +101,10 @@ def test_transient_temperature_with_initial_temp(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "t" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
-    assert result["T"][0] == T0
+    assert len(result["t"]) == len(time)
+    assert result["t"][0] == T0
 
 
 def test_transient_temperature_with_error(solver):
@@ -113,9 +114,9 @@ def test_transient_temperature_with_error(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "t" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["t"]) == len(time)
     assert Solver1T.Names.pjle in result
     assert Solver1T.Names.psol in result
     assert Solver1T.Names.pcnv in result

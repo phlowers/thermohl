@@ -7,8 +7,8 @@
 
 import numpy as np
 
-from thermohl.power import ieee
 from thermohl import solver
+from thermohl.power import ieee
 
 
 def test_compare_powers():
