@@ -35,6 +35,8 @@ theme:
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Examples: examples.md
+  - Parameters: api-reference/parameters.md
   - Developer Guide:
       - Models:
           - Convective Cooling: docstring/Models/convective_cooling.md

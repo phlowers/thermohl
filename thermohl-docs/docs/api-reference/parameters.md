@@ -9,6 +9,8 @@ SPDX-License-Identifier: MPL-2.0
 
 # Parameters and Default Values
 
+[TODO : check with sources + add a paragraph explaining which parameters are not required if we use srad directly]: #
+
 | Parameter | Default Value | Unit    | Used in CIGRE | Used in IEEE | Used in OLLA | Used in CNER | Comment                                                      |
 |-----------|---------------|---------|---------------|--------------|--------------|--------------|--------------------------------------------------------------|
 | lat       | 45            | degree  | yes           | yes          | yes          | yes          | latitude                                                     |

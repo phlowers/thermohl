@@ -11,20 +11,32 @@ SPDX-License-Identifier: MPL-2.0
 
 # ThermOHL
 
-ThermOHL is a python module to compute temperature (given environment
-parameters) or maximum transit intensity (given a maximum temperature
-and environment parameters) in overhead line conductors.
+ThermOHL is a python package to compute temperature ampacity in overhead line conductors.
 
 ## Features
 
-Three temperature models are currently available: 
+The temperature of a conductor is estimated by solving a heat equation which describes how temperature evolves over
+time, taking into account different power terms that either heat or cold the conductor.
 
-* one using CIGRE recommendations, 
-* one using an IEEE standard,
-* two others from RTE (R&D olla and RTE). 
+Two heat equations (a more complete, third one is under development) are available:
 
-Steady-state versions cover both temperature and transit solver; concerning transient version, only the temperature is
-implemented. Probabilistic simulations with random inputs are only possible with the steady-state solvers.
+* one with a single temperature for the cable;
+* another with three temperatures (core, average and surface temperature) for more precise computations.
 
-## Examples
-Todo
+Each of these equations can be used with a set of pre-coded power terms from the literature :
+
+[TODO : find a clean way to include references (maybe a dedicated page?)]: #
+
+* one using CIGRE recommendations [Thermal behaviour of overhead conductors, study committee 22, working
+  group 12, 2002];
+* one using an IEEE standard [IEEE std 38-2012];
+* two others from RTE departments.
+
+Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The
+set of parameter required depends on the power terms used, and default values are provided.
+
+## References
+
+* tata
+* titi
+* toto

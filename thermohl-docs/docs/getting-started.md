@@ -7,4 +7,4 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-{!README.md!}
+{!../README.md!}
