@@ -32,22 +32,12 @@ class RadiativeCoolingBase(PowerTerm):
     ):
         r"""Init with args.
 
-        Parameters
-        ----------
-        Ta : float or np.ndarray
-            Ambient temperature (C).
-        D : float or np.ndarray
-            External diameter (m).
-        epsilon : float or np.ndarray
-            Emissivity.
-        sigma : float, optional
-            Stefan-Boltzmann constant in W.m\ :sup:`-2`\ K\ :sup:`4`\ . The
-            default is 5.67E-08.
-        zerok : float, optional
-            Value for zero kelvin.
-
-        Returns
-        -------
+        Args:
+            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            D (float | numpy.ndarray): External diameter (m).
+            epsilon (float | numpy.ndarray): Emissivity (—).
+            sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
+            zerok (float, optional): Offset to convert Celsius to Kelvin (K). The default is 273.15.
 
         """
         self.zerok = zerok
@@ -59,15 +49,11 @@ class RadiativeCoolingBase(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature (C).
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return (
@@ -81,15 +67,11 @@ class RadiativeCoolingBase(PowerTerm):
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Analytical derivative of value method.
 
-        Parameters
-        ----------
-        conductor_temperature : float or np.ndarray
-        Conductor temperature (C).
+        Args:
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (K).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return (

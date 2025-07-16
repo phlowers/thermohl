@@ -48,19 +48,13 @@ class ConvectiveCoolingBase(PowerTerm):
         """
         Compute forced convective cooling value.
 
-        Parameters
-        ----------
-        Tf : float or np.ndarray
-            Temperature field array.
-        Td : float or np.ndarray
-            Temperature difference array.
-        vm : float or np.ndarray
-            Velocity magnitude array.
+        Args:
+            Tf (float | numpy.ndarray): Film temperature (°C).
+            Td (float | numpy.ndarray): Temperature difference (°C).
+            vm (float | numpy.ndarray): Velocity magnitude proxy (relative density or similar, model-dependent).
 
-        Returns
-        -------
-        float or np.ndarray
-            Computed forced convective cooling values.
+        Returns:
+            float | numpy.ndarray: Computed forced convective cooling values (W·m⁻¹).
         """
         Re = self.ws * self.D * vm / self.mu(Tf)
         Kp = (
@@ -84,32 +78,23 @@ class ConvectiveCoolingBase(PowerTerm):
         """
         Compute natural convective cooling value.
 
-        Parameters
-        ----------
-        Td : float or np.ndarray
-            Temperature difference array.
-        vm : float or np.ndarray
-            Velocity magnitude array.
+        Args:
+            Td (float | numpy.ndarray): Temperature difference (°C).
+            vm (float | numpy.ndarray): Velocity magnitude (relative density or similar, model-dependent).
 
-        Returns
-        -------
-        float or np.ndarray
-            Natural convective cooling value array.
+        Returns:
+            float | numpy.ndarray: Natural convective cooling value (W·m⁻¹).
         """
         return 3.645 * np.sqrt(vm) * self.D**0.75 * np.sign(Td) * np.abs(Td) ** 1.25
 
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         Tf = 0.5 * (T + self.Ta)

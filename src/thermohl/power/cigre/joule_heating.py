@@ -29,18 +29,12 @@ class JouleHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        I : float or np.ndarray
-            Transit intensity.
-        km : float or np.ndarray
-            Coefficient for magnetic effects.
-        kl : float or np.ndarray
-            Linear resistance augmentation with temperature.
-        RDC20 : float or np.ndarray
-            Electric resistance per unit length (DC) at 20°C.
-        T20 : float or np.ndarray, optional
-            Reference temperature. The default is 20.
+        Args:
+            I (float | numpy.ndarray): Transit intensity (A).
+            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
+            RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
+            T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
         self.I = I
@@ -52,15 +46,11 @@ class JouleHeating(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.I**2
@@ -70,15 +60,11 @@ class JouleHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        conductor_temperature : float or np.ndarray
-            Conductor temperature.
+        Args:
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return (

@@ -33,24 +33,15 @@ class ConvectiveCooling(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        alt : float or np.ndarray
-            Altitude.
-        azm : float or np.ndarray
-            Azimuth.
-        Ta : float or np.ndarray
-            Ambient temperature.
-        ws : float or np.ndarray
-            Wind speed.
-        wa : float or np.ndarray
-            Wind angle regarding north.
-        D : float or np.ndarray
-            External diameter.
-        R : float or np.ndarray
-            Cable roughness.
-        g : float, optional
-            Gravitational acceleration. The default is 9.81.
+        Args:
+            alt (float | numpy.ndarray): Altitude (m).
+            azm (float | numpy.ndarray): Azimuth (deg).
+            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
+            wa (float | numpy.ndarray): Wind angle regarding north (deg).
+            D (float | numpy.ndarray): External diameter (m).
+            R (float | numpy.ndarray): Cable roughness (—).
+            g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
 
         """
         self.alt = alt
@@ -65,24 +56,18 @@ class ConvectiveCooling(PowerTerm):
         """
         Calculate the Nusselt number for forced convection.
 
-        Parameters:
-        -----------
-        Tf : float or numpy.ndarray
-            Array of fluid temperatures.
-        nu : float or numpy.ndarray
-            Array of kinematic viscosities.
+        Args:
+            Tf (float | numpy.ndarray): Film temperature (°C).
+            nu (float | numpy.ndarray): Kinematic viscosity (m²·s⁻¹).
 
         Returns:
-        --------
-        float or numpy.ndarray
-            Array of Nusselt numbers for forced convection.
+            float | numpy.ndarray: Nusselt number for forced convection.
+
         Notes:
-        ------
-        The function calculates the Nusselt number based on the relative density of air,
-        Reynolds number, and empirical correlations. The correlations are adjusted based
-        on the Reynolds number and the ratio of characteristic length to diameter (R).
-        The function also considers the angle of attack (da) to adjust the coefficients
-        for the Nusselt number calculation.
+            The function calculates the Nusselt number based on the relative density of air,
+            the Reynolds number, and empirical correlations. The correlations are adjusted
+            depending on the Reynolds number and the roughness ratio R. The function also
+            considers the angle of attack (da) to adjust the coefficients.
         """
         relative_density = Air.relative_density(Tf, self.alt)
         Re = relative_density * np.abs(self.ws) * self.D / nu
@@ -124,25 +109,18 @@ class ConvectiveCooling(PowerTerm):
         """
         Calculate the Nusselt number for natural convection.
 
-        Parameters
-        ----------
-        Tf : float or numpy.ndarray
-            Film temperature in degrees Celsius.
-        Td : float or numpy.ndarray
-            Temperature difference in degrees Celsius.
-        nu : float or numpy.ndarray
-            Kinematic viscosity in m^2/s.
+        Args:
+            Tf (float | numpy.ndarray): Film temperature (°C).
+            Td (float | numpy.ndarray): Temperature difference (°C).
+            nu (float | numpy.ndarray): Kinematic viscosity (m²·s⁻¹).
 
-        Returns
-        -------
-        float or numpy.ndarray
-            Nusselt number for natural convection.
+        Returns:
+            float | numpy.ndarray: Nusselt number for natural convection.
 
-        Notes
-        -----
-        The function calculates the Grashof number (gr) and the product of the Grashof
-        number and the Prandtl number (gp). It then uses these values to determine the
-        Nusselt number based on empirical correlations for different ranges of gp.
+        Notes:
+            The function calculates the Grashof number (gr) and the product of the Grashof
+            number and the Prandtl number (gp). It then uses these values to determine the
+            Nusselt number based on empirical correlations for different ranges of gp.
 
         """
         gr = self.D**3 * np.abs(Td) * self.g / ((Tf + 273.15) * nu**2)
@@ -163,15 +141,11 @@ class ConvectiveCooling(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         Tf = 0.5 * (T + self.Ta)

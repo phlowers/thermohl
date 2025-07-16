@@ -26,17 +26,12 @@ class Air:
 
         If both inputs are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius).
-        alt : float or numpy.ndarray, optional
-            Altitude above sea-level. The default is 0.
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius).
+            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Volumic mass in kg.m\ :sup:`-3`\ .
+        Returns:
+            float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
         Tk = kelvin(Tc)
@@ -46,15 +41,11 @@ class Air:
     def dynamic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Dynamic viscosity in kg.m\ :sup:`-1`\ .s\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
         Tk = kelvin(Tc)
@@ -66,17 +57,12 @@ class Air:
     ) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
-        alt : float or numpy.ndarray, optional
-            Altitude above sea-level. The default is 0.
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
+            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Kinematic viscosity in m\ :sup:`2`\ .s\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Kinematic viscosity in m²·s⁻¹.
 
         """
         return Air.dynamic_viscosity(Tc) / Air.volumic_mass(Tc, alt=alt)
@@ -87,15 +73,11 @@ class Air:
 
         The output is valid for input in [-150, 1300] range (in Celsius)
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Thermal conductivity in W.m\ :sup:`-1`\ .K\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Thermal conductivity in W·m⁻¹·K⁻¹.
 
         """
         Tk = kelvin(Tc)
