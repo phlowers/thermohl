@@ -27,16 +27,11 @@ Each of these equations can be used with a set of pre-coded power terms from the
 
 [TODO : find a clean way to include references (maybe a dedicated page?)]: #
 
-* one using CIGRE recommendations [Thermal behaviour of overhead conductors, study committee 22, working
-  group 12, 2002];
-* one using an IEEE standard [IEEE std 38-2012];
+* one using CIGRE recommendations [@CIGRE2002];  
+* one using an IEEE standard [@IEEE2012];  
 * two others from RTE departments.
 
 Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The
 set of parameter required depends on the power terms used, and default values are provided.
 
 ## References
-
-* tata
-* titi
-* toto
