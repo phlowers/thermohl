@@ -15,6 +15,35 @@ SPDX-License-Identifier: MPL-2.0
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=coverage)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
 
 [TODO : Include index.md here]: #
+# ThermOHL
+
+ThermOHL is a python package to compute temperature ampacity in overhead line conductors.
+
+## Features
+
+The temperature of a conductor is estimated by solving a heat equation which describes how temperature evolves over
+time, taking into account different power terms that either heat or cold the conductor.
+
+Two heat equations (a more complete, third one is under development) are available:
+
+* one with a single temperature for the cable;
+* another with three temperatures (core, average and surface temperature) for more precise computations.
+
+Each of these equations can be used with a set of pre-coded power terms from the literature :
+
+[TODO : find a clean way to include references (maybe a dedicated page?)]: #
+
+* one using CIGRE recommendations [@CIGRE2002];  
+* one using an IEEE standard [@IEEE2012];  
+* two others from RTE departments.
+
+Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The
+set of parameter required depends on the power terms used, and default values are provided.
+
+## References
+[@CIGRE2002](https://fr.scribd.com/document/527831561/CIGRE-WG-22-12-Thermal-Behaviour-of-Overhead-Conductors)
+[@IEEE2012](https://ieeexplore.ieee.org/document/6692858)
+
 
 ## Installation
 
