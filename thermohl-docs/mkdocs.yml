@@ -29,13 +29,17 @@ theme:
       - palette.toggle # Display toggle button to switch bright/dark mode
       - navigation.footer # Display footer nav
 
-  logo: _static/logos/phlowers_64x64.ico
-  favicon: _static/logos/phlowers_32x32.ico
+  logo: assets/images/logos/phlowers_64x64.ico
+  favicon: assets/images/logos/phlowers_32x32.ico
 
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
-  - Examples: examples.md
+  - Examples:
+      - Example of steady temperature with 1t solver and IEEE model: examples/ex_steady_1t.ipynb
+      - Example of steady temperature with 3t solver and CIGRE model: examples/ex_steady_3t.ipynb
+      - Example of transient temperature with 3t solver and OLLA model: examples/ex_transient_3t.ipynb
+
   - Parameters: api-reference/parameters.md
   - Developer Guide:
       - Models:
@@ -77,6 +81,11 @@ nav:
 
 plugins:
   - search
+  - bibtex:
+      bib_file: "docs/refs.bib"
+  - mkdocs-jupyter:
+      execute: false
+
   - markdownextradata # Used to include README.md in getting-started.md file
   - mkdocstrings:
       handlers:
@@ -86,9 +95,11 @@ plugins:
             docstring_options:
               ignore_init_summary: true
 
+
 markdown_extensions:
   - markdown_include.include:
       base_path: . # Base path to find README.md
+
 
 extra:
   social:
@@ -107,3 +118,4 @@ extra:
     - icon: fontawesome/brands/instagram
       link: https://www.instagram.com/rte_france
       name: RTE France on Instagram
+
