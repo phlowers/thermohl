@@ -9,6 +9,11 @@ SPDX-License-Identifier: MPL-2.0
 
 # Parameters and Default Values
 
+Solvers in thermOHL take a dictionary as an argument, where all keys are strings and all values are either integers,
+floats or 1D `numpy.ndarray` of integers or floats. It is important to note that all arrays should have the same size.
+Missing or `None` values in the input dictionary are replaced with a default value, available using
+`solver.default_values()`, which are read from `thermohl/default_values.yaml`.
+
 [TODO : check with sources + add a paragraph explaining which parameters are not required if we use srad directly]: #
 
 | Parameter | Default Value | Unit    | Used in CIGRE | Used in IEEE | Used in OLLA | Used in CNER | Comment                                                      |
