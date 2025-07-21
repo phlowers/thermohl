@@ -41,8 +41,8 @@ Solvers derivated from heat equations can compute steady-state temperature or am
 set of parameter required depends on the power terms used, and default values are provided.
 
 ## References
-[@CIGRE2002](https://fr.scribd.com/document/527831561/CIGRE-WG-22-12-Thermal-Behaviour-of-Overhead-Conductors)
-[@IEEE2012](https://ieeexplore.ieee.org/document/6692858)
+CIGRE2002, **Thermal behaviour of overhead conductors, study committee 22, working group 12, 2002**  
+IEEE2012, **IEEE std 38-2012**
 
 
 ## Installation
