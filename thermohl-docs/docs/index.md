@@ -27,8 +27,8 @@ Each of these equations can be used with a set of pre-coded power terms from the
 
 [TODO : find a clean way to include references (maybe a dedicated page?)]: #
 
-* one using CIGRE recommendations [@CIGRE2002];  
-* one using an IEEE standard [@IEEE2012];  
+* one using CIGRE recommendations [@CIGRE];  
+* one using an IEEE standard [@IEEE];  
 * two others from RTE departments.
 
 Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The

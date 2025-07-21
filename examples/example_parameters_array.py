@@ -24,7 +24,6 @@ def example_all_params(dic):
         Trep=50
         damp = slvr.steady_intensity(Trep)
         ax[i,0].plot(slvr.args.hour, dtemp['t'], c='C0', label='Conductor temperature (C)')
-
         ax[i,0].axhline(Trep, ls="--", c='C1', label="Maximum temperature for ampacity")
         ax[i,1].plot(slvr.args.hour, slvr.args.I, c='C0', label="Transit (A)")
         ax[i,1].plot(slvr.args.hour, damp['I'], c='C1', label='Conductor ampacity (A)')
@@ -38,6 +37,10 @@ def example_all_params(dic):
 
 
 if __name__ == '__main__':
+    import matplotlib
+
+    matplotlib.use("TkAgg")
+    plt.close("all")
     dic = dict(
         lat=46.1,
         lon=2.0,
