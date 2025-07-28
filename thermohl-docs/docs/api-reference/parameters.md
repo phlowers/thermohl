@@ -58,9 +58,9 @@ units, default values and in which set of power terms they are used.
 
 For consistent joule heating outputs between CIGRE and IEEE joule power terms, you must have
 
-* RDCLow=RDC20
-* TLow=20
-* any THigh>TLow and RDCHigh-RDCLow=(THigh-TLow)*kl*RDC20
+* $ RDCLow=RDC20 $
+* $ TLow=20 $
+* any $ THigh > TLow $ and $ RDCHigh - RDCLow = (THigh - TLow) \cdot kl \cdot RDC20 $
 
 If you use direct solar radiation formula (with `srad` key), you can
 ignore the following parameters : `lat`, `lon`, `month`, `day`,
