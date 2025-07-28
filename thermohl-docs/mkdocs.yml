@@ -97,8 +97,11 @@ plugins:
 
 
 markdown_extensions:
+  - pymdownx.arithmatex
+  - pymdownx.superfences
   - markdown_include.include:
       base_path: . # Base path to find README.md
+
 
 
 extra:
@@ -119,3 +122,10 @@ extra:
       link: https://www.instagram.com/rte_france
       name: RTE France on Instagram
 
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+  - js/math.js  # tu peux créer ce fichier (voir ci-dessous)
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css
