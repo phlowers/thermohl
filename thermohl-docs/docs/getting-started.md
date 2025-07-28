@@ -82,7 +82,7 @@ Results from the solver are returned in a `pandas.DataFrame`:
 
 This example uses the same heat equation and power terms, but to compute the line ampacity (A), ie the maximum power 
 intensity that can be used in a conductor without exceeding a specified maximal temperature (°C), along with the 
-corresponding power terms (W.m<sup>-1</sup>). We can see that, for three different ambient temperature, we have three
+corresponding power terms (W.m<sup>-1</sup>). We can see that, for three different ambient temperatures, we have three
 distinct ampacities (and the lower the ambient temperature, the higher the ampacity).
 
 ```python
