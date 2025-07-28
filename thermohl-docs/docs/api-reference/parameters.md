@@ -54,13 +54,16 @@ units, default values and in which set of power terms they are used.
 | RDCHigh   | 3.05E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at THigh            |
 | RDCLow    | 2.66E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at TLow             |
 | THigh     | 60            | celsius    | no            | yes          | no           | no          | temperature for RDCHigh measurement                          |
-| TLow      | 20            | celsius    | no            | yes          | no           | no          | temperature for RDCHigh measurement                          | 
+| TLow      | 20            | celsius    | no            | yes          | no           | no          | temperature for RDCHigh measurement                          |
+| srad      | NaN           | W.m⁻²      | yes (opt.)    | yes (opt.)   | yes (opt.)   | yes (opt.)  | solar irradiance                                             |
 
-For consistent joule heating outputs between CIGRE and IEEE joule power terms, you must have
+For consistent joule heating outputs between CIGRE and IEEE joule
+power terms, you must have
 
-* $ RDCLow=RDC20 $
-* $ TLow=20 $
-* any $ THigh > TLow $ and $ RDCHigh - RDCLow = (THigh - TLow) \cdot kl \cdot RDC20 $
+* $ R_{\text{DC,low}}=R_{\text{DC},20} $;
+* $ T_{\text{low}}=20 $;
+* any $ T_{\text{high}} > T_{\text{low}} $ and
+$ R_{\text{DC,high}} - R_{\text{DC,low}} = (T_{\text{high}} - T_{\text{low}}) \cdot k_{\ell} \cdot R_{\text{DC},20} $.
 
 If you use direct solar radiation formula (with `srad` key), you can
 ignore the following parameters : `lat`, `lon`, `month`, `day`,
