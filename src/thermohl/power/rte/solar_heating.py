@@ -5,9 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 from typing import Optional, Any
-
 import numpy as np
-
 from thermohl import floatArrayLike, intArrayLike, sun
 from thermohl.power import SolarHeatingBase, _SRad
 
@@ -66,7 +64,7 @@ class SolarHeating(SolarHeatingBase):
         hour: floatArrayLike,
         D: floatArrayLike,
         alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        Qs: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Build with args.
@@ -90,8 +88,8 @@ class SolarHeating(SolarHeatingBase):
             external diameter.
         alpha : np.ndarray
             Solar absorption coefficient.
-        srad : xxx
-            xxx
+        Qs : measured solar irradiance (W/m2)
+
 
         Returns
         -------
@@ -99,20 +97,12 @@ class SolarHeating(SolarHeatingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        for k in ["alt", "tb"]:
-            if k in kwargs.keys():
-                kwargs.pop(k)
-        super().__init__(
-            lat=lat,
-            alt=0.0,
-            azm=azm,
-            tb=0.0,
-            month=month,
-            day=day,
-            hour=hour,
-            D=D,
-            alpha=alpha,
-            est=solar_radiation,
-            srad=srad,
-            **kwargs,
-        )
+        self.alpha = alpha
+        if np.isnan(Qs).all():
+            Qs = solar_irradiance(np.deg2rad(lat), month, day, hour)
+        sa = sun.solar_altitude(np.deg2rad(lat), month, day, hour)
+        sz = sun.solar_azimuth(np.deg2rad(lat), month, day, hour)
+        th = np.arccos(np.cos(sa) * np.cos(sz - np.deg2rad(azm)))
+        srad = Qs * np.sin(th)
+        self.srad = np.maximum(srad, 0.0)
+        self.D = D
