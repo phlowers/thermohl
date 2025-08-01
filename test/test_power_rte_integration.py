@@ -157,6 +157,18 @@ def scenarios():
         Ta=[20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0],
         ws=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
         wa=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
+        Qs=[
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+            np.nan,
+        ],
         lat=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         alt=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         azm=90.0,
@@ -220,6 +232,6 @@ def test_solar_heating():
     alpha = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
-    s = rte.SolarHeating(lat, azm, month, day, hour, D, alpha, srad=None)
+    s = rte.SolarHeating(lat, azm, month, day, hour, D, alpha, Qs=np.nan)
 
     assert np.allclose(p, s.value(ones), 0.1)
