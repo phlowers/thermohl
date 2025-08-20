@@ -145,3 +145,11 @@ may depend on temperature $ T $) : $ q_{\text{joule}} +
 q_{\text{solar}} - q_{\text{convection}} - q_{\text{radiation}} $.
 
 #### Three-temperatures model
+
+In order to have a more accurate resolution than the single-temperature model, 
+but with faster solving time than the full resolution, RTE developed a
+specific model with three temperatures for the conductor :
+
+* the surface temperature;
+* the average temperature;
+* the core temperature.
