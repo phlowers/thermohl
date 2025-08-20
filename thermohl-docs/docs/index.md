@@ -11,14 +11,20 @@ SPDX-License-Identifier: MPL-2.0
 
 # ThermOHL
 
-ThermOHL is a python package to compute temperature ampacity in
-overhead line conductors.
+Temperature estimation of overhead line conductors is an important topic for 
+TSOs for technical, economic, and safety-related reasons (DLR/ampacity, sag 
+management ...). It depends on several factors, mainly transit, weather and the
+conductor properties. ThermOHL is a python package to compute temperature and/or 
+ampacity in overhead line conductors.
 
 ## Features
 
 The temperature of a conductor is estimated by solving a heat equation
 which describes how temperature evolves over time, taking into account
-different power terms that either heat or cold the conductor.
+different power terms that either heat or cold the conductor (see next picture 
+from [CIGRE]).
+
+![image](assets/images/cigre_balance.png "Overhead conductor heating and cooling. From [CIGRE].")
 
 Two heat equations (a more complete, third one is under development)
 are available:
@@ -36,7 +42,7 @@ terms from the literature :
 
 Solvers derivated from heat equations can compute steady-state
 temperature or ampacity, and transient temperature. The set of
-parameter required depends on the power terms used, and default values
-are provided.
+[parameter](api-reference/parameters.md) required depends on the 
+power terms used, and default values are provided.
 
 ## References
