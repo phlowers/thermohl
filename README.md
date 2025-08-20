@@ -16,32 +16,42 @@ SPDX-License-Identifier: MPL-2.0
 
 # ThermOHL
 
-ThermOHL is a python package to compute temperature ampacity in overhead line conductors.
+ThermOHL is a python package to compute temperature ampacity in
+overhead line conductors.
 
 ## Features
 
-The temperature of a conductor is estimated by solving a heat equation which describes how temperature evolves over
-time, taking into account different power terms that either heat or cold the conductor.
+The temperature of a conductor is estimated by solving a heat equation
+which describes how temperature evolves over time, taking into account
+different power terms that either heat or cold the conductor.
 
-Two heat equations (a more complete, third one is under development) are available:
+Two heat equations (a more complete, third one is under development)
+are available:
 
 * one with a single temperature for the cable;
-* another with three temperatures (core, average and surface temperature) for more precise computations.
+* another with three temperatures (core, average and surface
+  temperature) for more precise computations.
 
-Each of these equations can be used with a set of pre-coded power terms from the literature :
+Each of these equations can be used with a set of pre-coded power
+terms from the literature :
 
-[TODO : find a clean way to include references (maybe a dedicated page?)]: #
-
-* one using **CIGRE**[1] recommendations;  
-* one using an **IEEE**[2] standard;  
+* one using CIGRE recommendations [1];  
+* one using the IEEE standard [2];  
 * two others from RTE departments.
 
-Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The
-set of parameter required depends on the power terms used, and default values are provided.
+Solvers derivated from heat equations can compute steady-state
+temperature or ampacity, and transient temperature. The set of
+parameter required depends on the power terms used, and default values
+are provided.
 
 ## References
-* [1]CIGRE: **Thermal behaviour of overhead conductors, study committee 22, working group 12, 2002**  
-* [2]IEEE:  **IEEE std 38-2012**
+
+* [1] Stephen et al., **Thermal behaviour of overhead conductors**. 
+  *CIGRE, Study committee 22, working group 12*, 2002.
+  https://e-cigre.org/publications/detail/207-thermal-behaviour-of-overhead-conductors.html.
+* [2] IEEE, **Standard for Calculating the Current-Temperature Relationship of Bare Overhead Conductors**.
+  *IEEE Std 738–2012 (Revision of IEEE Std 738–2006, Incorporates IEEE Std 738–2012 Cor 1–2013)*, 2013.
+  https://doi.org/10.1109/IEEESTD.2013.6692858.
 
 
 ## Installation

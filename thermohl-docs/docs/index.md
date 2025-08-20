@@ -31,7 +31,7 @@ Each of these equations can be used with a set of pre-coded power
 terms from the literature :
 
 * one using CIGRE recommendations [@CIGRE];  
-* one using an IEEE standard [@IEEE];  
+* one using the IEEE standard [@IEEE];  
 * two others from RTE departments.
 
 Solvers derivated from heat equations can compute steady-state
