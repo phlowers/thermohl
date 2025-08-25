@@ -11,32 +11,38 @@ SPDX-License-Identifier: MPL-2.0
 
 # ThermOHL
 
-ThermOHL is a python package to compute temperature ampacity in overhead line conductors.
+Temperature estimation of overhead line conductors is an important topic for 
+TSOs for technical, economic, and safety-related reasons (DLR/ampacity, sag 
+management ...). It depends on several factors, mainly transit, weather and the
+conductor properties. ThermOHL is a python package to compute temperature and/or 
+ampacity in overhead line conductors.
 
 ## Features
 
-The temperature of a conductor is estimated by solving a heat equation which describes how temperature evolves over
-time, taking into account different power terms that either heat or cold the conductor.
+The temperature of a conductor is estimated by solving a heat equation
+which describes how temperature evolves over time, taking into account
+different power terms that either heat or cold the conductor (see next picture 
+from [CIGRE]).
 
-Two heat equations (a more complete, third one is under development) are available:
+![image](assets/images/cigre_balance.png "Overhead conductor heating and cooling. From [CIGRE].")
+
+Two heat equations (a more complete, third one is under development)
+are available:
 
 * one with a single temperature for the cable;
-* another with three temperatures (core, average and surface temperature) for more precise computations.
+* another with three temperatures (core, average and surface
+  temperature) for more precise computations.
 
-Each of these equations can be used with a set of pre-coded power terms from the literature :
+Each of these equations can be used with a set of pre-coded power
+terms from the literature :
 
-[TODO : find a clean way to include references (maybe a dedicated page?)]: #
-
-* one using CIGRE recommendations [Thermal behaviour of overhead conductors, study committee 22, working
-  group 12, 2002];
-* one using an IEEE standard [IEEE std 38-2012];
+* one using CIGRE recommendations [@CIGRE];  
+* one using the IEEE standard [@IEEE];  
 * two others from RTE departments.
 
-Solvers derivated from heat equations can compute steady-state temperature or ampacity, and transient temperature. The
-set of parameter required depends on the power terms used, and default values are provided.
+Solvers derivated from heat equations can compute steady-state
+temperature or ampacity, and transient temperature. The set of
+[parameter](api-reference/parameters.md) required depends on the 
+power terms used, and default values are provided.
 
 ## References
-
-* tata
-* titi
-* toto
