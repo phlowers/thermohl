@@ -36,32 +36,19 @@ class JouleHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        I : float or np.ndarray
-            Transit intensity.
-        D : float or np.ndarray
-            External diameter.
-        d : float or np.ndarray
-            core diameter.
-        A : float or np.ndarray
-            External (total) section.
-        a : float or np.ndarray
-            core section.
-        km : float or np.ndarray
-            Coefficient for magnetic effects.
-        ki : float or np.ndarray
-            Coefficient for magnetic effects.
-        kl : float or np.ndarray
-            Linear resistance augmentation with temperature.
-        kq : float or np.ndarray
-            Quadratic resistance augmentation with temperature.
-        RDC20 : float or np.ndarray
-            Electric resistance per unit length (DC) at 20°C.
-        T20 : float or np.ndarray, optional
-            Reference temperature. The default is 20.
-        f : float or np.ndarray, optional
-            Current frequency (Hz). The default is 50.
+        Args:
+            I (float | numpy.ndarray): Transit intensity (A).
+            D (float | numpy.ndarray): External diameter (m).
+            d (float | numpy.ndarray): Core diameter (m).
+            A (float | numpy.ndarray): External (total) cross-sectional area (m²).
+            a (float | numpy.ndarray): Core cross-sectional area (m²).
+            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
+            kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
+            kq (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
+            RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
+            T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
+            f (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
         self.I = I
@@ -78,15 +65,11 @@ class JouleHeating(PowerTerm):
         """
         Compute resistance per unit length for direct current.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Temperature array or value at which to compute the resistance.
+        Args:
+            T (float | numpy.ndarray): Temperature at which to compute the resistance (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Resistance per unit length for direct current at the given temperature(s).
+        Returns:
+            float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
         dt = T - self.T20
         return self.RDC20 * (1.0 + self.kl * dt + self.kq * dt**2)
@@ -99,12 +82,11 @@ class JouleHeating(PowerTerm):
         resistance (rdc) and the object's attributes. The calculation is an
         approximation as described in the RTE's document.
 
-        Parameters:
-        rdc (float or np.ndarray): The resistance value(s) for which the skin-effect
-                              coefficient is to be computed.
+        Args:
+            rdc (float | numpy.ndarray): The resistance value(s) for which the skin-effect coefficient is to be computed (Ω·m⁻¹).
 
         Returns:
-        floatArrayLike: The computed skin-effect coefficient(s).
+            floatArrayLike: The computed skin-effect coefficient(s) (—).
         """
         z = (
             8
@@ -128,21 +110,14 @@ class JouleHeating(PowerTerm):
         """
         Compute magnetic coefficient.
 
-        Parameters
-        ----------
-        A : float or np.ndarray
-            External (total) section.
-        a : float or np.ndarray
-            Core section.
-        km : float or np.ndarray
-            Coefficient for magnetic effects.
-        ki : float or np.ndarray
-            Coefficient for magnetic effects.
+        Args:
+            A (float | numpy.ndarray): External (total) cross-sectional area (m²).
+            a (float | numpy.ndarray): Core cross-sectional area (m²).
+            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
 
-        Returns
-        -------
-        floatArrayLike
-            Computed magnetic coefficient.
+        Returns:
+            floatArrayLike: Computed magnetic coefficient (—).
         """
         s = (
             np.ones_like(self.I)
@@ -168,15 +143,11 @@ class JouleHeating(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         rdc = self._rdc(T)

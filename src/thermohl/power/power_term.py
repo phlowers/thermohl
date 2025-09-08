@@ -27,15 +27,11 @@ class PowerTerm(ABC):
         Usually this function should be overridden in children classes; if it is
         not the case it will just return zero.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature (C).
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return np.zeros_like(T) if not np.isscalar(T) else 0.0
@@ -49,17 +45,12 @@ class PowerTerm(ABC):
         not the case it will evaluate the derivative from the value method with
         a second-order approximation.
 
-        Parameters
-        ----------
-        conductor_temperature : float or np.ndarray
-            Conductor temperature (C).
-        dT : float, optional
-            Temperature increment. The default is 1.0E-03.
+        Args:
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
+            dT (float, optional): Temperature increment. The default is 1.0E-03.
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return (

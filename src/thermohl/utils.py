@@ -24,17 +24,12 @@ def _dict_completion(
     Read dict stored in filename (yaml format) and for each key in it, add it
     to input dict dat if the key is not already in dat.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
@@ -60,17 +55,12 @@ def _dict_completion(
 def add_default_parameters(dat: dict, warning: bool = False) -> dict:
     """Add default parameters if there is missing input.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(
@@ -82,17 +72,12 @@ def add_default_parameters(dat: dict, warning: bool = False) -> dict:
 def add_default_uncertainties(dat: dict, warning: bool = False) -> dict:
     """Add default uncertainty parameters if there is missing input.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(
@@ -106,14 +91,11 @@ def df2dct(df: pd.DataFrame) -> dict:
 
     Would be an equivalent to df.to_dict(orient='numpy.ndarray') if it existed.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
+    Args:
+        df (pandas.DataFrame): Input DataFrame.
 
-    Returns
-    -------
-    dict
-        DESCRIPTION.
+    Returns:
+        dict: Dictionary with values converted to scalars or numpy arrays.
     """
     q = df.to_dict(orient="list")
     for k in q.keys():
@@ -145,25 +127,21 @@ def bisect_v(
     This is most efficient if the outputs values of all these functions are
     computed using vectorized Numpy operations as in the example below.
 
-    Parameters
-    ----------
-    fun: Python function taking a Numpy array and returning a Numpy array of the same shape.
-    a : lower bound of [a, b] interval.
-    b : upper bound of [a, b] interval.
-    shape : shape of the inputs and ouputs of `fun` and thus of the ouputs of `bisect_v`.
-    tol : absolute tolerance.
-    maxiter : maximum number of iterations.
-    print_err : print or not max error and number of iterations at the end.
+    Args:
+        fun (Callable[[np.ndarray], np.ndarray]): Python function taking a NumPy array and returning a NumPy array of the same shape.
+        a (float): Lower bound of the [a, b] interval.
+        b (float): Upper bound of the [a, b] interval.
+        shape (tuple[int, ...]): Shape of the inputs and outputs of `fun` and thus of the outputs of `bisect_v`.
+        tol (float): Absolute tolerance.
+        maxiter (int): Maximum number of iterations.
+        print_err (bool): Whether to print the max absolute error and iteration count at the end.
 
-    Returns
-    -------
-    x: Numpy array of the same shape as the inputs and outputs of `fun`
-        The zero of each function.
-    err: Numpy array of the same shape as the inputs and outputs of `fun`
-        The convergence error.
+    Returns:
+        tuple[np.ndarray, np.ndarray]:
+            - x: NumPy array with the zeros (same shape as `shape`).
+            - err: NumPy array with the absolute convergence error (same shape as `shape`).
 
-    Example
-    -------
+    Examples
     >>> c = np.array([1.0, 4.0, 9.0, 16.0])
     >>> def f(x):
     ...     return x**2 - c
@@ -216,23 +194,22 @@ def quasi_newton_2d(
 
     All return values are arrays of the same size as inputs x0 and y0.
 
-    Parameters
-    ----------
-    f1 : first component of a 2d function of two variables
-    f2 : second component of a 2d function of two variables
-    x0 : first component of the initial guess
-    y0 : second component of the initial guess
-    relative_tolerance : relative tolerance
-    max_iterations : max number of iteration
-    delta_x : delta for evaluating derivative regarding first component
-    delta_y : delta for evaluating derivative regarding second component
+    Args:
+        f1 (Callable[[np.ndarray, np.ndarray], np.ndarray]): First component of a 2D function of two variables.
+        f2 (Callable[[np.ndarray, np.ndarray], np.ndarray]): Second component of a 2D function of two variables.
+        x0 (np.ndarray): First component of the initial guess.
+        y0 (np.ndarray): Second component of the initial guess.
+        relative_tolerance (float): Relative tolerance for convergence.
+        max_iterations (int): Maximum number of iterations.
+        delta_x (float): Delta for evaluating the derivative with respect to the first component.
+        delta_y (float): Delta for evaluating the derivative with respect to the second component.
 
-    Returns
-    -------
-    x: first component of solution
-    y: second component of solution
-    count: number of iterations when exiting the function
-    err: relative error when exiting the function
+    Returns:
+        tuple[np.ndarray, np.ndarray, int, np.ndarray]:
+            - x: First component of the solution.
+            - y: Second component of the solution.
+            - count: Number of iterations when exiting the function.
+            - err: Relative error when exiting the function (per component).
 
     """
     x = x0.copy()

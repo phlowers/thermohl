@@ -31,26 +31,16 @@ class Solver1T(Solver_):
         """
         Compute steady-state temperature.
 
-        Parameters
-        ----------
-        Tmin : float, optional
-            Lower bound for temperature.
-        Tmax : float, optional
-            Upper bound for temperature.
-        tol : float, optional
-            Tolerance for temperature error.
-        maxiter : int, optional
-            Max number of iteration.
-        return_err : bool, optional
-            Return final error on temperature to check convergence. The default is False.
-        return_power : bool, optional
-            Return power term values. The default is True.
+        Args:
+            Tmin (float, optional): Lower bound for temperature.
+            Tmax (float, optional): Upper bound for temperature.
+            tol (float, optional): Tolerance for temperature error.
+            maxiter (int, optional): Max number of iterations.
+            return_err (bool, optional): Return final error on temperature to check convergence. The default is False.
+            return_power (bool, optional): Return power term values. The default is True.
 
-        Returns
-        -------
-        pandas.DataFrame
-            A DataFrame with temperature and other results (depending on inputs)
-            in the columns.
+        Returns:
+            pandas.DataFrame: A DataFrame with temperature and other results (depending on inputs) in the columns.
 
         """
 
@@ -83,21 +73,13 @@ class Solver1T(Solver_):
         """
         Compute transient-state temperature.
 
-        Parameters
-        ----------
-        time : numpy.ndarray
-            A 1D array with times (in seconds) when the temperature needs to be
-            computed. The array must contain increasing values (undefined
-            behaviour otherwise).
-        T0 : float
-            Initial temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        return_power : bool, optional
-            Return power term values. The default is False.
+        Args:
+            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
+            T0 (float | None): Initial temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            return_power (bool, optional): Return power term values. The default is False.
 
-        Returns : Dict[str, Any]
-            A dictionary with temperature and other results (depending on inputs)
-            in the keys.
+        Returns:
+            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
         """
 
         # get sizes (n for input dict entries, N for time)
@@ -193,28 +175,17 @@ class Solver1T(Solver_):
         Compute the maximum intensity that can be run in a conductor without
         exceeding the temperature given in argument.
 
-        Parameters
-        ----------
-        T : float or numpy.ndarray
-            Maximum temperature.
-        Imin : float, optional
-            Lower bound for intensity. The default is 0.
-        Imax : float, optional
-            Upper bound for intensity. The default is 9999.
-        tol : float, optional
-            Tolerance for temperature error. The default is 1.0E-06.
-        maxiter : int, optional
-            Max number of iteration. The default is 64.
-        return_err : bool, optional
-            Return final error on intensity to check convergence. The default is False.
-        return_power : bool, optional
-            Return power term values. The default is True.
+        Args:
+            T (float | numpy.ndarray): Maximum temperature.
+            Imin (float, optional): Lower bound for intensity. The default is 0.
+            Imax (float, optional): Upper bound for intensity. The default is 9999.
+            tol (float, optional): Tolerance for temperature error. The default is 1.0E-06.
+            maxiter (int, optional): Max number of iterations. The default is 64.
+            return_err (bool, optional): Return final error on intensity to check convergence. The default is False.
+            return_power (bool, optional): Return power term values. The default is True.
 
-        Returns
-        -------
-        pandas.DataFrame
-            A dataframe with maximum intensity and other results (depending on inputs)
-            in the columns.
+        Returns:
+            pandas.DataFrame: A dataframe with maximum intensity and other results (depending on inputs) in the columns.
 
         """
 
