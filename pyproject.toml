@@ -35,11 +35,14 @@ dependencies = [
     "pandas >= 2.1.2",
     "scipy >= 1.13.1",
     "pyyaml >= 6.0.1",
-    "pyntb == 2024.0.1",
+    "pyntb >= 2024.0.1",
     "setuptools",
 ]
 
 [project.optional-dependencies]
+examples = [
+    "matplotlib ~= 3.9.2",
+]
 test = [
     "pytest >= 7.2.2",
     "pytest-cov >= 6.0.0",

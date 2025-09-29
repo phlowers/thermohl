@@ -51,7 +51,7 @@ class SolarHeating(PowerTerm):
         srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
-        r"""Build with args.
+        r"""Init with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
