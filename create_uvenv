@@ -8,14 +8,14 @@
 # SPDX-License-Identifier: MPL-2.0
 
 # -- dir for all envs
-ENV_DIR=/home/${USER}/ENV
+ENV_DIR=${ENV_DIR:-$HOME/ENV}  # Use global ENV_DIR variable if existing
 mkdir -p $ENV_DIR
 
 # -- current env with link
 VENV=${ENV_DIR}/mewslabs-thermohl-uv
 VLNK=.venv
 ln -sf $VENV $VLNK
-uv venv $VENV  # --python 3.11
+uv venv $VENV --python-preference=system # --python 3.11
 source $VENV/bin/activate
 # .venv\Scripts\activate
 
