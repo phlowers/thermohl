@@ -22,21 +22,11 @@ class RadiativeCooling(RadiativeCoolingBase):
     ):
         r"""Init with args.
 
-        Parameters
-        ----------
-        Ta : float or np.ndarray
-            Ambient temperature (C).
-        D : float or np.ndarray
-            External diameter (m).
-        epsilon : float or np.ndarray
-            Emissivity.
-        sigma : float, optional
-            Stefan-Boltzmann constant in W.m\ :sup:`-2`\ K\ :sup:`4`\ . The
-            default is 5.67E-08.
-
-        Returns
-        -------
-
+        Args:
+            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            D (float | numpy.ndarray): External diameter (m).
+            epsilon (float | numpy.ndarray): Emissivity (—).
+            sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
         """
         super().__init__(
             Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273.0, **kwargs

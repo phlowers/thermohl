@@ -34,14 +34,13 @@ class Solver3TL(Solver3T):
         Calculate coefficients for heat flux between surface and core in steady state.
 
         Returns:
-        --------
-        Tuple[numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[int]]
-            - heat_flux_coefficients : numpy.ndarray[float]
-                Coefficient array for heat flux.
-            - indices_non_zero_diameter : numpy.ndarray[int]
-                Indices where core diameter is greater than 0.
-                When conductors are uniform, core diameter is equal to 0.0.
-                When conductors are bimetallic, core diameter is greater than 0.0.
+            Tuple[numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[int]]
+                - heat_flux_coefficients : numpy.ndarray[float]
+                    Coefficient array for heat flux.
+                - indices_non_zero_diameter : numpy.ndarray[int]
+                    Indices where core diameter is greater than 0.
+                    When conductors are uniform, core diameter is equal to 0.0.
+                    When conductors are bimetallic, core diameter is greater than 0.0.
         """
         UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
         BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
@@ -63,12 +62,9 @@ class Solver3TL(Solver3T):
         Unlike Solver3T, always use a regular mean even for non-homogeneous
         conductors.
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
-
-        Returns:
-        float or numpy.ndarray: Array of average temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
         """
         return 0.5 * (ts + tc)
 
@@ -76,12 +72,12 @@ class Solver3TL(Solver3T):
         """
         Computes the Morgan function for given temperature arrays.
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
 
         Returns:
-        numpy.ndarray: Resulting array after applying the Morgan function.
+            numpy.ndarray: Resulting array after applying the Morgan function.
         """
         morgan_coefficient = self.mgc[0]
         return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
@@ -140,28 +136,19 @@ class Solver3TL(Solver3T):
         """
         Compute transient-state temperature with legacy method.
 
-        Parameters
-        ----------
-        time : numpy.ndarray
-            A 1D array with times (in seconds) when the temperature needs to be
-            computed. The array must contain increasing values (undefined
-            behaviour otherwise).
-        Ts0 : float
-            Initial surface temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        Tc0 : float
-            Initial core temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        tau: float
-            A time-constant to add some inertia. The default is 600.
-        return_power : bool, optional
-            Return power term values. The default is False.
+        Args:
+            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
+                computed. The array must contain increasing values (undefined behaviour otherwise).
+            Ts0 (float): Initial surface temperature. If set to None, the ambient temperature from
+                internal dict will be used. The default is None.
+            Tc0 (float): Initial core temperature. If set to None, the ambient temperature from
+                internal dict will be used. The default is None.
+            tau (float): A time-constant to add some inertia. The default is 600.
+            return_power (bool, optional): Return power term values. The default is False.
 
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary with temperature and other results (depending on inputs)
-            in the keys.
+        Returns:
+            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs)
+                in the keys.
 
         """
 

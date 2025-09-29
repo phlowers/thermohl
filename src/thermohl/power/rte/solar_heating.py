@@ -35,21 +35,14 @@ def solar_irradiance(
 
     Difference with IEEE version are neither turbidity or altitude influence.
 
-    Parameters
-    ----------
-    lat : floatArrayLike
-        Latitude in radians.
-    month : intArrayLike
-        Month (1-12).
-    day : intArrayLike
-        Day of the month.
-    hour : floatArrayLike
-        Hour of the day (0-24).
+    Args:
+        lat (float | numpy.ndarray): Latitude in radians.
+        month (int | numpy.ndarray): Month (1-12).
+        day (int | numpy.ndarray): Day of the month.
+        hour (float | numpy.ndarray): Hour of the day (0-24).
 
-    Returns
-    -------
-    floatArrayLike
-        Solar radiation value. Negative values are set to zero.
+    Returns:
+        float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
     """
     solar_altitude = sun.solar_altitude(lat, month, day, hour)
     atmospheric_coefficient = solar_radiation.catm(np.rad2deg(solar_altitude))
@@ -73,31 +66,18 @@ class SolarHeating(SolarHeatingBase):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        lat : float or np.ndarray
-            Latitude.
-        azm : float or np.ndarray
-            Azimuth.
-        month : int or np.ndarray
-            Month number (must be between 1 and 12).
-        day : int or np.ndarray
-            Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-            month).
-        hour : float or np.ndarray
-            Hour of the day (solar, must be between 0 and 23).
-        D : float or np.ndarray
-            external diameter.
-        alpha : np.ndarray
-            Solar absorption coefficient.
-        srad : float or np.ndarray
-            Solar irradiance. Default is nan. If nan value is estimated using
-            all other input.
+        Args:
+            lat (float | numpy.ndarray): Latitude.
+            azm (float | numpy.ndarray): Azimuth.
+            month (int | numpy.ndarray): Month number (must be between 1 and 12).
+            day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
+            hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
+            D (float | numpy.ndarray): external diameter.
+            alpha (numpy.ndarray): Solar absorption coefficient.
+            srad (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W.m\ :sup:`-1`\ ).
 
         """
         for k in ["alt", "tb"]:

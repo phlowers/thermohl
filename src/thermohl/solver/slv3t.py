@@ -175,12 +175,12 @@ class Solver3T(Solver_):
         single material, the formula reduces itself to an usual mean; for
         bi-material conductors, we have geometrical terms to take into account.
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
 
         Returns:
-        float or numpy.ndarray: Array of average temperatures.
+            float | numpy.ndarray: Array of average temperatures.
         """
         ta = 0.5 * (ts + tc)
         _, D, d, ix = self.mgc
@@ -191,12 +191,12 @@ class Solver3T(Solver_):
         """
         Calculate the Joule heating effect.
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
 
         Returns:
-        float or numpy.ndarray: The calculated Joule heating values.
+            float | numpy.ndarray: The calculated Joule heating values.
 
         Notes:
         - The function computes the average temperature `temperature`.
@@ -213,12 +213,12 @@ class Solver3T(Solver_):
         specific heat, and subtracting the contributions from the cooling
         components (convection, radiation, and conduction).
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
 
         Returns:
-        float or numpy.ndarray: The resulting thermal balance.
+            float | numpy.ndarray: The resulting thermal balance.
         """
         return (
             self.joule(ts, tc)
@@ -232,12 +232,12 @@ class Solver3T(Solver_):
         """
         Computes the Morgan function for given temperature arrays.
 
-        Parameters:
-        ts (numpy.ndarray): Array of surface temperatures.
-        tc (numpy.ndarray): Array of core temperatures.
+        Args:
+            ts (numpy.ndarray): Array of surface temperatures.
+            tc (numpy.ndarray): Array of core temperatures.
 
         Returns:
-        numpy.ndarray: Resulting array after applying the Morgan function.
+            numpy.ndarray: Resulting array after applying the Morgan function.
         """
         c, _, _, _ = self.mgc
         return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
@@ -377,24 +377,17 @@ class Solver3T(Solver_):
     ) -> pd.DataFrame:
         """
         Compute the steady-state temperature distribution.
-        Parameters:
-        -----------
-        Tsg : Optional[float or numpy.ndarray], default=None
-            Initial guess for the surface temperature. If None, ambient temperature is used.
-        Tcg : Optional[float or numpy.ndarray], default=None
-            Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
-        tol : float, default=DP.tol
-            Tolerance for the quasi-Newton solver.
-        maxiter : int, default=DP.maxiter
-            Maximum number of iterations for the quasi-Newton solver.
-        return_err : bool, default=False
-            If True, the error of the solution is included in the returned DataFrame.
-        return_power : bool, default=True
-            If True, power-related values are included in the returned DataFrame.
+
+        Args:
+            Tsg (float | numpy.ndarray | None): Initial guess for the surface temperature. If None, ambient temperature is used.
+            Tcg (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
+            tol (float): Tolerance for the quasi-Newton solver.
+            maxiter (int): Maximum number of iterations for the quasi-Newton solver.
+            return_err (bool): If True, the error of the solution is included in the returned DataFrame.
+            return_power (bool): If True, power-related values are included in the returned DataFrame.
+
         Returns:
-        --------
-        pd.DataFrame
-            DataFrame containing the steady-state temperatures and optionally the error and power-related values.
+            pd.DataFrame: DataFrame containing the steady-state temperatures and optionally the error and power-related values.
         """
 
         # if no guess provided, use ambient temp
@@ -439,26 +432,18 @@ class Solver3T(Solver_):
     ) -> pd.DataFrame:
         """
         Compute the steady-state intensity for a given temperature profile.
-        Parameters:
-        -----------
-        T : float or numpy.ndarray, optional
-            Initial temperature profile. Default is an empty numpy array.
-        target : str or List[str], optional
-            Target specification for the solver. Default is "auto".
-        tol : float, optional
-            Tolerance for the solver. Default is DP.tol.
-        maxiter : int, optional
-            Maximum number of iterations for the solver. Default is DP.maxiter.
-        return_err : bool, optional
-            If True, return the error in the output DataFrame. Default is False.
-        return_temp : bool, optional
-            If True, return the temperature profiles in the output DataFrame. Default is True.
-        return_power : bool, optional
-            If True, return the power profiles in the output DataFrame. Default is True.
+
+        Args:
+            T (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
+            target (str | list[str]): Target specification for the solver. Default is "auto".
+            tol (float): Tolerance for the solver. Default is DP.tol.
+            maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.
+            return_err (bool): If True, return the error in the output DataFrame. Default is False.
+            return_temp (bool): If True, return the temperature profiles in the output DataFrame. Default is True.
+            return_power (bool): If True, return the power profiles in the output DataFrame. Default is True.
+
         Returns:
-        --------
-        pd.DataFrame
-            DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
+            pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
 
         Tmax, newtheader = self._steady_intensity_header(T, target)
@@ -521,26 +506,15 @@ class Solver3T(Solver_):
         """
         Compute transient-state temperature.
 
-        Parameters
-        ----------
-        time : numpy.ndarray
-            A 1D array with times (in seconds) when the temperature needs to be
-            computed. The array must contain increasing values (undefined
-            behaviour otherwise).
-        Ts0 : float
-            Initial surface temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        Tc0 : float
-            Initial core temperature. If set to None, the ambient temperature from
-            internal dict will be used. The default is None.
-        return_power : bool, optional
-            Return power term values. The default is False.
+        Args:
+            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
+            Ts0 (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            Tc0 (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            dynamic (dict | optional | None): ...
+            return_power (bool, optional): Return power term values. The default is False.
 
-        Returns
-        -------
-        Dict[str, Any]
-            A dictionary with temperature and other results (depending on inputs)
-            in the keys.
+        Returns:
+            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
 
         """
         # get sizes (n for input dict entries, N for time)

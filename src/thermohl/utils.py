@@ -24,17 +24,12 @@ def _dict_completion(
     Read dict stored in filename (yaml format) and for each key in it, add it
     to input dict dat if the key is not already in dat.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
@@ -60,17 +55,12 @@ def _dict_completion(
 def add_default_parameters(dat: dict, warning: bool = False) -> dict:
     """Add default parameters if there is missing input.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(
@@ -82,17 +72,12 @@ def add_default_parameters(dat: dict, warning: bool = False) -> dict:
 def add_default_uncertainties(dat: dict, warning: bool = False) -> dict:
     """Add default uncertainty parameters if there is missing input.
 
-    Parameters
-    ----------
-    dat : dict
-        Input dict with parameters for power terms.
-    warning : bool, optional
-        Print a message if a parameter is missing. The default is False.
+    Args:
+        dat (dict): Input dict with parameters for power terms.
+        warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
-    Returns
-    -------
-    dict
-        Completed input dict if some parameters were missing.
+    Returns:
+        dict: Completed input dict if some parameters were missing.
 
     """
     fil = os.path.join(
@@ -106,14 +91,11 @@ def df2dict(df: pd.DataFrame) -> dict:
 
     Would be an equivalent to df.to_dict(orient='numpy.ndarray') if it existed.
 
-    Parameters
-    ----------
-    df : pandas.DataFrame
+    Args:
+        df (pandas.DataFrame): Input DataFrame.
 
-    Returns
-    -------
-    dict
-        DESCRIPTION.
+    Returns:
+        dict: Dictionary with values converted to scalars or numpy arrays.
     """
     q = df.to_dict(orient="list")
     for k in q.keys():

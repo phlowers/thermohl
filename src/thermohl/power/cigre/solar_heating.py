@@ -51,38 +51,23 @@ class SolarHeating(PowerTerm):
         srad: Optional[floatArrayLike] = float("nan"),
         **kwargs: Any,
     ):
-        r"""Init with args.
+        r"""Build with args.
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        lat : float or np.ndarray
-            Latitude.
-        azm : float or np.ndarray
-            Azimuth.
-        al : float or np.ndarray
-            Albedo.
-        month : int or np.ndarray
-            Month number (must be between 1 and 12).
-        day : int or np.ndarray
-            Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-            month).
-        hour : float or np.ndarray
-            Hour of the day (solar, must be between 0 and 23).
-        D : float or np.ndarray
-            external diameter.
-        alpha : float or np.ndarray
-            Solar absorption coefficient.
-        srad : float or np.ndarray
-            Solar irradiance. Default is nan. If nan value is estimated using
-            all other input.
+        Args:
+            lat (float | numpy.ndarray): Latitude.
+            azm (float | numpy.ndarray): Azimuth.
+            al (float | numpy.ndarray): Albedo.
+            month (int | numpy.ndarray): Month number (must be between 1 and 12).
+            day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
+            hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
+            D (float | numpy.ndarray): external diameter.
+            alpha (numpy.ndarray): Solar absorption coefficient.
+            srad (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
 
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W.m\ :sup:`-1`\ ).
 
         """
         self.alpha = alpha
@@ -99,15 +84,11 @@ class SolarHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)

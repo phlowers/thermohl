@@ -82,12 +82,9 @@ def _factory(
 def cigre(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
     """Get a Solver using CIGRE models.
 
-    Parameters
-    ----------
-    dic : dict, optional
-        Input values. The default is None.
-    heateq : str, optional
-        Input heat equation.
+    Args:
+        dic (dict | None): Input values. The default is None.
+        heateq (str): Input heat equation.
 
     """
     return _factory(dic, heateq=heateq, model="cigre")
@@ -96,12 +93,9 @@ def cigre(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
 def ieee(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
     """Get a Solver using IEEE models.
 
-    Parameters
-    ----------
-    dic : dict, optional
-        Input values. The default is None.
-    heateq : str, optional
-        Input heat equation.
+    Args:
+        dic (dict | None): Input values. The default is None.
+        heateq (str): Input heat equation.
 
     """
     return _factory(dic, heateq=heateq, model="ieee")
@@ -110,12 +104,9 @@ def ieee(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
 def olla(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
     """Get a Solver using RTE-olla models.
 
-    Parameters
-    ----------
-    dic : dict, optional
-        Input values. The default is None.
-    heateq : str, optional
-        Input heat equation.
+    Args:
+        dic (dict | None): Input values. The default is None.
+        heateq (str): Input heat equation.
 
     """
     return _factory(dic, heateq=heateq, model="olla")
@@ -124,12 +115,9 @@ def olla(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
 def rte(dic: Optional[Dict[str, Any]] = None, heateq: str = "1t") -> Solver:
     """Get a Solver using RTE models.
 
-    Parameters
-    ----------
-    dic : dict, optional
-        Input values. The default is None.
-    heateq : str, optional
-        Input heat equation.
+    Args:
+        dic (dict | None): Input values. The default is None.
+        heateq (str): Input heat equation.
 
     """
     return _factory(dic, heateq=heateq, model="rte")

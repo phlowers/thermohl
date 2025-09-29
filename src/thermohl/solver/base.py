@@ -58,6 +58,7 @@ class Args:
     def _set_default_values(self) -> None:
         """Set default values."""
 
+        self.Qs = np.nan  # solar irradiance
         self.lat = 45.0  # latitude (deg)
         self.lon = 0.0  # longitude (deg)
         self.alt = 0.0  # altitude (m)
@@ -225,23 +226,16 @@ class Solver(ABC):
     ) -> None:
         """Create a Solver object.
 
-        Parameters
-        ----------
-        dc : dict
-            Input values used in power terms. If there is a missing value, a
-            default is used.
-        jouleH : utils.PowerTerm
-            Joule heating term.
-        solarH : utils.PowerTerm
-            Solar heating term.
-        convectiveC : utils.PowerTerm
-            Convective cooling term.
-        radiativeC : utils.PowerTerm
-            Radiative cooling term.
+        Args:
+            dic (dict[str, Any] | None): Input values used in power terms. If there is a missing value, a default is used.
+            joule (Type[PowerTerm]): Joule heating term class.
+            solar (Type[PowerTerm]): Solar heating term class.
+            convective (Type[PowerTerm]): Convective cooling term class.
+            radiative (Type[PowerTerm]): Radiative cooling term class.
+            precipitation (Type[PowerTerm]): Precipitation cooling term class.
 
-        Returns
-        -------
-        None.
+        Returns:
+            None
 
         """
         self.args = Args(dic)

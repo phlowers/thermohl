@@ -18,12 +18,10 @@ class _SRad:
 
     def __init__(self, clean: List[float], indus: List[float]):
         """Initialize the solar radiation calculator.
-        Parameters
-        ----------
-        clean : List[float]
-            Coefficients for polynomial function to compute atmospheric turbidity in clean air conditions.
-        indus : List[float]
-            Coefficients for polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
+
+        Args:
+            clean (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in clean air conditions.
+            indus (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
         """
         if len(clean) != 7 or len(indus) != 7:
             raise ValueError(f"Both inputs must contain 7 elements.")
@@ -38,16 +36,13 @@ class _SRad:
         function of the solar altitude. The coefficients of the polynomial are a weighted
         average of the clean air and industrial air coefficients, with the weights
         determined by the turbidity factor.
-        Parameters
-        ----------
-        x : floatArrayLike
-            Solar altitude in degrees.
-        trb : floatArrayLike
-            Factor representing the atmospheric turbidity (0 for clean air, 1 for industrial air).
-        Returns
-        -------
-        floatArrayLike
-            Coefficient for atmospheric turbidity.
+
+        Args:
+            x (float | numpy.ndarray): Solar altitude in degrees.
+            trb (float | numpy.ndarray): Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
+
+        Returns:
+            float | numpy.ndarray: Coefficient for atmospheric turbidity.
         """
         omt = 1.0 - trb
         A = omt * self.clean[6] + trb * self.indus[6]
@@ -107,15 +102,11 @@ class SolarHeatingBase(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return self.alpha * self.srad * self.D * np.ones_like(T)

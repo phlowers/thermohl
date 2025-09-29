@@ -35,20 +35,13 @@ class ConvectiveCooling(ConvectiveCoolingBase):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        alt : float or np.ndarray
-            Altitude.
-        azm : float or np.ndarray
-            Azimuth.
-        Ta : float or np.ndarray
-            Ambient temperature.
-        ws : float or np.ndarray
-            Wind speed.
-        wa : float or np.ndarray
-            Wind angle regarding north.
-        D : float or np.ndarray
-            External diameter.
+        Args:
+            alt (float | numpy.ndarray): Altitude (m).
+            azm (float | numpy.ndarray): Azimuth (deg).
+            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
+            wa (float | numpy.ndarray): Wind angle regarding north (deg).
+            D (float | numpy.ndarray): External diameter (m).
 
         """
         super().__init__(

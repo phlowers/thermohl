@@ -7,24 +7,42 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-<img src="_static/logos/thermohl_logo.png" width="200" height="200" alt="Phlowers logo" style="float: right; display: block; margin: 0 auto"/>
+<img src="assets/images/logos/thermohl_logo.png" width="200" height="200" alt="Phlowers logo" style="float: right; display: block; margin: 0 auto"/>
 
 # ThermOHL
 
-ThermOHL is a python module to compute temperature (given environment
-parameters) or maximum transit intensity (given a maximum temperature
-and environment parameters) in overhead line conductors.
+Temperature estimation of overhead line conductors is an important topic for 
+TSOs for technical, economic, and safety-related reasons (DLR/ampacity, sag 
+management ...). It depends on several factors, mainly transit, weather and the
+conductor properties. ThermOHL is a python package to compute temperature and/or 
+ampacity in overhead line conductors.
 
 ## Features
 
-Three temperature models are currently available: 
+The temperature of a conductor is estimated by solving a heat equation
+which describes how temperature evolves over time, taking into account
+different power terms that either heat or cold the conductor (see next picture 
+from CIGRE[@CIGRE]).
 
-* one using CIGRE recommendations, 
-* one using an IEEE standard,
-* two others from RTE (R&D olla and RTE). 
+![image](assets/images/cigre_balance.png "Overhead conductor heating and cooling. From [CIGRE].")
 
-Steady-state versions cover both temperature and transit solver; concerning transient version, only the temperature is
-implemented. Probabilistic simulations with random inputs are only possible with the steady-state solvers.
+Two heat equations (a more complete, third one is under development)
+are available:
 
-## Examples
-Todo
+* one with a single temperature for the cable;
+* another with three temperatures (core, average and surface
+  temperature) for more precise computations.
+
+Each of these equations can be used with a set of pre-coded power
+terms from the literature :
+
+* one using CIGRE recommendations [@CIGRE];  
+* one using the IEEE standard [@IEEE];  
+* two others from RTE departments.
+
+Solvers derivated from heat equations can compute steady-state
+temperature or ampacity, and transient temperature. The set of
+[parameter](api-reference/parameters.md) required depends on the 
+power terms used, and default values are provided.
+
+## References

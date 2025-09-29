@@ -19,17 +19,12 @@ class Air:
 
         If both inputs are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius).
-        alt : float or numpy.ndarray, optional
-            Altitude above sea-level. The default is 0.
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius).
+            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Volumic mass in kg.m\ :sup:`-3`\ .
+        Returns:
+            float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
         return 1.2925 * Air.relative_density(Tc, alt)
@@ -46,17 +41,12 @@ class Air:
 
         If both inputs are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius).
-        alt : float or numpy.ndarray, optional
-            Altitude above sea-level. The default is 0.
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius).
+            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
-        Returns
-        -------
-        float or numpy.ndarray
-            Relative density of air.
+        Returns:
+            float | numpy.ndarray: Relative density of air.
 
         """
         return np.exp(-1.16e-04 * alt) * np.ones_like(Tc)
@@ -65,15 +55,11 @@ class Air:
     def kinematic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Kinematic viscosity in m\ :sup:`2`\ .s\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Kinematic viscosity in m²·s⁻¹.
 
         """
         return 1.32e-05 + 9.5e-08 * Tc
@@ -86,17 +72,12 @@ class Air:
 
         If both inputs are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
-        alt : float or numpy.ndarray, optional
-            Altitude above sea-level. The default is 0.
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
+            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Dynamic viscosity in kg.m\ :sup:`-1`\ .s\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
         return Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
@@ -105,15 +86,11 @@ class Air:
     def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:
         r"""Compute air thermal conductivity.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Thermal conductivity in W.m\ :sup:`-1`\ .K\ :sup:`-1`\ .
+        Returns:
+            float | numpy.ndarray: Thermal conductivity in W·m⁻¹·K⁻¹.
 
         """
         return 2.42e-02 + 7.2e-05 * Tc
@@ -126,15 +103,11 @@ class Air:
         physicist Ludwig Prandtl, defined as the ratio of momentum diffusivity to
         thermal diffusivity.
 
-        Parameters
-        ----------
-        Tc : float or numpy.ndarray
-            Air temperature (in Celsius)
+        Args:
+            Tc (float | numpy.ndarray): Air temperature (in Celsius)
 
-        Returns
-        -------
-        float or numpy.ndarray
-             Prandtl number (no unit)
+        Returns:
+            float | numpy.ndarray: Prandtl number (—)
 
         """
         return 0.715 - 2.5e-04 * Tc

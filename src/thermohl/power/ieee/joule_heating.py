@@ -38,23 +38,12 @@ class JouleHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        I : float or np.ndarray
-            Transit intensity.
-        TLow : float or np.ndarray
-            Temperature for RDCHigh measurement.
-        THigh : float or np.ndarray
-            Temperature for RDCHigh measurement.
-        RDCLow : float or np.ndarray
-            Electric resistance per unit length at TLow .
-        RDCHigh : float or np.ndarray
-            Electric resistance per unit length at THigh.
-
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Args:
+            I (float | numpy.ndarray): Transit intensity (A).
+            TLow (float | numpy.ndarray): Temperature for RDCLow measurement (°C).
+            THigh (float | numpy.ndarray): Temperature for RDCHigh measurement (°C).
+            RDCLow (float | numpy.ndarray): Electric resistance per unit length at TLow (Ω·m⁻¹).
+            RDCHigh (float | numpy.ndarray): Electric resistance per unit length at THigh (Ω·m⁻¹).
 
         """
         self.TLow = TLow
@@ -70,15 +59,11 @@ class JouleHeating(PowerTerm):
     def value(self, T: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
-        Parameters
-        ----------
-        T : float or np.ndarray
-            Conductor temperature.
+        Args:
+            T (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return self._rdc(T) * self.I**2
@@ -88,15 +73,11 @@ class JouleHeating(PowerTerm):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        conductor_temperature : float or np.ndarray
-            Conductor temperature.
+        Args:
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term derivative (W.m\ :sup:`-1`\ K\ :sup:`-1`\ ).
+        Returns:
+            float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return self.c * self.I**2 * np.ones_like(conductor_temperature)

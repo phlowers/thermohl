@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thermohl"
-version = "1.3.2-rc0"
+version = "1.3.2"
 
 description = "Calculations relative to temperature and ampacity in overhead conductors."
 license = "MPL-2.0"
@@ -40,12 +40,6 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-doc = [
-    "sphinx ~= 7.4.7",
-    "sphinx_rtd_theme ~= 3.0.2"]
-examples = [
-    "matplotlib ~= 3.9.2",
-]
 test = [
     "pytest >= 7.2.2",
     "pytest-cov >= 6.0.0",
@@ -61,11 +55,14 @@ dev = [
 ]
 docs = [
     "mkdocs >= 1.6.1",
+    "mkdocs-bibtex",
+    "mkdocs-jupyter",
     "mkdocs-material >= 9.6.9",
     "mkdocstrings[python] >= 0.29.0",
     "markdown_extensions >= 0.0.1",
     "markdown-include >= 0.8.1",
-    "mkdocs-markdownextradata-plugin >= 0.2.6"
+    "mkdocs-markdownextradata-plugin >= 0.2.6",
+    "thermohl[lint]",
 ]
 
 [project.urls]

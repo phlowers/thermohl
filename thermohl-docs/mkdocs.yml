@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 site_name: ThermOHL
-site_url : http://phlowers.readthedocs.io/projects/thermohl
+site_url: http://phlowers.readthedocs.io/projects/thermohl
 repo_url: https://github.com/phlowers/thermohl
 copyright: Copyright &copy; 2025 RTE France. Unless otherwise indicated, content is licensed under CC-BY-4.0.
 
@@ -29,12 +29,19 @@ theme:
       - palette.toggle # Display toggle button to switch bright/dark mode
       - navigation.footer # Display footer nav
 
-  logo: _static/logos/phlowers_64x64.ico
-  favicon: _static/logos/phlowers_32x32.ico
+  logo: assets/images/logos/phlowers_64x64.ico
+  favicon: assets/images/logos/phlowers_32x32.ico
 
 nav:
   - Home: index.md
   - Getting Started: getting-started.md
+  - Examples:
+      - Example of steady temperature with 1t solver and IEEE model: examples/ex_steady_1t.ipynb
+      - Example of steady temperature with 3t solver and CIGRE model: examples/ex_steady_3t.ipynb
+      - Example of transient temperature with 3t solver and OLLA model: examples/ex_transient_3t.ipynb
+      - Example of steady temperature with 1t solver, all models and all parameters: examples/ex_all_params.ipynb
+  - Parameters: api-reference/parameters.md
+  - User Guide: user-guide.md
   - Developer Guide:
       - Models:
           - Convective Cooling: docstring/Models/convective_cooling.md
@@ -42,29 +49,29 @@ nav:
           - Radiative Cooling: docstring/Models/radiative_cooling.md
           - Solar heating: docstring/Models/solar_heating.md
           - CIGRE:
-            - Air: docstring/Models/CIGRE/air.md
-            - Convective cooling: docstring/Models/CIGRE/convective_cooling.md
-            - Joule Heating: docstring/Models/CIGRE/joule_heating.md
-            - Radiative Cooling: docstring/Models/CIGRE/radiative_cooling.md
-            - Solar Heating: docstring/Models/CIGRE/solar_heating.md
+              - Air: docstring/Models/CIGRE/air.md
+              - Convective cooling: docstring/Models/CIGRE/convective_cooling.md
+              - Joule Heating: docstring/Models/CIGRE/joule_heating.md
+              - Radiative Cooling: docstring/Models/CIGRE/radiative_cooling.md
+              - Solar Heating: docstring/Models/CIGRE/solar_heating.md
           - IEEE:
-            - Air: docstring/Models/IEEE/air.md
-            - Convective cooling: docstring/Models/IEEE/convective_cooling.md
-            - Joule Heating: docstring/Models/IEEE/joule_heating.md
-            - Radiative Cooling: docstring/Models/IEEE/radiative_cooling.md
-            - Solar Heating: docstring/Models/IEEE/solar_heating.md
+              - Air: docstring/Models/IEEE/air.md
+              - Convective cooling: docstring/Models/IEEE/convective_cooling.md
+              - Joule Heating: docstring/Models/IEEE/joule_heating.md
+              - Radiative Cooling: docstring/Models/IEEE/radiative_cooling.md
+              - Solar Heating: docstring/Models/IEEE/solar_heating.md
           - RTE:
-            - Air: docstring/Models/RTE/air.md
-            - Convective cooling: docstring/Models/RTE/convective_cooling.md
-            - Joule Heating: docstring/Models/RTE/joule_heating.md
-            - Radiative Cooling: docstring/Models/RTE/radiative_cooling.md
-            - Solar Heating: docstring/Models/RTE/solar_heating.md
+              - Air: docstring/Models/RTE/air.md
+              - Convective cooling: docstring/Models/RTE/convective_cooling.md
+              - Joule Heating: docstring/Models/RTE/joule_heating.md
+              - Radiative Cooling: docstring/Models/RTE/radiative_cooling.md
+              - Solar Heating: docstring/Models/RTE/solar_heating.md
           - OLLA:
-            - Air: docstring/Models/OLLA/air.md
-            - Convective cooling: docstring/Models/OLLA/convective_cooling.md
-            - Joule Heating: docstring/Models/OLLA/joule_heating.md
-            - Radiative Cooling: docstring/Models/OLLA/radiative_cooling.md
-            - Solar Heating: docstring/Models/OLLA/solar_heating.md
+              - Air: docstring/Models/OLLA/air.md
+              - Convective cooling: docstring/Models/OLLA/convective_cooling.md
+              - Joule Heating: docstring/Models/OLLA/joule_heating.md
+              - Radiative Cooling: docstring/Models/OLLA/radiative_cooling.md
+              - Solar Heating: docstring/Models/OLLA/solar_heating.md
       - Solvers:
           - Solver Base: docstring/Solvers/solver_base.md
           - Solver 1 temperature: docstring/Solvers/Solver1T/solver_1_temperature.md
@@ -75,18 +82,44 @@ nav:
 
 plugins:
   - search
+  - bibtex:
+      bib_file: "docs/refs.bib"
+  - mkdocs-jupyter:
+      execute: false
+
   - markdownextradata # Used to include README.md in getting-started.md file
   - mkdocstrings:
       handlers:
         python:
-          paths: [../src] # Path to find sources in order to build docstring documentation
+          paths: [ ../src ] # Path to find sources in order to build docstring documentation
+          inventories:
+            - url: https://docs.python.org/3/objects.inv
+              domains: [ py, std ]
           options:
             docstring_options:
               ignore_init_summary: true
+            heading_level: 1
+            inherited_members: true
+            merge_init_into_class: true
+            parameter_headings: true
+            separate_signature: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_signature_annotations: true
+            # show_source: false
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+#            signature_crossrefs: true
+            # summary: true
+
 
 markdown_extensions:
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.superfences
   - markdown_include.include:
       base_path: . # Base path to find README.md
+  - footnotes
 
 extra:
   social:
@@ -105,3 +138,11 @@ extra:
     - icon: fontawesome/brands/instagram
       link: https://www.instagram.com/rte_france
       name: RTE France on Instagram
+
+extra_javascript:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+  - js/math.js
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css

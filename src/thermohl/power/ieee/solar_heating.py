@@ -30,35 +30,20 @@ class SolarHeating(SolarHeatingBase):
 
         If more than one input are numpy arrays, they should have the same size.
 
-        Parameters
-        ----------
-        lat : float or np.ndarray
-            Latitude.
-        alt : float or np.ndarray
-            Altitude.
-        azm : float or np.ndarray
-            Azimuth.
-        tb : float or np.ndarray
-            Air pollution from 0 (clean) to 1 (polluted).
-        month : int or np.ndarray
-            Month number (must be between 1 and 12).
-        day : int or np.ndarray
-            Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-            month).
-        hour : float or np.ndarray
-            Hour of the day (solar, must be between 0 and 23).
-        D : float or np.ndarray
-            external diameter.
-        alpha : float or np.ndarray
-            Solar absorption coefficient.
-        srad : float or np.ndarray
-            Solar irradiance. Default is nan. If nan value is estimated using
-            all other input.
+        Args:
+            lat (float | numpy.ndarray): Latitude.
+            alt (float | numpy.ndarray): Altitude.
+            azm (float | numpy.ndarray): Azimuth.
+            tb (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
+            month (int | numpy.ndarray): Month number (must be between 1 and 12).
+            day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
+            hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
+            D (float | numpy.ndarray): external diameter.
+            alpha (float | numpy.ndarray): Solar absorption coefficient.
+            srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
 
-        Returns
-        -------
-        float or np.ndarray
-            Power term value (W.m\ :sup:`-1`\ ).
+        Returns:
+            float or np.ndarray: Power term value (W.m\ :sup:`-1`\ ).
 
         """
         est = _SRad(

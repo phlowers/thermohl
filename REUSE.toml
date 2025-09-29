@@ -13,7 +13,13 @@ SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
 SPDX-License-Identifier = "MPL-2.0"
 
 [[annotations]]
-path = ["thermohl-docs/docs/_static/logos/*.ico", "thermohl-docs/docs/_static/logos/*.png"]
+path = ["thermohl-docs/docs/assets/images/logos/*.ico", "thermohl-docs/docs/assets/images/logos/*.png", "thermohl-docs/docs/assets/images/*.png"]
+precedence = "aggregate"
+SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
+SPDX-License-Identifier = "MPL-2.0"
+
+[[annotations]]
+path = ["thermohl-docs/docs/examples/*.ipynb"]
 precedence = "aggregate"
 SPDX-FileCopyrightText = ["RTE (https://www.rte-france.com)"]
 SPDX-License-Identifier = "MPL-2.0"
