@@ -143,7 +143,6 @@ class Solver1T(Solver_):
 
         return df
 
-
     def transient_temperature(
         self,
         time: floatArray = np.array([]),

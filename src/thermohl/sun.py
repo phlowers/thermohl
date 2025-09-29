@@ -17,8 +17,12 @@ import numpy as np
 from thermohl import floatArrayLike, intArrayLike
 
 
-def utc2solar_hour(hour: floatArrayLike, minute: floatArrayLike = 0., second: floatArrayLike = 0.,
-                   lon: floatArrayLike = 0.):
+def utc2solar_hour(
+    hour: floatArrayLike,
+    minute: floatArrayLike = 0.0,
+    second: floatArrayLike = 0.0,
+    lon: floatArrayLike = 0.0,
+):
     """convert utc hour to solar hour adding the longitude contribution
 
     If more than one input are numpy arrays, they should have the same size.
@@ -41,12 +45,12 @@ def utc2solar_hour(hour: floatArrayLike, minute: floatArrayLike = 0., second: fl
 
     """
     # add 4 min (1/15 of an hour) for every degree of east longitude
-    solar_hour = hour % 24 + minute / 60. + second / 3600. + np.rad2deg(lon) / 15.
+    solar_hour = hour % 24 + minute / 60.0 + second / 3600.0 + np.rad2deg(lon) / 15.0
     return solar_hour
 
 
 def hour_angle(
-        hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
+    hour: floatArrayLike, minute: floatArrayLike = 0.0, second: floatArrayLike = 0.0
 ) -> floatArrayLike:
     """Compute hour angle.
 
@@ -98,12 +102,12 @@ def solar_declination(month: intArrayLike, day: intArrayLike) -> floatArrayLike:
 
 
 def solar_altitude(
-        lat: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
-        minute: floatArrayLike = 0.0,
-        second: floatArrayLike = 0.0,
+    lat: floatArrayLike,
+    month: intArrayLike,
+    day: intArrayLike,
+    hour: floatArrayLike,
+    minute: floatArrayLike = 0.0,
+    second: floatArrayLike = 0.0,
 ) -> floatArrayLike:
     """Compute solar altitude.
 
@@ -137,12 +141,12 @@ def solar_altitude(
 
 
 def solar_azimuth(
-        lat: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
-        minute: floatArrayLike = 0.0,
-        second: floatArrayLike = 0.0,
+    lat: floatArrayLike,
+    month: intArrayLike,
+    day: intArrayLike,
+    hour: floatArrayLike,
+    minute: floatArrayLike = 0.0,
+    second: floatArrayLike = 0.0,
 ) -> floatArrayLike:
     """Compute solar azimuth.
 
