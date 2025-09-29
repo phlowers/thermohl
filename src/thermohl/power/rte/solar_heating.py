@@ -4,11 +4,56 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-
 from typing import Optional, Any
 
-from thermohl import floatArrayLike, intArrayLike
+import numpy as np
+
+from thermohl import floatArrayLike, intArrayLike, sun
 from thermohl.power import SolarHeatingBase, _SRad
+
+CLEAN_AIR_COEFFICIENTS = [
+    -42.0,
+    +63.8,
+    -1.922,
+    0.03469,
+    -3.61e-04,
+    +1.943e-06,
+    -4.08e-09,
+]
+POLLUTED_AIR_COEFFICIENTS = [0, 0, 0, 0, 0, 0, 0]
+
+solar_radiation = _SRad(clean=CLEAN_AIR_COEFFICIENTS, indus=POLLUTED_AIR_COEFFICIENTS)
+
+
+def solar_irradiance(
+    lat: floatArrayLike,
+    month: intArrayLike,
+    day: intArrayLike,
+    hour: floatArrayLike,
+) -> floatArrayLike:
+    """Compute solar radiation.
+
+    Difference with IEEE version are neither turbidity or altitude influence.
+
+    Parameters
+    ----------
+    lat : floatArrayLike
+        Latitude in radians.
+    month : intArrayLike
+        Month (1-12).
+    day : intArrayLike
+        Day of the month.
+    hour : floatArrayLike
+        Hour of the day (0-24).
+
+    Returns
+    -------
+    floatArrayLike
+        Solar radiation value. Negative values are set to zero.
+    """
+    solar_altitude = sun.solar_altitude(lat, month, day, hour)
+    atmospheric_coefficient = solar_radiation.catm(np.rad2deg(solar_altitude))
+    return np.where(solar_altitude > 0.0, atmospheric_coefficient, 0.0)
 
 
 class SolarHeating(SolarHeatingBase):
@@ -55,10 +100,6 @@ class SolarHeating(SolarHeatingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        est = _SRad(
-            [-42.0, +63.8, -1.922, 0.03469, -3.61e-04, +1.943e-06, -4.08e-09],
-            [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
-        )
         for k in ["alt", "tb"]:
             if k in kwargs.keys():
                 kwargs.pop(k)
@@ -72,7 +113,7 @@ class SolarHeating(SolarHeatingBase):
             hour=hour,
             D=D,
             alpha=alpha,
-            est=est,
+            est=solar_radiation,
             srad=srad,
             **kwargs,
         )
