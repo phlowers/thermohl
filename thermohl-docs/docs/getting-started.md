@@ -6,22 +6,38 @@ License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
-## Installation
 
-### Using pip
+## Users
+
+---
+
+### Environment
+ThermOHL is using pip for project and dependencies management.
+You need a compatible version of python (3.8 or higher). You may have to install it manually (e.g. with pyenv). Then you may create a virtualenv and activate it.
+
+### Set up thermohl
 
 To install the package using pip, execute the following command:
 
 ```shell
-    python -m pip install thermohl@git+https://github.com/phlowers/thermohl
+    pip install thermohl
 ```
 
-## Development
+Use it ! You can report to the user guide section.
+```shell
+    import thermohl
+    print(thermohl.__version__)
+```
+
+## Developers
+
+---
 
 Install the development dependencies and program scripts via
 
 ```shell
-  pip install -e .[dev]
+  pip install -e .
+  pip install --group dev
 ```
 
 Build a new wheel via
@@ -40,7 +56,7 @@ First, make sure you have mkdocs and the Readthedocs theme installed.
 If you use pip, open a terminal and enter the following commands:
 
 ```shell 
-  pip install -e .[docs]
+  pip install --group docs
 ```
 
 Then, in the same terminal, build the doc with:

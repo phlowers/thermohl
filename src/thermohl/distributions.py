@@ -11,12 +11,23 @@ import warnings
 from typing import Union, Optional
 
 import numpy as np
-import scipy
-from scipy.special import erf
-from scipy.special import i0
-from scipy.special import i1
 
-from thermohl import floatArrayLike, frozen_dist
+from thermohl.utils import depends_on_optional
+
+try:
+    import scipy
+    from scipy.special import erf, i0, i1
+    from scipy.stats._distn_infrastructure import rv_continuous_frozen as frozen_dist
+except ImportError:
+    warnings.warn(
+        "scipy is not installed. Some functions will not be available.",
+        RuntimeWarning,
+    )
+    frozen_dist = object
+
+
+
+from thermohl import floatArrayLike
 
 _twopi = 2 * np.pi
 
@@ -26,6 +37,7 @@ def _phi(x: float) -> float:
     return np.exp(-0.5 * x**2) / np.sqrt(_twopi)
 
 
+@depends_on_optional("scipy")
 def _psi(x: float) -> float:
     """CDF of standard normal distribution."""
     return 0.5 * (1 + erf(x / np.sqrt(2)))
@@ -55,6 +67,7 @@ def _truncnorm_mean_std(
     return mean, std
 
 
+@depends_on_optional("scipy")
 def truncnorm(
     a: float,
     b: float,
@@ -101,6 +114,7 @@ def truncnorm(
     return dist
 
 
+@depends_on_optional("scipy")
 class WrappedNormal(object):
     """Wrapped-Normal distribution. Not as complete as a scipy.stat distribution."""
 
@@ -117,6 +131,7 @@ class WrappedNormal(object):
         self.sigma = sigma
         return
 
+    @depends_on_optional("scipy")
     def rvs(
         self,
         size: int = 1,
@@ -167,11 +182,13 @@ def wrapnorm(mu: float, sigma: float) -> WrappedNormal:
     return WrappedNormal(mu2, sigma)
 
 
+@depends_on_optional("scipy")
 def _vonmises_circ_var(kappa: float) -> float:
     """Von Mises distribution circular variance."""
     return 1 - i1(kappa) / i0(kappa)
 
 
+@depends_on_optional("scipy")
 def _vonmises_kappa(sigma: float) -> float:
     """Get von Mises parameter that matches std in input."""
     from scipy.optimize import newton
@@ -190,6 +207,7 @@ def _vonmises_kappa(sigma: float) -> float:
     return kappa
 
 
+@depends_on_optional("scipy")
 def vonmises(mu: float, sigma: float) -> frozen_dist:
     """Get von Mises distribution.
     -- in radians, in [-pi,+pi]

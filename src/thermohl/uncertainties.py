@@ -7,15 +7,25 @@
 
 # mypy: ignore-errors
 """Tools to perform Monte Carlo simulations using the thermOHL steady solvers with uncertain input parameters."""
-
+import warnings
 from typing import Union, Tuple
 
 import numpy as np
 import pandas as pd
-import scipy.stats
-from scipy.stats import circmean
-from scipy.stats import circstd
-from thermohl import distributions, frozen_dist
+
+from thermohl.utils import depends_on_optional
+
+try:
+    import scipy
+    from scipy.stats._distn_infrastructure import rv_continuous_frozen as frozen_dist
+except ImportError:
+    warnings.warn(
+        "scipy is not installed. Some functions will not be available.",
+        RuntimeWarning,
+    )
+    frozen_dist = object
+
+from thermohl import distributions
 from thermohl import solver
 from thermohl import utils
 
@@ -43,6 +53,7 @@ def cumstd(x: np.ndarray) -> np.ndarray:
     return np.sqrt(cummean(x**2) - cummean(x) ** 2)
 
 
+@depends_on_optional("scipy")
 def _get_dist(du: dict, mean: float) -> frozen_dist:
     """Get distribution
     -- based on parameters in dict du and with mean mean"""
@@ -69,6 +80,7 @@ def _get_dist(du: dict, mean: float) -> frozen_dist:
     return dist
 
 
+@depends_on_optional("scipy")
 def _generate_samples(
     dc: dict, i: int, du: dict, ns: int, check: bool = False
 ) -> Union[dict, Tuple[dict, pd.DataFrame]]:
@@ -123,8 +135,8 @@ def _generate_samples(
             if "max" in du[k].keys():
                 dk.loc[j, "max"] = du[k]["max"]
             if dist in ["vonmises", "wrapnorm"]:
-                dk.loc[j, "s_mean"] = circmean(sample, high=360.0, low=0.0)
-                dk.loc[j, "s_std"] = circstd(sample, high=360.0, low=0.0)
+                dk.loc[j, "s_mean"] = scipy.stats.circmean(sample, high=360.0, low=0.0)
+                dk.loc[j, "s_std"] = scipy.stats.circstd(sample, high=360.0, low=0.0)
                 dk.loc[j, "circular"] = True
             else:
                 dk.loc[j, "s_mean"] = sample.mean()
