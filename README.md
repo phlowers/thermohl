@@ -14,7 +14,8 @@ SPDX-License-Identifier: MPL-2.0
 [![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=phlowers_thermohl&metric=coverage)](https://sonarcloud.io/summary/new_code?id=phlowers_thermohl)
 
-# ThermOHL
+[![pyodide](https://img.shields.io/badge/works_on-pyodide-%237303fc)](https://pyodide.org/en/stable/index.html)
+
 
 Temperature estimation of overhead line conductors is an important topic for 
 TSOs for technical, economic, and safety-related reasons (DLR/ampacity, sag 
@@ -60,22 +61,37 @@ the power terms used, and default values are provided.
   https://doi.org/10.1109/IEEESTD.2013.6692858.
 
 
-## Installation
+## Users
 
-### Using pip
+---
+
+### Environment
+ThermOHL is using pip for project and dependencies management.
+You need a compatible version of python (3.8 or higher). You may have to install it manually (e.g. with pyenv). Then you may create a virtualenv and activate it.
+
+### Set up thermohl
 
 To install the package using pip, execute the following command:
 
 ```shell
-    python -m pip install thermohl@git+https://github.com/phlowers/thermohl
+    pip install thermohl
 ```
 
-## Development
+Use it ! You can report to the user guide section.
+```shell
+    import thermohl
+    print(thermohl.__version__)
+```
+
+## Developers
+
+---
 
 Install the development dependencies and program scripts via
 
 ```shell
-  pip install -e .[dev]
+  pip install -e .
+  pip install --group dev
 ```
 
 Build a new wheel via
@@ -94,7 +110,7 @@ First, make sure you have mkdocs and the Readthedocs theme installed.
 If you use pip, open a terminal and enter the following commands:
 
 ```shell 
-  pip install -e .[docs]
+  pip install --group docs
 ```
 
 Then, in the same terminal, build the doc with:

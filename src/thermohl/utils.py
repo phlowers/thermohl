@@ -10,6 +10,8 @@
 """Misc. utility code for thermohl project."""
 
 import os
+from functools import wraps
+from importlib.util import find_spec
 
 import numpy as np
 import pandas as pd
@@ -240,3 +242,19 @@ def quasi_newton_2d(
             break
 
     return x, y, count + 1, np.maximum(np.abs(err_abs_x / x), np.abs(err_abs_y / y))
+
+def depends_on_optional(module_name: str):
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            spec = find_spec(module_name)
+            if spec is None:
+                raise ImportError(
+                    f"Optional dependency {module_name} not found ({func.__name__})."
+                )
+            else:
+                return func(*args, **kwargs)
+
+        return wrapper
+
+    return decorator
