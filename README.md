@@ -61,44 +61,29 @@ the power terms used, and default values are provided.
   https://doi.org/10.1109/IEEESTD.2013.6692858.
 
 
-## Users
+## Installation
 
----
+### Using uv
 
-### Environment
-ThermOHL is using pip for project and dependencies management.
-You need a compatible version of python (3.8 or higher). You may have to install it manually (e.g. with pyenv). Then you may create a virtualenv and activate it.
-
-### Set up thermohl
-
-To install the package using pip, execute the following command:
+To install the package using uv, execute the following command:
 
 ```shell
-    pip install thermohl
+    uv add "thermohl @ git+https://github.com/phlowers/thermohl"
 ```
 
-Use it ! You can report to the user guide section.
-```shell
-    import thermohl
-    print(thermohl.__version__)
-```
-
-## Developers
-
----
+## Development
 
 Install the development dependencies and program scripts via
 
 ```shell
-  pip install -e .
-  pip install --group dev
+  uv pip install -e .
+  uv sync --group dev
 ```
 
 Build a new wheel via
 
 ```shell
-  pip install build
-  python -m build --wheel
+  uv build --wheel
 ```
 
 This build a wheel in newly-created dist/ directory
@@ -107,10 +92,10 @@ This build a wheel in newly-created dist/ directory
 
 First, make sure you have mkdocs and the Readthedocs theme installed.
 
-If you use pip, open a terminal and enter the following commands:
+If you use uv, open a terminal and enter the following commands:
 
 ```shell 
-  pip install --group docs
+  uv sync --group docs
 ```
 
 Then, in the same terminal, build the doc with:
