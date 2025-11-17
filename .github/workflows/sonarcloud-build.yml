@@ -32,23 +32,19 @@ jobs:
         run: |
           uv --version
 
-      - name: Install dependencies
-        run: |
-          uv pip install --upgrade build
-
       - name: Build and analyze (Pull Request)
         if: ${{ github.event_name == 'pull_request' || (github.actor == 'dependabot[bot]' && github.event_name == 'pull_request_target') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m build
+          uv build
 
       - name: Build and analyze (Push)
         if: ${{ github.event_name == 'push' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python -m build
+          uv build
 
       - name: Save PR number to file
         if: github.event_name == 'pull_request'

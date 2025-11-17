@@ -35,16 +35,15 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync --upgrade --group build
           uv sync --group test
 
       - name: ✔️ Run tests and generate coverage report
         run: |
-          pytest test/
+          uv run pytest test/
 
       - name: 🛠️ Build wheel on ${{ matrix.os }} with Python ${{ matrix.python-version }}
         run: |
-          python -m build
+          uv build --wheel
 
   build-dist:
     needs: test-and-build-all-os
@@ -57,7 +56,7 @@ jobs:
           fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
 
       - name: Build SDist and wheel
-        run: pipx run build
+        run: uvx --from build pyproject-build
 
       - name: Upload SDist
         uses: actions/upload-artifact@v4
@@ -66,7 +65,7 @@ jobs:
           path: dist/*
 
       - name: Check metadata
-        run: pipx run twine check dist/*
+        run: uvx twine check dist/*
 
   publish-to-pypi:
     name: Publish Python 🐍 distribution 📦 to PyPI

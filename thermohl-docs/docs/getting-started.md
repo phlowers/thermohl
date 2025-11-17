@@ -43,8 +43,7 @@ Install the development dependencies and program scripts via
 Build a new wheel via
 
 ```shell
-  uv pip install build
-  python -m build --wheel
+  uv build --wheel
 ```
 
 This build a wheel in newly-created dist/ directory

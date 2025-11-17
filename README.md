@@ -61,17 +61,30 @@ the power terms used, and default values are provided.
   https://doi.org/10.1109/IEEESTD.2013.6692858.
 
 
-## Installation
+## Users
 
-### Using uv
+---
+
+### Environment
+ThermOHL is using pip for project and dependencies management.
+You need a compatible version of python (3.8 or higher). You may have to install it manually (e.g. with pyenv). Then you may create a virtualenv and activate it.
+
+### Set up thermohl
 
 To install the package using uv, execute the following command:
 
 ```shell
     uv add "thermohl @ git+https://github.com/phlowers/thermohl"
 ```
+Use it ! You can report to the user guide section.
+```shell
+    import thermohl
+    print(thermohl.__version__)
+```
 
-## Development
+## Developers
+
+---
 
 Install the development dependencies and program scripts via
 

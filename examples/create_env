@@ -17,7 +17,7 @@ uv self update
 # -- install local package
 cd ..
 rm -rf build
-uv pip install ".[examples,dev]"
+uv sync --group dev
 
 # -- end text
 echo "---"

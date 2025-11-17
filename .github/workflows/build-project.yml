@@ -26,7 +26,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv add flake8
+          uv sync --group lint
 
       - name: Lint with flake8
         run: |
@@ -54,7 +54,7 @@ jobs:
     - name: Install dependencies
       run: |
         uv sync 
-        uv sync --group dev
+        uv sync --group test
 
     - name: Run tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
       run: uv run pytest
@@ -80,11 +80,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv add --upgrade build
           uv sync --group dev
 
       - name: Build
         run: |
-          python -m build
+          uv build
       
 

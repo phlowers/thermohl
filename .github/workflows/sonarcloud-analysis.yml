@@ -67,12 +67,11 @@ jobs:
 
       - name: Install dependencies
         run: |
-          uv sync
           uv sync --group test
 
       - name: Run tests and generate coverage report
         run: |
-          pytest --cov=thermohl --cov-report=xml test/
+          uv run pytest --cov=thermohl --cov-report=xml test/
 
       - name: Display coverage report
         run: |

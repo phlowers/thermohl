@@ -34,7 +34,7 @@ This guide explains how to contribute to the ThermOHL project documentation.
    ```
 4. Install documentation dependencies:
    ```bash
-   uv pip install -e ".[docs]"
+   uv sync --group docs
    ```
 
 ## Documentation Structure
