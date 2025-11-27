@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver.solver_type import SolverType
 
 if __name__ == "__main__":
     import matplotlib
@@ -53,7 +54,7 @@ if __name__ == "__main__":
     plt.show()
 
     # dict with all 4 solvers
-    kys = ["cigre", "ieee", "rte", "rtem"]
+    kys = [SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_RTE, SolverType.SOLVER_OLLA]
     slv = dict(
         cigre=solver.cigre(dct),
         ieee=solver.ieee(dct),

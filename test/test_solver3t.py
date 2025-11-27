@@ -8,15 +8,17 @@
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver import HeatEquationType
+from thermohl.solver.solver_type import SolverType
 
 _nprs = 123456
 
 
 def _solvers(dic=None):
     return [
-        solver._factory(dic=dic, heateq=he, model=m)
-        for he in ["3t", "3tl"]
-        for m in ["rte", "cigre", "ieee", "olla"]
+        solver._factory(dic=dic, heat_equation=heat_equation, model=m)
+        for heat_equation in [HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES, HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY]
+        for m in [SolverType.SOLVER_RTE, SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_OLLA]
     ]
 
 
@@ -42,7 +44,7 @@ def test_balance():
 
     for s in _solvers(dic):
         # compute guess with 1t solver
-        s1 = solver._factory(dic=dic, heateq="1t", model="ieee")
+        s1 = solver._factory(dic=dic, heat_equation=HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE, model=SolverType.SOLVER_IEEE)
         t1 = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
         )

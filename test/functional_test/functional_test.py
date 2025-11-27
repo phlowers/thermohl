@@ -13,7 +13,7 @@ import pandas as pd
 import yaml
 from typing import List, Dict
 
-from thermohl.solver import rte
+from thermohl.solver import rte, HeatEquationType
 
 
 def cable_data(s: str) -> dict:
@@ -66,7 +66,7 @@ def scn2dict(d: dict) -> dict:
 def test_steady_temperature():
     for d in scenario("temperature", "steady"):
         for _, e in d.items():
-            s = rte(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
             r = s.steady_temperature()
 
             assert np.allclose(r["t_surf"], e["T_surf"], atol=0.05)
@@ -77,7 +77,7 @@ def test_steady_temperature():
 def test_steady_ampacity():
     for d in scenario("ampacity", "steady"):
         for _, e in d.items():
-            s = rte(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
             r = s.steady_intensity(T=e["Tmax_cable"])
 
             assert np.allclose(r["I"], e["I_max"], atol=0.05)
@@ -96,7 +96,7 @@ def test_transient_temperature():
         for _, e in d.items():
 
             # solver
-            s = rte(scn2dict(e), heateq="3tl")
+            s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
 
             # initial steady state
             s.args["I"] = e["I0_cable"]
