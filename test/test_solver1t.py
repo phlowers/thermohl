@@ -8,14 +8,16 @@
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver import SolverType
+from thermohl.solver.heat_equation_enum import HeatEquationType
 
 _nprs = 123456
 
 
 def _solvers(dic=None):
     return [
-        solver._factory(dic=dic, heateq="1t", model=m)
-        for m in ["rte", "cigre", "ieee", "olla"]
+        solver._factory(dic=dic, heat_equation=HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE, model=m)
+        for m in [SolverType.SOLVER_RTE, SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_OLLA]
     ]
 
 

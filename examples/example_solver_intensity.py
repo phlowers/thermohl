@@ -16,7 +16,7 @@ from thermohl import solver
 
 
 def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
-    """Given an input dictionnary, a default tolerance and a maximum number of
+    """Given an input dictionary, a default tolerance and a maximum number of
     iterations, compute the surface temperature for the four available models.
     Print compute time, Return a DataFrame with both input and computed
     temperature."""

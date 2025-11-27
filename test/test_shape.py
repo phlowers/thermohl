@@ -9,13 +9,14 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
+from thermohl.solver import HeatEquationType, SolverType
 
 
 def _solvers():
     li = []
-    for ht in ["1t", "3t"]:
-        for m in ["rte", "cigre", "ieee", "olla"]:
-            li.append(solver._factory(dic=None, heateq=ht, model=m))
+    for heat_equation in [HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE, HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES]:
+        for m in [SolverType.SOLVER_RTE, SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_OLLA]:
+            li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
 
 
