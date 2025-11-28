@@ -34,58 +34,42 @@ def _factory(
     heat_equation: HeatEquationType = HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE,
     model: SolverType = SolverType.SOLVER_CIGRE,
 ) -> Solver:
-    solver: concreteSolverType
+
     solver = create_solver_from_heat_equation(heat_equation)
 
-    if model == SolverType.SOLVER_CIGRE:
-        return solver(
-            dic,
-            cigrep.JouleHeating,
-            cigrep.SolarHeating,
-            cigrep.ConvectiveCooling,
-            cigrep.RadiativeCooling,
-        )
-    elif model == SolverType.SOLVER_IEEE:
-        return solver(
-            dic,
-            ieeep.JouleHeating,
-            ieeep.SolarHeating,
-            ieeep.ConvectiveCooling,
-            ieeep.RadiativeCooling,
-        )
-    elif model == SolverType.SOLVER_OLLA:
-        return solver(
-            dic,
-            ollap.JouleHeating,
-            ollap.SolarHeating,
-            ollap.ConvectiveCooling,
-            ollap.RadiativeCooling,
-        )
-    elif model == SolverType.SOLVER_RTE:
-        return solver(
-            dic,
-            rtep.JouleHeating,
-            rtep.SolarHeating,
-            rtep.ConvectiveCooling,
-            rtep.RadiativeCooling,
-        )
-    else:
-        raise ValueError()
+    solver_modules = {
+        SolverType.SOLVER_CIGRE: cigrep,
+        SolverType.SOLVER_IEEE: ieeep,
+        SolverType.SOLVER_OLLA: ollap,
+        SolverType.SOLVER_RTE: rtep,
+    }
+
+    if model not in solver_modules:
+        raise ValueError(f"Unsupported solver model: {model}")
+
+    module = solver_modules[model]
+    return solver(
+        dic,
+        module.JouleHeating,
+        module.SolarHeating,
+        module.ConvectiveCooling,
+        module.RadiativeCooling,
+    )
 
 
-def create_solver_from_heat_equation(heat_equation: HeatEquationType):
-    if heat_equation == HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE:
-        solver = Solver1T
-    elif heat_equation == HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES:
-        solver = Solver3T
-    elif heat_equation == HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY:
-        solver = Solver3TL
-    elif heat_equation == HeatEquationType.HEAT_EQUATION_1D:
-        solver = Solver1D
-    else:
+
+def create_solver_from_heat_equation(heat_equation: HeatEquationType) -> concreteSolverType:
+    heat_equations_solvers = {
+        HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE: Solver1T,
+        HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES: Solver3T,
+        HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY: Solver3TL,
+        HeatEquationType.HEAT_EQUATION_1D: Solver1D
+    }
+
+    if heat_equation not in heat_equations_solvers:
         raise ValueError(f"Invalid HeatEquation value {heat_equation.value}")
 
-    return solver
+    return heat_equations_solvers[heat_equation]
 
 
 def __solver_model(dic: Optional[Dict[str, Any]] = None,
