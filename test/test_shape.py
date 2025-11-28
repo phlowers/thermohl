@@ -10,6 +10,7 @@ import pandas as pd
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType, SolverType
+from thermohl.solver.enums.variable_type import VariableType
 
 
 def _solvers():
@@ -22,9 +23,9 @@ def _solvers():
 
 def _ampargs(s: solver.Solver, t: pd.DataFrame):
     if isinstance(s, solver.Solver1T):
-        a = dict(T=t[solver.Solver.Names.temp].values)
+        a = dict(T=t[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
-        a = dict(T=t[solver.Solver.Names.tsurf].values, target=solver.Solver.Names.surf)
+        a = dict(T=t[VariableType.TEMPERATURE_SURFACE].values, target=VariableType.SURFACE)
     else:
         raise NotImplementedError
     return a
@@ -32,12 +33,12 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
 
 def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
+        a = dict(time=t, T0=ds[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[solver.Solver.Names.tsurf].values,
-            Tc0=ds[solver.Solver.Names.tcore].values,
+            Ts0=ds[VariableType.TEMPERATURE_SURFACE].values,
+            Tc0=ds[VariableType.TEMPERATURE_CORE].values,
         )
     else:
         raise NotImplementedError
@@ -114,13 +115,13 @@ def test_transient_0():
         a = _traargs(s, ds, t, I)
 
         r = s.transient_temperature(**a)
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t),)
 
         r = s.transient_temperature(**{**a, "return_power": True})
 
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t),)
 
@@ -138,11 +139,11 @@ def test_transient_1():
         a = _traargs(s, ds, t, I)
 
         r = s.transient_temperature(**a)
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t), n)
 
         r = s.transient_temperature(**{**a, "return_power": True})
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t), n)

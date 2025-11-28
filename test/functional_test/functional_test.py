@@ -14,6 +14,7 @@ import yaml
 from typing import List, Dict
 
 from thermohl.solver import rte, HeatEquationType
+from thermohl.solver.enums.variable_type import VariableType
 
 
 def cable_data(s: str) -> dict:
@@ -58,7 +59,7 @@ def scn2dict(d: dict) -> dict:
         dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
     )
     if "iac" in d.keys():
-        dic["I"] = d["iac"]
+        dic[VariableType.TRANSIT.value] = d["iac"]
 
     return dic
 
@@ -69,9 +70,9 @@ def test_steady_temperature():
             s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
             r = s.steady_temperature()
 
-            assert np.allclose(r["t_surf"], e["T_surf"], atol=0.05)
-            assert np.allclose(r["t_avg"], e["T_mean"], atol=0.05)
-            assert np.allclose(r["t_core"], e["T_heart"], atol=0.05)
+            assert np.allclose(r[VariableType.TEMPERATURE_SURFACE], e["T_surf"], atol=0.05)
+            assert np.allclose(r[VariableType.TEMPERATURE_AVERAGE], e["T_mean"], atol=0.05)
+            assert np.allclose(r[VariableType.TEMPERATURE_CORE], e["T_heart"], atol=0.05)
 
 
 def test_steady_ampacity():
@@ -80,7 +81,7 @@ def test_steady_ampacity():
             s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
             r = s.steady_intensity(T=e["Tmax_cable"])
 
-            assert np.allclose(r["I"], e["I_max"], atol=0.05)
+            assert np.allclose(r[VariableType.TRANSIT], e["I_max"], atol=0.05)
 
 
 def test_transient_temperature():
@@ -99,12 +100,12 @@ def test_transient_temperature():
             s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
 
             # initial steady state
-            s.args["I"] = e["I0_cable"]
+            s.args[VariableType.TRANSIT.value] = e["I0_cable"]
             s.update()
             ri = s.steady_temperature()
 
             # final steady state
-            s.args["I"] = e["iac"]
+            s.args[VariableType.TRANSIT.value] = e["iac"]
             s.update()
             rf = s.steady_temperature(Tsg=e["T_mean_final"], Tcg=e["T_mean_final"])
 
@@ -113,18 +114,18 @@ def test_transient_temperature():
 
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
-                time=time, Ts0=ri["t_surf"], Tc0=ri["t_core"], tau=tau
+                time=time, Ts0=ri[VariableType.TEMPERATURE_SURFACE], Tc0=ri[VariableType.TEMPERATURE_CORE], tau=tau
             )
 
             # check final temp
-            assert np.isclose(e["T_mean_final"], rf["t_avg"][0], atol=atol)
+            assert np.isclose(e["T_mean_final"], rf[VariableType.TEMPERATURE_AVERAGE][0], atol=atol)
 
             # check transient temp
             for k1, k2 in zip(
                 ["T_surf_transient", "T_mean_transient", "T_heart_transient"],
-                ["t_surf", "t_avg", "t_core"],
+                [VariableType.TEMPERATURE_SURFACE, VariableType.TEMPERATURE_AVERAGE, VariableType.TEMPERATURE_CORE],
             ):
                 expected_time = np.array(list(e[k1].keys())) * minute
                 expected_temp = np.array(list(e[k1].values()))
-                estimated_temp = np.interp(expected_time, rl["time"], rl[k2])
+                estimated_temp = np.interp(expected_time, rl[VariableType.TIME], rl[k2])
                 assert np.allclose(expected_temp, estimated_temp, atol=atol)

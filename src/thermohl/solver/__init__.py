@@ -15,12 +15,12 @@ from thermohl.power import ieee as ieeep
 from thermohl.power import olla as ollap
 
 from thermohl.solver.base import Args, Solver
-from thermohl.solver.heat_equation_enum import HeatEquationType
+from thermohl.solver.enums.heat_equation_type import HeatEquationType
 from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
-from thermohl.solver.solver_type import SolverType
+from thermohl.solver.enums.solver_type import SolverType
 
 concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]]
 

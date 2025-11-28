@@ -11,7 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from thermohl import solver
-from thermohl.solver.solver_type import SolverType
+from thermohl.solver.enums.solver_type import SolverType
+from thermohl.solver.enums.variable_type import VariableType
 
 if __name__ == "__main__":
     import matplotlib
@@ -65,9 +66,9 @@ if __name__ == "__main__":
     plt.figure()
     for i, key in enumerate(slv):
         elm = slv[key]
-        elm.dc["I"] = I
+        elm.dc[VariableType.TRANSIT] = I
         df = elm.steady_temperature()
-        elm.dc["I"] = np.nan
+        elm.dc[VariableType.TRANSIT] = np.nan
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
         T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=I)["T_surf"]
@@ -83,9 +84,9 @@ if __name__ == "__main__":
     # only rte but with core temp
     plt.figure()
     elm = slv["rte"]
-    elm.dc["I"] = I
+    elm.dc[VariableType.TRANSIT] = I
     df = elm.steady_temperature(return_avg=True, return_core=True)
-    elm.dc["I"] = np.nan
+    elm.dc[VariableType.TRANSIT] = np.nan
     cl = "C0"
     dg = elm.transient_temperature(
         t, T0=T1[0], transit=I, return_avg=True, return_core=True

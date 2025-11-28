@@ -9,7 +9,8 @@ import numpy as np
 
 from thermohl import solver
 from thermohl.solver import SolverType
-from thermohl.solver.heat_equation_enum import HeatEquationType
+from thermohl.solver.enums.heat_equation_type import HeatEquationType
+from thermohl.solver.enums.variable_type import VariableType
 
 _nprs = 123456
 
@@ -43,17 +44,17 @@ def test_balance():
         df = s.steady_temperature(
             return_err=True, return_power=True, tol=tol, maxiter=64
         )
-        assert np.all(df["err"] < tol)
+        assert np.all(df[VariableType.ERROR] < tol)
         bl = np.abs(
-            df["P_joule"]
-            + df["P_solar"]
-            - df["P_convection"]
-            - df["P_radiation"]
-            - df["P_precipitation"]
+            df[VariableType.POWER_JOULE]
+            + df[VariableType.POWER_SUN]
+            - df[VariableType.POWER_CONVECTION]
+            - df[VariableType.POWER_RADIATION]
+            - df[VariableType.POWER_RAIN]
         )
         atol = np.maximum(
-            np.abs(s.balance(df["t"] + 0.5 * df["err"])),
-            np.abs(s.balance(df["t"] - 0.5 * df["err"])),
+            np.abs(s.balance(df[VariableType.TEMPERATURE] + 0.5 * df[VariableType.ERROR])),
+            np.abs(s.balance(df[VariableType.TEMPERATURE] - 0.5 * df[VariableType.ERROR])),
         )
         assert np.allclose(bl, 0.0, atol=atol)
 
@@ -79,16 +80,16 @@ def test_consistency():
             T=100.0, return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
         bl = (
-            df["P_joule"]
-            + df["P_solar"]
-            - df["P_convection"]
-            - df["P_radiation"]
-            - df["P_precipitation"]
+            df[VariableType.POWER_JOULE]
+            + df[VariableType.POWER_SUN]
+            - df[VariableType.POWER_CONVECTION]
+            - df[VariableType.POWER_RADIATION]
+            - df[VariableType.POWER_RAIN]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
-        s.args["I"] = df["I"].values
+        s.args[VariableType.TRANSIT.value] = df[VariableType.TRANSIT].values
         s.update()
         dg = s.steady_temperature(
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
-        assert np.allclose(dg["t"].values, 100.0)
+        assert np.allclose(dg[VariableType.TEMPERATURE].values, 100.0)
