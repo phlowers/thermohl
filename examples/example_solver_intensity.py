@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
+from thermohl.solver.enums.variable_type import VariableType
 
 
 def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
@@ -83,9 +84,9 @@ if __name__ == "__main__":
         slv = d["model"]
         df = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
         df["pb"] = (
-            df["P_joule"] + df["P_solar"] - df["P_convection"] - df["P_radiation"]
+            df[VariableType.POWER_JOULE] + df[VariableType.POWER_SUN] - df[VariableType.POWER_CONVECTION] - df[VariableType.POWER_RADIATION]
         )
-        slv.dc["I"] = df["I_max"].values
+        slv.dc[VariableType.TRANSIT] = df["I_max"].values
         df["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]
 
         ax[0, i].hist(df["pb"], bins=100)

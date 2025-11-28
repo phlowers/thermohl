@@ -1,9 +1,0 @@
-from enum import Enum
-
-class HeatEquationType(Enum):
-
-    HEAT_EQUATION_ONE_TEMPERATURE = "1t",
-    HEAT_EQUATION_THREE_TEMPERATURES = "3t",
-    HEAT_EQUATION_THREE_TEMPERATURES_LEGACY = "3tl",
-    HEAT_EQUATION_1D = "1d"
-

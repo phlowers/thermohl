@@ -13,6 +13,7 @@ from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 
+from thermohl.solver.enums.variable_type import VariableType
 from thermohl.utils import depends_on_optional
 
 try:
@@ -151,7 +152,7 @@ def _generate_samples(
 
 
 def _rdict(
-    mode: str, target: str, return_surf: bool, return_core: bool, return_avg: bool
+    mode: str, target: VariableType, return_surf: bool, return_core: bool, return_avg: bool
 ) -> dict:
     """Code factorization"""
     if mode == "temperature":
@@ -183,7 +184,7 @@ def _compute(mode: str, s: solver.Solver, tmx: Union[float, np.ndarray], rdc: di
 def _steady_uncertainties(
     s: solver.Solver,
     tmax: Union[float, np.ndarray],
-    target: str,
+    target: VariableType,
     u: dict,
     ns: int,
     return_surf: bool,
@@ -268,7 +269,7 @@ def temperature(
 def intensity(
     s: solver.Solver,
     tmax: Union[float, np.ndarray],
-    target: str = "surf",
+    target: VariableType = VariableType.SURFACE,
     u: dict = {},
     ns: int = 4999,
     return_core: bool = False,
