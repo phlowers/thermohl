@@ -10,6 +10,8 @@ import pandas as pd
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType, SolverType
+from thermohl.solver.enums.cable_location import CableLocation
+from thermohl.solver.enums.temperature_location import TemperatureLocation
 from thermohl.solver.enums.variable_type import VariableType
 
 
@@ -25,7 +27,7 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
     if isinstance(s, solver.Solver1T):
         a = dict(T=t[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
-        a = dict(T=t[VariableType.TEMPERATURE_SURFACE].values, target=VariableType.SURFACE)
+        a = dict(T=t[TemperatureLocation.SURFACE].values, target=CableLocation.SURFACE)
     else:
         raise NotImplementedError
     return a
@@ -37,8 +39,8 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[VariableType.TEMPERATURE_SURFACE].values,
-            Tc0=ds[VariableType.TEMPERATURE_CORE].values,
+            Ts0=ds[TemperatureLocation.SURFACE].values,
+            Tc0=ds[TemperatureLocation.CORE].values,
         )
     else:
         raise NotImplementedError

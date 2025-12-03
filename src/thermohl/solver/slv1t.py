@@ -15,6 +15,7 @@ from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
+from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.utils import bisect_v
 
@@ -57,11 +58,11 @@ class Solver1T(Solver_):
             df[VariableType.ERROR] = err
 
         if return_power:
-            df[VariableType.POWER_JOULE] = self.jh.value(T)
-            df[VariableType.POWER_SUN] = self.sh.value(T)
-            df[VariableType.POWER_CONVECTION] = self.cc.value(T)
-            df[VariableType.POWER_RADIATION] = self.rc.value(T)
-            df[VariableType.POWER_RAIN] = self.pc.value(T)
+            df[PowerType.JOULE] = self.jh.value(T)
+            df[PowerType.SOLAR] = self.sh.value(T)
+            df[PowerType.CONVECTION] = self.cc.value(T)
+            df[PowerType.RADIATION] = self.rc.value(T)
+            df[PowerType.RAIN] = self.pc.value(T)
 
         return df
 
@@ -146,11 +147,11 @@ class Solver1T(Solver_):
                 for k in de.keys():
                     self.args[k] = de[k][i, :]
                 self.update()
-                dr[VariableType.POWER_JOULE][i, :] = self.jh.value(T[i, :])
-                dr[VariableType.POWER_SUN][i, :] = self.sh.value(T[i, :])
-                dr[VariableType.POWER_CONVECTION][i, :] = self.cc.value(T[i, :])
-                dr[VariableType.POWER_RADIATION][i, :] = self.rc.value(T[i, :])
-                dr[VariableType.POWER_RAIN][i, :] = self.pc.value(T[i, :])
+                dr[PowerType.JOULE][i, :] = self.jh.value(T[i, :])
+                dr[PowerType.SOLAR][i, :] = self.sh.value(T[i, :])
+                dr[PowerType.CONVECTION][i, :] = self.cc.value(T[i, :])
+                dr[PowerType.RADIATION][i, :] = self.rc.value(T[i, :])
+                dr[PowerType.RAIN][i, :] = self.pc.value(T[i, :])
 
         # squeeze return values if n is 1
         if n == 1:
@@ -220,10 +221,10 @@ class Solver1T(Solver_):
             df[VariableType.ERROR] = err
 
         if return_power:
-            df[VariableType.POWER_JOULE] = self.jh.value(T)
-            df[VariableType.POWER_SUN] = self.sh.value(T)
-            df[VariableType.POWER_CONVECTION] = self.cc.value(T)
-            df[VariableType.POWER_RADIATION] = self.rc.value(T)
-            df[VariableType.POWER_RAIN] = self.pc.value(T)
+            df[PowerType.JOULE] = self.jh.value(T)
+            df[PowerType.SOLAR] = self.sh.value(T)
+            df[PowerType.CONVECTION] = self.cc.value(T)
+            df[PowerType.RADIATION] = self.rc.value(T)
+            df[PowerType.RAIN] = self.pc.value(T)
 
         return df

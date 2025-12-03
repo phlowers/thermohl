@@ -11,22 +11,9 @@ from typing import Union, List
 
 
 class VariableType(Enum):
-
-    POWER_JOULE = "P_joule"
-    POWER_SUN = "P_solar"
-    POWER_CONVECTION = "P_convection"
-    POWER_RADIATION = "P_radiation"
-    POWER_RAIN = "P_precipitation"
     ERROR = "err"
-    SURFACE = "surf"
-    AVERAGE = "avg"
-    CORE = "core"
     TIME = "time"
     TRANSIT = "I"
     TEMPERATURE = "t"
-    TEMPERATURE_SURFACE = "t_surf"
-    TEMPERATURE_AVERAGE = "t_avg"
-    TEMPERATURE_CORE = "t_core"
 
 
-VariableTypeListLike = Union[VariableType, List[VariableType]]
