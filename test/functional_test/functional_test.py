@@ -14,6 +14,7 @@ import yaml
 from typing import List, Dict
 
 from thermohl.solver import rte, HeatEquationType
+from thermohl.solver.enums.temperature_location import TemperatureLocation
 from thermohl.solver.enums.variable_type import VariableType
 
 
@@ -70,9 +71,9 @@ def test_steady_temperature():
             s = rte(scn2dict(e), heat_equation=HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES_LEGACY)
             r = s.steady_temperature()
 
-            assert np.allclose(r[VariableType.TEMPERATURE_SURFACE], e["T_surf"], atol=0.05)
-            assert np.allclose(r[VariableType.TEMPERATURE_AVERAGE], e["T_mean"], atol=0.05)
-            assert np.allclose(r[VariableType.TEMPERATURE_CORE], e["T_heart"], atol=0.05)
+            assert np.allclose(r[TemperatureLocation.SURFACE], e["T_surf"], atol=0.05)
+            assert np.allclose(r[TemperatureLocation.AVERAGE], e["T_mean"], atol=0.05)
+            assert np.allclose(r[TemperatureLocation.CORE], e["T_heart"], atol=0.05)
 
 
 def test_steady_ampacity():
@@ -114,16 +115,16 @@ def test_transient_temperature():
 
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
-                time=time, Ts0=ri[VariableType.TEMPERATURE_SURFACE], Tc0=ri[VariableType.TEMPERATURE_CORE], tau=tau
+                time=time, Ts0=ri[TemperatureLocation.SURFACE], Tc0=ri[TemperatureLocation.CORE], tau=tau
             )
 
             # check final temp
-            assert np.isclose(e["T_mean_final"], rf[VariableType.TEMPERATURE_AVERAGE][0], atol=atol)
+            assert np.isclose(e["T_mean_final"], rf[TemperatureLocation.AVERAGE][0], atol=atol)
 
             # check transient temp
             for k1, k2 in zip(
                 ["T_surf_transient", "T_mean_transient", "T_heart_transient"],
-                [VariableType.TEMPERATURE_SURFACE, VariableType.TEMPERATURE_AVERAGE, VariableType.TEMPERATURE_CORE],
+                [TemperatureLocation.SURFACE, TemperatureLocation.AVERAGE, TemperatureLocation.CORE],
             ):
                 expected_time = np.array(list(e[k1].keys())) * minute
                 expected_temp = np.array(list(e[k1].values()))

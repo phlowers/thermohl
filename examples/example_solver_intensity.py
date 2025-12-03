@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
+from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
 
 
@@ -25,8 +26,8 @@ def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
     mdl = [
         dict(label="cigr", model=solver.cigre(dct)),
         dict(label="ieee", model=solver.ieee(dct)),
-        dict(label="olla", model=solver.olla(dct, multi=False)),
-        dict(label="ollm", model=solver.olla(dct, multi=True)),
+        dict(label="olla", model=solver.olla(dct)),
+        #dict(label="ollm", model=solver.olla(dct, multi=True)),
         dict(label="rte", model=solver.rte(dct)),
     ]
     dfi = pd.DataFrame(dct)
@@ -74,8 +75,8 @@ if __name__ == "__main__":
     mdl = [
         dict(label="cigr", model=solver.cigre(dct)),
         dict(label="ieee", model=solver.ieee(dct)),
-        dict(label="olla", model=solver.olla(dct, multi=False)),
-        dict(label="ollm", model=solver.olla(dct, multi=True)),
+        dict(label="olla", model=solver.olla(dct)),
+        #dict(label="ollm", model=solver.olla(dct, multi=True)),
         dict(label="rte", model=solver.rte(dct)),
     ]
 
@@ -84,7 +85,7 @@ if __name__ == "__main__":
         slv = d["model"]
         df = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
         df["pb"] = (
-            df[VariableType.POWER_JOULE] + df[VariableType.POWER_SUN] - df[VariableType.POWER_CONVECTION] - df[VariableType.POWER_RADIATION]
+                df[PowerType.JOULE] + df[PowerType.SOLAR] - df[PowerType.CONVECTION] - df[PowerType.RADIATION]
         )
         slv.dc[VariableType.TRANSIT] = df["I_max"].values
         df["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]

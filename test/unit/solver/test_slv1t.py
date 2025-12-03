@@ -9,6 +9,7 @@ import pytest
 import numpy as np
 import pandas as pd
 
+from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.solver.slv1t import Solver1T
 
@@ -38,11 +39,11 @@ def test_steady_temperature_default(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TEMPERATURE in result.columns
-    assert VariableType.POWER_JOULE in result.columns
-    assert VariableType.POWER_SUN in result.columns
-    assert VariableType.POWER_CONVECTION in result.columns
-    assert VariableType.POWER_RADIATION in result.columns
-    assert VariableType.POWER_RAIN in result.columns
+    assert PowerType.JOULE in result.columns
+    assert PowerType.SOLAR in result.columns
+    assert PowerType.CONVECTION in result.columns
+    assert PowerType.RADIATION in result.columns
+    assert PowerType.RAIN in result.columns
 
 
 def test_steady_temperature_with_error(solver):
@@ -58,11 +59,11 @@ def test_steady_temperature_no_power(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TEMPERATURE in result.columns
-    assert VariableType.POWER_JOULE not in result.columns
-    assert VariableType.POWER_SUN not in result.columns
-    assert VariableType.POWER_CONVECTION not in result.columns
-    assert VariableType.POWER_RADIATION not in result.columns
-    assert VariableType.POWER_RAIN not in result.columns
+    assert PowerType.JOULE not in result.columns
+    assert PowerType.SOLAR not in result.columns
+    assert PowerType.CONVECTION not in result.columns
+    assert PowerType.RADIATION not in result.columns
+    assert PowerType.RAIN not in result.columns
 
 
 def test_steady_temperature_custom_params(solver):
@@ -118,11 +119,11 @@ def test_transient_temperature_with_error(solver):
     assert VariableType.TEMPERATURE in result
     assert len(result[VariableType.TIME]) == len(time)
     assert len(result[VariableType.TEMPERATURE]) == len(time)
-    assert VariableType.POWER_JOULE in result
-    assert VariableType.POWER_SUN in result
-    assert VariableType.POWER_CONVECTION in result
-    assert VariableType.POWER_RADIATION in result
-    assert VariableType.POWER_RAIN in result
+    assert PowerType.JOULE in result
+    assert PowerType.SOLAR in result
+    assert PowerType.CONVECTION in result
+    assert PowerType.RADIATION in result
+    assert PowerType.RAIN in result
 
 
 def test_steady_intensity_default(solver):
@@ -132,11 +133,11 @@ def test_steady_intensity_default(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
-    assert VariableType.POWER_JOULE in result.columns
-    assert VariableType.POWER_SUN in result.columns
-    assert VariableType.POWER_CONVECTION in result.columns
-    assert VariableType.POWER_RADIATION in result.columns
-    assert VariableType.POWER_RAIN in result.columns
+    assert PowerType.JOULE in result.columns
+    assert PowerType.SOLAR in result.columns
+    assert PowerType.CONVECTION in result.columns
+    assert PowerType.RADIATION in result.columns
+    assert PowerType.RAIN in result.columns
 
 
 def test_steady_intensity_with_error(solver):
@@ -156,11 +157,11 @@ def test_steady_intensity_no_power(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
-    assert VariableType.POWER_JOULE not in result.columns
-    assert VariableType.POWER_SUN not in result.columns
-    assert VariableType.POWER_CONVECTION not in result.columns
-    assert VariableType.POWER_RADIATION not in result.columns
-    assert VariableType.POWER_RAIN not in result.columns
+    assert PowerType.JOULE not in result.columns
+    assert PowerType.SOLAR not in result.columns
+    assert PowerType.CONVECTION not in result.columns
+    assert PowerType.RADIATION not in result.columns
+    assert PowerType.RAIN not in result.columns
 
 
 def test_steady_intensity_custom_params(solver):

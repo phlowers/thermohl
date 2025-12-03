@@ -11,8 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, Args
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
 
 
@@ -84,7 +83,7 @@ class Solver3TL(Solver3T):
         return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
 
     def _steady_intensity_header(
-        self, T: floatArrayLike, target: strListLike
+        self, T: floatArrayLike, target: CableLocationListLike
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
@@ -93,9 +92,9 @@ class Solver3TL(Solver3T):
         target_ = self._check_target(target, self.args.d, max_len)
 
         # pre-compute indexes
-        surface_indices = np.nonzero(target_ == VariableType.SURFACE)[0]
-        average_indices = np.nonzero(target_ == VariableType.AVERAGE)[0]
-        core_indices = np.nonzero(target_ == VariableType.CORE)[0]
+        surface_indices = np.nonzero(target_ == CableLocation.SURFACE)[0]
+        average_indices = np.nonzero(target_ == CableLocation.AVERAGE)[0]
+        core_indices = np.nonzero(target_ == CableLocation.CORE)[0]
 
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
             self.args.I = i

@@ -11,6 +11,7 @@ from thermohl import solver
 from thermohl.solver import SolverType
 from thermohl.solver.enums.heat_equation_type import HeatEquationType
 from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.enums.power_type import PowerType
 
 _nprs = 123456
 
@@ -46,11 +47,11 @@ def test_balance():
         )
         assert np.all(df[VariableType.ERROR] < tol)
         bl = np.abs(
-            df[VariableType.POWER_JOULE]
-            + df[VariableType.POWER_SUN]
-            - df[VariableType.POWER_CONVECTION]
-            - df[VariableType.POWER_RADIATION]
-            - df[VariableType.POWER_RAIN]
+            df[PowerType.JOULE]
+            + df[PowerType.SOLAR]
+            - df[PowerType.CONVECTION]
+            - df[PowerType.RADIATION]
+            - df[PowerType.RAIN]
         )
         atol = np.maximum(
             np.abs(s.balance(df[VariableType.TEMPERATURE] + 0.5 * df[VariableType.ERROR])),
@@ -80,11 +81,11 @@ def test_consistency():
             T=100.0, return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
         bl = (
-            df[VariableType.POWER_JOULE]
-            + df[VariableType.POWER_SUN]
-            - df[VariableType.POWER_CONVECTION]
-            - df[VariableType.POWER_RADIATION]
-            - df[VariableType.POWER_RAIN]
+            df[PowerType.JOULE]
+            + df[PowerType.SOLAR]
+            - df[PowerType.CONVECTION]
+            - df[PowerType.RADIATION]
+            - df[PowerType.RAIN]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
         s.args[VariableType.TRANSIT.value] = df[VariableType.TRANSIT].values

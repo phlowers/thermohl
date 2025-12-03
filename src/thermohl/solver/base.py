@@ -23,7 +23,7 @@ from thermohl import (
     numberArrayLike,
 )
 from thermohl.power import PowerTerm
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.enums.power_type import PowerType
 
 
 class _DEFPARAM:
@@ -241,13 +241,13 @@ class Solver(ABC):
         )
 
     @staticmethod
-    def powers() -> tuple[VariableType, VariableType, VariableType, VariableType, VariableType]:
+    def powers() -> tuple[PowerType, PowerType, PowerType, PowerType, PowerType]:
         return (
-            VariableType.POWER_JOULE,
-            VariableType.POWER_SUN,
-            VariableType.POWER_CONVECTION,
-            VariableType.POWER_RADIATION,
-            VariableType.POWER_RAIN,
+            PowerType.JOULE,
+            PowerType.SOLAR,
+            PowerType.CONVECTION,
+            PowerType.RADIATION,
+            PowerType.RAIN,
         )
 
     @abstractmethod

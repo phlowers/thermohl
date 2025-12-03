@@ -11,6 +11,8 @@ from thermohl import solver
 from thermohl.solver import HeatEquationType
 from thermohl.solver.enums.solver_type import SolverType
 from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.enums.temperature_location import TemperatureLocation
+from thermohl.solver.enums.cable_location import CableLocation
 
 _nprs = 123456
 
@@ -57,10 +59,10 @@ def test_balance():
         # checks
         assert np.all(df[VariableType.ERROR] < tol)
         assert np.allclose(
-            s.balance(ts=df[VariableType.TEMPERATURE_SURFACE], tc=df[VariableType.TEMPERATURE_CORE]).values, 0.0, atol=tol
+            s.balance(ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]).values, 0.0, atol=tol
         )
         assert np.allclose(
-            s.morgan(ts=df[VariableType.TEMPERATURE_SURFACE], tc=df[VariableType.TEMPERATURE_CORE]).values, 0.0, atol=tol
+            s.morgan(ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]).values, 0.0, atol=tol
         )
 
 
@@ -82,9 +84,9 @@ def test_consistency():
     )
 
     for s in _solvers(dic):
-        d = {VariableType.SURFACE: VariableType.TEMPERATURE_SURFACE,
-             VariableType.AVERAGE: VariableType.TEMPERATURE_AVERAGE,
-             VariableType.CORE: VariableType.TEMPERATURE_CORE}
+        d = {CableLocation.SURFACE: TemperatureLocation.SURFACE,
+             CableLocation.AVERAGE: TemperatureLocation.AVERAGE,
+             CableLocation.CORE: TemperatureLocation.CORE}
 
         for location,temperature_at_location in d.items():
             # solve intensity with different targets
@@ -101,15 +103,15 @@ def test_consistency():
             s.args.I = df[VariableType.TRANSIT].values
             s.update()
             assert np.allclose(
-                s.balance(ts=df[VariableType.TEMPERATURE_SURFACE], tc=df[VariableType.TEMPERATURE_CORE]).values, 0.0, atol=tol
+                s.balance(ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]).values, 0.0, atol=tol
             )
             assert np.allclose(
-                s.morgan(ts=df[VariableType.TEMPERATURE_SURFACE], tc=df[VariableType.TEMPERATURE_CORE]).values, 0.0, atol=tol
+                s.morgan(ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]).values, 0.0, atol=tol
             )
             # 3t solve
             dg = s.steady_temperature(
-                Tsg=df[VariableType.TEMPERATURE_SURFACE].round(1).values,
-                Tcg=df[VariableType.TEMPERATURE_CORE].round(1).values,
+                Tsg=df[TemperatureLocation.SURFACE].round(1).values,
+                Tcg=df[TemperatureLocation.CORE].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
