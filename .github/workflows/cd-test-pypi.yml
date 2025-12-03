@@ -36,17 +36,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
-        run: |
-          uv add --upgrade build
-          uv sync --group test
+        run: uv sync --group test
 
       - name: ✔️ Run tests and generate coverage report
-        run: |
-          uv run pytest test/
+        run: uv run pytest test/
 
       - name: 🛠️ Build wheel
-        run: |
-          uv build --wheel
+        run: uv build --wheel
 
   build-dist:
     needs: test-and-build-all-os
@@ -59,7 +55,7 @@ jobs:
           fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
 
       - name: Build SDist and wheel
-        run: uvx --from build pyproject-build
+        run: uv build
 
       - name: Upload SDist
         uses: actions/upload-artifact@v4

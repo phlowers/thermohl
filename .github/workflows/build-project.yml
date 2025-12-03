@@ -52,9 +52,7 @@ jobs:
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        uv sync 
-        uv sync --group test
+      run: uv sync --group test
 
     - name: Run tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
       run: uv run pytest
@@ -83,7 +81,6 @@ jobs:
           uv sync --group dev
 
       - name: Build
-        run: |
-          uv build
+        run: uv build
       
 

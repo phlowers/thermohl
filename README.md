@@ -74,7 +74,7 @@ You need a compatible version of python (3.8 or higher). You may have to install
 To install the package using uv, execute the following command:
 
 ```shell
-    uv add "thermohl @ git+https://github.com/phlowers/thermohl"
+    uv pip install "thermohl @ git+https://github.com/phlowers/thermohl"
 ```
 Use it ! You can report to the user guide section.
 ```shell

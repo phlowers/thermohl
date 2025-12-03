@@ -13,7 +13,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "thermohl"
-version = "1.3.2-rc0"
+version = "1.4.0-rc0"
 
 description = "Calculations relative to temperature and ampacity in overhead conductors."
 license = "MPL-2.0"
