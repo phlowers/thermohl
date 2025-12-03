@@ -26,8 +26,8 @@ def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
     mdl = [
         dict(label="cigr", model=solver.cigre(dct)),
         dict(label="ieee", model=solver.ieee(dct)),
-        dict(label="olla", model=solver.olla(dct)),
-        #dict(label="ollm", model=solver.olla(dct, multi=True)),
+        dict(label="olla", model=solver.olla(dct, multi=False)),
+        dict(label="ollm", model=solver.olla(dct, multi=True)),
         dict(label="rte", model=solver.rte(dct)),
     ]
     dfi = pd.DataFrame(dct)
@@ -75,8 +75,8 @@ if __name__ == "__main__":
     mdl = [
         dict(label="cigr", model=solver.cigre(dct)),
         dict(label="ieee", model=solver.ieee(dct)),
-        dict(label="olla", model=solver.olla(dct)),
-        #dict(label="ollm", model=solver.olla(dct, multi=True)),
+        dict(label="olla", model=solver.olla(dct, multi=False)),
+        dict(label="ollm", model=solver.olla(dct, multi=True)),
         dict(label="rte", model=solver.rte(dct)),
     ]
 

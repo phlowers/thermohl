@@ -18,7 +18,7 @@ _nprs = 123456
 
 def _solvers(dic=None):
     return [
-        solver._factory(dic=dic, heat_equation=HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE, model=m)
+        solver._factory(dic=dic, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE, model=m)
         for m in [SolverType.SOLVER_RTE, SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_OLLA]
     ]
 
