@@ -391,7 +391,7 @@ class Solver3T(Solver_):
                 ]
             )
         elif isinstance(target, CableLocation):
-                target_ = np.array([target for _ in range(max_len)])
+            target_ = np.array([target for _ in range(max_len)])
         else:
             if len(target) != max_len:
                 raise ValueError()

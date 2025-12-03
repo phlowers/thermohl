@@ -17,7 +17,7 @@ from thermohl.solver.enums.variable_type import VariableType
 
 def _solvers():
     li = []
-    for heat_equation in [HeatEquationType.HEAT_EQUATION_ONE_TEMPERATURE, HeatEquationType.HEAT_EQUATION_THREE_TEMPERATURES]:
+    for heat_equation in [HeatEquationType.WITH_ONE_TEMPERATURE, HeatEquationType.WITH_THREE_TEMPERATURES]:
         for m in [SolverType.SOLVER_RTE, SolverType.SOLVER_CIGRE, SolverType.SOLVER_IEEE, SolverType.SOLVER_OLLA]:
             li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
