@@ -55,8 +55,14 @@ jobs:
         with:
           fetch-depth: 0 # Disable shallow clones to improve sonarcloud analysis
 
+      - name: Install uv and Set up Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          version: "0.9.4"
+          python-version: 3.11
+
       - name: Build SDist and wheel
-        run: uv build
+        run: uvx --from build pyproject-build
 
       - name: Upload SDist
         uses: actions/upload-artifact@v4
