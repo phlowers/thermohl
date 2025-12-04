@@ -42,9 +42,7 @@ jobs:
         uses: octokit/request-action@v2.x
         id: get_pr_data
         with:
-          route: GET /repos/{full_name}/pulls/{number}
-          number: ${{ steps.pr_number.outputs.content }}
-          full_name: ${{ github.event.repository.full_name }}
+          route: GET /repos/${{ github.event.repository.full_name }}/pulls/${{ steps.pr_number.outputs.content }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -81,7 +79,7 @@ jobs:
           coverage report
 
       - name: Run Sonar analysis (Pull Request)
-        if: ${{ github.event.workflow_run.event == 'pull_request' || (github.event.workflow_run.actor == 'dependabot[bot]' && github.event.workflow_run.event == 'pull_request_target') }}
+        if: github.event.workflow_run.event == 'pull_request'
         uses: sonarsource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
@@ -94,7 +92,7 @@ jobs:
             -Dsonar.scm.revision=${{ github.event.workflow_run.head_sha }}
 
       - name: Run Sonar analysis (Push)
-        if: ${{ github.event.workflow_run.event == 'push' && github.repository == 'phlowers/thermohl'}}
+        if: github.event.workflow_run.event == 'push' && github.repository == 'phlowers/thermohl'
         uses: sonarsource/sonarqube-scan-action@v5
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
