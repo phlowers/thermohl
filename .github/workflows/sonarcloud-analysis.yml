@@ -45,7 +45,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           repository: ${{ github.event.workflow_run.head_repository.full_name }}
           ref: ${{ github.event.workflow_run.head_branch }}
@@ -60,9 +60,9 @@ jobs:
           git clean -ffdx && git reset --hard HEAD
 
       - name: Install uv and Set up Python
-        uses: astral-sh/setup-uv@v5
+        uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.4"
+          version: "0.9.15"
           python-version: 3.11
 
       - name: Install dependencies
