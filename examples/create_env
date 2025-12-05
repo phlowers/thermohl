@@ -8,16 +8,16 @@ mkdir -p $ENV_DIR
 VENV=${ENV_DIR}/thermohl
 VLNK=.venv
 ln -sf $VENV $VLNK
-python3 -m venv $VENV
+uv venv $VENV
 source $VENV/bin/activate
 
-# -- upgrade pip
-python3 -m pip install --upgrade pip
+# -- upgrade uv
+uv self update
 
 # -- install local package
 cd ..
 rm -rf build
-pip install .[examples,dev]
+uv sync --group dev
 
 # -- end text
 echo "---"

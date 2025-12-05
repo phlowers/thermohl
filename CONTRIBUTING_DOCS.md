@@ -27,14 +27,14 @@ This guide explains how to contribute to the ThermOHL project documentation.
    ```
 3. Create a virtual environment:
    ```bash
-   python -m venv venv
+   uv venv venv
    source venv/bin/activate  # Linux/MacOS
    # or
    .\venv\Scripts\activate  # Windows
    ```
 4. Install documentation dependencies:
    ```bash
-   pip install -e ".[docs]"
+   uv sync --group docs
    ```
 
 ## Documentation Structure

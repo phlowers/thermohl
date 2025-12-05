@@ -16,23 +16,24 @@ jobs:
     runs-on: ubuntu-latest
     name: Lint
     steps:
-      - uses: actions/checkout@v4
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - uses: actions/checkout@v5
+
+      - name: Install uv and Set up Python
+        uses: astral-sh/setup-uv@v7
         with:
-          python-version: 3.11
+          version: "0.9.15"
+          python-version: 3.11.13
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install flake8
+          uv sync --group lint
 
       - name: Lint with flake8
         run: |
           # stop the build if there are Python syntax errors or undefined names
-          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+          uv run flake8 src/ test/ --count --select=E9,F63,F7,F82 --show-source --statistics
           # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+          uv run flake8 src/ test/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
   Test:
     runs-on: ${{ matrix.os }}
@@ -42,21 +43,19 @@ jobs:
         python-version: [ "3.9", "3.10", "3.11", "3.12" ]
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
 
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
+    - name: Install uv and Set up Python
+      uses: astral-sh/setup-uv@v7
       with:
+        version: "0.9.15"
         python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install .
-        pip install --group test
+      run: uv sync --group test
 
     - name: Run tests on ${{ matrix.os }} with Python ${{ matrix.python-version }}
-      run: pytest
+      run: uv run pytest
 
   Build:
     runs-on: ubuntu-latest
@@ -69,21 +68,19 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
-      - name: Set up Python 3.11
-        uses: actions/setup-python@v5
+      - name: Install uv and Set up Python
+        uses: astral-sh/setup-uv@v7
         with:
+          version: "0.9.15"
           python-version: 3.11
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install --upgrade build
-          pip install .
+          uv sync --group dev
 
       - name: Build
-        run: |
-          python -m build
+        run: uv build
       
 

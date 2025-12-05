@@ -36,15 +36,14 @@ Use it ! You can report to the user guide section.
 Install the development dependencies and program scripts via
 
 ```shell
-  pip install -e .
-  pip install --group dev
+  uv pip install -e .
+  uv sync --group dev
 ```
 
 Build a new wheel via
 
 ```shell
-  pip install build
-  python -m build --wheel
+  uv build --wheel
 ```
 
 This build a wheel in newly-created dist/ directory
@@ -53,10 +52,10 @@ This build a wheel in newly-created dist/ directory
 
 First, make sure you have mkdocs and the Readthedocs theme installed.
 
-If you use pip, open a terminal and enter the following commands:
+If you use uv, open a terminal and enter the following commands:
 
 ```shell 
-  pip install --group docs
+  uv sync --group docs
 ```
 
 Then, in the same terminal, build the doc with:
