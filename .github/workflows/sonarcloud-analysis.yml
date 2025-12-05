@@ -77,9 +77,6 @@ jobs:
         run: |
           uv run pytest --cov=thermohl --cov-report=xml test/
 
-      - name: Display coverage report
-        run: uv run coverage report
-
       - name: Run Sonar analysis (Pull Request)
         if: github.event.workflow_run.event == 'pull_request'
         uses: sonarsource/sonarqube-scan-action@v5
