@@ -26,6 +26,7 @@ jobs:
 
     steps:
       - name: Download PR number artifact
+        if: github.event.workflow_run.event == 'pull_request'
         uses: dawidd6/action-download-artifact@v3
         with:
           workflow: SonarCloud Build
@@ -33,12 +34,14 @@ jobs:
           name: PR_NUMBER
 
       - name: Read PR_NUMBER.txt
+        if: github.event.workflow_run.event == 'pull_request'
         id: pr_number
         uses: juliangruber/read-file-action@v1
         with:
           path: ./PR_NUMBER.txt
 
       - name: Request GitHub API for PR data
+        if: github.event.workflow_run.event == 'pull_request'
         uses: octokit/request-action@v2.x
         id: get_pr_data
         with:
@@ -76,7 +79,7 @@ jobs:
 
       - name: Display coverage report
         run: |
-          coverage report
+          uv run coverage report
 
       - name: Run Sonar analysis (Pull Request)
         if: github.event.workflow_run.event == 'pull_request'
