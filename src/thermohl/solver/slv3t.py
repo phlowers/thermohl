@@ -47,7 +47,6 @@ def _profile_bim_avg(
 
 
 class Solver3T(Solver_):
-
     def __init__(
         self,
         dic: Optional[dict[str, Any]] = None,
@@ -324,7 +323,7 @@ class Solver3T(Solver_):
             month=month,
             day=day,
             hour=hour,
-            I=reshape(self.args.I, N, n),
+            transit=reshape(self.args.transit, N, n),
             Ta=reshape(self.args.Ta, N, n),
             wa=reshape(self.args.wa, N, n),
             ws=reshape(self.args.ws, N, n),
@@ -432,7 +431,7 @@ class Solver3T(Solver_):
 
         # get correct input for quasi-newton solver
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
+            self.args.transit = i
             self.jh.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan

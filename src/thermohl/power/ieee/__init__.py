@@ -13,7 +13,15 @@ Relationship of Bare Overhead Conductors.
 
 from .air import Air
 from .convective_cooling import ConvectiveCooling
-from ..convective_cooling import ConvectiveCoolingBase
 from .joule_heating import JouleHeating
 from .radiative_cooling import RadiativeCooling
 from .solar_heating import SolarHeating
+
+
+__all__ = [
+    "Air",
+    "ConvectiveCooling",
+    "JouleHeating",
+    "RadiativeCooling",
+    "SolarHeating",
+]

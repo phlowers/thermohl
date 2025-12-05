@@ -81,6 +81,11 @@ Use it ! You can report to the user guide section.
     import thermohl
     print(thermohl.__version__)
 ```
+Use it ! You can report to the user guide section.
+```shell
+    import thermohl
+    print(thermohl.__version__)
+```
 
 ## Developers
 
@@ -164,7 +169,7 @@ imax = slvr.steady_intensity(Tmax)
 
 ```
 >>> print(imax)
-             I    P_joule  P_solar  P_convection  P_radiation  P_precipitation
+       transit    P_joule  P_solar  P_convection  P_radiation  P_precipitation
 0  1606.398362  83.737734  9.64051     66.750785    26.627459              0.0
 1  1408.025761  64.333311  9.64051     50.884473    23.089348              0.0
 2  1184.741847  45.547250  9.64051     36.234737    18.953023              0.0

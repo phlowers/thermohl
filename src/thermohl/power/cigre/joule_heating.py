@@ -18,7 +18,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        I: floatArrayLike,
+        transit: floatArrayLike,
         km: floatArrayLike,
         kl: floatArrayLike,
         RDC20: floatArrayLike,
@@ -30,14 +30,14 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            I (float | numpy.ndarray): Transit intensity (A).
+            transit (float | numpy.ndarray): Transit intensity (A).
             km (float | numpy.ndarray): Coefficient for magnetic effects (—).
             kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
-        self.I = I
+        self.transit = transit
         self.km = km
         self.kl = kl
         self.RDC20 = RDC20
@@ -53,7 +53,7 @@ class JouleHeating(PowerTerm):
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.I**2
+        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.transit**2
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
@@ -71,6 +71,6 @@ class JouleHeating(PowerTerm):
             self.km
             * self.RDC20
             * self.kl
-            * self.I**2
+            * self.transit**2
             * np.ones_like(conductor_temperature)
         )

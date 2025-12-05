@@ -36,7 +36,7 @@ def test_balance():
         Ta=np.random.uniform(0.0, 30.0, N),
         ws=np.random.uniform(0.0, 7.0, N),
         wa=np.random.uniform(0.0, 90.0, N),
-        I=np.random.uniform(40.0, 4000.0, N),
+        transit=np.random.uniform(40.0, 4000.0, N),
         d=np.random.randint(2, size=N) * solver.default_values()["d"],
     )
 
@@ -91,7 +91,7 @@ def test_consistency():
             )
             assert np.all(df["err"] < tol)
             # set args intensity to newly founds ampacities
-            s.args.I = df["I"].values
+            s.args.transit = df["transit"].values
             s.update()
             assert np.allclose(
                 s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol

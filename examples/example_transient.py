@@ -24,7 +24,7 @@ if __name__ == "__main__":
     Im = 3000.0
     tau = 1000.0
     t = np.linspace(0.0, 7200.0, 721)
-    I = I0 * np.ones_like(tau) + (Im - I0) * (
+    transit = I0 * np.ones_like(tau) + (Im - I0) * (
         np.where(np.abs(1800 - t) <= tau, 1, 0)
         + np.where(np.abs(5400 - t) <= tau, 1, 0)
     )
@@ -40,12 +40,12 @@ if __name__ == "__main__":
         Ta=20.0,
         ws=2.0,
         wa=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
-        I=np.nan,
+        transit=np.nan,
     )
 
     # plot transit over time
     plt.figure()
-    plt.plot(t, I)
+    plt.plot(t, transit)
     plt.grid(True)
     plt.xlabel("Time (s)")
     plt.ylabel("Transit (A)")
@@ -64,12 +64,12 @@ if __name__ == "__main__":
     plt.figure()
     for i, key in enumerate(slv):
         elm = slv[key]
-        elm.dc["I"] = I
+        elm.dc["transit"] = transit
         df = elm.steady_temperature()
-        elm.dc["I"] = np.nan
+        elm.dc["transit"] = np.nan
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
-        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=I)["T_surf"]
+        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)["T_surf"]
         plt.plot(t, T1, "--", c=cl, label="%s - steady" % (key,))
         plt.plot(t, T2, "-", c=cl, label="%s - transient" % (key,))
     plt.grid(True)
@@ -82,12 +82,12 @@ if __name__ == "__main__":
     # only rte but with core temp
     plt.figure()
     elm = slv["rte"]
-    elm.dc["I"] = I
+    elm.dc["transit"] = transit
     df = elm.steady_temperature(return_avg=True, return_core=True)
-    elm.dc["I"] = np.nan
+    elm.dc["transit"] = np.nan
     cl = "C0"
     dg = elm.transient_temperature(
-        t, T0=T1[0], transit=I, return_avg=True, return_core=True
+        t, T0=T1[0], transit=transit, return_avg=True, return_core=True
     )
     plt.fill_between(t, df["T_surf"], df["T_core"], fc=cl, alpha=0.33)
     plt.plot(t, df["T_avg"], "--", c=cl, label="%s - steady" % (key,))

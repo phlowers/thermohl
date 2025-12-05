@@ -19,9 +19,9 @@ class ExcelSheet:
         self.args = Args(dic)
         self.args.nbc = dic["nbc"]
 
-    def joule_heating(self, Ta, I=None):
-        if I is None:
-            I = self.args["I"]
+    def joule_heating(self, Ta, transit=None):
+        if transit is None:
+            transit = self.args["transit"]
         d = self.args["d"]
         D = self.args["D"]
         Rdc = self.args["RDC20"] * (
@@ -35,11 +35,11 @@ class ExcelSheet:
         kem = np.where(
             (d > 0.0) & (self.args["nbc"] == 3),
             self.args["km"]
-            + self.args["ki"] * I / (self.args["A"] - self.args["a"]) * 1.0e-06,
+            + self.args["ki"] * transit / (self.args["A"] - self.args["a"]) * 1.0e-06,
             1.0,
         )
         Rac = Rdc * kep * kem
-        return Rac * self.args["I"] ** 2
+        return Rac * self.args["transit"] ** 2
 
     def solar_heating(self):
         csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
@@ -172,7 +172,18 @@ def scenarios():
         lat=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         alt=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         azm=90.0,
-        I=[1000.0, 1000.0, 1800.0, 1100.0, 3000.0, 4000.0, 700.0, 700.0, 700.0, 700.0],
+        transit=[
+            1000.0,
+            1000.0,
+            1800.0,
+            1100.0,
+            3000.0,
+            4000.0,
+            700.0,
+            700.0,
+            700.0,
+            700.0,
+        ],
         alpha=0.9,
         epsilon=0.8,
         tb=0.0,

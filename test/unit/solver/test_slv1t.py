@@ -15,7 +15,7 @@ from thermohl.solver.slv1t import Solver1T
 def solver():
     args = {
         "max_len": lambda: 1,
-        "I": np.array([0]),
+        "transit": np.array([0]),
         "Ta": np.array([25]),
         "ws": np.array([0]),
         "wa": np.array([0]),

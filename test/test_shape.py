@@ -29,7 +29,7 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
     return a
 
 
-def _traargs(s: solver.Solver, ds: pd.DataFrame, t, I):
+def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     if isinstance(s, solver.Solver1T):
         a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
     elif isinstance(s, solver.Solver3T):
@@ -58,7 +58,7 @@ def test_power_1d():
     n = 61
     for s in _solvers():
         d = s.args.__dict__.copy()
-        d["I"] = np.linspace(0.0, +999.0, n)
+        d["transit"] = np.linspace(0.0, +999.0, n)
         d["alpha"] = np.linspace(0.5, 0.9, n)
         d["Ta"] = np.linspace(-10.0, +50.0, n)
         for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
@@ -95,7 +95,7 @@ def test_steady_1d_mix():
     n = 61
     for s in _solvers():
         s.args.Ta = np.linspace(-10, +50, n)
-        s.args.I = np.array([199.0])
+        s.args.transit = np.array([199.0])
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
@@ -107,10 +107,9 @@ def test_steady_1d_mix():
 def test_transient_0():
     for s in _solvers():
         t = np.linspace(0, 3600, 361)
-        I = 199 * np.ones_like(t)
 
         ds = s.steady_temperature()
-        a = _traargs(s, ds, t, I)
+        a = _traargs(s, ds, t)
 
         r = s.transient_temperature(**a)
         assert len(r.pop("time")) == len(t)
@@ -131,10 +130,9 @@ def test_transient_1():
         s.update()
 
         t = np.linspace(0, 3600, 361)
-        I = 199 * np.ones_like(t)
 
         ds = s.steady_temperature()
-        a = _traargs(s, ds, t, I)
+        a = _traargs(s, ds, t)
 
         r = s.transient_temperature(**a)
         assert len(r.pop("time")) == len(t)

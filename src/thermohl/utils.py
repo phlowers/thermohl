@@ -243,6 +243,7 @@ def quasi_newton_2d(
 
     return x, y, count + 1, np.maximum(np.abs(err_abs_x / x), np.abs(err_abs_y / y))
 
+
 def depends_on_optional(module_name: str):
     def decorator(func):
         @wraps(func)

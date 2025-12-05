@@ -12,13 +12,13 @@ from thermohl.power.cigre import JouleHeating
 
 joule_heating_instances = [
     JouleHeating(
-        I=np.array([100.0, 150.0, 200.0]),
+        transit=np.array([100.0, 150.0, 200.0]),
         km=np.array([1.0, 1.0, 1.0]),
         kl=np.array([0.004, 0.004, 0.004]),
         RDC20=np.array([0.1, 0.1, 0.1]),
         T20=np.array([20.0, 18.0, 22.0]),
     ),
-    JouleHeating(I=100.0, km=1.0, kl=0.004, RDC20=0.1, T20=20.0),
+    JouleHeating(transit=100.0, km=1.0, kl=0.004, RDC20=0.1, T20=20.0),
 ]
 
 
@@ -36,7 +36,7 @@ def test_joule_heating_value_scalar(joule_heating):
         joule_heating.km
         * joule_heating.RDC20
         * (1.0 + joule_heating.kl * (T - joule_heating.T20))
-        * joule_heating.I**2
+        * joule_heating.transit**2
     )
 
     result = joule_heating.value(T)
@@ -58,7 +58,7 @@ def test_joule_heating_value_array(joule_heating):
         joule_heating.km
         * joule_heating.RDC20
         * (1.0 + joule_heating.kl * (T - joule_heating.T20))
-        * joule_heating.I**2
+        * joule_heating.transit**2
     )
 
     result = joule_heating.value(T)
@@ -67,14 +67,14 @@ def test_joule_heating_value_array(joule_heating):
 
 
 def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
-    I = np.array([100.0, 150.0])
+    transit = np.array([100.0, 150.0])
     km = np.array([1.0, 1.0, 1.0])
     kl = np.array([0.004, 0.004])
     RDC20 = np.array([0.1, 0.1])
     T20 = np.array([20.0, 20.0])
     T = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        joule_heating = JouleHeating(I, km, kl, RDC20, T20)
+        joule_heating = JouleHeating(transit, km, kl, RDC20, T20)
         joule_heating.value(T)
 
 
@@ -89,7 +89,10 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
 def test_joule_heating_derivative_scalar(joule_heating):
     conductor_temperature = 25.0
     expected = (
-        joule_heating.km * joule_heating.RDC20 * joule_heating.kl * joule_heating.I**2
+        joule_heating.km
+        * joule_heating.RDC20
+        * joule_heating.kl
+        * joule_heating.transit**2
     )
 
     result = joule_heating.derivative(conductor_temperature)
@@ -108,7 +111,10 @@ def test_joule_heating_derivative_scalar(joule_heating):
 def test_joule_heating_derivative_array(joule_heating):
     conductor_temperature = np.array([25.0, 30.0, 35.0])
     expected = (
-        joule_heating.km * joule_heating.RDC20 * joule_heating.kl * joule_heating.I**2
+        joule_heating.km
+        * joule_heating.RDC20
+        * joule_heating.kl
+        * joule_heating.transit**2
     )
 
     result = joule_heating.derivative(conductor_temperature)
@@ -117,12 +123,12 @@ def test_joule_heating_derivative_array(joule_heating):
 
 
 def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
-    I = np.array([100.0, 150.0])
+    transit = np.array([100.0, 150.0])
     km = np.array([1.0, 1.0, 1.0])
     kl = np.array([0.004, 0.004])
     RDC20 = np.array([0.1, 0.1])
     T20 = np.array([20.0, 20.0])
     conductor_temperature = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        joule_heating = JouleHeating(I, km, kl, RDC20, T20)
+        joule_heating = JouleHeating(transit, km, kl, RDC20, T20)
         joule_heating.derivative(conductor_temperature)

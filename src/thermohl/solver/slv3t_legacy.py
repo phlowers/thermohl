@@ -11,12 +11,11 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, Args
+from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.slv3t import Solver3T
 
 
 class Solver3TL(Solver3T):
-
     def __init__(
         self,
         dic: Optional[dict[str, Any]] = None,
@@ -97,7 +96,7 @@ class Solver3TL(Solver3T):
         core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.I = i
+            self.args.transit = i
             self.jh.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan

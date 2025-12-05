@@ -59,7 +59,7 @@ if __name__ == "__main__":
         Ta=np.random.uniform(0.0, 30.0, N),
         ws=np.random.uniform(0.0, 7.0, N),
         wa=np.random.uniform(0.0, 90.0, N),
-        I=np.random.uniform(20.0, 2000.0, N),
+        transit=np.random.uniform(20.0, 2000.0, N),
     )
 
     # Test 1 : compute max intensity
@@ -85,7 +85,7 @@ if __name__ == "__main__":
         df["pb"] = (
             df["P_joule"] + df["P_solar"] - df["P_convection"] - df["P_radiation"]
         )
-        slv.dc["I"] = df["I_max"].values
+        slv.dc["transit"] = df["I_max"].values
         df["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]
 
         ax[0, i].hist(df["pb"], bins=100)

@@ -5,11 +5,18 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-"""Power terms implementation using RTE's olla project choices.
-"""
+"""Power terms implementation using RTE's olla project choices."""
 
 from .air import Air
 from .solar_heating import SolarHeating
 from .convective_cooling import ConvectiveCooling
 from .joule_heating import JouleHeating
 from .radiative_cooling import RadiativeCooling
+
+__all__ = [
+    "Air",
+    "SolarHeating",
+    "ConvectiveCooling",
+    "JouleHeating",
+    "RadiativeCooling",
+]

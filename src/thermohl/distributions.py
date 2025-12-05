@@ -26,7 +26,6 @@ except ImportError:
     frozen_dist = object
 
 
-
 from thermohl import floatArrayLike
 
 _twopi = 2 * np.pi
