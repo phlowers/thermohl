@@ -17,8 +17,9 @@ def test_scalar_input():
     lon = np.deg2rad(45)  # 45 degrees east
 
     result = utc2solar_hour(hour, minute, second, lon)
-    expected_result = 12 + 30 / 60. + 45 / 3600. + 45 / 15.
+    expected_result = 12 + 30 / 60.0 + 45 / 3600.0 + 45 / 15.0
     assert np.isclose(result, expected_result)
+
 
 def test_array_input():
     # Test with numpy array inputs
@@ -28,12 +29,15 @@ def test_array_input():
     lons = np.deg2rad(np.array([45, 90, 135]))  # 45, 90, and 135 degrees east
 
     result = utc2solar_hour(hours, minutes, seconds, lons)
-    expected_result = np.array([
-        12 + 30 / 60. + 45 / 3600. + 45 / 15.,
-        15 + 45 / 60. + 30 / 3600. + 90 / 15.,
-        18 + 0 / 60. + 15 / 3600. + 135 / 15.
-    ])
+    expected_result = np.array(
+        [
+            12 + 30 / 60.0 + 45 / 3600.0 + 45 / 15.0,
+            15 + 45 / 60.0 + 30 / 3600.0 + 90 / 15.0,
+            18 + 0 / 60.0 + 15 / 3600.0 + 135 / 15.0,
+        ]
+    )
     np.testing.assert_array_almost_equal(result, expected_result)
+
 
 def test_edge_cases():
     # Test edge cases
@@ -43,7 +47,7 @@ def test_edge_cases():
     lon = np.deg2rad(180)  # 180 degrees east
 
     result = utc2solar_hour(hour, minute, second, lon)
-    expected_result = 23 + 59 / 60. + 59 / 3600. + 180 / 15.
+    expected_result = 23 + 59 / 60.0 + 59 / 3600.0 + 180 / 15.0
     assert np.isclose(result, expected_result)
 
     hour = 0
@@ -52,8 +56,9 @@ def test_edge_cases():
     lon = np.deg2rad(-180)  # 180 degrees west
 
     result = utc2solar_hour(hour, minute, second, lon)
-    expected_result = 0 + 0 / 60. + 0 / 3600. - 180 / 15.
+    expected_result = 0 + 0 / 60.0 + 0 / 3600.0 - 180 / 15.0
     assert np.isclose(result, expected_result)
+
 
 def test_realistic_cases():
     # Test edge cases
@@ -63,8 +68,8 @@ def test_realistic_cases():
     lon = np.deg2rad(np.array([2.33472, 7.75, -4.48]))  # Paris, Strasbourg, Brest
 
     result = utc2solar_hour(hour, minute, second, lon)
-    expected_result = 23 + 59 / 60. + 59 / 3600.
-    
+    expected_result = 23 + 59 / 60.0 + 59 / 3600.0
+
     assert result[0] > expected_result
     assert result[1] > result[0]
     assert result[2] < expected_result

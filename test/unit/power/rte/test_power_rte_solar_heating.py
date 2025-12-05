@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-import pytest
 from thermohl.power.rte.solar_heating import solar_irradiance
 
 
