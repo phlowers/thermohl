@@ -46,7 +46,7 @@ def test_balance():
         t1 = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
         )
-        t1 = t1["t"].values
+        t1 = t1["t"]
         # 3t solve
         df = s.steady_temperature(
             Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64
@@ -54,10 +54,10 @@ def test_balance():
         # checks
         assert np.all(df["err"] < tol)
         assert np.allclose(
-            s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.balance(ts=df["t_surf"], tc=df["t_core"]), 0.0, atol=tol
         )
         assert np.allclose(
-            s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.morgan(ts=df["t_surf"], tc=df["t_core"]), 0.0, atol=tol
         )
 
 
@@ -81,7 +81,7 @@ def test_consistency():
     for s in _solvers(dic):
         for t in ["surf", "avg", "core"]:
             # solve intensity with different targets
-            df = s.steady_intensity(
+            result = s.steady_intensity(
                 T=100.0,
                 target=t,
                 return_err=True,
@@ -89,24 +89,24 @@ def test_consistency():
                 tol=1.0e-09,
                 maxiter=64,
             )
-            assert np.all(df["err"] < tol)
+            assert np.all(result["err"] < tol)
             # set args intensity to newly founds ampacities
-            s.args.transit = df["transit"].values
+            s.args.I = result["transit"]
             s.update()
             assert np.allclose(
-                s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.balance(ts=result["t_surf"], tc=result["t_core"]), 0.0, atol=tol
             )
             assert np.allclose(
-                s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.morgan(ts=result["t_surf"], tc=result["t_core"]), 0.0, atol=tol
             )
             # 3t solve
             dg = s.steady_temperature(
-                Tsg=df["t_surf"].round(1).values,
-                Tcg=df["t_core"].round(1).values,
+                Tsg=result["t_surf"].round(1),
+                Tcg=result["t_core"].round(1),
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
                 maxiter=64,
             )
             # check consistency
-            assert np.allclose(dg["t_" + t].values, 100.0)
+            assert np.allclose(dg["t_" + t], 100.0)

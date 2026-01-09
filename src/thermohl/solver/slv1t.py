@@ -19,6 +19,7 @@ from thermohl.utils import bisect_v
 
 
 class Solver1T(Solver_):
+
     def steady_temperature(
         self,
         Tmin: float = DP.tmin,
@@ -27,7 +28,7 @@ class Solver1T(Solver_):
         maxiter: int = DP.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """
         Compute steady-state temperature.
 
@@ -40,7 +41,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            pandas.DataFrame: A DataFrame with temperature and other results (depending on inputs) in the columns.
+            dict[str, np.ndarray]: A dictionary with temperature and other results (depending on inputs) in the keys.
 
         """
 
@@ -50,19 +51,10 @@ class Solver1T(Solver_):
         )
 
         # format output
-        df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
+        result = self.format_output([Solver_.Names.temp], [T])
+        self.add_error_and_power_if_needed(T, err, result, return_err, return_power)
 
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
-
-        return df
+        return result
 
     def transient_temperature(
         self,
@@ -169,7 +161,7 @@ class Solver1T(Solver_):
         maxiter: int = DP.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """Compute steady-state max intensity.
 
         Compute the maximum intensity that can be run in a conductor without
@@ -185,7 +177,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            pandas.DataFrame: A dataframe with maximum intensity and other results (depending on inputs) in the columns.
+            dict[str, np.array]: A dictionary with temperature and other results (depending on inputs) in the keys.
 
         """
 
@@ -213,16 +205,8 @@ class Solver1T(Solver_):
         self.args.transit = transit
 
         # format output
-        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
+        result = self.format_output([Solver_.Names.transit], [A])
+        self.add_error_and_power_if_needed(T_, err, result, return_err, return_power)
 
-        if return_err:
-            df[Solver_.Names.err] = err
+        return result
 
-        if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
-
-        return df
