@@ -34,33 +34,33 @@ def solver():
 def test_steady_temperature_default(solver):
     result = solver.steady_temperature()
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.temp in result.columns
-    assert Solver1T.Names.pjle in result.columns
-    assert Solver1T.Names.psol in result.columns
-    assert Solver1T.Names.pcnv in result.columns
-    assert Solver1T.Names.prad in result.columns
-    assert Solver1T.Names.ppre in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.temp in result.keys()
+    assert Solver1T.Names.pjle in result.keys()
+    assert Solver1T.Names.psol in result.keys()
+    assert Solver1T.Names.pcnv in result.keys()
+    assert Solver1T.Names.prad in result.keys()
+    assert Solver1T.Names.ppre in result.keys()
 
 
 def test_steady_temperature_with_error(solver):
     result = solver.steady_temperature(return_err=True)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.temp in result.columns
-    assert Solver1T.Names.err in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.temp in result.keys()
+    assert Solver1T.Names.err in result.keys()
 
 
 def test_steady_temperature_no_power(solver):
     result = solver.steady_temperature(return_power=False)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.temp in result.columns
-    assert Solver1T.Names.pjle not in result.columns
-    assert Solver1T.Names.psol not in result.columns
-    assert Solver1T.Names.pcnv not in result.columns
-    assert Solver1T.Names.prad not in result.columns
-    assert Solver1T.Names.ppre not in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.temp in result.keys()
+    assert Solver1T.Names.pjle not in result.keys()
+    assert Solver1T.Names.psol not in result.keys()
+    assert Solver1T.Names.pcnv not in result.keys()
+    assert Solver1T.Names.prad not in result.keys()
+    assert Solver1T.Names.ppre not in result.keys()
 
 
 def test_steady_temperature_custom_params(solver):
@@ -76,8 +76,8 @@ def test_steady_temperature_custom_params(solver):
         maxiter=maxiter,
     )
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.temp in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.temp in result.keys()
 
 
 def test_transient_temperature_default(solver):
@@ -128,13 +128,13 @@ def test_steady_intensity_default(solver):
 
     result = solver.steady_intensity(T)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
-    assert Solver1T.Names.pjle in result.columns
-    assert Solver1T.Names.psol in result.columns
-    assert Solver1T.Names.pcnv in result.columns
-    assert Solver1T.Names.prad in result.columns
-    assert Solver1T.Names.ppre in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.transit in result.keys()
+    assert Solver1T.Names.pjle in result.keys()
+    assert Solver1T.Names.psol in result.keys()
+    assert Solver1T.Names.pcnv in result.keys()
+    assert Solver1T.Names.prad in result.keys()
+    assert Solver1T.Names.ppre in result.keys()
 
 
 def test_steady_intensity_with_error(solver):
@@ -142,9 +142,9 @@ def test_steady_intensity_with_error(solver):
 
     result = solver.steady_intensity(T, return_err=True)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
-    assert Solver1T.Names.err in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.transit in result.keys()
+    assert Solver1T.Names.err in result.keys()
 
 
 def test_steady_intensity_no_power(solver):
@@ -152,13 +152,13 @@ def test_steady_intensity_no_power(solver):
 
     result = solver.steady_intensity(T, return_power=False)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
-    assert Solver1T.Names.pjle not in result.columns
-    assert Solver1T.Names.psol not in result.columns
-    assert Solver1T.Names.pcnv not in result.columns
-    assert Solver1T.Names.prad not in result.columns
-    assert Solver1T.Names.ppre not in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.transit in result.keys()
+    assert Solver1T.Names.pjle not in result.keys()
+    assert Solver1T.Names.psol not in result.keys()
+    assert Solver1T.Names.pcnv not in result.keys()
+    assert Solver1T.Names.prad not in result.keys()
+    assert Solver1T.Names.ppre not in result.keys()
 
 
 def test_steady_intensity_custom_params(solver):
@@ -170,5 +170,5 @@ def test_steady_intensity_custom_params(solver):
 
     result = solver.steady_intensity(T, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter)
 
-    assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
+    assert isinstance(result, dict)
+    assert Solver1T.Names.transit in result.keys()
