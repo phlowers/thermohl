@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
     # Test 1 : compute max intensity
     Trep = 99.0
-    df = test_solve(dct, Trep, tol=1.0e-03, mxi=16)
+    dictionary = test_solve(dct, Trep, tol=1.0e-03, mxi=16)
 
     # Test 2 : check balance and consistency
     tol = 1.0e-06
@@ -81,16 +81,16 @@ if __name__ == "__main__":
     fig, ax = plt.subplots(nrows=2, ncols=5)
     for i, d in enumerate(mdl):
         slv = d["model"]
-        df = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
-        df["pb"] = (
-            df["P_joule"] + df["P_solar"] - df["P_convection"] - df["P_radiation"]
+        dictionary = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
+        dictionary["pb"] = (
+            dictionary["P_joule"] + dictionary["P_solar"] - dictionary["P_convection"] - dictionary["P_radiation"]
         )
-        slv.dc["transit"] = df["I_max"].values
-        df["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]
+        slv.dc["transit"] = dictionary["I_max"]
+        dictionary["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]
 
-        ax[0, i].hist(df["pb"], bins=100)
+        ax[0, i].hist(dictionary["pb"], bins=100)
         ax[0, i].grid(True)
-        ax[1, i].hist(np.abs(1.0 - df["TIrep"] / Trep), bins=100)
+        ax[1, i].hist(np.abs(1.0 - dictionary["TIrep"] / Trep), bins=100)
         ax[1, i].grid(True)
         ax[0, i].set_title(d["label"])
 

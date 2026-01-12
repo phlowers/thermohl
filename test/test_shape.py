@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-import pandas as pd
 
 from thermohl import solver
 
@@ -19,7 +18,7 @@ def _solvers():
     return li
 
 
-def _ampargs(s: solver.Solver, t: pd.DataFrame):
+def _ampargs(s: solver.Solver, t: dict[str, np.ndarray]):
     if isinstance(s, solver.Solver1T):
         a = dict(T=t[solver.Solver.Names.temp])
     elif isinstance(s, solver.Solver3T):
@@ -29,7 +28,7 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
     return a
 
 
-def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
+def _traargs(s: solver.Solver, ds: dict[str, np.ndarray], t):
     if isinstance(s, solver.Solver1T):
         a = dict(time=t, T0=ds[solver.Solver.Names.temp])
     elif isinstance(s, solver.Solver3T):

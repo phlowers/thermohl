@@ -462,7 +462,7 @@ class Solver3T(Solver_):
             return_power (bool): If True, return the power profiles in the output DataFrame. Default is True.
 
         Returns:
-            dict[str, np.ndarray]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            dict[str, np.ndarray]: A dictionary with intensity and other results (depending on inputs) in the keys.
         """
 
         Tmax, newtheader = self._steady_intensity_header(T, target)

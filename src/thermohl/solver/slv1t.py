@@ -177,7 +177,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            dict[str, np.array]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            dict[str, np.array]: A dictionary with intensity and other results (depending on inputs) in the keys.
 
         """
 

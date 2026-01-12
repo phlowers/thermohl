@@ -67,11 +67,11 @@ if __name__ == "__main__":
         elm = slv[key]
         elm.dc["transit"] = transit[:, 1]
         elm.dc["Ta"] = elm.dc["Ta"][1]
-        df = elm.steady_temperature()
+        dictionary = elm.steady_temperature()
         elm.dc["transit"] = np.nan
         elm.dc["Ta"] = dct["Ta"]
         cl = "C%d" % (i % 10,)
-        T1 = df["T_surf"].values
+        T1 = dictionary["T_surf"]
         T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)
         for j in range(3):
             plt.plot(t, T2["T_surf"][:, j], "-", c=cl, label="%s - transient" % (key,))
