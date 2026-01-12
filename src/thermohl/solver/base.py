@@ -278,6 +278,31 @@ class Solver(ABC):
     def steady_intensity(self) -> pd.DataFrame:
         raise NotImplementedError
 
+    @staticmethod
+    def format_output(columns_names: list[str], data: list[np.ndarray]) -> dict[str, np.ndarray]:
+        if len(columns_names) != len(data):
+            raise ValueError(f"columns_names and data must have the same length but len(columns_names)={len(columns_names)} and len(data)={len(data)}")
+
+        return {columns_names[i]: data[i] for i in range(len(columns_names))}
+
+    def add_error_and_power_if_needed(self, T, err, output, return_err, return_power):
+        self.add_error_if_needed(err, output, return_err)
+        self.add_powers_if_needed(T, output, return_power)
+
+    @staticmethod
+    def add_error_if_needed(err, output, return_err):
+        if return_err:
+            output[Solver.Names.err] = err
+
+    def add_powers_if_needed(self, temperature_average, output, return_power, temperature_surface=None):
+        if return_power:
+            temperature_surface = temperature_surface if temperature_surface is not None else temperature_average
+            output[Solver.Names.pjle] = self.jh.value(temperature_average)
+            output[Solver.Names.psol] = self.sh.value(temperature_surface)
+            output[Solver.Names.pcnv] = self.cc.value(temperature_surface)
+            output[Solver.Names.prad] = self.rc.value(temperature_surface)
+            output[Solver.Names.ppre] = self.pc.value(temperature_surface)
+
 
 def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
     """
