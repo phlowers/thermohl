@@ -20,7 +20,9 @@ from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]]
+concreteSolverType = Union[
+    Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]
+]
 
 
 def default_values() -> Dict[str, Any]:

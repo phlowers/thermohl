@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'lat', 'lon', 'alt', 'azm', 'month', 'day', 'hour', 'Ta', 'Pa', 'rh', 'pr', 'ws', 'wa', 'al', 'tb', 'I', 'm',
+    #     'lat', 'lon', 'alt', 'azm', 'month', 'day', 'hour', 'Ta', 'Pa', 'rh', 'pr', 'ws', 'wa', 'al', 'tb', 'transit', 'm',
     #     'd', 'D', 'a', 'A', 'R', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
@@ -77,7 +77,7 @@ class Args:
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.tb = 0.1
 
-        self.I = 100.0  # transit intensity (A)
+        self.transit = 100.0  # transit intensity (A)
 
         self.m = 1.5  # mass per unit length (kg.m**-1)
         self.d = 1.9e-02  # core diameter (m)
@@ -200,7 +200,7 @@ class Solver(ABC):
         avg = "avg"
         core = "core"
         time = "time"
-        transit = "I"
+        transit = "transit"
         temp = "t"
         tsurf = "t_surf"
         tavg = "t_avg"

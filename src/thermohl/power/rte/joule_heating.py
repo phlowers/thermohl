@@ -18,7 +18,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        I: floatArrayLike,
+        transit: floatArrayLike,
         D: floatArrayLike,
         d: floatArrayLike,
         A: floatArrayLike,
@@ -37,7 +37,7 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            I (float | numpy.ndarray): Transit intensity (A).
+            transit (float | numpy.ndarray): Transit intensity (A).
             D (float | numpy.ndarray): External diameter (m).
             d (float | numpy.ndarray): Core diameter (m).
             A (float | numpy.ndarray): External (total) cross-sectional area (m²).
@@ -51,7 +51,7 @@ class JouleHeating(PowerTerm):
             f (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
-        self.I = I
+        self.transit = transit
         self.D = D
         self.d = d
         self.kem = self._kem(A, a, km, ki)
@@ -120,7 +120,7 @@ class JouleHeating(PowerTerm):
             floatArrayLike: Computed magnetic coefficient (—).
         """
         s = (
-            np.ones_like(self.I)
+            np.ones_like(self.transit)
             * np.ones_like(A)
             * np.ones_like(a)
             * np.ones_like(km)
@@ -129,7 +129,7 @@ class JouleHeating(PowerTerm):
         z = s.shape == ()
         if z:
             s = np.array([1.0])
-        I_ = self.I * s
+        I_ = self.transit * s
         a_ = a * s
         A_ = A * s
         m = a_ > 0.0
@@ -153,4 +153,4 @@ class JouleHeating(PowerTerm):
         rdc = self._rdc(T)
         ks = self._ks(rdc)
         rac = self.kem * ks * rdc
-        return rac * self.I**2
+        return rac * self.transit**2

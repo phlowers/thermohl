@@ -25,15 +25,13 @@ jobs:
           python-version: 3.11.13
 
       - name: Install dependencies
-        run: |
-          uv sync --group lint
+        run: uv sync --group lint
 
-      - name: Lint with flake8
-        run: |
-          # stop the build if there are Python syntax errors or undefined names
-          uv run flake8 src/ test/ --count --select=E9,F63,F7,F82 --show-source --statistics
-          # exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
-          uv run flake8 src/ test/ --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+      - name: Check code style
+        run: uv run ruff format --check
+
+      - name: Lint with ruff
+        run: uv run ruff check
 
   Test:
     runs-on: ${{ matrix.os }}
