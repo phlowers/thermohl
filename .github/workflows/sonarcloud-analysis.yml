@@ -56,6 +56,7 @@ jobs:
           fetch-depth: 0
 
       - name: Checkout base branch
+        if: github.event.workflow_run.event == 'pull_request'
         run: |
           git remote add upstream ${{ github.event.repository.clone_url }}
           git fetch upstream
@@ -67,7 +68,7 @@ jobs:
         uses: astral-sh/setup-uv@v7
         with:
           version: "0.9.15"
-          python-version: 3.11
+          python-version: 3.12
 
       - name: Install dependencies
         run: |
