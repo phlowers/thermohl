@@ -8,7 +8,6 @@
 from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
@@ -229,7 +228,9 @@ class Solver3T(Solver_):
 
         # format output
         z = self.average(x, y)
-        result = self.format_output([Solver_.Names.tsurf, Solver_.Names.tavg, Solver_.Names.tcore], [x, z, y])
+        result = self.format_output(
+            [Solver_.Names.tsurf, Solver_.Names.tavg, Solver_.Names.tcore], [x, z, y]
+        )
         self.add_error_and_power_if_needed(x, err, result, return_err, return_power)
 
         return result

@@ -267,7 +267,7 @@ class Solver(ABC):
         )
 
     @abstractmethod
-    def steady_temperature(self) -> pd.DataFrame:
+    def steady_temperature(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     @abstractmethod
@@ -275,13 +275,17 @@ class Solver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def steady_intensity(self) -> pd.DataFrame:
+    def steady_intensity(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     @staticmethod
-    def format_output(columns_names: list[str], data: list[np.ndarray]) -> dict[str, np.ndarray]:
+    def format_output(
+        columns_names: list[str], data: list[np.ndarray]
+    ) -> dict[str, np.ndarray]:
         if len(columns_names) != len(data):
-            raise ValueError(f"columns_names and data must have the same length but len(columns_names)={len(columns_names)} and len(data)={len(data)}")
+            raise ValueError(
+                f"columns_names and data must have the same length but len(columns_names)={len(columns_names)} and len(data)={len(data)}"
+            )
 
         return {columns_names[i]: data[i] for i in range(len(columns_names))}
 
@@ -294,9 +298,15 @@ class Solver(ABC):
         if return_err:
             output[Solver.Names.err] = err
 
-    def add_powers_if_needed(self, temperature_average, output, return_power, temperature_surface=None):
+    def add_powers_if_needed(
+        self, temperature_average, output, return_power, temperature_surface=None
+    ):
         if return_power:
-            temperature_surface = temperature_surface if temperature_surface is not None else temperature_average
+            temperature_surface = (
+                temperature_surface
+                if temperature_surface is not None
+                else temperature_average
+            )
             output[Solver.Names.pjle] = self.jh.value(temperature_average)
             output[Solver.Names.psol] = self.sh.value(temperature_surface)
             output[Solver.Names.pcnv] = self.cc.value(temperature_surface)

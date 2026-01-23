@@ -48,17 +48,13 @@ def test_balance():
         )
         t1 = t1["t"]
         # 3t solve
-        df = s.steady_temperature(
+        dct = s.steady_temperature(
             Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64
         )
         # checks
-        assert np.all(df["err"] < tol)
-        assert np.allclose(
-            s.balance(ts=df["t_surf"], tc=df["t_core"]), 0.0, atol=tol
-        )
-        assert np.allclose(
-            s.morgan(ts=df["t_surf"], tc=df["t_core"]), 0.0, atol=tol
-        )
+        assert np.all(dct["err"] < tol)
+        assert np.allclose(s.balance(ts=dct["t_surf"], tc=dct["t_core"]), 0.0, atol=tol)
+        assert np.allclose(s.morgan(ts=dct["t_surf"], tc=dct["t_core"]), 0.0, atol=tol)
 
 
 def test_consistency():

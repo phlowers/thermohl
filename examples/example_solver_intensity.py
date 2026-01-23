@@ -83,7 +83,10 @@ if __name__ == "__main__":
         slv = d["model"]
         dictionary = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
         dictionary["pb"] = (
-            dictionary["P_joule"] + dictionary["P_solar"] - dictionary["P_convection"] - dictionary["P_radiation"]
+            dictionary["P_joule"]
+            + dictionary["P_solar"]
+            - dictionary["P_convection"]
+            - dictionary["P_radiation"]
         )
         slv.dc["transit"] = dictionary["I_max"]
         dictionary["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]

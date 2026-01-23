@@ -9,7 +9,6 @@ import numbers
 from typing import Dict, Any, Optional
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Solver as Solver_
@@ -19,7 +18,6 @@ from thermohl.utils import bisect_v
 
 
 class Solver1T(Solver_):
-
     def steady_temperature(
         self,
         Tmin: float = DP.tmin,
@@ -209,4 +207,3 @@ class Solver1T(Solver_):
         self.add_error_and_power_if_needed(T_, err, result, return_err, return_power)
 
         return result
-

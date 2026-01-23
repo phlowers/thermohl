@@ -38,20 +38,20 @@ def test_balance():
     )
 
     for s in _solvers(dic):
-        df = s.steady_temperature(
+        dct = s.steady_temperature(
             return_err=True, return_power=True, tol=tol, maxiter=64
         )
-        assert np.all(df["err"] < tol)
+        assert np.all(dct["err"] < tol)
         bl = np.abs(
-            df["P_joule"]
-            + df["P_solar"]
-            - df["P_convection"]
-            - df["P_radiation"]
-            - df["P_precipitation"]
+            dct["P_joule"]
+            + dct["P_solar"]
+            - dct["P_convection"]
+            - dct["P_radiation"]
+            - dct["P_precipitation"]
         )
         atol = np.maximum(
-            np.abs(s.balance(df["t"] + 0.5 * df["err"])),
-            np.abs(s.balance(df["t"] - 0.5 * df["err"])),
+            np.abs(s.balance(dct["t"] + 0.5 * dct["err"])),
+            np.abs(s.balance(dct["t"] - 0.5 * dct["err"])),
         )
         assert np.allclose(bl, 0.0, atol=atol)
 

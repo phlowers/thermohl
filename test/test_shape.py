@@ -79,7 +79,7 @@ def test_steady_default():
 
 
 def check_number_of_lines_in_result(dictionary, expected_lines: int):
-    for (key, val) in dictionary.items():
+    for key, val in dictionary.items():
         assert val.shape == (expected_lines,)
 
 
