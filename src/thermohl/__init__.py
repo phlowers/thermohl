@@ -5,13 +5,20 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from importlib.metadata import version
 from typing import Union, List
 
 import numpy as np
 import numpy.typing as npt
 
-__version__ = version("thermohl")
+try:
+    from ._version import __version__
+except ImportError:
+    try:
+        from importlib.metadata import version
+
+        __version__ = version("thermohl")
+    except Exception:
+        __version__ = "unknown"
 
 floatArrayLike = Union[float, npt.NDArray[np.float64]]
 intArrayLike = Union[int, npt.NDArray[np.int64]]
