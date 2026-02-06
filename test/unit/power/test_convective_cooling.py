@@ -125,7 +125,7 @@ def test_value_natural_scalar(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.D**0.75
+        * convective_cooling.outer_diameter_m**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -150,7 +150,7 @@ def test_value_natural_array(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.D**0.75
+        * convective_cooling.outer_diameter_m**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -173,16 +173,18 @@ def test_convective_cooling_value_scalar(convective_cooling, expected):
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (T + convective_cooling.Ta),
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            0.5 * (T + convective_cooling.ambient_temp_c),
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
         convective_cooling._value_natural(
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
     )
@@ -205,16 +207,18 @@ def test_convective_cooling_value_array(convective_cooling, expected):
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (T + convective_cooling.Ta),
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            0.5 * (T + convective_cooling.ambient_temp_c),
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
         convective_cooling._value_natural(
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
     )

@@ -44,9 +44,9 @@ def solar_irradiance(
     Returns:
         float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
     """
-    solar_altitude = sun.solar_altitude(lat, month, day, hour)
-    atmospheric_coefficient = solar_radiation.catm(np.rad2deg(solar_altitude))
-    return np.where(solar_altitude > 0.0, atmospheric_coefficient, 0.0)
+    solar_altitude_rad = sun.solar_altitude(lat, month, day, hour)
+    clearness_factor = solar_radiation.catm(np.rad2deg(solar_altitude_rad))
+    return np.where(solar_altitude_rad > 0.0, clearness_factor, 0.0)
 
 
 class SolarHeating(SolarHeatingBase):
@@ -76,12 +76,14 @@ class SolarHeating(SolarHeatingBase):
             alpha (numpy.ndarray): Solar absorption coefficient.
             Qs (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
-        self.alpha = alpha
+        self.solar_absorptivity = alpha
         if np.isnan(Qs).all():
             Qs = solar_irradiance(np.deg2rad(lat), month, day, hour)
-        sa = sun.solar_altitude(np.deg2rad(lat), month, day, hour)
-        sz = sun.solar_azimuth(np.deg2rad(lat), month, day, hour)
-        th = np.arccos(np.cos(sa) * np.cos(sz - np.deg2rad(azm)))
-        srad = Qs * np.sin(th)
-        self.srad = np.maximum(srad, 0.0)
-        self.D = D
+        solar_altitude_rad = sun.solar_altitude(np.deg2rad(lat), month, day, hour)
+        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(lat), month, day, hour)
+        incidence_angle_rad = np.arccos(
+            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - np.deg2rad(azm))
+        )
+        irradiance = Qs * np.sin(incidence_angle_rad)
+        self.solar_irradiance = np.maximum(irradiance, 0.0)
+        self.outer_diameter_m = D

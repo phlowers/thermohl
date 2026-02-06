@@ -33,10 +33,10 @@ joule_heating_instances = [
 def test_joule_heating_value_scalar(joule_heating):
     T = 25.0
     expected = (
-        joule_heating.km
-        * joule_heating.RDC20
-        * (1.0 + joule_heating.kl * (T - joule_heating.T20))
-        * joule_heating.transit**2
+        joule_heating.magnetic_coeff
+        * joule_heating.dc_resistance_20c
+        * (1.0 + joule_heating.temp_coeff_linear * (T - joule_heating.reference_temp_c))
+        * joule_heating.current_a**2
     )
 
     result = joule_heating.value(T)
@@ -55,10 +55,10 @@ def test_joule_heating_value_scalar(joule_heating):
 def test_joule_heating_value_array(joule_heating):
     T = np.array([25.0, 30.0, 35.0])
     expected = (
-        joule_heating.km
-        * joule_heating.RDC20
-        * (1.0 + joule_heating.kl * (T - joule_heating.T20))
-        * joule_heating.transit**2
+        joule_heating.magnetic_coeff
+        * joule_heating.dc_resistance_20c
+        * (1.0 + joule_heating.temp_coeff_linear * (T - joule_heating.reference_temp_c))
+        * joule_heating.current_a**2
     )
 
     result = joule_heating.value(T)
@@ -89,10 +89,10 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
 def test_joule_heating_derivative_scalar(joule_heating):
     conductor_temperature = 25.0
     expected = (
-        joule_heating.km
-        * joule_heating.RDC20
-        * joule_heating.kl
-        * joule_heating.transit**2
+        joule_heating.magnetic_coeff
+        * joule_heating.dc_resistance_20c
+        * joule_heating.temp_coeff_linear
+        * joule_heating.current_a**2
     )
 
     result = joule_heating.derivative(conductor_temperature)
@@ -111,10 +111,10 @@ def test_joule_heating_derivative_scalar(joule_heating):
 def test_joule_heating_derivative_array(joule_heating):
     conductor_temperature = np.array([25.0, 30.0, 35.0])
     expected = (
-        joule_heating.km
-        * joule_heating.RDC20
-        * joule_heating.kl
-        * joule_heating.transit**2
+        joule_heating.magnetic_coeff
+        * joule_heating.dc_resistance_20c
+        * joule_heating.temp_coeff_linear
+        * joule_heating.current_a**2
     )
 
     result = joule_heating.derivative(conductor_temperature)

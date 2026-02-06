@@ -48,11 +48,11 @@ def test_radiative_cooling_value_temperature_scalar(radiative_cooling):
     temp = 100.0
     expected_result = (
         17.8
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter_m
         * (
             ((temp + 273.0) / 100.0) ** 4
-            - ((radiative_cooling.Ta + 273.0) / 100.0) ** 4
+            - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
         )
     )
 
@@ -73,11 +73,11 @@ def test_radiative_cooling_value_temperature_array(radiative_cooling):
     temp = np.array([65.3, 100.0])
     expected_result = (
         17.8
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter_m
         * (
             ((temp + 273.0) / 100.0) ** 4
-            - ((radiative_cooling.Ta + 273.0) / 100.0) ** 4
+            - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
         )
     )
 
@@ -99,7 +99,11 @@ def test_radiative_cooling_derivative_temperature_scalar(radiative_cooling):
     result = radiative_cooling.derivative(temp)
 
     expected_result = (
-        4.0 * 1.78e-07 * radiative_cooling.epsilon * radiative_cooling.D * temp**3
+        4.0
+        * 1.78e-07
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter_m
+        * temp**3
     )
 
     assert np.allclose(result, expected_result, rtol=0.001)
@@ -118,7 +122,11 @@ def test_radiative_cooling_derivative_temperature_array(radiative_cooling):
     result = radiative_cooling.derivative(temp)
 
     expected_result = (
-        4.0 * 1.78e-07 * radiative_cooling.epsilon * radiative_cooling.D * temp**3
+        4.0
+        * 1.78e-07
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter_m
+        * temp**3
     )
 
     assert np.allclose(result, expected_result, rtol=0.001)

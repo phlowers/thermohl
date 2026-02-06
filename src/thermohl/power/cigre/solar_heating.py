@@ -26,17 +26,41 @@ class SolarHeating(PowerTerm):
         hour: floatArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        sd = sun.solar_declination(month, day)
-        sh = sun.hour_angle(hour)
-        sa = sun.solar_altitude(lat, month, day, hour)
-        Id = 1280.0 * np.sin(sa) / (0.314 + np.sin(sa))
-        gs = np.arcsin(np.cos(sd) * np.sin(sh) / np.cos(sa))
-        eta = np.arccos(np.cos(sa) * np.cos(gs - azm))
-        A = 0.5 * np.pi * albedo * np.sin(sa) + np.sin(eta)
-        x = np.sin(sa)
-        C = np.piecewise(x, [x < 0.0, x >= 0.0], [lambda x_: 0.0, lambda x_: x_**1.2])
-        B = 0.5 * np.pi * (1 + albedo) * (570.0 - 0.47 * Id) * C
-        return np.where(sa > 0.0, A * Id + B, 0.0)
+        solar_declination_rad = sun.solar_declination(month, day)
+        hour_angle_rad = sun.hour_angle(hour)
+        solar_altitude_rad = sun.solar_altitude(lat, month, day, hour)
+        direct_irradiance = (
+            1280.0 * np.sin(solar_altitude_rad) / (0.314 + np.sin(solar_altitude_rad))
+        )
+        solar_azimuth_rad = np.arcsin(
+            np.cos(solar_declination_rad)
+            * np.sin(hour_angle_rad)
+            / np.cos(solar_altitude_rad)
+        )
+        incidence_angle_rad = np.arccos(
+            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azm)
+        )
+        direct_term = 0.5 * np.pi * albedo * np.sin(solar_altitude_rad) + np.sin(
+            incidence_angle_rad
+        )
+        sin_altitude = np.sin(solar_altitude_rad)
+        clear_sky_factor = np.piecewise(
+            sin_altitude,
+            [sin_altitude < 0.0, sin_altitude >= 0.0],
+            [lambda value: 0.0, lambda value: value**1.2],
+        )
+        diffuse_term = (
+            0.5
+            * np.pi
+            * (1 + albedo)
+            * (570.0 - 0.47 * direct_irradiance)
+            * clear_sky_factor
+        )
+        return np.where(
+            solar_altitude_rad > 0.0,
+            direct_term * direct_irradiance + diffuse_term,
+            0.0,
+        )
 
     def __init__(
         self,
@@ -66,28 +90,33 @@ class SolarHeating(PowerTerm):
             alpha (float | numpy.ndarray): Solar absorption coefficient.
             srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
         """
-        self.alpha = alpha
+        self.solar_absorptivity = alpha
         if srad is None:
-            self.srad = SolarHeating._solar_radiation(
+            self.solar_irradiance = SolarHeating._solar_radiation(
                 np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour
             )
         else:
-            self.srad = srad
-        self.D = D
+            self.solar_irradiance = srad
+        self.outer_diameter_m = D
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self.alpha * self.srad * self.D * np.ones_like(T)
+        return (
+            self.solar_absorptivity
+            * self.solar_irradiance
+            * self.outer_diameter_m
+            * np.ones_like(conductor_temp_c)
+        )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""

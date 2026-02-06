@@ -44,7 +44,7 @@ def plot_hour_angle():
         freq="15min",
     )
     plt.figure()
-    ha = sun.hour_angle(dr.hour, minute=dr.minute)
+    ha = sun.hour_angle(dr.hour, solar_minute=dr.minute)
     plt.plot(dr, ha / np.pi)
     plt.grid(True)
     plt.xlabel("Time")
