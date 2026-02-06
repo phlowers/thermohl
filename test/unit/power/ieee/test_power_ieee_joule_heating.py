@@ -83,7 +83,9 @@ joule_heating_instances = [
 )
 def test_rdc_scalar_temperature(joule_heating):
     T = 50.0
-    expected = joule_heating.RDCLow + joule_heating.c * (T - joule_heating.TLow)
+    expected = joule_heating.dc_resistance_low_c + joule_heating.temp_coeff_linear * (
+        T - joule_heating.temp_low_c
+    )
 
     result = joule_heating._rdc(T)
 
@@ -101,7 +103,9 @@ def test_rdc_scalar_temperature(joule_heating):
 )
 def test_rdc_array_temperature(joule_heating):
     T = np.array([30.0, 40.0])
-    expected = joule_heating.RDCLow + joule_heating.c * (T - joule_heating.TLow)
+    expected = joule_heating.dc_resistance_low_c + joule_heating.temp_coeff_linear * (
+        T - joule_heating.temp_low_c
+    )
 
     result = joule_heating._rdc(T)
 
@@ -120,8 +124,9 @@ def test_rdc_array_temperature(joule_heating):
 def test_value_scalar_temperature(joule_heating):
     T = 50.0
     expected = (
-        joule_heating.RDCLow + joule_heating.c * (T - joule_heating.TLow)
-    ) * joule_heating.transit**2
+        joule_heating.dc_resistance_low_c
+        + joule_heating.temp_coeff_linear * (T - joule_heating.temp_low_c)
+    ) * joule_heating.current_a**2
 
     result = joule_heating.value(T)
 
@@ -140,8 +145,9 @@ def test_value_scalar_temperature(joule_heating):
 def test_value_array_temperature(joule_heating):
     T = np.array([30.0, 40.0])
     expected = (
-        joule_heating.RDCLow + joule_heating.c * (T - joule_heating.TLow)
-    ) * joule_heating.transit**2
+        joule_heating.dc_resistance_low_c
+        + joule_heating.temp_coeff_linear * (T - joule_heating.temp_low_c)
+    ) * joule_heating.current_a**2
 
     result = joule_heating.value(T)
 
@@ -172,7 +178,7 @@ def test_value_array_temperature_different_shape_should_throw_error():
 )
 def test_derivative_scalar_temperature(joule_heating):
     conductor_temperature = 50.0
-    expected = joule_heating.c * joule_heating.transit**2
+    expected = joule_heating.temp_coeff_linear * joule_heating.current_a**2
 
     result = joule_heating.derivative(conductor_temperature)
 
@@ -191,7 +197,9 @@ def test_derivative_scalar_temperature(joule_heating):
 def test_derivative_array_temperature(joule_heating):
     conductor_temperature = np.array([30.0, 40.0])
     expected = (
-        joule_heating.c * joule_heating.transit**2 * np.ones_like(conductor_temperature)
+        joule_heating.temp_coeff_linear
+        * joule_heating.current_a**2
+        * np.ones_like(conductor_temperature)
     )
 
     result = joule_heating.derivative(conductor_temperature)

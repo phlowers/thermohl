@@ -42,15 +42,23 @@ class _SRad:
         Returns:
             float | numpy.ndarray: Coefficient for atmospheric turbidity.
         """
-        omt = 1.0 - trb
-        A = omt * self.clean[6] + trb * self.indus[6]
-        B = omt * self.clean[5] + trb * self.indus[5]
-        C = omt * self.clean[4] + trb * self.indus[4]
-        D = omt * self.clean[3] + trb * self.indus[3]
-        E = omt * self.clean[2] + trb * self.indus[2]
-        F = omt * self.clean[1] + trb * self.indus[1]
-        G = omt * self.clean[0] + trb * self.indus[0]
-        return A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+        clean_weight = 1.0 - trb
+        coeff_6 = clean_weight * self.clean[6] + trb * self.indus[6]
+        coeff_5 = clean_weight * self.clean[5] + trb * self.indus[5]
+        coeff_4 = clean_weight * self.clean[4] + trb * self.indus[4]
+        coeff_3 = clean_weight * self.clean[3] + trb * self.indus[3]
+        coeff_2 = clean_weight * self.clean[2] + trb * self.indus[2]
+        coeff_1 = clean_weight * self.clean[1] + trb * self.indus[1]
+        coeff_0 = clean_weight * self.clean[0] + trb * self.indus[0]
+        return (
+            coeff_6 * x**6
+            + coeff_5 * x**5
+            + coeff_4 * x**4
+            + coeff_3 * x**3
+            + coeff_2 * x**2
+            + coeff_1 * x**1
+            + coeff_0
+        )
 
     def __call__(
         self,
@@ -63,13 +71,17 @@ class _SRad:
         hour: floatArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        sa = sun.solar_altitude(lat, month, day, hour)
-        sz = sun.solar_azimuth(lat, month, day, hour)
-        th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-        K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-        Q = self.catm(np.rad2deg(sa), trb)
-        sr = K * Q * np.sin(th)
-        return np.where(sr > 0.0, sr, 0.0)
+        solar_altitude_rad = sun.solar_altitude(lat, month, day, hour)
+        solar_azimuth_rad = sun.solar_azimuth(lat, month, day, hour)
+        incidence_angle_rad = np.arccos(
+            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azm)
+        )
+        altitude_factor = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
+        clearness_factor = self.catm(np.rad2deg(solar_altitude_rad), trb)
+        solar_irradiance = (
+            altitude_factor * clearness_factor * np.sin(incidence_angle_rad)
+        )
+        return np.where(solar_irradiance > 0.0, solar_irradiance, 0.0)
 
 
 class SolarHeatingBase(PowerTerm):
@@ -90,24 +102,37 @@ class SolarHeatingBase(PowerTerm):
         srad: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
-        self.alpha = alpha
+        self.solar_absorptivity = alpha
         if srad is None:
-            self.srad = est(np.deg2rad(lat), alt, np.deg2rad(azm), tb, month, day, hour)
+            self.solar_irradiance = est(
+                np.deg2rad(lat),
+                alt,
+                np.deg2rad(azm),
+                tb,
+                month,
+                day,
+                hour,
+            )
         else:
-            self.srad = np.maximum(srad, 0.0)
-        self.D = D
+            self.solar_irradiance = np.maximum(srad, 0.0)
+        self.outer_diameter_m = D
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self.alpha * self.srad * self.D * np.ones_like(T)
+        return (
+            self.solar_absorptivity
+            * self.solar_irradiance
+            * self.outer_diameter_m
+            * np.ones_like(conductor_temp_c)
+        )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         """Compute solar heating derivative."""

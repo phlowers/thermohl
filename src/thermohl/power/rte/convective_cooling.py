@@ -70,10 +70,13 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        Tf = 0.5 * (T + self.Ta)
-        Td = T - self.Ta
+        film_temp_c = 0.5 * (T + self.ambient_temp_c)
+        temp_delta_c = T - self.ambient_temp_c
         # very slight difference with air.IEEE.volumic_mass() in coefficient before alt**2
-        vm = (1.293 - 1.525e-04 * self.alt + 6.38e-09 * self.alt**2) / (
-            1 + 0.00367 * Tf
+        air_density = (
+            1.293 - 1.525e-04 * self.altitude_m + 6.38e-09 * self.altitude_m**2
+        ) / (1 + 0.00367 * film_temp_c)
+        return np.maximum(
+            self._value_forced(film_temp_c, temp_delta_c, air_density),
+            self._value_natural(temp_delta_c, air_density),
         )
-        return np.maximum(self._value_forced(Tf, Td, vm), self._value_natural(Td, vm))

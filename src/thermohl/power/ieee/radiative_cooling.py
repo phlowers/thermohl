@@ -33,15 +33,15 @@ class RadiativeCooling(PowerTerm):
             epsilon (float | numpy.ndarray): Emissivity (—).
 
         """
-        self.Ta = Ta
-        self.D = D
-        self.epsilon = epsilon
+        self.ambient_temp_c = Ta
+        self.outer_diameter_m = D
+        self.emissivity = epsilon
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -49,9 +49,12 @@ class RadiativeCooling(PowerTerm):
         """
         return (
             17.8
-            * self.epsilon
-            * self.D
-            * (((T + 273.0) / 100.0) ** 4 - ((self.Ta + 273.0) / 100.0) ** 4)
+            * self.emissivity
+            * self.outer_diameter_m
+            * (
+                ((conductor_temp_c + 273.0) / 100.0) ** 4
+                - ((self.ambient_temp_c + 273.0) / 100.0) ** 4
+            )
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
@@ -64,4 +67,10 @@ class RadiativeCooling(PowerTerm):
             float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
-        return 4.0 * 1.78e-07 * self.epsilon * self.D * conductor_temperature**3
+        return (
+            4.0
+            * 1.78e-07
+            * self.emissivity
+            * self.outer_diameter_m
+            * conductor_temperature**3
+        )

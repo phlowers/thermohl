@@ -215,10 +215,10 @@ class Solver3T(Solver_):
 
         # solve system
         x, y, cnt, err = quasi_newton_2d(
-            f1=self.balance,
-            f2=self.morgan,
-            x0=Tsg_,
-            y0=Tcg_,
+            func1=self.balance,
+            func2=self.morgan,
+            x_init=Tsg_,
+            y_init=Tcg_,
             relative_tolerance=tol,
             max_iterations=maxiter,
             delta_x=1.0e-03,

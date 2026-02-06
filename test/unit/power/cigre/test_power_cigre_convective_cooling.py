@@ -93,8 +93,8 @@ def test_nu_forced_array_values(convective_cooling, expected_type):
 def test_nu_forced_boundary_conditions(convective_cooling, expected_type):
     Tf = np.array([30.0])
     nu = np.array([1.5e-5])
-    convective_cooling.R = np.array([0.05])
-    convective_cooling.ws = np.array([100.0])
+    convective_cooling.roughness_ratio = np.array([0.05])
+    convective_cooling.wind_speed_ms = np.array([100.0])
     expected_result = np.array([115.5214])
 
     result = convective_cooling._nu_forced(Tf, nu)

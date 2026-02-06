@@ -37,23 +37,31 @@ class JouleHeating(PowerTerm):
             T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
-        self.transit = transit
-        self.km = km
-        self.kl = kl
-        self.RDC20 = RDC20
-        self.T20 = T20
+        self.current_a = transit
+        self.magnetic_coeff = km
+        self.temp_coeff_linear = kl
+        self.dc_resistance_20c = RDC20
+        self.reference_temp_c = T20
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.transit**2
+        return (
+            self.magnetic_coeff
+            * self.dc_resistance_20c
+            * (
+                1.0
+                + self.temp_coeff_linear * (conductor_temp_c - self.reference_temp_c)
+            )
+            * self.current_a**2
+        )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
@@ -68,9 +76,9 @@ class JouleHeating(PowerTerm):
 
         """
         return (
-            self.km
-            * self.RDC20
-            * self.kl
-            * self.transit**2
+            self.magnetic_coeff
+            * self.dc_resistance_20c
+            * self.temp_coeff_linear
+            * self.current_a**2
             * np.ones_like(conductor_temperature)
         )

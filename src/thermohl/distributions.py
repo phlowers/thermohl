@@ -31,82 +31,93 @@ from thermohl import floatArrayLike
 _twopi = 2 * np.pi
 
 
-def _phi(x: float) -> float:
+def _phi(value: float) -> float:
     """PDF of standard normal distribution."""
-    return np.exp(-0.5 * x**2) / np.sqrt(_twopi)
+    return np.exp(-0.5 * value**2) / np.sqrt(_twopi)
 
 
 @depends_on_optional("scipy")
-def _psi(x: float) -> float:
+def _psi(value: float) -> float:
     """CDF of standard normal distribution."""
-    return 0.5 * (1 + erf(x / np.sqrt(2)))
+    return 0.5 * (1 + erf(value / np.sqrt(2)))
 
 
 def _truncnorm_header(
-    a: float, b: float, mu: float, sigma: float
+    lower_bound: float, upper_bound: float, mean: float, std_dev: float
 ) -> tuple[float, float, float, float]:
     """Utility code factoring."""
-    m = mu
-    s = sigma
-    al = (a - m) / s
-    bt = (b - m) / s
-    return al, bt, m, s
+    alpha = (lower_bound - mean) / std_dev
+    beta = (upper_bound - mean) / std_dev
+    return alpha, beta, mean, std_dev
 
 
 def _truncnorm_mean_std(
-    a: float, b: float, mu: float, sigma: float
+    lower_bound: float, upper_bound: float, mean: float, std_dev: float
 ) -> tuple[float, float]:
     """Real mean and std of truncated normal distribution."""
-    al, bt, m, s = _truncnorm_header(a, b, mu, sigma)
-    Z = _psi(bt) - _psi(al)
-    mean = m + s * (_phi(al) - _phi(bt)) / Z
-    std = s * np.sqrt(
-        1 + (al * _phi(al) - bt * _phi(bt)) / Z - ((_phi(al) - _phi(bt)) / Z) ** 2
+    alpha, beta, mean, std_dev = _truncnorm_header(
+        lower_bound, upper_bound, mean, std_dev
     )
-    return mean, std
+    normalizer = _psi(beta) - _psi(alpha)
+    mean_value = mean + std_dev * (_phi(alpha) - _phi(beta)) / normalizer
+    std_value = std_dev * np.sqrt(
+        1
+        + (alpha * _phi(alpha) - beta * _phi(beta)) / normalizer
+        - ((_phi(alpha) - _phi(beta)) / normalizer) ** 2
+    )
+    return mean_value, std_value
 
 
 @depends_on_optional("scipy")
 def truncnorm(
-    a: float,
-    b: float,
-    mu: float,
-    sigma: float,
-    err_mu: float = 1.0e-03,
-    err_sigma: float = 1.0e-02,
-    rel_err: bool = True,
+    lower_bound: float,
+    upper_bound: float,
+    mean: float,
+    std_dev: float,
+    mean_tolerance: float = 1.0e-03,
+    std_tolerance: float = 1.0e-02,
+    relative_tolerance: bool = True,
 ) -> frozen_dist:
     """Truncated normal distribution. Wrapper from scipy.stats."""
-    if a >= b:
-        raise ValueError("Input a (%.3E) should be lower than b (%.3E)." % (a, b))
-    if mu < a or mu > b:
+    if lower_bound >= upper_bound:
         raise ValueError(
-            "Input mu (%.3E) should be in [a, b] range (%.3E, %.3E)." % (mu, a, b)
+            "Input lower_bound (%.3E) should be lower than upper_bound (%.3E)."
+            % (lower_bound, upper_bound)
         )
-    if sigma < 0.0:
-        raise ValueError("Input sigma (%.3E) should be positive." % (sigma,))
+    if mean < lower_bound or mean > upper_bound:
+        raise ValueError(
+            "Input mean (%.3E) should be in [lower_bound, upper_bound] range (%.3E, %.3E)."
+            % (mean, lower_bound, upper_bound)
+        )
+    if std_dev < 0.0:
+        raise ValueError("Input std_dev (%.3E) should be positive." % (std_dev,))
 
-    al, bt, m, s = _truncnorm_header(a, b, mu, sigma)
-    dist = scipy.stats.truncnorm(al, bt, m, s)
+    target_mean = mean
+    target_std_dev = std_dev
+    alpha, beta, mean, std_dev = _truncnorm_header(
+        lower_bound, upper_bound, target_mean, target_std_dev
+    )
+    dist = scipy.stats.truncnorm(alpha, beta, mean, std_dev)
 
-    mean = dist.mean()
-    std = dist.std()
+    actual_mean = dist.mean()
+    actual_std = dist.std()
 
-    err_mu_ = err_mu
-    err_sigma_ = err_sigma
-    if rel_err:
-        err_mu_ *= mu
-        err_sigma_ *= sigma
-    if np.abs(sigma - std) >= err_sigma_:
+    mean_tol = mean_tolerance
+    std_tol = std_tolerance
+    if relative_tolerance:
+        mean_tol *= target_mean
+        std_tol *= target_std_dev
+    if np.abs(target_std_dev - actual_std) >= std_tol:
         warnings.warn(
             "Required std cannot be achieved (%.3E instead of %.3E). Choose a lower std, extend your "
-            "bounds or change your distribution." % (sigma, std),
+            "bounds or change your distribution." % (target_std_dev, actual_std),
             RuntimeWarning,
         )
-    if np.abs(mu - mean) >= err_mu_:
+    if np.abs(target_mean - actual_mean) >= mean_tol:
         warnings.warn(
             "Required mean cannot be achieved (%.3E instead of %.3E). Move the mean towards the center of your "
-            "bounds, extend your bounds or change your distribution." % (mu, mean),
+            "bounds, extend your bounds or change your distribution."
+            % (target_mean, actual_mean),
             RuntimeWarning,
         )
 
@@ -117,17 +128,17 @@ def truncnorm(
 class WrappedNormal(object):
     """Wrapped-Normal distribution. Not as complete as a scipy.stat distribution."""
 
-    def __init__(self, mu: float, sigma: float, lwrb: float = 0.0):
-        if sigma < 0:
+    def __init__(self, mean: float, std_dev: float, lower_bound: float = 0.0):
+        if std_dev < 0:
             raise ValueError("Std should be positive.")
-        if mu < lwrb or mu >= lwrb + _twopi:
+        if mean < lower_bound or mean >= lower_bound + _twopi:
             raise ValueError(
                 "Mean should be greater than lower bound and lower than lower bound + 2*pi."
             )
-        self.lwrb = lwrb
-        self.uprb = lwrb + _twopi
-        self.mu = mu
-        self.sigma = sigma
+        self.lower_bound = lower_bound
+        self.upper_bound = lower_bound + _twopi
+        self.mean_value = mean
+        self.std_dev = std_dev
         return
 
     @depends_on_optional("scipy")
@@ -139,21 +150,24 @@ class WrappedNormal(object):
         ] = None,
     ) -> floatArrayLike:
         smpl = scipy.stats.norm.rvs(
-            loc=self.mu, scale=self.sigma, size=size, random_state=random_state
+            loc=self.mean_value,
+            scale=self.std_dev,
+            size=size,
+            random_state=random_state,
         )
         smpl = smpl % _twopi
-        smpl[smpl < self.lwrb] += _twopi
-        smpl[smpl > self.uprb] -= _twopi
+        smpl[smpl < self.lower_bound] += _twopi
+        smpl[smpl > self.upper_bound] -= _twopi
         return smpl
 
     def mean(self) -> float:
-        return self.mu
+        return self.mean_value
 
     def median(self) -> float:
-        return self.mu
+        return self.mean_value
 
     def var(self) -> float:
-        return 1 - np.exp(-0.5 * self.sigma**2)
+        return 1 - np.exp(-0.5 * self.std_dev**2)
 
     def std(self) -> float:
         return np.sqrt(self.var())
@@ -162,23 +176,24 @@ class WrappedNormal(object):
         return np.quantile(self.rvs(9999), q)
 
 
-def wrapnorm(mu: float, sigma: float) -> WrappedNormal:
+def wrapnorm(mean: float, std_dev: float) -> WrappedNormal:
     """Get Wrapped Normal distribution.
     -- in radians, in [0, 2*pi]
     """
-    mu2 = mu % _twopi
-    if mu2 != mu:
+    mean_wrapped = mean % _twopi
+    if mean_wrapped != mean:
         warnings.warn(
-            "Changed mean from %.3E to %.3E to fit [0,2*pi] interval." % (mu, mu2),
+            "Changed mean from %.3E to %.3E to fit [0,2*pi] interval."
+            % (mean, mean_wrapped),
             RuntimeWarning,
         )
-    if sigma >= _twopi:
+    if std_dev >= _twopi:
         warnings.warn(
             "Required std cannot be achieved (%.3E > 2*pi). Choose a lower std "
-            "or change your distribution." % (sigma,),
+            "or change your distribution." % (std_dev,),
             RuntimeWarning,
         )
-    return WrappedNormal(mu2, sigma)
+    return WrappedNormal(mean_wrapped, std_dev)
 
 
 @depends_on_optional("scipy")
@@ -188,45 +203,46 @@ def _vonmises_circ_var(kappa: float) -> float:
 
 
 @depends_on_optional("scipy")
-def _vonmises_kappa(sigma: float) -> float:
+def _vonmises_kappa(std_dev: float) -> float:
     """Get von Mises parameter that matches std in input."""
     from scipy.optimize import newton
 
-    vr = 1.0 - np.exp(-0.5 * sigma**2)
-    k0 = 0.5 / vr
+    circ_variance = 1.0 - np.exp(-0.5 * std_dev**2)
+    kappa_guess = 0.5 / circ_variance
 
     def fun(x: float) -> float:
-        return _vonmises_circ_var(x) - vr
+        return _vonmises_circ_var(x) - circ_variance
 
     try:
-        kappa = newton(fun, x0=k0, tol=1.0e-06, maxiter=32)
+        kappa = newton(fun, x0=kappa_guess, tol=1.0e-06, maxiter=32)
     except RuntimeError:
-        kappa = 1 / sigma**2
+        kappa = 1 / std_dev**2
 
     return kappa
 
 
 @depends_on_optional("scipy")
-def vonmises(mu: float, sigma: float) -> frozen_dist:
+def vonmises(mean: float, std_dev: float) -> frozen_dist:
     """Get von Mises distribution.
     -- in radians, in [-pi,+pi]
     """
-    mu2 = mu % _twopi
-    if mu2 > np.pi:
-        mu2 -= _twopi
-    if mu2 != mu:
+    mean_wrapped = mean % _twopi
+    if mean_wrapped > np.pi:
+        mean_wrapped -= _twopi
+    if mean_wrapped != mean:
         warnings.warn(
-            "Changed mean from %.3E to %.3E to fit [-pi,+pi] interval." % (mu, mu2),
+            "Changed mean from %.3E to %.3E to fit [-pi,+pi] interval."
+            % (mean, mean_wrapped),
             RuntimeWarning,
         )
-    if sigma < 0.0:
-        raise ValueError("Input sigma (%.3E) should be positive." % (sigma,))
+    if std_dev < 0.0:
+        raise ValueError("Input std_dev (%.3E) should be positive." % (std_dev,))
     sigmax = _twopi / np.sqrt(12)
-    if sigma >= sigmax:
+    if std_dev >= sigmax:
         warnings.warn(
             "Required std cannot be achieved (%.3E > %.3E). Choose a lower std "
-            "or change your distribution." % (sigma, sigmax),
+            "or change your distribution." % (std_dev, sigmax),
             RuntimeWarning,
         )
-    kappa = _vonmises_kappa(sigma)
-    return scipy.stats.vonmises_line(kappa, loc=mu)
+    kappa = _vonmises_kappa(std_dev)
+    return scipy.stats.vonmises_line(kappa, loc=mean_wrapped)

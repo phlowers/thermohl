@@ -53,7 +53,7 @@ def test_compare_powers():
     sd = sun.solar_declination(dic["month"], dic["day"])
     assert np.isclose(np.rad2deg(sd), 23.0, rtol=0.001)
 
-    ha = sun.hour_angle(dic["hour"], minute=0.0, second=0.0)
+    ha = sun.hour_angle(dic["hour"], solar_minute=0.0, solar_second=0.0)
     assert np.isclose(np.rad2deg(ha), -15.0)
 
     sa = sun.solar_altitude(
