@@ -12,9 +12,11 @@ from thermohl.power.radiative_cooling import RadiativeCoolingBase
 
 radiative_cooling_instances = [
     RadiativeCoolingBase(
-        Ta=np.array([25.0, 15.2]), D=np.array([1, 1.5]), epsilon=np.array([0.9, 0.8])
+        ambient_temperature=np.array([25.0, 15.2]),
+        outer_diameter=np.array([1, 1.5]),
+        emissivity=np.array([0.9, 0.8]),
     ),
-    RadiativeCoolingBase(Ta=25, D=1, epsilon=0.9),
+    RadiativeCoolingBase(ambient_temperature=25, outer_diameter=1, emissivity=0.9),
 ]
 
 
@@ -48,7 +50,9 @@ def test_celsius2kelvin_array(radiative_cooling):
 
 
 def test_celsius2kelvin_with_custom_zerok():
-    radiative_cooling = RadiativeCoolingBase(Ta=25, D=1, epsilon=0.9, zerok=0)
+    radiative_cooling = RadiativeCoolingBase(
+        ambient_temperature=25, outer_diameter=1, emissivity=0.9, zerok=0
+    )
 
     assert radiative_cooling._celsius2kelvin(0) == 0
     assert radiative_cooling._celsius2kelvin(100) == 100
@@ -67,12 +71,12 @@ def test_value_scalar(radiative_cooling):
 
     expected_value = (
         np.pi
-        * radiative_cooling.sigma
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.stefan_boltzmann
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter
         * (
             (radiative_cooling._celsius2kelvin(conductor_temp)) ** 4
-            - radiative_cooling.Ta**4
+            - radiative_cooling.ambient_temperature**4
         )
     )
 
@@ -92,12 +96,12 @@ def test_value_array(radiative_cooling):
 
     expected_value = (
         np.pi
-        * radiative_cooling.sigma
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.stefan_boltzmann
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter
         * (
             (radiative_cooling._celsius2kelvin(conductor_temp)) ** 4
-            - radiative_cooling.Ta**4
+            - radiative_cooling.ambient_temperature**4
         )
     )
 
@@ -120,9 +124,9 @@ def test_derivative_scalar(radiative_cooling):
     expected = (
         4.0
         * np.pi
-        * radiative_cooling.sigma
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.stefan_boltzmann
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter
         * conductor_temperature**3
     )
     assert np.allclose(expected, radiative_cooling.derivative(conductor_temperature))
@@ -137,15 +141,15 @@ def test_derivative_scalar(radiative_cooling):
     ],
 )
 def test_derivative_array(radiative_cooling):
-    # radiative_cooling = RadiativeCoolingBase(Ta=25, D=1, epsilon=0.9, zerok=0)
+    # radiative_cooling = RadiativeCoolingBase(ambient_temperature=25, outer_diameter=1, emissivity=0.9, zerok=0)
     conductor_temperature = np.array([100, 200])
 
     expected = (
         4.0
         * np.pi
-        * radiative_cooling.sigma
-        * radiative_cooling.epsilon
-        * radiative_cooling.D
+        * radiative_cooling.stefan_boltzmann
+        * radiative_cooling.emissivity
+        * radiative_cooling.outer_diameter
         * conductor_temperature**3
     )
     np.testing.assert_array_equal(

@@ -10,43 +10,52 @@
 import numpy as np
 from thermohl import floatArrayLike
 
-# Standard temperature and pressure from EPA and NIST; _T0 in K, _p0 in Pa
-_T0, _p0 = 293.15, 1.01325e05
+# Standard temperature and pressure from EPA and NIST; in K and Pa
+_STD_TEMP_K, _STD_PRESSURE_PA = 293.15, 1.01325e05
 
-# Boltzman constant, Avogadro number and Gas constant (all in SI)
-_kb = 1.380649e-23
-_Na = 6.02214076e23
-_R = _kb * _Na
+# Boltzmann constant, Avogadro number and Gas constant (all in SI)
+_BOLTZMANN_CONSTANT = 1.380649e-23
+_AVOGADRO_NUMBER = 6.02214076e23
+_GAS_CONSTANT = _BOLTZMANN_CONSTANT * _AVOGADRO_NUMBER
 
 
 class Air:
     @staticmethod
-    def heat_capacity(T: floatArrayLike = _T0) -> floatArrayLike:
+    def heat_capacity(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """In J.kg**-1.K**-1"""
-        return np.interp(T, [240.0, 600.0], [1.006, 1.051])
+        return np.interp(temperature, [240.0, 600.0], [1.006, 1.051])
 
 
 class Water:
     @staticmethod
-    def boiling_point(p: floatArrayLike = _p0) -> floatArrayLike:
+    def boiling_point(pressure: floatArrayLike = _STD_PRESSURE_PA) -> floatArrayLike:
         """Using Clausius–Clapeyron equation; in K."""
         # convert H from J.kg**-1 to J.mol**-1 using molar mass
-        H = Water.heat_of_vaporization() * 0.018015
-        Tb = 1.0 / (1 / 373.15 - _R * np.log(p / _p0) / H)
-        return Tb
+        latent_heat = Water.heat_of_vaporization() * 0.018015
+        boiling_temp = 1.0 / (
+            1 / 373.15
+            - _GAS_CONSTANT * np.log(pressure / _STD_PRESSURE_PA) / latent_heat
+        )
+        return boiling_temp
 
     @staticmethod
-    def heat_capacity(T: floatArrayLike = _T0) -> floatArrayLike:
+    def heat_capacity(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """From NIST webbook; in J.kg**-1.K**-1.
         See https://webbook.nist.gov/cgi/cbook.cgi?Name=Water&Units=SI.
         """
-        A = -203.6060
-        B = +1523.290
-        C = -3196.413
-        D = +2474.455
-        E = 3.855326
-        t = T / 1000.0
-        return A + B * t + C * t**2 + D * t**3 + E / t**2
+        coeff_a = -203.6060
+        coeff_b = +1523.290
+        coeff_c = -3196.413
+        coeff_d = +2474.455
+        coeff_e = 3.855326
+        temp_kilo = temperature / 1000.0
+        return (
+            coeff_a
+            + coeff_b * temp_kilo
+            + coeff_c * temp_kilo**2
+            + coeff_d * temp_kilo**3
+            + coeff_e / temp_kilo**2
+        )
 
     @staticmethod
     def heat_of_vaporization() -> float:
@@ -56,15 +65,17 @@ class Water:
         return 2.257e05
 
     @staticmethod
-    def vapor_pressure(T: floatArrayLike = _T0) -> floatArrayLike:
+    def vapor_pressure(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """Using Buck equation; in Pa."""
-        Tc = T - 273.15
-        return 611.21 * np.exp((18.678 - Tc / 234.5) * (Tc / (257.14 + Tc)))
+        temperature = temperature - 273.15
+        return 611.21 * np.exp(
+            (18.678 - temperature / 234.5) * (temperature / (257.14 + temperature))
+        )
 
     @staticmethod
-    def volumic_mass(T: floatArrayLike = _T0) -> floatArrayLike:
+    def volumic_mass(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """In kg.m**-3."""
-        xp = np.array(
+        temp_points = np.array(
             [
                 0.0,
                 1.0,
@@ -121,7 +132,7 @@ class Water:
                 100.0,
             ]
         )
-        fp = np.array(
+        density_points = np.array(
             [
                 999.840,
                 999.899,
@@ -178,7 +189,7 @@ class Water:
                 958.35,
             ]
         )
-        return np.interp(T, xp, fp)
+        return np.interp(temperature, temp_points, density_points)
 
 
 class Ice:

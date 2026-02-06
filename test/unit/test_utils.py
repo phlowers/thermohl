@@ -30,9 +30,9 @@ def test_bisect():
         0.0,
         np.sqrt(np.max(c)) * 1.1,
         (size,),
-        print_err=False,
-        tol=tol,
-        maxiter=99,
+        print_error=False,
+        tolerance=tol,
+        max_iterations=99,
     )
 
     assert np.max(np.abs(x0 - r0) <= np.minimum(tol, err))
@@ -43,7 +43,7 @@ def test_bisect_scalar():
         return x**2 - 2
 
     tol = 1e-6
-    x0, err = bisect_v(f, a=0, b=2, shape=1, tol=tol)
+    x0, err = bisect_v(f, lower_bound=0, upper_bound=2, output_shape=1, tolerance=tol)
     np.testing.assert_allclose(x0, np.sqrt(2), atol=tol)
 
 
@@ -53,7 +53,9 @@ def test_bisect_vector():
         # Not the best way to use bisect_v, but just for testing.
 
     tol = 1e-6
-    x0, err = bisect_v(f, a=0, b=2, shape=(2,), tol=tol)
+    x0, err = bisect_v(
+        f, lower_bound=0, upper_bound=2, output_shape=(2,), tolerance=tol
+    )
     np.testing.assert_allclose(x0, np.array([np.sqrt(2), np.cbrt(2)]), atol=tol)
 
 
@@ -64,7 +66,9 @@ def test_bisect_array():
         return x**2 - c
 
     tol = 1e-6
-    x0, err = bisect_v(f, a=0, b=30, shape=c.shape, tol=tol)
+    x0, err = bisect_v(
+        f, lower_bound=0, upper_bound=30, output_shape=c.shape, tolerance=tol
+    )
     np.testing.assert_allclose(x0, np.sqrt(c), atol=tol)
 
 
@@ -86,10 +90,10 @@ def test_quasi_newton_2d_convergence():
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        f1=f1,
-        f2=f2,
-        x0=xg,
-        y0=yg,
+        func1=f1,
+        func2=f2,
+        x_init=xg,
+        y_init=yg,
         relative_tolerance=tol,
         max_iterations=999,
         delta_x=1.0e-09,
@@ -119,10 +123,10 @@ def test_quasi_newton_2d_no_convergence():
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        f1=f1,
-        f2=f2,
-        x0=xg,
-        y0=yg,
+        func1=f1,
+        func2=f2,
+        x_init=xg,
+        y_init=yg,
         relative_tolerance=tol,
         max_iterations=1,  # Set max iterations to 1 to force no convergence
         delta_x=1.0e-09,
@@ -152,10 +156,10 @@ def test_quasi_newton_2d_large_system():
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        f1=f1,
-        f2=f2,
-        x0=xg,
-        y0=yg,
+        func1=f1,
+        func2=f2,
+        x_init=xg,
+        y_init=yg,
         relative_tolerance=tol,
         max_iterations=999,
         delta_x=1.0e-09,

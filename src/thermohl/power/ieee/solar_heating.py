@@ -15,16 +15,16 @@ from thermohl.power import _SRad, SolarHeatingBase
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
-        lat: floatArrayLike,
-        alt: floatArrayLike,
-        azm: floatArrayLike,
-        tb: floatArrayLike,
+        latitude: floatArrayLike,
+        altitude: floatArrayLike,
+        azimuth: floatArrayLike,
+        turbidity: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        D: floatArrayLike,
-        alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        outer_diameter: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
+        precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -32,16 +32,16 @@ class SolarHeating(SolarHeatingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
-            alt (float | numpy.ndarray): Altitude.
-            azm (float | numpy.ndarray): Azimuth.
-            tb (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
+            latitude (float | numpy.ndarray): Latitude.
+            altitude (float | numpy.ndarray): Altitude.
+            azimuth (float | numpy.ndarray): Azimuth.
+            turbidity (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            D (float | numpy.ndarray): external diameter.
-            alpha (float | numpy.ndarray): Solar absorption coefficient.
-            srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            outer_diameter (float | numpy.ndarray): external diameter.
+            solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
+            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
         """
         est = _SRad(
             [
@@ -64,5 +64,16 @@ class SolarHeating(SolarHeatingBase):
             ],
         )
         super().__init__(
-            lat, alt, azm, tb, month, day, hour, D, alpha, est, srad, **kwargs
+            latitude,
+            altitude,
+            azimuth,
+            turbidity,
+            month,
+            day,
+            hour,
+            outer_diameter,
+            solar_absorptivity,
+            est,
+            precomputed_solar_radiation,
+            **kwargs,
         )

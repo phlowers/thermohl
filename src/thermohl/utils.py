@@ -19,7 +19,10 @@ import yaml
 
 
 def _dict_completion(
-    dat: dict, filename: str, check: bool = True, warning: bool = False
+    params: dict,
+    filename: str,
+    validate_types: bool = True,
+    warning: bool = False,
 ) -> dict:
     """Complete input dict with values from file.
 
@@ -27,65 +30,65 @@ def _dict_completion(
     to input dict dat if the key is not already in dat.
 
     Args:
-        dat (dict): Input dict with parameters for power terms.
+        params (dict): Input dict with parameters for power terms.
         warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
     Returns:
         dict: Completed input dict if some parameters were missing.
 
     """
-    fil = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
-    dfl = yaml.safe_load(open(fil, "r"))
-    for k in dfl.keys():
-        if k not in dat.keys() or dat[k] is None:
-            dat[k] = dfl[k]
+    file_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), filename)
+    defaults = yaml.safe_load(open(file_path, "r"))
+    for key in defaults.keys():
+        if key not in params.keys() or params[key] is None:
+            params[key] = defaults[key]
             if warning:
-                print("Added key %s from default parameters" % (k,))
+                print("Added key %s from default parameters" % (key,))
         elif (
-            not isinstance(dat[k], int)
-            and not isinstance(dat[k], float)
-            and not isinstance(dat[k], np.ndarray)
-            and check
+            not isinstance(params[key], int)
+            and not isinstance(params[key], float)
+            and not isinstance(params[key], np.ndarray)
+            and validate_types
         ):
             raise TypeError(
                 "element in input dict (key [%s]) must be int, float or numpy.ndarray"
-                % (k,)
+                % (key,)
             )
-    return dat
+    return params
 
 
-def add_default_parameters(dat: dict, warning: bool = False) -> dict:
+def add_default_parameters(params: dict, warning: bool = False) -> dict:
     """Add default parameters if there is missing input.
 
     Args:
-        dat (dict): Input dict with parameters for power terms.
+        params (dict): Input dict with parameters for power terms.
         warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
     Returns:
         dict: Completed input dict if some parameters were missing.
 
     """
-    fil = os.path.join(
+    file_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "default_values.yaml"
     )
-    return _dict_completion(dat, fil, warning=warning)
+    return _dict_completion(params, file_path, warning=warning)
 
 
-def add_default_uncertainties(dat: dict, warning: bool = False) -> dict:
+def add_default_uncertainties(params: dict, warning: bool = False) -> dict:
     """Add default uncertainty parameters if there is missing input.
 
     Args:
-        dat (dict): Input dict with parameters for power terms.
+        params (dict): Input dict with parameters for power terms.
         warning (bool, optional): Print a message if a parameter is missing. The default is False.
 
     Returns:
         dict: Completed input dict if some parameters were missing.
 
     """
-    fil = os.path.join(
+    file_path = os.path.join(
         os.path.dirname(os.path.realpath(__file__)), "default_uncertainties.yaml"
     )
-    return _dict_completion(dat, fil, check=False, warning=warning)
+    return _dict_completion(params, file_path, validate_types=False, warning=warning)
 
 
 def df2dct(df: pd.DataFrame) -> dict:
@@ -99,23 +102,23 @@ def df2dct(df: pd.DataFrame) -> dict:
     Returns:
         dict: Dictionary with values converted to scalars or numpy arrays.
     """
-    q = df.to_dict(orient="list")
-    for k in q.keys():
-        if len(q[k]) > 1:
-            q[k] = np.array(q[k])
+    values_by_key = df.to_dict(orient="list")
+    for key in values_by_key.keys():
+        if len(values_by_key[key]) > 1:
+            values_by_key[key] = np.array(values_by_key[key])
         else:
-            q[k] = q[k][0]
-    return q
+            values_by_key[key] = values_by_key[key][0]
+    return values_by_key
 
 
 def bisect_v(
-    fun: callable,
-    a: float,
-    b: float,
-    shape: tuple[int, ...],
-    tol=1.0e-06,
-    maxiter=128,
-    print_err=False,
+    func: callable,
+    lower_bound: float,
+    upper_bound: float,
+    output_shape: tuple[int, ...],
+    tolerance: float = 1.0e-06,
+    max_iterations: int = 128,
+    print_error: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Bisection method to find a zero of a continuous function [a, b] -> R,
     such that f(a) < 0 < f(b).
@@ -130,13 +133,13 @@ def bisect_v(
     computed using vectorized Numpy operations as in the example below.
 
     Args:
-        fun (Callable[[np.ndarray], np.ndarray]): Python function taking a NumPy array and returning a NumPy array of the same shape.
-        a (float): Lower bound of the [a, b] interval.
-        b (float): Upper bound of the [a, b] interval.
-        shape (tuple[int, ...]): Shape of the inputs and outputs of `fun` and thus of the outputs of `bisect_v`.
-        tol (float): Absolute tolerance.
-        maxiter (int): Maximum number of iterations.
-        print_err (bool): Whether to print the max absolute error and iteration count at the end.
+        func (Callable[[np.ndarray], np.ndarray]): Python function taking a NumPy array and returning a NumPy array of the same shape.
+        lower_bound (float): Lower bound of the [a, b] interval.
+        upper_bound (float): Upper bound of the [a, b] interval.
+        output_shape (tuple[int, ...]): Shape of the inputs and outputs of `func` and thus of the outputs of `bisect_v`.
+        tolerance (float): Absolute tolerance.
+        max_iterations (int): Maximum number of iterations.
+        print_error (bool): Whether to print the max absolute error and iteration count at the end.
 
     Returns:
         tuple[np.ndarray, np.ndarray]:
@@ -147,39 +150,41 @@ def bisect_v(
     >>> c = np.array([1.0, 4.0, 9.0, 16.0])
     >>> def f(x):
     ...     return x**2 - c
-    >>> x0, err = bisect_v(f, a=0.0, b=10.0, shape=(4,), tol=1e-10)
+    >>> x0, err = bisect_v(f, lower_bound=0.0, upper_bound=10.0, output_shape=(4,), tolerance=1e-10)
     >>> x0
     array([1., 2., 3., 4.])
 
     """
-    a_ = a * np.ones(shape)
-    b_ = b * np.ones(shape)
+    lower_bounds = lower_bound * np.ones(output_shape)
+    upper_bounds = upper_bound * np.ones(output_shape)
 
-    err = np.abs(b - a)
-    count = 1
-    while np.nanmax(err) > tol and count <= maxiter:
-        x = 0.5 * (a_ + b_)
-        y = fun(x)
-        i = y < 0
-        a_[i] = x[i]
-        b_[~i] = x[~i]
-        err = np.abs(b_ - a_)
-        count += 1
-    x = 0.5 * (a_ + b_)
-    x[np.isnan(fun(x))] = np.nan
-    if print_err:
-        print(f"Bisection max err (abs) : {np.max(err):.2E}; count={count}")
-    return x, err
+    abs_error = np.abs(upper_bound - lower_bound)
+    iteration_count = 1
+    while np.nanmax(abs_error) > tolerance and iteration_count <= max_iterations:
+        midpoint = 0.5 * (lower_bounds + upper_bounds)
+        values = func(midpoint)
+        lower_mask = values < 0
+        lower_bounds[lower_mask] = midpoint[lower_mask]
+        upper_bounds[~lower_mask] = midpoint[~lower_mask]
+        abs_error = np.abs(upper_bounds - lower_bounds)
+        iteration_count += 1
+    midpoint = 0.5 * (lower_bounds + upper_bounds)
+    midpoint[np.isnan(func(midpoint))] = np.nan
+    if print_error:
+        print(
+            f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
+        )
+    return midpoint, abs_error
 
 
 # In agreement with Eurobios, this function has been retrieved from the pyntb library,
 # in order to remove the external dependency on this library.
 # In this library, this function was initially developed under the name qnewt2d_v
 def quasi_newton_2d(
-    f1: callable,
-    f2: callable,
-    x0: np.ndarray,
-    y0: np.ndarray,
+    func1: callable,
+    func2: callable,
+    x_init: np.ndarray,
+    y_init: np.ndarray,
     relative_tolerance: float = 1.0e-12,
     max_iterations: int = 64,
     delta_x: float = 1.0e-03,
@@ -197,10 +202,10 @@ def quasi_newton_2d(
     All return values are arrays of the same size as inputs x0 and y0.
 
     Args:
-        f1 (Callable[[np.ndarray, np.ndarray], np.ndarray]): First component of a 2D function of two variables.
-        f2 (Callable[[np.ndarray, np.ndarray], np.ndarray]): Second component of a 2D function of two variables.
-        x0 (np.ndarray): First component of the initial guess.
-        y0 (np.ndarray): Second component of the initial guess.
+        func1 (Callable[[np.ndarray, np.ndarray], np.ndarray]): First component of a 2D function of two variables.
+        func2 (Callable[[np.ndarray, np.ndarray], np.ndarray]): Second component of a 2D function of two variables.
+        x_init (np.ndarray): First component of the initial guess.
+        y_init (np.ndarray): Second component of the initial guess.
         relative_tolerance (float): Relative tolerance for convergence.
         max_iterations (int): Maximum number of iterations.
         delta_x (float): Delta for evaluating the derivative with respect to the first component.
@@ -214,24 +219,28 @@ def quasi_newton_2d(
             - err: Relative error when exiting the function (per component).
 
     """
-    x = x0.copy()
-    y = y0.copy()
+    x = x_init.copy()
+    y = y_init.copy()
 
     for count in range(max_iterations):
         # Evaluate functions at current x and y
-        f1_value = f1(x, y)
-        f2_value = f2(x, y)
+        func1_value = func1(x, y)
+        func2_value = func2(x, y)
 
         # Compute Jacobian matrix using second-order centered differences
-        jacobian_11 = (f1(x + delta_x, y) - f1(x - delta_x, y)) / (2 * delta_x)
-        jacobian_12 = (f1(x, y + delta_y) - f1(x, y - delta_y)) / (2 * delta_y)
-        jacobian_21 = (f2(x + delta_x, y) - f2(x - delta_x, y)) / (2 * delta_x)
-        jacobian_22 = (f2(x, y + delta_y) - f2(x, y - delta_y)) / (2 * delta_y)
+        jacobian_11 = (func1(x + delta_x, y) - func1(x - delta_x, y)) / (2 * delta_x)
+        jacobian_12 = (func1(x, y + delta_y) - func1(x, y - delta_y)) / (2 * delta_y)
+        jacobian_21 = (func2(x + delta_x, y) - func2(x - delta_x, y)) / (2 * delta_x)
+        jacobian_22 = (func2(x, y + delta_y) - func2(x, y - delta_y)) / (2 * delta_y)
 
         # Compute inverse of the Jacobian determinant
         inv_jacobian_det = 1.0 / (jacobian_11 * jacobian_22 - jacobian_12 * jacobian_21)
-        err_abs_x = inv_jacobian_det * (jacobian_22 * f1_value - jacobian_12 * f2_value)
-        err_abs_y = inv_jacobian_det * (jacobian_11 * f2_value - jacobian_21 * f1_value)
+        err_abs_x = inv_jacobian_det * (
+            jacobian_22 * func1_value - jacobian_12 * func2_value
+        )
+        err_abs_y = inv_jacobian_det * (
+            jacobian_11 * func2_value - jacobian_21 * func1_value
+        )
 
         x -= err_abs_x
         y -= err_abs_y

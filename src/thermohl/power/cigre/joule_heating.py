@@ -19,10 +19,10 @@ class JouleHeating(PowerTerm):
     def __init__(
         self,
         transit: floatArrayLike,
-        km: floatArrayLike,
-        kl: floatArrayLike,
-        RDC20: floatArrayLike,
-        T20: floatArrayLike = 20.0,
+        magnetic_coeff: floatArrayLike,
+        temperature_coeff_linear: floatArrayLike,
+        linear_resistance_dc_20c: floatArrayLike,
+        reference_temperature: floatArrayLike = 20.0,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -31,29 +31,38 @@ class JouleHeating(PowerTerm):
 
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
-            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
-            kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
-            RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
-            T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
+            magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            temperature_coeff_linear (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
+            linear_resistance_dc_20c (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
+            reference_temperature (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
         self.transit = transit
-        self.km = km
-        self.kl = kl
-        self.RDC20 = RDC20
-        self.T20 = T20
+        self.magnetic_coeff = magnetic_coeff
+        self.temp_coeff_linear = temperature_coeff_linear
+        self.linear_resistance_dc_20c = linear_resistance_dc_20c
+        self.reference_temperature = reference_temperature
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self.km * self.RDC20 * (1.0 + self.kl * (T - self.T20)) * self.transit**2
+        return (
+            self.magnetic_coeff
+            * self.linear_resistance_dc_20c
+            * (
+                1.0
+                + self.temp_coeff_linear
+                * (conductor_temperature - self.reference_temperature)
+            )
+            * self.transit**2
+        )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
@@ -68,9 +77,9 @@ class JouleHeating(PowerTerm):
 
         """
         return (
-            self.km
-            * self.RDC20
-            * self.kl
+            self.magnetic_coeff
+            * self.linear_resistance_dc_20c
+            * self.temp_coeff_linear
             * self.transit**2
             * np.ones_like(conductor_temperature)
         )
