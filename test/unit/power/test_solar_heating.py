@@ -90,43 +90,43 @@ def test_srad_catm_array(srad):
 
 
 def test_srad_call_scalar(srad):
-    lat = 45.0
+    latitude_deg = 45.0
     altitude = 1000.0
     azimuth = 180.0
     trb = 0.5
     month = 6
     day = 21
     hour = 12.0
-    sa = sun.solar_altitude(lat, month, day, hour)
-    sz = sun.solar_azimuth(lat, month, day, hour)
+    sa = sun.solar_altitude(latitude_deg, month, day, hour)
+    sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.catm(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, altitude, azimuth, trb, month, day, hour)
+    result = srad(latitude_deg, altitude, azimuth, trb, month, day, hour)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_call_array(srad):
-    lat = np.array([45.0, 50.0])
+    latitude_deg = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
     azimuth = np.array([180.0, 190.0])
     trb = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
-    sa = sun.solar_altitude(lat, month, day, hour)
-    sz = sun.solar_azimuth(lat, month, day, hour)
+    sa = sun.solar_altitude(latitude_deg, month, day, hour)
+    sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.catm(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, altitude, azimuth, trb, month, day, hour)
+    result = srad(latitude_deg, altitude, azimuth, trb, month, day, hour)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -134,7 +134,7 @@ def test_srad_call_array(srad):
 # Tests Class SolarHeating
 solar_heating_instances = [
     SolarHeating(
-        lat=np.array([45.0, 50.0]),
+        latitude_deg=np.array([45.0, 50.0]),
         altitude=np.array([1000.0, 2000.0]),
         azimuth=np.array([180.0, 190.0]),
         tb=np.array([0.5, 0.7]),
@@ -146,7 +146,7 @@ solar_heating_instances = [
         srad=np.array([800.0, 900.0]),
     ),
     SolarHeating(
-        lat=45.0,
+        latitude_deg=45.0,
         altitude=1000.0,
         azimuth=180.0,
         tb=0.5,

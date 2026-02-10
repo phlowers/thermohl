@@ -18,7 +18,7 @@ class SolarHeating(PowerTerm):
 
     @staticmethod
     def _solar_radiation(
-        lat: floatArrayLike,
+        latitude_deg: floatArrayLike,
         azimuth: floatArrayLike,
         albedo: floatArrayLike,
         month: intArrayLike,
@@ -28,7 +28,7 @@ class SolarHeating(PowerTerm):
         """Compute solar radiation."""
         solar_declination_rad = sun.solar_declination(month, day)
         hour_angle_rad = sun.hour_angle(hour)
-        solar_altitude_rad = sun.solar_altitude(lat, month, day, hour)
+        solar_altitude_rad = sun.solar_altitude(latitude_deg, month, day, hour)
         direct_irradiance = (
             1280.0 * np.sin(solar_altitude_rad) / (0.314 + np.sin(solar_altitude_rad))
         )
@@ -64,7 +64,7 @@ class SolarHeating(PowerTerm):
 
     def __init__(
         self,
-        lat: floatArrayLike,
+        latitude_deg: floatArrayLike,
         azimuth: floatArrayLike,
         al: floatArrayLike,
         month: intArrayLike,
@@ -80,7 +80,7 @@ class SolarHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
+            latitude_deg (float | numpy.ndarray): Latitude.
             azimuth (float | numpy.ndarray): Azimuth.
             al (float | numpy.ndarray): Albedo.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
@@ -93,7 +93,7 @@ class SolarHeating(PowerTerm):
         self.solar_absorptivity = alpha
         if srad is None:
             self.solar_irradiance = SolarHeating._solar_radiation(
-                np.deg2rad(lat), np.deg2rad(azimuth), al, month, day, hour
+                np.deg2rad(latitude_deg), np.deg2rad(azimuth), al, month, day, hour
             )
         else:
             self.solar_irradiance = srad

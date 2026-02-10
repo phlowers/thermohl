@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'lat', 'lon', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
+    #     'latitude_deg', 'lon', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
     #     'd', 'outer_diameter_m', 'a', 'A', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
@@ -58,7 +58,7 @@ class Args:
         """Set default values."""
 
         self.Qs = np.nan  # solar irradiance
-        self.lat = 45.0  # latitude (deg)
+        self.latitude_deg = 45.0  # latitude (deg)
         self.lon = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
         self.azimuth = 0.0  # azimuth (deg)

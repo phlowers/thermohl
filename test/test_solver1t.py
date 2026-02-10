@@ -24,7 +24,7 @@ def test_balance():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
+        latitude_deg=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
@@ -60,7 +60,7 @@ def test_consistency():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
+        latitude_deg=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),

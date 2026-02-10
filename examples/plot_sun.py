@@ -94,16 +94,20 @@ def plot_solar_altitude_1(only_positive=False):
     cl = cm.magma(np.linspace(0.0, 1.0, len(hl) + 2))[1:-1]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(lt))
-    for j, lat in enumerate(lt):
+    for j, latitude_deg in enumerate(lt):
         for i, sg in enumerate([-1, +1]):
             for k, h in enumerate(hl):
-                sa = np.rad2deg(sun.solar_altitude(sg * lat, dr.month, dr.day, h))
+                sa = np.rad2deg(
+                    sun.solar_altitude(sg * latitude_deg, dr.month, dr.day, h)
+                )
                 if only_positive:
                     sa = np.where(sa > 0.0, sa, 0.0)
                 sa = sa + np.where(h <= 12, 0, 1)
                 ax[i, j].plot(dr, sa, c=cl[k], label="At %02d:00" % (h,))
             ax[i, j].grid(True)
-            ax[i, j].set_title("At lat = %.1f" % (sg * np.rad2deg(lat),))
+            ax[i, j].set_title(
+                "At latitude_deg = %.1f" % (sg * np.rad2deg(latitude_deg),)
+            )
     for i in range(2):
         ax[i, 0].set_ylabel("Solar altitude (deg)")
     for j in range(len(lt)):
@@ -128,15 +132,17 @@ def plot_solar_altitude_2(only_positive=False):
     cl = cm.Spectral(np.linspace(0.0, 1.0, len(mo) + 2))[1:-1]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(lt))
-    for j, lat in enumerate(lt):
+    for j, latitude_deg in enumerate(lt):
         for i, sg in enumerate([-1, +1]):
             for k, m in enumerate(mo):
-                sa = np.rad2deg(sun.solar_altitude(sg * lat, mo[k], dy[k], hl))
+                sa = np.rad2deg(sun.solar_altitude(sg * latitude_deg, mo[k], dy[k], hl))
                 if only_positive:
                     sa = np.where(sa > 0.0, sa, 0.0)
                 ax[i, j].plot(hl, sa, c=cl[k], label=calendar.month_name[k + 1])
             ax[i, j].grid(True)
-            ax[i, j].set_title("At lat = %.1f" % (sg * np.rad2deg(lat),))
+            ax[i, j].set_title(
+                "At latitude_deg = %.1f" % (sg * np.rad2deg(latitude_deg),)
+            )
     for i in range(2):
         ax[i, 0].set_ylabel("Solar altitude (deg)")
     for j in range(len(lt)):
@@ -164,18 +170,25 @@ def plot_solar_azimuth_1(only_positive=False):
     cl = cm.magma(np.linspace(0.0, 1.0, len(hl) + 2))[1:-1]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(lt))
-    for j, lat in enumerate(lt):
+    for j, latitude_deg in enumerate(lt):
         for i, sg in enumerate([-1, +1]):
             for k, h in enumerate(hl):
-                sa = np.rad2deg(sun.solar_azimuth(sg * lat, dr.month, dr.day, h))
+                sa = np.rad2deg(
+                    sun.solar_azimuth(sg * latitude_deg, dr.month, dr.day, h)
+                )
                 if only_positive:
                     sa = np.where(
-                        sun.solar_altitude(sg * lat, dr.month, dr.day, h) > 0.0, sa, 0.0
+                        sun.solar_altitude(sg * latitude_deg, dr.month, dr.day, h)
+                        > 0.0,
+                        sa,
+                        0.0,
                     )
                 sa = sa + np.where(h <= 12, 0, 1)
                 ax[i, j].plot(dr, sa, c=cl[k], label="At %02d:00" % (h,))
             ax[i, j].grid(True)
-            ax[i, j].set_title("At lat = %.1f" % (sg * np.rad2deg(lat),))
+            ax[i, j].set_title(
+                "At latitude_deg = %.1f" % (sg * np.rad2deg(latitude_deg),)
+            )
     for i in range(2):
         ax[i, 0].set_ylabel("Solar azimuth (deg)")
     for j in range(len(lt)):
@@ -200,17 +213,21 @@ def plot_solar_azimuth_2(only_positive=False):
     cl = cm.Spectral(np.linspace(0.0, 1.0, len(mo) + 2))[1:-1]
 
     fig, ax = plt.subplots(nrows=2, ncols=len(lt))
-    for j, lat in enumerate(lt):
+    for j, latitude_deg in enumerate(lt):
         for i, sg in enumerate([-1, +1]):
             for k, m in enumerate(mo):
-                sa = np.rad2deg(sun.solar_azimuth(sg * lat, mo[k], dy[k], hl))
+                sa = np.rad2deg(sun.solar_azimuth(sg * latitude_deg, mo[k], dy[k], hl))
                 if only_positive:
                     sa = np.where(
-                        sun.solar_altitude(sg * lat, mo[k], dy[k], hl) > 0.0, sa, 0.0
+                        sun.solar_altitude(sg * latitude_deg, mo[k], dy[k], hl) > 0.0,
+                        sa,
+                        0.0,
                     )
                 ax[i, j].plot(hl, sa, c=cl[k], label=calendar.month_name[k + 1])
             ax[i, j].grid(True)
-            ax[i, j].set_title("At lat = %.1f" % (sg * np.rad2deg(lat),))
+            ax[i, j].set_title(
+                "At latitude_deg = %.1f" % (sg * np.rad2deg(latitude_deg),)
+            )
     for i in range(2):
         ax[i, 0].set_ylabel("Solar azimuth (deg)")
     for j in range(len(lt)):

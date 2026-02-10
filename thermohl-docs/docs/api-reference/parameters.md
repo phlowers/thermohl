@@ -23,7 +23,7 @@ units, default values and in which set of power terms they are used.
 
 | Parameter | Default Value | Unit       | Used in CIGRE | Used in IEEE | Used in OLLA | Used in RTE | Comment                                                      |
 |-----------|---------------|------------|---------------|--------------|--------------|-------------|--------------------------------------------------------------|
-| lat       | 45            | degree     | yes           | yes          | yes          | yes         | latitude                                                     |
+| latitude_deg       | 45            | degree     | yes           | yes          | yes          | yes         | latitude                                                     |
 | lon       | 0             | degree     | no            | no           | no           | no          | longitude                                                    |
 | altitude       | 0             | m          | yes           | yes          | yes          | yes         | altitude                                                     |
 | azimuth       | 0             | degree     | yes           | yes          | yes          | yes         | azimuth                                                      |
@@ -66,6 +66,6 @@ power terms, you must have
 $ R_{\text{DC,high}} - R_{\text{DC,low}} = (T_{\text{high}} - T_{\text{low}}) \cdot k_{\ell} \cdot R_{\text{DC},20} $.
 
 If you use direct solar radiation formula (with `srad` key), you can
-ignore the following parameters : `lat`, `lon`, `month`, `day`,
+ignore the following parameters : `latitude_deg`, `lon`, `month`, `day`,
 `hour`, `al` and `tb`.
 
