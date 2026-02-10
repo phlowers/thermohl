@@ -43,7 +43,7 @@ class ConvectiveCoolingBase(PowerTerm):
 
     def _value_forced(
         self,
-        film_temp_c: floatArrayLike,
+        film_temperature_c: floatArrayLike,
         temp_delta_c: floatArrayLike,
         air_density: floatArrayLike,
     ) -> floatArrayLike:
@@ -51,7 +51,7 @@ class ConvectiveCoolingBase(PowerTerm):
         Compute forced convective cooling value.
 
         Args:
-            film_temp_c (float | numpy.ndarray): Film temperature (°C).
+            film_temperature_c (float | numpy.ndarray): Film temperature (°C).
             temp_delta_c (float | numpy.ndarray): Temperature difference (°C).
             air_density (float | numpy.ndarray): Velocity magnitude proxy (relative density or similar, model-dependent).
 
@@ -62,7 +62,7 @@ class ConvectiveCoolingBase(PowerTerm):
             self.wind_speed_ms
             * self.outer_diameter_m
             * air_density
-            / self.dynamic_viscosity(film_temp_c)
+            / self.dynamic_viscosity(film_temperature_c)
         )
         direction_factor = (
             1.194
@@ -73,7 +73,7 @@ class ConvectiveCoolingBase(PowerTerm):
         return (
             direction_factor
             * np.maximum(1.01 + 1.35 * reynolds**0.52, 0.754 * reynolds**0.6)
-            * self.thermal_conductivity(film_temp_c)
+            * self.thermal_conductivity(film_temperature_c)
             * temp_delta_c
         )
 
@@ -110,10 +110,10 @@ class ConvectiveCoolingBase(PowerTerm):
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        film_temp_c = 0.5 * (conductor_temp_c + self.ambient_temp_c)
+        film_temperature_c = 0.5 * (conductor_temp_c + self.ambient_temp_c)
         temp_delta_c = conductor_temp_c - self.ambient_temp_c
-        air_density = self.air_density(film_temp_c, self.altitude_m)
+        air_density = self.air_density(film_temperature_c, self.altitude_m)
         return np.maximum(
-            self._value_forced(film_temp_c, temp_delta_c, air_density),
+            self._value_forced(film_temperature_c, temp_delta_c, air_density),
             self._value_natural(temp_delta_c, air_density),
         )
