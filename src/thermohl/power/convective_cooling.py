@@ -26,7 +26,7 @@ class ConvectiveCoolingBase(PowerTerm):
         outer_diameter_m: floatArrayLike,
         air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         dynamic_viscosity: Callable[[floatArrayLike], floatArrayLike],
-        lambda_: Callable[[floatArrayLike], floatArrayLike],
+        thermal_conductivity: Callable[[floatArrayLike], floatArrayLike],
         **kwargs: Any,
     ):
         self.altitude_m = altitude
@@ -39,7 +39,7 @@ class ConvectiveCoolingBase(PowerTerm):
 
         self.air_density = air_density
         self.dynamic_viscosity = dynamic_viscosity
-        self.thermal_conductivity = lambda_
+        self.thermal_conductivity = thermal_conductivity
 
     def _value_forced(
         self,
