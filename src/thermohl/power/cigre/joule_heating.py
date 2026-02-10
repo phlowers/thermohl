@@ -43,11 +43,11 @@ class JouleHeating(PowerTerm):
         self.dc_resistance_20c = dc_resistance_20c_ohm_m
         self.reference_temperature_c = reference_temperature_c
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -59,7 +59,7 @@ class JouleHeating(PowerTerm):
             * (
                 1.0
                 + self.temp_coeff_linear
-                * (conductor_temp_c - self.reference_temperature_c)
+                * (conductor_temperature_c - self.reference_temperature_c)
             )
             * self.current_a**2
         )

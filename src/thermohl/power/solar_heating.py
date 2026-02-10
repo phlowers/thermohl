@@ -117,11 +117,11 @@ class SolarHeatingBase(PowerTerm):
             self.solar_irradiance = np.maximum(srad, 0.0)
         self.outer_diameter_m = outer_diameter_m
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -131,7 +131,7 @@ class SolarHeatingBase(PowerTerm):
             self.solar_absorptivity
             * self.solar_irradiance
             * self.outer_diameter_m
-            * np.ones_like(conductor_temp_c)
+            * np.ones_like(conductor_temperature_c)
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:

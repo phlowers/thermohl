@@ -162,18 +162,18 @@ class ConvectiveCooling(PowerTerm):
             m2[ia] = 0.188
         return A2 * gr_prandtl**m2
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        film_temperature_c = 0.5 * (conductor_temp_c + self.ambient_temp_c)
-        temp_delta_c = conductor_temp_c - self.ambient_temp_c
+        film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
+        temp_delta_c = conductor_temperature_c - self.ambient_temp_c
         kinematic_viscosity = Air.kinematic_viscosity(film_temperature_c)
         # nu[nu < 1.0E-06] = 1.0E-06
         thermal_conductivity = Air.thermal_conductivity(film_temperature_c)
@@ -185,6 +185,6 @@ class ConvectiveCooling(PowerTerm):
         return (
             np.pi
             * thermal_conductivity
-            * (conductor_temp_c - self.ambient_temp_c)
+            * (conductor_temperature_c - self.ambient_temp_c)
             * np.maximum(nusselt_forced, nusselt_natural)
         )

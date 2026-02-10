@@ -100,18 +100,18 @@ class ConvectiveCoolingBase(PowerTerm):
             * np.abs(temp_delta_c) ** 1.25
         )
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        film_temperature_c = 0.5 * (conductor_temp_c + self.ambient_temp_c)
-        temp_delta_c = conductor_temp_c - self.ambient_temp_c
+        film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
+        temp_delta_c = conductor_temperature_c - self.ambient_temp_c
         air_density = self.air_density(film_temperature_c, self.altitude_m)
         return np.maximum(
             self._value_forced(film_temperature_c, temp_delta_c, air_density),

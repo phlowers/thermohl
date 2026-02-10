@@ -53,22 +53,22 @@ class JouleHeating(PowerTerm):
         self.current_a = transit
         self.temp_coeff_linear = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
 
-    def _rdc(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         return self.dc_resistance_low_c + self.temp_coeff_linear * (
-            conductor_temp_c - self.temp_low_c
+            conductor_temperature_c - self.temp_low_c
         )
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self._rdc(conductor_temp_c) * self.current_a**2
+        return self._rdc(conductor_temperature_c) * self.current_a**2
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
