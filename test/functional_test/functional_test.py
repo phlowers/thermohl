@@ -38,7 +38,7 @@ def scn2dict(d: dict) -> dict:
     dic = cable_data(d["cable"])
 
     dic["latitude_deg"] = d["latitude"]
-    dic["lon"] = d["longitude"]
+    dic["longitude_deg"] = d["longitude"]
     dic["altitude"] = d["altitude"]
     dic["azimuth"] = 90.0
     dic["ambient_temperature_c"] = d["weather_temperature"]
