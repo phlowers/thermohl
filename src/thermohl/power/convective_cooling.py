@@ -44,7 +44,7 @@ class ConvectiveCoolingBase(PowerTerm):
     def _value_forced(
         self,
         film_temperature_c: floatArrayLike,
-        temp_delta_c: floatArrayLike,
+        temperature_delta_c: floatArrayLike,
         air_density: floatArrayLike,
     ) -> floatArrayLike:
         """
@@ -52,7 +52,7 @@ class ConvectiveCoolingBase(PowerTerm):
 
         Args:
             film_temperature_c (float | numpy.ndarray): Film temperature (°C).
-            temp_delta_c (float | numpy.ndarray): Temperature difference (°C).
+            temperature_delta_c (float | numpy.ndarray): Temperature difference (°C).
             air_density (float | numpy.ndarray): Velocity magnitude proxy (relative density or similar, model-dependent).
 
         Returns:
@@ -74,19 +74,19 @@ class ConvectiveCoolingBase(PowerTerm):
             direction_factor
             * np.maximum(1.01 + 1.35 * reynolds**0.52, 0.754 * reynolds**0.6)
             * self.thermal_conductivity(film_temperature_c)
-            * temp_delta_c
+            * temperature_delta_c
         )
 
     def _value_natural(
         self,
-        temp_delta_c: floatArrayLike,
+        temperature_delta_c: floatArrayLike,
         air_density: floatArrayLike,
     ) -> floatArrayLike:
         """
         Compute natural convective cooling value.
 
         Args:
-            temp_delta_c (float | numpy.ndarray): Temperature difference (°C).
+            temperature_delta_c (float | numpy.ndarray): Temperature difference (°C).
             air_density (float | numpy.ndarray): Velocity magnitude (relative density or similar, model-dependent).
 
         Returns:
@@ -96,8 +96,8 @@ class ConvectiveCoolingBase(PowerTerm):
             3.645
             * np.sqrt(air_density)
             * self.outer_diameter_m**0.75
-            * np.sign(temp_delta_c)
-            * np.abs(temp_delta_c) ** 1.25
+            * np.sign(temperature_delta_c)
+            * np.abs(temperature_delta_c) ** 1.25
         )
 
     def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
@@ -111,9 +111,9 @@ class ConvectiveCoolingBase(PowerTerm):
 
         """
         film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
-        temp_delta_c = conductor_temperature_c - self.ambient_temp_c
+        temperature_delta_c = conductor_temperature_c - self.ambient_temp_c
         air_density = self.air_density(film_temperature_c, self.altitude_m)
         return np.maximum(
-            self._value_forced(film_temperature_c, temp_delta_c, air_density),
-            self._value_natural(temp_delta_c, air_density),
+            self._value_forced(film_temperature_c, temperature_delta_c, air_density),
+            self._value_natural(temperature_delta_c, air_density),
         )

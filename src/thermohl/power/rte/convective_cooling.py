@@ -71,12 +71,12 @@ class ConvectiveCooling(ConvectiveCoolingBase):
 
         """
         film_temperature_c = 0.5 * (T + self.ambient_temp_c)
-        temp_delta_c = T - self.ambient_temp_c
+        temperature_delta_c = T - self.ambient_temp_c
         # very slight difference with air.IEEE.volumic_mass() in coefficient before altitude**2
         air_density = (
             1.293 - 1.525e-04 * self.altitude_m + 6.38e-09 * self.altitude_m**2
         ) / (1 + 0.00367 * film_temperature_c)
         return np.maximum(
-            self._value_forced(film_temperature_c, temp_delta_c, air_density),
-            self._value_natural(temp_delta_c, air_density),
+            self._value_forced(film_temperature_c, temperature_delta_c, air_density),
+            self._value_natural(temperature_delta_c, air_density),
         )

@@ -103,18 +103,18 @@ class PrecipitationCooling(PowerTerm):
         relative_humidity,
     ):
         film_temperature_c = 0.5 * (conductor_temperature_c + ambient_temp_c)
-        temp_delta_c = conductor_temperature_c - ambient_temp_c
+        temperature_delta_c = conductor_temperature_c - ambient_temp_c
         air_density = air.IEEE.volumic_mass(film_temperature_c, altitude_m)
         convective_cooling = ieee.ConvectiveCooling._value_forced(
             film_temperature_c,
-            temp_delta_c,
+            temperature_delta_c,
             air_density,
             wind_speed_ms,
             outer_diameter_m,
             wind_angle_deg,
         )
         heat_transfer_coeff = convective_cooling / (
-            np.pi * outer_diameter_m * temp_delta_c
+            np.pi * outer_diameter_m * temperature_delta_c
         )
         mass_ratio = 18.015 / 28.9647
         wetted_perimeter_m = np.pi * outer_diameter_m
@@ -135,7 +135,7 @@ class PrecipitationCooling(PowerTerm):
             / (air_heat_capacity * air_pressure_pa)
         )
         return np.where(
-            temp_delta_c != 0.0,
+            temperature_delta_c != 0.0,
             evaporation_mass_flux,
             np.zeros_like(conductor_temperature_c),
         )
