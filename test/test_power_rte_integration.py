@@ -45,7 +45,7 @@ class ExcelSheet:
             self.args["km"]
             + self.args["ki"]
             * transit
-            / (self.args["outer_area_m2"] - self.args["a"])
+            / (self.args["outer_area_m2"] - self.args["core_area_m2"])
             * 1.0e-06,
             1.0,
         )
@@ -143,7 +143,7 @@ def excel_conductor_data():
             outer_diameter_m=[44.0, 19.6, 31.06, 26.4, 19.6, 32.1],
             core_diameter_m=[21.28, 0.0, 0.0, 12.0, 8.4, 13.25],
             outer_area_m2=[1317, 228, 570, 412, 228, 612],
-            a=[0, 0, 0, 0, 0, 0],
+            core_area_m2=[0, 0, 0, 0, 0, 0],
             B=[1049, 228, 570, 323, 185, 508],
             RDC20=[0.0272, 0.146, 0.0583, 0.089, 0.18, 0.0657],
             kl=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
@@ -154,12 +154,12 @@ def excel_conductor_data():
         )
     )
 
-    df["a"] = df["outer_area_m2"] - df["B"]
+    df["core_area_m2"] = df["outer_area_m2"] - df["B"]
     df.drop(columns=["B"], inplace=True)
     df["outer_diameter_m"] *= 1.0e-03
     df["core_diameter_m"] *= 1.0e-03
     df["outer_area_m2"] *= 1.0e-06
-    df["a"] *= 1.0e-06
+    df["core_area_m2"] *= 1.0e-06
     df["RDC20"] *= 1.0e-03
 
     return df

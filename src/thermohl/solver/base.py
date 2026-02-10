@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'a', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
 
@@ -82,7 +82,7 @@ class Args:
         self.m = 1.5  # mass per unit length (kg.m**-1)
         self.core_diameter_m = 1.9e-02  # core diameter (m)
         self.outer_diameter_m = 3.0e-02  # external (global) diameter (m)
-        self.a = 2.84e-04  # core section (m**2)
+        self.core_area_m2 = 2.84e-04  # core section (m**2)
         self.outer_area_m2 = 7.07e-04  # external (global) section (m**2)
         self.roughness_ratio = 4.0e-02  # roughness (1)
         self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)

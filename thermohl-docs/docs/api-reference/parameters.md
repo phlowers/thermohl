@@ -39,7 +39,7 @@ units, default values and in which set of power terms they are used.
 | m         | 1.5           | kg.m⁻¹     | yes           | yes          | yes          | yes         | mass per unit length (only used in transient mode)           |
 | core_diameter_m         | 1.9E-02       | m          | no            | no           | yes          | yes         | core diameter                                                |
 | outer_diameter_m         | 3.0E-02       | m          | yes           | yes          | yes          | yes         | external (global) diameter                                   |
-| a         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
+| core_area_m2         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
 | A         | 7.07E-04      | m²         | no            | no           | yes          | yes         | external (global) section                                    |
 | roughness_ratio         | 4.0E-02       | N/A        | yes           | no           | no           | no          | roughness                                                    |
 | l         | 1.0           | W.m⁻¹.K⁻¹  | no            | no           | yes          | yes         | radial thermal conductivity (not used in 1t equation)        |

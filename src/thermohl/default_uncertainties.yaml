@@ -108,7 +108,7 @@ outer_diameter_m:
   max: 0.1
   std: 0.008
   relative_std: true
-a:
+core_area_m2:
   dist: 'truncnorm'
   min: 0.
   max: 5.0E-04
