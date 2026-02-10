@@ -121,7 +121,7 @@ class ExcelSheet:
         return (
             17.8
             * outer_diameter_m
-            * self.args["epsilon"]
+            * self.args["emissivity"]
             * (
                 ((273 + Ts) / 100) ** 4
                 - ((273 + self.args["ambient_temperature_c"]) / 100) ** 4
@@ -230,7 +230,7 @@ def scenarios():
             700.0,
         ],
         alpha=0.9,
-        epsilon=0.8,
+        emissivity=0.8,
         tb=0.0,
         month=[3, 3, 3, 3, 3, 3, 3, 6, 6, 6],
         day=[7, 7, 7, 7, 7, 7, 7, 21, 21, 21],

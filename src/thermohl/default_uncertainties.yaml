@@ -144,7 +144,7 @@ alpha:
   max: 0.93
   std: 0.01
   relative_std: false
-epsilon:
+emissivity:
   dist: null
   min: 0.13
   max: 0.83

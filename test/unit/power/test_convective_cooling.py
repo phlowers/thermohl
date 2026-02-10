@@ -16,7 +16,7 @@ def set_default_values_scalar():
     dic = solver.default_values()
     dic["wind_speed_ms"] = 0.61
     dic["wind_angle_deg"] = 0.0
-    dic["epsilon"] = 0.8
+    dic["emissivity"] = 0.8
     dic["alpha"] = 0.8
     dic["ambient_temperature_c"] = 40.0
     dic["THigh"] = 75.0
@@ -39,7 +39,7 @@ def set_default_values_array():
     dic = solver.default_values()
     dic["wind_speed_ms"] = np.array([0.61, 0.83])
     dic["wind_angle_deg"] = np.array([0.0, 42.1])
-    dic["epsilon"] = np.array([0.8, 0.9])
+    dic["emissivity"] = np.array([0.8, 0.9])
     dic["alpha"] = np.array([0.8, 0.9])
     dic["ambient_temperature_c"] = np.array([40.0, 32])
     dic["THigh"] = np.array([75.0, 70.0])

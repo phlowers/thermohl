@@ -22,7 +22,7 @@ class RadiativeCooling(PowerTerm):
         self,
         ambient_temperature_c: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        epsilon: floatArrayLike,
+        emissivity: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -30,12 +30,12 @@ class RadiativeCooling(PowerTerm):
         Args:
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
-            epsilon (float | numpy.ndarray): Emissivity (—).
+            emissivity (float | numpy.ndarray): Emissivity (—).
 
         """
         self.ambient_temp_c = ambient_temperature_c
         self.outer_diameter_m = outer_diameter_m
-        self.emissivity = epsilon
+        self.emissivity = emissivity
 
     def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.

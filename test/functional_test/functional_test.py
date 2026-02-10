@@ -49,7 +49,7 @@ def scn2dict(d: dict) -> dict:
         np.arcsin(np.sin(np.deg2rad(np.abs(dic["azimuth"] - d["wind_angle"]) % 180.0)))
     )
     dic["alpha"] = 0.9
-    dic["epsilon"] = 0.8
+    dic["emissivity"] = 0.8
 
     dt = datetime.datetime.fromisoformat(d["date"])
     dic["month"] = dt.month

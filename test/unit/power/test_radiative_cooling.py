@@ -14,9 +14,9 @@ radiative_cooling_instances = [
     RadiativeCoolingBase(
         ambient_temperature_c=np.array([25.0, 15.2]),
         outer_diameter_m=np.array([1, 1.5]),
-        epsilon=np.array([0.9, 0.8]),
+        emissivity=np.array([0.9, 0.8]),
     ),
-    RadiativeCoolingBase(ambient_temperature_c=25, outer_diameter_m=1, epsilon=0.9),
+    RadiativeCoolingBase(ambient_temperature_c=25, outer_diameter_m=1, emissivity=0.9),
 ]
 
 
@@ -51,7 +51,7 @@ def test_celsius2kelvin_array(radiative_cooling):
 
 def test_celsius2kelvin_with_custom_zerok():
     radiative_cooling = RadiativeCoolingBase(
-        ambient_temperature_c=25, outer_diameter_m=1, epsilon=0.9, zerok=0
+        ambient_temperature_c=25, outer_diameter_m=1, emissivity=0.9, zerok=0
     )
 
     assert radiative_cooling._celsius2kelvin(0) == 0
@@ -141,7 +141,7 @@ def test_derivative_scalar(radiative_cooling):
     ],
 )
 def test_derivative_array(radiative_cooling):
-    # radiative_cooling = RadiativeCoolingBase(ambient_temperature_c=25, outer_diameter_m=1, epsilon=0.9, zerok=0)
+    # radiative_cooling = RadiativeCoolingBase(ambient_temperature_c=25, outer_diameter_m=1, emissivity=0.9, zerok=0)
     conductor_temperature = np.array([100, 200])
 
     expected = (
