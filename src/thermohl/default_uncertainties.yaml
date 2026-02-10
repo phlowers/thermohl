@@ -46,7 +46,7 @@ ambient_temperature_c:
   max: +50.
   std: 2.
   relative_std: false
-Pa:
+ambient_pressure_pa:
   dist: 'truncnorm'
   min: 0.870E+05
   max: 1.050E+05
