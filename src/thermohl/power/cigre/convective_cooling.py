@@ -121,7 +121,7 @@ class ConvectiveCooling(PowerTerm):
     def _nu_natural(
         self,
         film_temperature_c: floatArrayLike,
-        temp_delta_c: floatArrayLike,
+        temperature_delta_c: floatArrayLike,
         kinematic_viscosity: floatArrayLike,
     ) -> floatArrayLike:
         """
@@ -129,7 +129,7 @@ class ConvectiveCooling(PowerTerm):
 
         Args:
             film_temperature_c (float | numpy.ndarray): Film temperature (°C).
-            temp_delta_c (float | numpy.ndarray): Temperature difference (°C).
+            temperature_delta_c (float | numpy.ndarray): Temperature difference (°C).
             kinematic_viscosity (float | numpy.ndarray): Kinematic viscosity (m²·s⁻¹).
 
         Returns:
@@ -143,7 +143,7 @@ class ConvectiveCooling(PowerTerm):
         """
         grashof = (
             self.outer_diameter_m**3
-            * np.abs(temp_delta_c)
+            * np.abs(temperature_delta_c)
             * self.gravity_ms2
             / ((film_temperature_c + 273.15) * kinematic_viscosity**2)
         )
@@ -173,14 +173,14 @@ class ConvectiveCooling(PowerTerm):
 
         """
         film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
-        temp_delta_c = conductor_temperature_c - self.ambient_temp_c
+        temperature_delta_c = conductor_temperature_c - self.ambient_temp_c
         kinematic_viscosity = Air.kinematic_viscosity(film_temperature_c)
         # nu[nu < 1.0E-06] = 1.0E-06
         thermal_conductivity = Air.thermal_conductivity(film_temperature_c)
         # lm[lm < 0.01] = 0.01
         nusselt_forced = self._nu_forced(film_temperature_c, kinematic_viscosity)
         nusselt_natural = self._nu_natural(
-            film_temperature_c, temp_delta_c, kinematic_viscosity
+            film_temperature_c, temperature_delta_c, kinematic_viscosity
         )
         return (
             np.pi

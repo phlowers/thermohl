@@ -73,11 +73,11 @@ class JouleHeating(PowerTerm):
         Returns:
             float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
-        temp_delta_c = conductor_temperature_c - self.reference_temperature_c
+        temperature_delta_c = conductor_temperature_c - self.reference_temperature_c
         return self.dc_resistance_20c * (
             1.0
-            + self.temp_coeff_linear * temp_delta_c
-            + self.temp_coeff_quadratic * temp_delta_c**2
+            + self.temp_coeff_linear * temperature_delta_c
+            + self.temp_coeff_quadratic * temperature_delta_c**2
         )
 
     def _ks(self, dc_resistance: floatArrayLike) -> floatArrayLike:
