@@ -29,7 +29,7 @@ class JouleHeating(PowerTerm):
         temperature_coeff_quadratic: floatArrayLike,
         dc_resistance_20c_ohm_m: floatArrayLike,
         reference_temperature_c: floatArrayLike = 20.0,
-        f: floatArrayLike = 50.0,
+        frequency_hz: floatArrayLike = 50.0,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -48,7 +48,7 @@ class JouleHeating(PowerTerm):
             temperature_coeff_quadratic (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
             dc_resistance_20c_ohm_m (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             reference_temperature_c (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
-            f (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
+            frequency_hz (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
         self.current_a = transit
@@ -61,7 +61,7 @@ class JouleHeating(PowerTerm):
         self.temp_coeff_quadratic = temperature_coeff_quadratic
         self.dc_resistance_20c = dc_resistance_20c_ohm_m
         self.reference_temp_c = reference_temperature_c
-        self.frequency_hz = f
+        self.frequency_hz = frequency_hz
 
     def _rdc(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         """
