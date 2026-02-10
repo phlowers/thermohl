@@ -37,7 +37,8 @@ def test_balance():
         wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wind_angle_deg=np.random.uniform(0.0, 90.0, N),
         transit=np.random.uniform(40.0, 4000.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        core_diameter_m=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter_m"],
     )
 
     for s in _solvers(dic):
@@ -75,7 +76,8 @@ def test_consistency():
         ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
         wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wind_angle_deg=np.random.uniform(0.0, 90.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        core_diameter_m=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter_m"],
     )
 
     for s in _solvers(dic):

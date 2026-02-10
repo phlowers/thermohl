@@ -43,17 +43,23 @@ def plot_skin_effect():
     di = solver.default_values()
 
     plt.figure()
-    for i, d in enumerate(dl):
+    for i, core_diameter_m in enumerate(dl):
         di.update(
             [
                 ("outer_diameter_m", outer_diameter_m),
-                ("d", d),
+                ("core_diameter_m", core_diameter_m),
                 ("RDC20", R),
                 ("f", 50.0),
             ]
         )
         jh = olla.JouleHeating(**di)
-        plt.plot(x, jh._ks(R), "-", c=cl[i], label="with $r_{in}/r_{out}$=%.2f" % (d,))
+        plt.plot(
+            x,
+            jh._ks(R),
+            "-",
+            c=cl[i],
+            label="with $r_{in}/r_{out}$=%.2f" % (core_diameter_m,),
+        )
     plt.grid(True)
     plt.legend()
     plt.ylim([1.00, 1.15])

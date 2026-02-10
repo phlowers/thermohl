@@ -32,7 +32,7 @@ def test_compare_powers():
     dic["tb"] = 0.0
     dic["altitude"] = 0.0
     dic["outer_diameter_m"] = 28.14 * 1.0e-03
-    dic["d"] = 10.4 * 1.0e-03
+    dic["core_diameter_m"] = 10.4 * 1.0e-03
     dic["month"] = 6
     dic["day"] = 10
     dic["hour"] = 11.0
