@@ -27,7 +27,7 @@ class PrecipitationCooling(PowerTerm):
 
     def value(
         self,
-        conductor_temp_c,
+        conductor_temperature_c,
         altitude_m,
         ambient_temp_c,
         wind_speed_ms,
@@ -40,7 +40,7 @@ class PrecipitationCooling(PowerTerm):
     ):
         # maksic = (
         #     PrecipitationCooling._evap(
-        #         conductor_temp_c,
+        #         conductor_temperature_c,
         #         altitude_m,
         #         ambient_temp_c,
         #         wind_speed_ms,
@@ -51,7 +51,7 @@ class PrecipitationCooling(PowerTerm):
         #         rain_rate_ms,
         #     )
         #     + PrecipitationCooling._imp(
-        #         conductor_temp_c,
+        #         conductor_temperature_c,
         #         ambient_temp_c,
         #         wind_speed_ms,
         #         outer_diameter_m,
@@ -59,7 +59,7 @@ class PrecipitationCooling(PowerTerm):
         #     )
         # )
         pytlak = PrecipitationCooling._evap(
-            conductor_temp_c,
+            conductor_temperature_c,
             altitude_m,
             ambient_temp_c,
             wind_speed_ms,
@@ -93,7 +93,7 @@ class PrecipitationCooling(PowerTerm):
 
     @staticmethod
     def _me(
-        conductor_temp_c,
+        conductor_temperature_c,
         altitude_m,
         ambient_temp_c,
         wind_speed_ms,
@@ -102,8 +102,8 @@ class PrecipitationCooling(PowerTerm):
         air_pressure_pa,
         relative_humidity,
     ):
-        film_temperature_c = 0.5 * (conductor_temp_c + ambient_temp_c)
-        temp_delta_c = conductor_temp_c - ambient_temp_c
+        film_temperature_c = 0.5 * (conductor_temperature_c + ambient_temp_c)
+        temp_delta_c = conductor_temperature_c - ambient_temp_c
         air_density = air.IEEE.volumic_mass(film_temperature_c, altitude_m)
         convective_cooling = ieee.ConvectiveCooling._value_forced(
             film_temperature_c,
@@ -122,7 +122,7 @@ class PrecipitationCooling(PowerTerm):
             temp_k=olla.air.kelvin(film_temperature_c)
         )
         vapor_pressure_conductor = thermodynamics.Water.vapor_pressure(
-            temp_k=olla.air.kelvin(conductor_temp_c)
+            temp_k=olla.air.kelvin(conductor_temperature_c)
         )
         vapor_pressure_ambient = thermodynamics.Water.vapor_pressure(
             temp_k=olla.air.kelvin(ambient_temp_c)
@@ -135,12 +135,14 @@ class PrecipitationCooling(PowerTerm):
             / (air_heat_capacity * air_pressure_pa)
         )
         return np.where(
-            temp_delta_c != 0.0, evaporation_mass_flux, np.zeros_like(conductor_temp_c)
+            temp_delta_c != 0.0,
+            evaporation_mass_flux,
+            np.zeros_like(conductor_temperature_c),
         )
 
     @staticmethod
     def _mass_flux(
-        conductor_temp_c,
+        conductor_temperature_c,
         altitude_m,
         ambient_temp_c,
         wind_speed_ms,
@@ -160,7 +162,7 @@ class PrecipitationCooling(PowerTerm):
                 snow_rate_ms,
             ),
             PrecipitationCooling._me(
-                conductor_temp_c,
+                conductor_temperature_c,
                 altitude_m,
                 ambient_temp_c,
                 wind_speed_ms,
@@ -173,7 +175,7 @@ class PrecipitationCooling(PowerTerm):
 
     @staticmethod
     def _evap(
-        conductor_temp_c,
+        conductor_temperature_c,
         altitude_m,
         ambient_temp_c,
         wind_speed_ms,
@@ -185,7 +187,7 @@ class PrecipitationCooling(PowerTerm):
         snow_rate_ms=0.0,
     ):
         mass_flux = PrecipitationCooling._mass_flux(
-            conductor_temp_c,
+            conductor_temperature_c,
             altitude_m,
             ambient_temp_c,
             wind_speed_ms,
@@ -198,11 +200,11 @@ class PrecipitationCooling(PowerTerm):
         )
         latent_heat_vap = thermodynamics.Water.heat_of_vaporization()
         water_heat_capacity = thermodynamics.Water.heat_capacity(
-            temp_k=olla.air.kelvin(conductor_temp_c)
+            temp_k=olla.air.kelvin(conductor_temperature_c)
         )
         boiling_temp_k = thermodynamics.Water.boiling_point(pressure_pa=air_pressure_pa)
         boiling_temp_c = air.celsius(boiling_temp_k)
-        effective_temp_c = np.minimum(conductor_temp_c, boiling_temp_c)
+        effective_temp_c = np.minimum(conductor_temperature_c, boiling_temp_c)
         latent_heat_fusion = thermodynamics.Ice.heat_of_fusion()
         ice_heat_capacity = thermodynamics.Ice.heat_capacity()
         rain_cooling = mass_flux * (
@@ -210,16 +212,16 @@ class PrecipitationCooling(PowerTerm):
         )
         snow_cooling = mass_flux * (
             latent_heat_vap
-            + water_heat_capacity * conductor_temp_c
+            + water_heat_capacity * conductor_temperature_c
             + latent_heat_fusion * ice_heat_capacity * ambient_temp_c
         )
         return np.maximum(
-            rain_cooling + 0.0 * snow_cooling, np.zeros_like(conductor_temp_c)
+            rain_cooling + 0.0 * snow_cooling, np.zeros_like(conductor_temperature_c)
         )
 
     @staticmethod
     def _imp(
-        conductor_temp_c,
+        conductor_temperature_c,
         ambient_temp_c,
         wind_speed_ms,
         outer_diameter_m,
@@ -227,12 +229,12 @@ class PrecipitationCooling(PowerTerm):
         snow_rate_ms=0.0,
     ):
         water_heat_capacity = thermodynamics.Water.heat_capacity(
-            temp_k=olla.air.kelvin(conductor_temp_c)
+            temp_k=olla.air.kelvin(conductor_temperature_c)
         )
         return (
             0.71
             * water_heat_capacity
-            * (conductor_temp_c - ambient_temp_c)
+            * (conductor_temperature_c - ambient_temp_c)
             * PrecipitationCooling._ma(
                 ambient_temp_c,
                 wind_speed_ms,

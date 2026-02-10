@@ -63,17 +63,17 @@ class JouleHeating(PowerTerm):
         self.reference_temperature_c = reference_temperature_c
         self.frequency_hz = frequency_hz
 
-    def _rdc(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         """
         Compute resistance per unit length for direct current.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Temperature at which to compute the resistance (°C).
+            conductor_temperature_c (float | numpy.ndarray): Temperature at which to compute the resistance (°C).
 
         Returns:
             float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
-        temp_delta_c = conductor_temp_c - self.reference_temperature_c
+        temp_delta_c = conductor_temperature_c - self.reference_temperature_c
         return self.dc_resistance_20c * (
             1.0
             + self.temp_coeff_linear * temp_delta_c
@@ -154,17 +154,17 @@ class JouleHeating(PowerTerm):
             magnetic_coeff = magnetic_coeff[0]
         return magnetic_coeff
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        dc_resistance = self._rdc(conductor_temp_c)
+        dc_resistance = self._rdc(conductor_temperature_c)
         skin_effect_coeff = self._ks(dc_resistance)
         ac_resistance = self.magnetic_coeff * skin_effect_coeff * dc_resistance
         return ac_resistance * self.current_a**2

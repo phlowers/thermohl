@@ -21,28 +21,28 @@ class PowerTerm(ABC):
     def __init__(self, **kwargs: Any):
         pass
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute power term value in function of temperature.
 
         Usually this function should be overridden in children classes; if it is
         not the case it will just return zero.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
         return (
-            np.zeros_like(conductor_temp_c)
-            if not np.isscalar(conductor_temp_c)
+            np.zeros_like(conductor_temperature_c)
+            if not np.isscalar(conductor_temperature_c)
             else 0.0
         )
 
     def derivative(
         self,
-        conductor_temp_c: floatArrayLike,
+        conductor_temperature_c: floatArrayLike,
         temp_increment: float = _TEMP_INCREMENT,
     ) -> floatArrayLike:
         r"""Compute power term derivative regarding temperature in function of temperature.
@@ -52,7 +52,7 @@ class PowerTerm(ABC):
         a second-order approximation.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
             temp_increment (float, optional): Temperature increment. The default is 1.0E-03.
 
         Returns:
@@ -60,6 +60,6 @@ class PowerTerm(ABC):
 
         """
         return (
-            self.value(conductor_temp_c + temp_increment)
-            - self.value(conductor_temp_c - temp_increment)
+            self.value(conductor_temperature_c + temp_increment)
+            - self.value(conductor_temperature_c - temp_increment)
         ) / (2.0 * temp_increment)

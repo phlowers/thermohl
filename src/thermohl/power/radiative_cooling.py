@@ -46,11 +46,11 @@ class RadiativeCoolingBase(PowerTerm):
         self.emissivity = epsilon
         self.stefan_boltzmann = sigma
 
-    def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Args:
-            conductor_temp_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -61,7 +61,10 @@ class RadiativeCoolingBase(PowerTerm):
             * self.stefan_boltzmann
             * self.emissivity
             * self.outer_diameter_m
-            * (self._celsius2kelvin(conductor_temp_c) ** 4 - self.ambient_temp_k**4)
+            * (
+                self._celsius2kelvin(conductor_temperature_c) ** 4
+                - self.ambient_temp_k**4
+            )
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
