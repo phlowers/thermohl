@@ -38,7 +38,7 @@ if __name__ == "__main__":
         month=3,
         day=21,
         hour=0,
-        Ta=np.array([0.0, 15.0, 30.0]),
+        ambient_temperature_c=np.array([0.0, 15.0, 30.0]),
         ws=2.0,
         wa=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
         transit=np.nan,
@@ -66,10 +66,10 @@ if __name__ == "__main__":
     for i, key in enumerate(slv):
         elm = slv[key]
         elm.dc["transit"] = transit[:, 1]
-        elm.dc["Ta"] = elm.dc["Ta"][1]
+        elm.dc["ambient_temperature_c"] = elm.dc["ambient_temperature_c"][1]
         df = elm.steady_temperature()
         elm.dc["transit"] = np.nan
-        elm.dc["Ta"] = dct["Ta"]
+        elm.dc["ambient_temperature_c"] = dct["ambient_temperature_c"]
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
         T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)

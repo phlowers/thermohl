@@ -40,7 +40,7 @@ hour:
   max: 24.
   std: 0.25
   relative_std: false
-Ta:
+ambient_temperature_c:
   dist: 'truncnorm'
   min: -40.
   max: +50.

@@ -60,7 +60,7 @@ def test_power_1d():
         d = s.args.__dict__.copy()
         d["transit"] = np.linspace(0.0, +999.0, n)
         d["alpha"] = np.linspace(0.5, 0.9, n)
-        d["Ta"] = np.linspace(-10.0, +50.0, n)
+        d["ambient_temperature_c"] = np.linspace(-10.0, +50.0, n)
         for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
             p.__init__(**d)
             v = p.value(0.0)
@@ -82,7 +82,7 @@ def test_steady_default():
 def test_steady_1d():
     n = 61
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
@@ -94,7 +94,7 @@ def test_steady_1d():
 def test_steady_1d_mix():
     n = 61
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
         s.args.transit = np.array([199.0])
         s.update()
         t = s.steady_temperature()
@@ -126,7 +126,7 @@ def test_transient_0():
 def test_transient_1():
     n = 7
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
         s.update()
 
         t = np.linspace(0, 3600, 361)

@@ -16,7 +16,7 @@ def solver():
     args = {
         "max_len": lambda: 1,
         "transit": np.array([0]),
-        "Ta": np.array([25]),
+        "ambient_temperature_c": np.array([25]),
         "ws": np.array([0]),
         "wa": np.array([0]),
         "Pa": np.array([101325]),

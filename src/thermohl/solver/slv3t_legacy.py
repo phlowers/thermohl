@@ -154,7 +154,7 @@ class Solver3TL(Solver3T):
             raise ValueError()
 
         # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Ts0 = Ts0 if Ts0 is not None else self.args.ambient_temperature_c
         Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
 
         # shortcuts for time-loop
@@ -162,23 +162,27 @@ class Solver3TL(Solver3T):
 
         # init
         ts = np.zeros((N, n))
-        ta = np.zeros((N, n))
+        ambient_temperature_c = np.zeros((N, n))
         tc = np.zeros((N, n))
         dT = np.zeros((N, n))
 
         ts[0, :] = Ts0
         tc[0, :] = Tc0
-        ta[0, :] = self.average(ts[0, :], tc[0, :])
+        ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]
 
         for i in range(1, len(time)):
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
             dti = time[i] - time[i - 1]
-            ta[i, :] = ta[i - 1, :] + dti * imc * bal
-            dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
-                dti / tau * self.mgc[0] * self.jh.value(ta[i, :])
+            ambient_temperature_c[i, :] = (
+                ambient_temperature_c[i - 1, :] + dti * imc * bal
             )
-            tc[i, :] = ta[i, :] + 0.5 * dT[i, :]
-            ts[i, :] = ta[i, :] - 0.5 * dT[i, :]
+            dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
+                dti / tau * self.mgc[0] * self.jh.value(ambient_temperature_c[i, :])
+            )
+            tc[i, :] = ambient_temperature_c[i, :] + 0.5 * dT[i, :]
+            ts[i, :] = ambient_temperature_c[i, :] - 0.5 * dT[i, :]
 
-        return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
+        return self._transient_temperature_results(
+            time, ts, ambient_temperature_c, tc, return_power, n
+        )

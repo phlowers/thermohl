@@ -122,10 +122,12 @@ class Solver3T(Solver_):
         Returns:
             float | numpy.ndarray: Array of average temperatures.
         """
-        ta = 0.5 * (ts + tc)
+        ambient_temperature_c = 0.5 * (ts + tc)
         _, D, d, ix = self.mgc
-        ta[ix] = _profile_bim_avg(ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix])
-        return ta
+        ambient_temperature_c[ix] = _profile_bim_avg(
+            ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix]
+        )
+        return ambient_temperature_c
 
     def joule(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -142,8 +144,8 @@ class Solver3T(Solver_):
         - The function computes the average temperature `temperature`.
         - Returns the Joule heating values based on the adjusted temperatures.
         """
-        ta = self.average(ts, tc)
-        return self.jh.value(ta)
+        ambient_temperature_c = self.average(ts, tc)
+        return self.jh.value(ambient_temperature_c)
 
     def balance(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -208,8 +210,8 @@ class Solver3T(Solver_):
 
         # if no guess provided, use ambient temp
         shape = (self.args.max_len(),)
-        Tsg = Tsg if Tsg is not None else 1.0 * self.args.Ta
-        Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.Ta)
+        Tsg = Tsg if Tsg is not None else 1.0 * self.args.ambient_temperature_c
+        Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.ambient_temperature_c)
         Tsg_ = Tsg * np.ones(shape)
         Tcg_ = Tcg * np.ones(shape)
 
@@ -254,11 +256,13 @@ class Solver3T(Solver_):
         c2[ix] = a / b
         return c1, c2
 
-    def _transient_temperature_results(self, time, ts, ta, tc, return_power, n):
+    def _transient_temperature_results(
+        self, time, ts, ambient_temperature_c, tc, return_power, n
+    ):
         dr = {
             Solver_.Names.time: time,
             Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
+            Solver_.Names.tavg: ambient_temperature_c,
             Solver_.Names.tcore: tc,
         }
 
@@ -308,7 +312,7 @@ class Solver3T(Solver_):
             raise ValueError()
 
         # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.Ta
+        Ts0 = Ts0 if Ts0 is not None else self.args.ambient_temperature_c
         Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
 
         # get month, day and hours
@@ -324,7 +328,7 @@ class Solver3T(Solver_):
             day=day,
             hour=hour,
             transit=reshape(self.args.transit, N, n),
-            Ta=reshape(self.args.Ta, N, n),
+            ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
             wa=reshape(self.args.wa, N, n),
             ws=reshape(self.args.ws, N, n),
             Pa=reshape(self.args.Pa, N, n),
@@ -339,11 +343,11 @@ class Solver3T(Solver_):
 
         # init
         ts = np.zeros((N, n))
-        ta = np.zeros((N, n))
+        ambient_temperature_c = np.zeros((N, n))
         tc = np.zeros((N, n))
         ts[0, :] = Ts0
         tc[0, :] = Tc0
-        ta[0, :] = self.average(ts[0, :], tc[0, :])
+        ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
 
         # main time loop
         for i in range(1, len(time)):
@@ -351,12 +355,16 @@ class Solver3T(Solver_):
                 self.args[k] = de[k][i, :]
             self.update()
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            ta[i, :] = ta[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
-            mrg = c1 * (self.jh.value(ta[i, :]) - bal)
-            tc[i, :] = ta[i, :] + c2 * mrg
+            ambient_temperature_c[i, :] = (
+                ambient_temperature_c[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
+            )
+            mrg = c1 * (self.jh.value(ambient_temperature_c[i, :]) - bal)
+            tc[i, :] = ambient_temperature_c[i, :] + c2 * mrg
             ts[i, :] = tc[i, :] - mrg
 
-        return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
+        return self._transient_temperature_results(
+            time, ts, ambient_temperature_c, tc, return_power, n
+        )
 
     @staticmethod
     def _check_target(target, d, max_len):
@@ -517,15 +525,15 @@ class Solver3T(Solver_):
 
         if return_temp or return_power:
             ts, tc = newtheader(x, y)
-            ta = self.average(ts, tc)
+            ambient_temperature_c = self.average(ts, tc)
 
             if return_temp:
                 df[Solver_.Names.tsurf] = ts
-                df[Solver_.Names.tavg] = ta
+                df[Solver_.Names.tavg] = ambient_temperature_c
                 df[Solver_.Names.tcore] = tc
 
             if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ta)
+                df[Solver_.Names.pjle] = self.jh.value(ambient_temperature_c)
                 df[Solver_.Names.psol] = self.sh.value(ts)
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)

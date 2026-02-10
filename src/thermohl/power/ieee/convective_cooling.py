@@ -20,7 +20,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         self,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
-        Ta: floatArrayLike,
+        ambient_temperature_c: floatArrayLike,
         ws: floatArrayLike,
         wa: floatArrayLike,
         D: floatArrayLike,
@@ -33,7 +33,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         Args:
             altitude (float | numpy.ndarray): Altitude (m).
             azimuth (float | numpy.ndarray): Azimuth (deg).
-            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
             wa (float | numpy.ndarray): Wind angle regarding north (deg).
             D (float | numpy.ndarray): External diameter (m).
@@ -42,7 +42,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         super().__init__(
             altitude,
             azimuth,
-            Ta,
+            ambient_temperature_c,
             ws,
             wa,
             D,

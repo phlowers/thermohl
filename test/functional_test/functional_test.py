@@ -41,7 +41,7 @@ def scn2dict(d: dict) -> dict:
     dic["lon"] = d["longitude"]
     dic["altitude"] = d["altitude"]
     dic["azimuth"] = 90.0
-    dic["Ta"] = d["weather_temperature"]
+    dic["ambient_temperature_c"] = d["weather_temperature"]
     dic["ws"] = d["wind_speed"]
     # in scenario file, wind angles are given regarding span, where in thermohl
     # they are supposed to be regarding north, hence this conversion formula

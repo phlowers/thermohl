@@ -105,7 +105,7 @@ def plot_convective_cooling(dic):
     ws = np.linspace(0, 1, 5)
     wa = dic["azimuth"] - np.array([0, 45, 90])
     Tc = np.linspace(0.0, 80.0, 41)
-    Ta = np.linspace(-10, 40, 6)
+    ambient_temperatures = np.linspace(-10, 40, 6)
 
     # olla not tested here since olla's convective cooling is the same as ieee's one
     mdl = [
@@ -118,17 +118,25 @@ def plot_convective_cooling(dic):
     fig, ax = plt.subplots(nrows=len(ws), ncols=len(wa))
     for i, u in enumerate(ws):
         for j, a in enumerate(wa):
-            for m, ta in enumerate(Ta):
-                dic.update([("ws", u), ("wa", a), ("Ta", ta)])
+            for m, ambient_temperature_c in enumerate(ambient_temperatures):
+                dic.update(
+                    [
+                        ("ws", u),
+                        ("wa", a),
+                        ("ambient_temperature_c", ambient_temperature_c),
+                    ]
+                )
                 for k, d in enumerate(mdl):
                     d["model"].__init__(**dic)
-                    c = d["cm"](np.linspace(0.0, 1.0, len(Ta) + 2))[1:-1]
+                    c = d["cm"](np.linspace(0.0, 1.0, len(ambient_temperatures) + 2))[
+                        1:-1
+                    ]
                     ax[i, j].plot(
                         Tc,
                         d["model"].value(Tc),
                         "-",
                         c=c[m],
-                        label="T$_a$=%.0f C" % (ta,),
+                        label="T$_a$=%.0f C" % (ambient_temperature_c,),
                     )
                 ax[i, j].set_title("At u=%.1f and $\phi$=%.0f" % (u, a))
                 ax[i, j].grid(True)
@@ -146,8 +154,8 @@ def plot_convective_cooling(dic):
 
 def plot_radiative_cooling(dic):
     Tc = np.linspace(0.0, 80.0, 41)
-    Ta = np.linspace(-20, 50, 8)
-    cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(Ta) + 2)[1:-1])
+    ambient_temperatures = np.linspace(-20, 50, 8)
+    cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(ambient_temperatures) + 2)[1:-1])
 
     # rte is not displayed since it is the same as ieee
 
@@ -156,12 +164,17 @@ def plot_radiative_cooling(dic):
     plt.plot(np.nan, np.nan, ls="--", c="gray", label="ieee")
     plt.plot(np.nan, np.nan, ls=":", c="gray", label="olla")
 
-    for i, ta in enumerate(Ta):
-        dic["Ta"] = ta
+    for i, ambient_temperature_c in enumerate(ambient_temperatures):
+        dic["ambient_temperature_c"] = ambient_temperature_c
 
         rc = cigre.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ls="-", c=cl[i], label="T$_a$=%.0f C" % (ta,))
-
+        plt.plot(
+            Tc,
+            rc.value(Tc),
+            ls="-",
+            c=cl[i],
+            label="T$_a$=%.0f C" % (ambient_temperature_c,),
+        )
         rc = ieee.RadiativeCooling(**dic)
         plt.plot(Tc, rc.value(Tc), ls="--", c=cl[i])
 

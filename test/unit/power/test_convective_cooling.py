@@ -18,7 +18,7 @@ def set_default_values_scalar():
     dic["wa"] = 0.0
     dic["epsilon"] = 0.8
     dic["alpha"] = 0.8
-    dic["Ta"] = 40.0
+    dic["ambient_temperature_c"] = 40.0
     dic["THigh"] = 75.0
     dic["TLow"] = 25.0
     dic["RDCHigh"] = 8.688e-05
@@ -41,7 +41,7 @@ def set_default_values_array():
     dic["wa"] = np.array([0.0, 42.1])
     dic["epsilon"] = np.array([0.8, 0.9])
     dic["alpha"] = np.array([0.8, 0.9])
-    dic["Ta"] = np.array([40.0, 32])
+    dic["ambient_temperature_c"] = np.array([40.0, 32])
     dic["THigh"] = np.array([75.0, 70.0])
     dic["TLow"] = np.array([25.0, 20])
     dic["RDCHigh"] = np.array([8.688e-05, 8.688e-05])
