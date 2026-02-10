@@ -58,7 +58,7 @@ class SolarHeating(SolarHeatingBase):
         day: intArrayLike,
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        alpha: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
         Qs: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
@@ -73,10 +73,10 @@ class SolarHeating(SolarHeatingBase):
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter_m (float | numpy.ndarray): external diameter.
-            alpha (numpy.ndarray): Solar absorption coefficient.
+            solar_absorptivity (numpy.ndarray): Solar absorption coefficient.
             Qs (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
-        self.solar_absorptivity = alpha
+        self.solar_absorptivity = solar_absorptivity
         if np.isnan(Qs).all():
             Qs = solar_irradiance(np.deg2rad(latitude_deg), month, day, hour)
         solar_altitude_rad = sun.solar_altitude(

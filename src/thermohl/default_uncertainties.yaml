@@ -138,7 +138,7 @@ c:
   max: 1000.
   std: 0.
   relative_std: false
-alpha:
+solar_absorptivity:
   dist: 'truncnorm'
   min: 0.23
   max: 0.93

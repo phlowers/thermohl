@@ -21,7 +21,7 @@ def test_compare_powers():
     dic["wind_speed_ms"] = 0.61
     dic["wind_angle_deg"] = 0.0
     dic["emissivity"] = 0.8
-    dic["alpha"] = 0.8
+    dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature_c"] = 40.0
     dic["THigh"] = 75.0
     dic["TLow"] = 25.0

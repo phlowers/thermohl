@@ -19,7 +19,7 @@ conv_cool_instances = [
         wind_speed_ms=np.array([10.0]),
         wind_angle_deg=np.array([11.0]),
         outer_diameter_m=np.array([0.01]),
-        alpha=np.array([0.5]),
+        solar_absorptivity=np.array([0.5]),
     ),
     ConvectiveCooling(
         altitude=100.0,
@@ -28,7 +28,7 @@ conv_cool_instances = [
         wind_speed_ms=10.0,
         wind_angle_deg=11.0,
         outer_diameter_m=0.01,
-        alpha=0.5,
+        solar_absorptivity=0.5,
     ),
 ]
 
