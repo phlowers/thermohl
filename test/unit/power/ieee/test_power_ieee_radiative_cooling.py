@@ -15,7 +15,7 @@ from thermohl import solver
 def set_default_values_scalar():
     dic = solver.default_values()
     dic["ambient_temperature_c"] = 40.0
-    dic["D"] = 28.14 * 1.0e-03
+    dic["outer_diameter_m"] = 28.14 * 1.0e-03
     dic["epsilon"] = 0.8
     return dic
 
@@ -23,7 +23,7 @@ def set_default_values_scalar():
 def set_default_values_array():
     dic = solver.default_values()
     dic["ambient_temperature_c"] = np.array([25.0, 40.0])
-    dic["D"] = np.array([24.83 * 1.0e-03, 28.14 * 1.0e-03])
+    dic["outer_diameter_m"] = np.array([24.83 * 1.0e-03, 28.14 * 1.0e-03])
     dic["epsilon"] = np.array([0.9, 0.8])
     return dic
 

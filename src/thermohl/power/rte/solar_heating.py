@@ -57,7 +57,7 @@ class SolarHeating(SolarHeatingBase):
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        D: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
         alpha: floatArrayLike,
         Qs: Optional[floatArrayLike] = None,
         **kwargs: Any,
@@ -72,7 +72,7 @@ class SolarHeating(SolarHeatingBase):
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            D (float | numpy.ndarray): external diameter.
+            outer_diameter_m (float | numpy.ndarray): external diameter.
             alpha (numpy.ndarray): Solar absorption coefficient.
             Qs (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
@@ -86,4 +86,4 @@ class SolarHeating(SolarHeatingBase):
         )
         irradiance = Qs * np.sin(incidence_angle_rad)
         self.solar_irradiance = np.maximum(irradiance, 0.0)
-        self.outer_diameter_m = D
+        self.outer_diameter_m = outer_diameter_m

@@ -23,16 +23,22 @@ class ExcelSheet:
         if transit is None:
             transit = self.args["transit"]
         d = self.args["d"]
-        D = self.args["D"]
+        outer_diameter_m = self.args["outer_diameter_m"]
         Rdc = self.args["RDC20"] * (
             1.0
             + self.args["kl"] * (ambient_temperature_c - 20.0)
             + self.args["kq"] * (ambient_temperature_c - 20.0) ** 2
         )
-        z = 8 * np.pi * 50.0 * (D - d) ** 2 / ((D**2 - d**2) * 1.0e07 * Rdc)
+        z = (
+            8
+            * np.pi
+            * 50.0
+            * (outer_diameter_m - d) ** 2
+            / ((outer_diameter_m**2 - d**2) * 1.0e07 * Rdc)
+        )
         a = 7 * z**2 / (315 + 3 * z**2)
         b = 56 / (211 + z**2)
-        beta = 1.0 - d / D
+        beta = 1.0 - d / outer_diameter_m
         kep = 1 + a * (1.0 - 0.5 * beta - b * beta**2)
         kem = np.where(
             (d > 0.0) & (self.args["nbc"] == 3),
@@ -68,10 +74,10 @@ class ExcelSheet:
         O7 = np.pi / 2
         O2 = np.arccos(np.cos(np.deg2rad(Q6)) * np.cos(Q8 - O7))
         q *= np.sin(O2)
-        return q * self.args["D"] * self.args["alpha"]
+        return q * self.args["outer_diameter_m"] * self.args["alpha"]
 
     def convective_cooling(self, Ts):
-        D = self.args["D"]
+        outer_diameter_m = self.args["outer_diameter_m"]
         Tf = 0.5 * (Ts + self.args["ambient_temperature_c"])
         lm = 0.02424 + 0.00007477 * Tf - 0.000000004407 * Tf**2
         rho = (
@@ -80,7 +86,7 @@ class ExcelSheet:
             + 0.00000000638 * self.args["altitude"] ** 2
         ) / (1 + 0.00367 * Tf)
         mu = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
-        Re = self.args["wind_speed_ms"] * self.args["D"] * rho / mu
+        Re = self.args["wind_speed_ms"] * self.args["outer_diameter_m"] * rho / mu
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
         wind_angle_deg = np.deg2rad(self.args["wind_angle_deg"])
         K = (
@@ -92,7 +98,7 @@ class ExcelSheet:
         PCn = (
             3.645
             * rho**0.5
-            * D**0.75
+            * outer_diameter_m**0.75
             * np.sign(Ts - self.args["ambient_temperature_c"])
             * np.abs(Ts - self.args["ambient_temperature_c"]) ** 1.25
         )
@@ -102,10 +108,10 @@ class ExcelSheet:
         return np.maximum(PCn, PCf)
 
     def radiative_cooling(self, Ts):
-        D = self.args["D"]
+        outer_diameter_m = self.args["outer_diameter_m"]
         return (
             17.8
-            * D
+            * outer_diameter_m
             * self.args["epsilon"]
             * (
                 ((273 + Ts) / 100) ** 4
@@ -126,7 +132,7 @@ def excel_conductor_data():
                 "Pastel228",
                 "Petunia612",
             ],
-            D=[44.0, 19.6, 31.06, 26.4, 19.6, 32.1],
+            outer_diameter_m=[44.0, 19.6, 31.06, 26.4, 19.6, 32.1],
             d=[21.28, 0.0, 0.0, 12.0, 8.4, 13.25],
             A=[1317, 228, 570, 412, 228, 612],
             a=[0, 0, 0, 0, 0, 0],
@@ -142,7 +148,7 @@ def excel_conductor_data():
 
     df["a"] = df["A"] - df["B"]
     df.drop(columns=["B"], inplace=True)
-    df["D"] *= 1.0e-03
+    df["outer_diameter_m"] *= 1.0e-03
     df["d"] *= 1.0e-03
     df["A"] *= 1.0e-06
     df["a"] *= 1.0e-06
@@ -264,10 +270,12 @@ def test_solar_heating():
     month = np.array([7, 3, 3, 3, 3])
     day = np.array([19, 7, 14, 7, 7])
     hour = np.array([14.0, 12.0, 17.0, 12.0, 12.0])
-    D = 4.4e-02 * ones
+    outer_diameter_m = 4.4e-02 * ones
     alpha = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
-    s = rte.SolarHeating(lat, azimuth, month, day, hour, D, alpha, Qs=np.nan)
+    s = rte.SolarHeating(
+        lat, azimuth, month, day, hour, outer_diameter_m, alpha, Qs=np.nan
+    )
 
     assert np.allclose(p, s.value(ones), 0.1)

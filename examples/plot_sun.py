@@ -59,7 +59,9 @@ def plot_solar_declination():
     """Plot solar declination over time (one year)."""
 
     dr = pd.date_range(
-        datetime.datetime(2000, 12, 15), datetime.datetime(2002, 1, 15), freq="D"
+        datetime.datetime(2000, 12, 15),
+        datetime.datetime(2002, 1, 15),
+        freq="outer_diameter_m",
     )
 
     plt.figure()
@@ -84,7 +86,9 @@ def plot_solar_altitude_1(only_positive=False):
     """
     lt = np.linspace(0, 0.5 * np.pi, 7)[:-1]
     dr = pd.date_range(
-        datetime.datetime(2001, 1, 1), datetime.datetime(2001, 12, 31), freq="D"
+        datetime.datetime(2001, 1, 1),
+        datetime.datetime(2001, 12, 31),
+        freq="outer_diameter_m",
     )
     hl = np.linspace(0, 24, 13)[:-1]
     cl = cm.magma(np.linspace(0.0, 1.0, len(hl) + 2))[1:-1]
@@ -152,7 +156,9 @@ def plot_solar_azimuth_1(only_positive=False):
     """
     lt = np.linspace(0, 0.5 * np.pi, 7)[:-1]
     dr = pd.date_range(
-        datetime.datetime(2001, 1, 1), datetime.datetime(2001, 12, 31), freq="D"
+        datetime.datetime(2001, 1, 1),
+        datetime.datetime(2001, 12, 31),
+        freq="outer_diameter_m",
     )
     hl = np.linspace(0, 24, 13)[:-1]
     cl = cm.magma(np.linspace(0.0, 1.0, len(hl) + 2))[1:-1]

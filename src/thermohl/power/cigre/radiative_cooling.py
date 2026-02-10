@@ -15,7 +15,7 @@ class RadiativeCooling(RadiativeCoolingBase):
     def __init__(
         self,
         ambient_temperature_c: floatArrayLike,
-        D: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
         epsilon: floatArrayLike,
         sigma: float = 5.67e-08,
         **kwargs: Any,
@@ -24,13 +24,13 @@ class RadiativeCooling(RadiativeCoolingBase):
 
         Args:
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            D (float | numpy.ndarray): External diameter (m).
+            outer_diameter_m (float | numpy.ndarray): External diameter (m).
             epsilon (float | numpy.ndarray): Emissivity (—).
             sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
         """
         super().__init__(
             ambient_temperature_c=ambient_temperature_c,
-            D=D,
+            outer_diameter_m=outer_diameter_m,
             epsilon=epsilon,
             sigma=sigma,
             zerok=273.0,

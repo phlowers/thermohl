@@ -38,7 +38,7 @@ units, default values and in which set of power terms they are used.
 | transit   | 100           | A          | yes           | yes          | yes          | yes         | transit intensity                                            |
 | m         | 1.5           | kg.m⁻¹     | yes           | yes          | yes          | yes         | mass per unit length (only used in transient mode)           |
 | d         | 1.9E-02       | m          | no            | no           | yes          | yes         | core diameter                                                |
-| D         | 3.0E-02       | m          | yes           | yes          | yes          | yes         | external (global) diameter                                   |
+| outer_diameter_m         | 3.0E-02       | m          | yes           | yes          | yes          | yes         | external (global) diameter                                   |
 | a         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
 | A         | 7.07E-04      | m²         | no            | no           | yes          | yes         | external (global) section                                    |
 | R         | 4.0E-02       | N/A        | yes           | no           | no           | no          | roughness                                                    |

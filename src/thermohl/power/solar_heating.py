@@ -96,7 +96,7 @@ class SolarHeatingBase(PowerTerm):
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        D: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
         alpha: floatArrayLike,
         est: _SRad,
         srad: Optional[floatArrayLike] = None,
@@ -115,7 +115,7 @@ class SolarHeatingBase(PowerTerm):
             )
         else:
             self.solar_irradiance = np.maximum(srad, 0.0)
-        self.outer_diameter_m = D
+        self.outer_diameter_m = outer_diameter_m
 
     def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
