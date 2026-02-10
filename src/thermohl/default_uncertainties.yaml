@@ -158,7 +158,7 @@ magnetic_coeff:
   dist: null
 magnetic_coeff_per_a:
   dist: null
-kl:
+temperature_coeff_linear:
   dist: null
 kq:
   dist: null

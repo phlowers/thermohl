@@ -25,7 +25,7 @@ class JouleHeating(PowerTerm):
         core_area_m2: floatArrayLike,
         magnetic_coeff: floatArrayLike,
         magnetic_coeff_per_a: floatArrayLike,
-        kl: floatArrayLike,
+        temperature_coeff_linear: floatArrayLike,
         kq: floatArrayLike,
         RDC20: floatArrayLike,
         T20: floatArrayLike = 20.0,
@@ -44,7 +44,7 @@ class JouleHeating(PowerTerm):
             core_area_m2 (float | numpy.ndarray): Core cross-sectional area (m²).
             magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
             magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
-            kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
+            temperature_coeff_linear (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             kq (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
             RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
@@ -57,7 +57,7 @@ class JouleHeating(PowerTerm):
         self.magnetic_coeff = self._kem(
             outer_area_m2, core_area_m2, magnetic_coeff, magnetic_coeff_per_a
         )
-        self.temp_coeff_linear = kl
+        self.temp_coeff_linear = temperature_coeff_linear
         self.temp_coeff_quadratic = kq
         self.dc_resistance_20c = RDC20
         self.reference_temp_c = T20

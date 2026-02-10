@@ -26,7 +26,7 @@ class ExcelSheet:
         outer_diameter_m = self.args["outer_diameter_m"]
         Rdc = self.args["RDC20"] * (
             1.0
-            + self.args["kl"] * (ambient_temperature_c - 20.0)
+            + self.args["temperature_coeff_linear"] * (ambient_temperature_c - 20.0)
             + self.args["kq"] * (ambient_temperature_c - 20.0) ** 2
         )
         z = (
@@ -146,7 +146,7 @@ def excel_conductor_data():
             core_area_m2=[0, 0, 0, 0, 0, 0],
             B=[1049, 228, 570, 323, 185, 508],
             RDC20=[0.0272, 0.146, 0.0583, 0.089, 0.18, 0.0657],
-            kl=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
+            temperature_coeff_linear=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
             magnetic_coeff=[1.006, 1.0, 1.0, 1.0, 1.0, 1.006],
             magnetic_coeff_per_a=[0.016, 0.0, 0.0, 0.0, 0.0, 0.016],
             kq=[8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07],
