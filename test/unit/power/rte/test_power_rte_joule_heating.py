@@ -15,7 +15,7 @@ joule_heating_instances = [
         transit=np.array([10.0]),
         outer_diameter_m=np.array([0.01]),
         core_diameter_m=np.array([0.005]),
-        A=np.array([0.0001]),
+        outer_area_m2=np.array([0.0001]),
         a=np.array([0.00005]),
         km=np.array([1.0]),
         ki=np.array([0.1]),
@@ -29,7 +29,7 @@ joule_heating_instances = [
         transit=10.0,
         outer_diameter_m=0.01,
         core_diameter_m=0.005,
-        A=0.0001,
+        outer_area_m2=0.0001,
         a=0.00005,
         km=1.0,
         ki=0.1,
@@ -78,13 +78,13 @@ def test_ks(joule_heating):
     ids=["JouleHeating with arrays", "JouleHeating with scalars"],
 )
 def test_kem(joule_heating):
-    A = np.array([0.0001])
+    outer_area_m2 = np.array([0.0001])
     a = np.array([0.00005])
     km = np.array([1.0])
     ki = np.array([0.1])
     expected_kem = 1.02
 
-    result = joule_heating._kem(A, a, km, ki)
+    result = joule_heating._kem(outer_area_m2, a, km, ki)
 
     np.testing.assert_allclose(result, expected_kem, rtol=1e-5)
 

@@ -114,7 +114,7 @@ a:
   max: 5.0E-04
   std: 2.5E-04
   relative_std: true
-A:
+outer_area_m2:
   dist: 'truncnorm'
   min: 2.0E-05
   max: 2.0E-03
