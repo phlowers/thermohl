@@ -24,7 +24,7 @@ class ExcelSheet:
             transit = self.args["transit"]
         core_diameter_m = self.args["core_diameter_m"]
         outer_diameter_m = self.args["outer_diameter_m"]
-        Rdc = self.args["RDC20"] * (
+        Rdc = self.args["dc_resistance_20c_ohm_m"] * (
             1.0
             + self.args["temperature_coeff_linear"] * (ambient_temperature_c - 20.0)
             + self.args["temperature_coeff_quadratic"]
@@ -146,7 +146,7 @@ def excel_conductor_data():
             outer_area_m2=[1317, 228, 570, 412, 228, 612],
             core_area_m2=[0, 0, 0, 0, 0, 0],
             B=[1049, 228, 570, 323, 185, 508],
-            RDC20=[0.0272, 0.146, 0.0583, 0.089, 0.18, 0.0657],
+            dc_resistance_20c_ohm_m=[0.0272, 0.146, 0.0583, 0.089, 0.18, 0.0657],
             temperature_coeff_linear=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
             magnetic_coeff=[1.006, 1.0, 1.0, 1.0, 1.0, 1.006],
             magnetic_coeff_per_a=[0.016, 0.0, 0.0, 0.0, 0.0, 0.016],
@@ -168,7 +168,7 @@ def excel_conductor_data():
     df["core_diameter_m"] *= 1.0e-03
     df["outer_area_m2"] *= 1.0e-06
     df["core_area_m2"] *= 1.0e-06
-    df["RDC20"] *= 1.0e-03
+    df["dc_resistance_20c_ohm_m"] *= 1.0e-03
 
     return df
 
