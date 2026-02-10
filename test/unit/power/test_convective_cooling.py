@@ -25,7 +25,7 @@ def set_default_values_scalar():
     dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
     dic["azimuth"] = 90.0
     dic["latitude_deg"] = 30.0
-    dic["tb"] = 0.0
+    dic["turbidity"] = 0.0
     dic["altitude"] = 0.0
     dic["outer_diameter_m"] = 28.14 * 1.0e-03
     dic["core_diameter_m"] = 10.4 * 1.0e-03
@@ -48,7 +48,7 @@ def set_default_values_array():
     dic["linear_resistance_temp_low_ohm_m"] = np.array([7.283e-05, 7.283e-05])
     dic["azimuth"] = np.array([90.0, 90.0])
     dic["latitude_deg"] = np.array([30.0, 30.0])
-    dic["tb"] = np.array([0.0, 0.0])
+    dic["turbidity"] = np.array([0.0, 0.0])
     dic["altitude"] = np.array([0.0, 0.0])
     dic["outer_diameter_m"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
     dic["core_diameter_m"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])

@@ -202,7 +202,7 @@ if __name__ == "__main__":
 
     dic = solver.default_values()
     dic["latitude_deg"] = 45.0
-    dic["tb"] = 0.33
+    dic["turbidity"] = 0.33
     dic["albedo"] = 0.85
 
     plot_joule_heating(dic)

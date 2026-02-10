@@ -14,7 +14,7 @@ def test_solar_heating_init_scalar():
     latitude_deg = 45.0
     altitude = 1000.0
     azimuth = 180.0
-    tb = 0.5
+    turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
@@ -26,7 +26,7 @@ def test_solar_heating_init_scalar():
         latitude_deg,
         altitude,
         azimuth,
-        tb,
+        turbidity,
         month,
         day,
         hour,
@@ -44,7 +44,7 @@ def test_solar_heating_init_array():
     latitude_deg = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
     azimuth = np.array([180.0, 190.0])
-    tb = np.array([0.5, 0.7])
+    turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
@@ -56,7 +56,7 @@ def test_solar_heating_init_array():
         latitude_deg,
         altitude,
         azimuth,
-        tb,
+        turbidity,
         month,
         day,
         hour,
@@ -74,7 +74,7 @@ def test_solar_heating_init_mixed():
     latitude_deg = 45.0
     altitude = 1000.0
     azimuth = 180.0
-    tb = 0.5
+    turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
@@ -86,7 +86,7 @@ def test_solar_heating_init_mixed():
         latitude_deg,
         altitude,
         azimuth,
-        tb,
+        turbidity,
         month,
         day,
         hour,
@@ -104,7 +104,7 @@ def test_solar_heating_init_no_srad():
     latitude_deg = 45.0
     altitude = 1000.0
     azimuth = 180.0
-    tb = 0.5
+    turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
@@ -115,7 +115,7 @@ def test_solar_heating_init_no_srad():
         latitude_deg,
         altitude,
         azimuth,
-        tb,
+        turbidity,
         month,
         day,
         hour,

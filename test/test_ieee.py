@@ -29,7 +29,7 @@ def test_compare_powers():
     dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
     dic["azimuth"] = 90.0
     dic["latitude_deg"] = 30.0
-    dic["tb"] = 0.0
+    dic["turbidity"] = 0.0
     dic["altitude"] = 0.0
     dic["outer_diameter_m"] = 28.14 * 1.0e-03
     dic["core_diameter_m"] = 10.4 * 1.0e-03
