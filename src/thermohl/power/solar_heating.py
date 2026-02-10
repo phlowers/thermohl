@@ -27,7 +27,9 @@ class _SRad:
         self.indus = indus
 
     def atmosphere_turbidity(
-        self, x: floatArrayLike, turbidity: Optional[floatArrayLike] = 0.0
+        self,
+        solar_altitude_deg: floatArrayLike,
+        turbidity: Optional[floatArrayLike] = 0.0,
     ) -> floatArrayLike:
         """Compute coefficient for atmosphere turbidity.
         This method calculates the atmospheric turbidity coefficient using a polynomial
@@ -36,7 +38,7 @@ class _SRad:
         determined by the turbidity factor.
 
         Args:
-            x (float | numpy.ndarray): Solar altitude in degrees.
+            solar_altitude_deg (float | numpy.ndarray): Solar altitude in degrees.
             turbidity (float | numpy.ndarray): Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
 
         Returns:
@@ -51,12 +53,12 @@ class _SRad:
         coeff_1 = clean_weight * self.clean[1] + turbidity * self.indus[1]
         coeff_0 = clean_weight * self.clean[0] + turbidity * self.indus[0]
         return (
-            coeff_6 * x**6
-            + coeff_5 * x**5
-            + coeff_4 * x**4
-            + coeff_3 * x**3
-            + coeff_2 * x**2
-            + coeff_1 * x**1
+            coeff_6 * solar_altitude_deg**6
+            + coeff_5 * solar_altitude_deg**5
+            + coeff_4 * solar_altitude_deg**4
+            + coeff_3 * solar_altitude_deg**3
+            + coeff_2 * solar_altitude_deg**2
+            + coeff_1 * solar_altitude_deg**1
             + coeff_0
         )
 
