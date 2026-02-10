@@ -338,7 +338,7 @@ class Solver3T(Solver_):
             ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
             wind_angle_deg=reshape(self.args.wind_angle_deg, N, n),
             wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
-            Pa=reshape(self.args.Pa, N, n),
+            ambient_pressure_pa=reshape(self.args.ambient_pressure_pa, N, n),
             rh=reshape(self.args.rh, N, n),
             pr=reshape(self.args.pr, N, n),
         )

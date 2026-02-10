@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'transit', 'm',
+    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'transit', 'm',
     #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
     #     'temp_high_c', 'temp_low_c'
     # ]
@@ -68,7 +68,7 @@ class Args:
         self.hour = 12  # hour of the day (in [0, 23] range)
 
         self.ambient_temperature_c = 15.0  # ambient temperature (C)
-        self.Pa = 1.0e05  # ambient pressure (Pa)
+        self.ambient_pressure_pa = 1.0e05  # ambient pressure (Pa)
         self.rh = 0.8  # relative humidity (none, in [0, 1])
         self.pr = 0.0  # rain precipitation rate (m.s**-1)
         self.wind_speed_ms = 0.0  # wind speed (m.s**-1)
