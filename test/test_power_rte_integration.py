@@ -19,13 +19,15 @@ class ExcelSheet:
         self.args = Args(dic)
         self.args.nbc = dic["nbc"]
 
-    def joule_heating(self, Ta, transit=None):
+    def joule_heating(self, ambient_temperature_c, transit=None):
         if transit is None:
             transit = self.args["transit"]
         d = self.args["d"]
         D = self.args["D"]
         Rdc = self.args["RDC20"] * (
-            1.0 + self.args["kl"] * (Ta - 20.0) + self.args["kq"] * (Ta - 20.0) ** 2
+            1.0
+            + self.args["kl"] * (ambient_temperature_c - 20.0)
+            + self.args["kq"] * (ambient_temperature_c - 20.0) ** 2
         )
         z = 8 * np.pi * 50.0 * (D - d) ** 2 / ((D**2 - d**2) * 1.0e07 * Rdc)
         a = 7 * z**2 / (315 + 3 * z**2)
@@ -70,7 +72,7 @@ class ExcelSheet:
 
     def convective_cooling(self, Ts):
         D = self.args["D"]
-        Tf = 0.5 * (Ts + self.args["Ta"])
+        Tf = 0.5 * (Ts + self.args["ambient_temperature_c"])
         lm = 0.02424 + 0.00007477 * Tf - 0.000000004407 * Tf**2
         rho = (
             1.293
@@ -86,10 +88,10 @@ class ExcelSheet:
             3.645
             * rho**0.5
             * D**0.75
-            * np.sign(Ts - self.args["Ta"])
-            * np.abs(Ts - self.args["Ta"]) ** 1.25
+            * np.sign(Ts - self.args["ambient_temperature_c"])
+            * np.abs(Ts - self.args["ambient_temperature_c"]) ** 1.25
         )
-        PCf = F * lm * K * (Ts - self.args["Ta"])
+        PCf = F * lm * K * (Ts - self.args["ambient_temperature_c"])
         # print(f"re={Re}, kp={K}, lam={lm}")
         # print(f"pcn={PCn}, pcf={PCf}")
         return np.maximum(PCn, PCf)
@@ -100,7 +102,10 @@ class ExcelSheet:
             17.8
             * D
             * self.args["epsilon"]
-            * (((273 + Ts) / 100) ** 4 - ((273 + self.args["Ta"]) / 100) ** 4)
+            * (
+                ((273 + Ts) / 100) ** 4
+                - ((273 + self.args["ambient_temperature_c"]) / 100) ** 4
+            )
         )
 
 
@@ -156,7 +161,18 @@ def scenarios():
             "Aster228",
             "Aster228",
         ],
-        Ta=[20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0, 20.0],
+        ambient_temperature_c=[
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+            20.0,
+        ],
         ws=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
         wa=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
         Qs=[

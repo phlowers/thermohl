@@ -23,7 +23,7 @@ class RadiativeCoolingBase(PowerTerm):
 
     def __init__(
         self,
-        Ta: floatArrayLike,
+        ambient_temperature_c: floatArrayLike,
         D: floatArrayLike,
         epsilon: floatArrayLike,
         sigma: float = 5.67e-08,
@@ -33,7 +33,7 @@ class RadiativeCoolingBase(PowerTerm):
         r"""Init with args.
 
         Args:
-            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             D (float | numpy.ndarray): External diameter (m).
             epsilon (float | numpy.ndarray): Emissivity (—).
             sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
@@ -41,7 +41,7 @@ class RadiativeCoolingBase(PowerTerm):
 
         """
         self.kelvin_offset = zerok
-        self.ambient_temp_k = self._celsius2kelvin(Ta)
+        self.ambient_temp_k = self._celsius2kelvin(ambient_temperature_c)
         self.outer_diameter_m = D
         self.emissivity = epsilon
         self.stefan_boltzmann = sigma

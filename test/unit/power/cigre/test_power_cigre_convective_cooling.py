@@ -17,7 +17,7 @@ conv_cool_instances = [
         ConvectiveCooling(
             altitude=np.array([100.0]),
             azimuth=np.array([45.0]),
-            Ta=np.array([25.0]),
+            ambient_temperature_c=np.array([25.0]),
             ws=np.array([5.0]),
             wa=np.array([30.0]),
             D=np.array([0.01]),
@@ -29,7 +29,7 @@ conv_cool_instances = [
         ConvectiveCooling(
             altitude=100.0,
             azimuth=45.0,
-            Ta=25.0,
+            ambient_temperature_c=25.0,
             ws=5.0,
             wa=30.0,
             D=0.01,

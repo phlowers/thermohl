@@ -20,7 +20,7 @@ class RadiativeCooling(PowerTerm):
 
     def __init__(
         self,
-        Ta: floatArrayLike,
+        ambient_temperature_c: floatArrayLike,
         D: floatArrayLike,
         epsilon: floatArrayLike,
         **kwargs: Any,
@@ -28,12 +28,12 @@ class RadiativeCooling(PowerTerm):
         r"""Init with args.
 
         Args:
-            Ta (float | numpy.ndarray): Ambient temperature (°C).
+            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             D (float | numpy.ndarray): External diameter (m).
             epsilon (float | numpy.ndarray): Emissivity (—).
 
         """
-        self.ambient_temp_c = Ta
+        self.ambient_temp_c = ambient_temperature_c
         self.outer_diameter_m = D
         self.emissivity = epsilon
 

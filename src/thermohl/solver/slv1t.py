@@ -91,9 +91,9 @@ class Solver1T(Solver_):
         # get initial temperature
         if T0 is None:
             T0 = (
-                self.args.Ta
-                if isinstance(self.args.Ta, numbers.Number)
-                else self.args.Ta[0]
+                self.args.ambient_temperature_c
+                if isinstance(self.args.ambient_temperature_c, numbers.Number)
+                else self.args.ambient_temperature_c[0]
             )
 
         # get month, day and hours
@@ -109,7 +109,7 @@ class Solver1T(Solver_):
             day=day,
             hour=hour,
             transit=reshape(self.args.transit, N, n),
-            Ta=reshape(self.args.Ta, N, n),
+            ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
             wa=reshape(self.args.wa, N, n),
             ws=reshape(self.args.ws, N, n),
             Pa=reshape(self.args.Pa, N, n),

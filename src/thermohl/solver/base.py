@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'lat', 'lon', 'altitude', 'azimuth', 'month', 'day', 'hour', 'Ta', 'Pa', 'rh', 'pr', 'ws', 'wa', 'al', 'tb', 'transit', 'm',
+    #     'lat', 'lon', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'ws', 'wa', 'al', 'tb', 'transit', 'm',
     #     'd', 'D', 'a', 'A', 'R', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
@@ -67,7 +67,7 @@ class Args:
         self.day = 21  # day of the month
         self.hour = 12  # hour of the day (in [0, 23] range)
 
-        self.Ta = 15.0  # ambient temperature (C)
+        self.ambient_temperature_c = 15.0  # ambient temperature (C)
         self.Pa = 1.0e05  # ambient pressure (Pa)
         self.rh = 0.8  # relative humidity (none, in [0, 1])
         self.pr = 0.0  # rain precipitation rate (m.s**-1)

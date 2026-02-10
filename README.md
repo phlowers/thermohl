@@ -162,7 +162,7 @@ distinct ampacities (and the lower the ambient temperature, the higher the ampac
 import numpy as np
 from thermohl import solver
 
-slvr = solver.ieee(dict(Ta=np.array([0., 15., 30.])), heateq='1t')
+slvr = solver.ieee(dict(ambient_temperature_c=np.array([0., 15., 30.])), heateq='1t')
 Tmax = 80.
 imax = slvr.steady_intensity(Tmax)
 ```

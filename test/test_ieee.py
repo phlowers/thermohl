@@ -22,7 +22,7 @@ def test_compare_powers():
     dic["wa"] = 0.0
     dic["epsilon"] = 0.8
     dic["alpha"] = 0.8
-    dic["Ta"] = 40.0
+    dic["ambient_temperature_c"] = 40.0
     dic["THigh"] = 75.0
     dic["TLow"] = 25.0
     dic["RDCHigh"] = 8.688e-05
