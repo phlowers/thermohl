@@ -21,9 +21,11 @@ class JouleHeating(PowerTerm):
         TLow: floatArrayLike,
         THigh: floatArrayLike,
         linear_resistance_temp_low_ohm_m: floatArrayLike,
-        RDCHigh: floatArrayLike,
+        linear_resistance_temp_high_ohm_m: floatArrayLike,
     ) -> floatArrayLike:
-        return (RDCHigh - linear_resistance_temp_low_ohm_m) / (THigh - TLow)
+        return (
+            linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
+        ) / (THigh - TLow)
 
     def __init__(
         self,
@@ -31,7 +33,7 @@ class JouleHeating(PowerTerm):
         TLow: floatArrayLike,
         THigh: floatArrayLike,
         linear_resistance_temp_low_ohm_m: floatArrayLike,
-        RDCHigh: floatArrayLike,
+        linear_resistance_temp_high_ohm_m: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -41,18 +43,21 @@ class JouleHeating(PowerTerm):
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
             TLow (float | numpy.ndarray): Temperature for linear_resistance_temp_low_ohm_m measurement (°C).
-            THigh (float | numpy.ndarray): Temperature for RDCHigh measurement (°C).
+            THigh (float | numpy.ndarray): Temperature for linear_resistance_temp_high_ohm_m measurement (°C).
             linear_resistance_temp_low_ohm_m (float | numpy.ndarray): Electric resistance per unit length at TLow (Ω·m⁻¹).
-            RDCHigh (float | numpy.ndarray): Electric resistance per unit length at THigh (Ω·m⁻¹).
+            linear_resistance_temp_high_ohm_m (float | numpy.ndarray): Electric resistance per unit length at THigh (Ω·m⁻¹).
 
         """
         self.temp_low_c = TLow
         self.temp_high_c = THigh
         self.dc_resistance_low_c = linear_resistance_temp_low_ohm_m
-        self.dc_resistance_high_c = RDCHigh
+        self.dc_resistance_high_c = linear_resistance_temp_high_ohm_m
         self.current_a = transit
         self.temp_coeff_linear = JouleHeating._c(
-            TLow, THigh, linear_resistance_temp_low_ohm_m, RDCHigh
+            TLow,
+            THigh,
+            linear_resistance_temp_low_ohm_m,
+            linear_resistance_temp_high_ohm_m,
         )
 
     def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
