@@ -26,7 +26,7 @@ units, default values and in which set of power terms they are used.
 | lat       | 45            | degree     | yes           | yes          | yes          | yes         | latitude                                                     |
 | lon       | 0             | degree     | no            | no           | no           | no          | longitude                                                    |
 | altitude       | 0             | m          | yes           | yes          | yes          | yes         | altitude                                                     |
-| azm       | 0             | degree     | yes           | yes          | yes          | yes         | azimuth                                                      |
+| azimuth       | 0             | degree     | yes           | yes          | yes          | yes         | azimuth                                                      |
 | month     | 3             | N/A        | yes           | yes          | yes          | yes         | month number (int in [1, 12])                                |
 | day       | 21            | N/A        | yes           | yes          | yes          | yes         | day of the month (int in [1, 31])                            |
 | hour      | 12            | N/A        | yes           | yes          | yes          | yes         | hour of the day (float in[0, 24[)                            |

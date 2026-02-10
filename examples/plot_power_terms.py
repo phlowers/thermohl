@@ -103,7 +103,7 @@ def plot_solar_heating(dic):
 
 def plot_convective_cooling(dic):
     ws = np.linspace(0, 1, 5)
-    wa = dic["azm"] - np.array([0, 45, 90])
+    wa = dic["azimuth"] - np.array([0, 45, 90])
     Tc = np.linspace(0.0, 80.0, 41)
     Ta = np.linspace(-10, 40, 6)
 

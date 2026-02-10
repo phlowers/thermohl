@@ -13,7 +13,7 @@ from thermohl.power.ieee import SolarHeating
 def test_solar_heating_init_scalar():
     lat = 45.0
     altitude = 1000.0
-    azm = 180.0
+    azimuth = 180.0
     tb = 0.5
     month = 6
     day = 21
@@ -23,7 +23,7 @@ def test_solar_heating_init_scalar():
     srad = 800.0
 
     solar_heating = SolarHeating(
-        lat, altitude, azm, tb, month, day, hour, D, alpha, srad
+        lat, altitude, azimuth, tb, month, day, hour, D, alpha, srad
     )
 
     assert solar_heating.solar_absorptivity == alpha
@@ -34,7 +34,7 @@ def test_solar_heating_init_scalar():
 def test_solar_heating_init_array():
     lat = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
-    azm = np.array([180.0, 190.0])
+    azimuth = np.array([180.0, 190.0])
     tb = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
@@ -44,7 +44,7 @@ def test_solar_heating_init_array():
     srad = np.array([800.0, 900.0])
 
     solar_heating = SolarHeating(
-        lat, altitude, azm, tb, month, day, hour, D, alpha, srad
+        lat, altitude, azimuth, tb, month, day, hour, D, alpha, srad
     )
 
     assert np.allclose(solar_heating.solar_absorptivity, alpha)
@@ -55,7 +55,7 @@ def test_solar_heating_init_array():
 def test_solar_heating_init_mixed():
     lat = 45.0
     altitude = 1000.0
-    azm = 180.0
+    azimuth = 180.0
     tb = 0.5
     month = 6
     day = 21
@@ -65,7 +65,7 @@ def test_solar_heating_init_mixed():
     srad = np.array([800.0, 900.0])
 
     solar_heating = SolarHeating(
-        lat, altitude, azm, tb, month, day, hour, D, alpha, srad
+        lat, altitude, azimuth, tb, month, day, hour, D, alpha, srad
     )
 
     assert solar_heating.solar_absorptivity == alpha
@@ -76,7 +76,7 @@ def test_solar_heating_init_mixed():
 def test_solar_heating_init_no_srad():
     lat = 45.0
     altitude = 1000.0
-    azm = 180.0
+    azimuth = 180.0
     tb = 0.5
     month = 6
     day = 21
@@ -84,7 +84,7 @@ def test_solar_heating_init_no_srad():
     D = 0.01
     alpha = 0.9
 
-    solar_heating = SolarHeating(lat, altitude, azm, tb, month, day, hour, D, alpha)
+    solar_heating = SolarHeating(lat, altitude, azimuth, tb, month, day, hour, D, alpha)
 
     assert solar_heating.solar_absorptivity == alpha
     assert solar_heating.solar_irradiance is not None
