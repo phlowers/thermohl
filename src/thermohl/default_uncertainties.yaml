@@ -74,7 +74,7 @@ wind_angle_deg:
   dist: 'vonmises'
   std: 10.
   relative_std: false
-al:
+albedo:
   dist: 'truncnorm'
   min: 0.
   max: 1.
