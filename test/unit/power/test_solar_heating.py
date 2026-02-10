@@ -39,15 +39,15 @@ def srad():
 
 def test_srad_atmosphere_scalar(srad):
     x = 30.0
-    trb = 0.5
-    omt = 1.0 - trb
-    A = omt * srad.clean[6] + trb * srad.indus[6]
-    B = omt * srad.clean[5] + trb * srad.indus[5]
-    C = omt * srad.clean[4] + trb * srad.indus[4]
-    outer_diameter_m = omt * srad.clean[3] + trb * srad.indus[3]
-    E = omt * srad.clean[2] + trb * srad.indus[2]
-    F = omt * srad.clean[1] + trb * srad.indus[1]
-    G = omt * srad.clean[0] + trb * srad.indus[0]
+    turbidity = 0.5
+    omt = 1.0 - turbidity
+    A = omt * srad.clean[6] + turbidity * srad.indus[6]
+    B = omt * srad.clean[5] + turbidity * srad.indus[5]
+    C = omt * srad.clean[4] + turbidity * srad.indus[4]
+    outer_diameter_m = omt * srad.clean[3] + turbidity * srad.indus[3]
+    E = omt * srad.clean[2] + turbidity * srad.indus[2]
+    F = omt * srad.clean[1] + turbidity * srad.indus[1]
+    G = omt * srad.clean[0] + turbidity * srad.indus[0]
     expected = (
         A * x**6
         + B * x**5
@@ -58,22 +58,22 @@ def test_srad_atmosphere_scalar(srad):
         + G
     )
 
-    result = srad.atmosphere_turbidity(x, trb)
+    result = srad.atmosphere_turbidity(x, turbidity)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_atmosphere_turbidity_array(srad):
     x = np.array([30.0, 40.0])
-    trb = np.array([0.5, 0.7])
-    omt = 1.0 - trb
-    A = omt * srad.clean[6] + trb * srad.indus[6]
-    B = omt * srad.clean[5] + trb * srad.indus[5]
-    C = omt * srad.clean[4] + trb * srad.indus[4]
-    outer_diameter_m = omt * srad.clean[3] + trb * srad.indus[3]
-    E = omt * srad.clean[2] + trb * srad.indus[2]
-    F = omt * srad.clean[1] + trb * srad.indus[1]
-    G = omt * srad.clean[0] + trb * srad.indus[0]
+    turbidity = np.array([0.5, 0.7])
+    omt = 1.0 - turbidity
+    A = omt * srad.clean[6] + turbidity * srad.indus[6]
+    B = omt * srad.clean[5] + turbidity * srad.indus[5]
+    C = omt * srad.clean[4] + turbidity * srad.indus[4]
+    outer_diameter_m = omt * srad.clean[3] + turbidity * srad.indus[3]
+    E = omt * srad.clean[2] + turbidity * srad.indus[2]
+    F = omt * srad.clean[1] + turbidity * srad.indus[1]
+    G = omt * srad.clean[0] + turbidity * srad.indus[0]
     expected = (
         A * x**6
         + B * x**5
@@ -84,7 +84,7 @@ def test_srad_atmosphere_turbidity_array(srad):
         + G
     )
 
-    result = srad.atmosphere_turbidity(x, trb)
+    result = srad.atmosphere_turbidity(x, turbidity)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -93,7 +93,7 @@ def test_srad_call_scalar(srad):
     latitude_deg = 45.0
     altitude = 1000.0
     azimuth = 180.0
-    trb = 0.5
+    turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
@@ -101,11 +101,11 @@ def test_srad_call_scalar(srad):
     sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
-    Q = srad.atmosphere_turbidity(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(latitude_deg, altitude, azimuth, trb, month, day, hour)
+    result = srad(latitude_deg, altitude, azimuth, turbidity, month, day, hour)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -114,7 +114,7 @@ def test_srad_call_array(srad):
     latitude_deg = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
     azimuth = np.array([180.0, 190.0])
-    trb = np.array([0.5, 0.7])
+    turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
@@ -122,11 +122,11 @@ def test_srad_call_array(srad):
     sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
-    Q = srad.atmosphere_turbidity(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(latitude_deg, altitude, azimuth, trb, month, day, hour)
+    result = srad(latitude_deg, altitude, azimuth, turbidity, month, day, hour)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
