@@ -41,7 +41,7 @@ units, default values and in which set of power terms they are used.
 | outer_diameter_m         | 3.0E-02       | m          | yes           | yes          | yes          | yes         | external (global) diameter                                   |
 | a         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
 | A         | 7.07E-04      | m²         | no            | no           | yes          | yes         | external (global) section                                    |
-| R         | 4.0E-02       | N/A        | yes           | no           | no           | no          | roughness                                                    |
+| cable_roughness         | 4.0E-02       | N/A        | yes           | no           | no           | no          | roughness                                                    |
 | l         | 1.0           | W.m⁻¹.K⁻¹  | no            | no           | yes          | yes         | radial thermal conductivity (not used in 1t equation)        |
 | c         | 500           | J.kg⁻¹.K⁻¹ | yes           | yes          | yes          | yes         | specific heat capacity (only used in transient mode)         |
 | alpha     | 0.5           | N/A        | yes           | yes          | yes          | yes         | solar absorption                                             |
