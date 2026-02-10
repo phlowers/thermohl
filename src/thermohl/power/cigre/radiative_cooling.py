@@ -17,7 +17,7 @@ class RadiativeCooling(RadiativeCoolingBase):
         ambient_temperature_c: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         emissivity: floatArrayLike,
-        sigma: float = 5.67e-08,
+        stefan_boltzmann_constant: float = 5.67e-08,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -26,13 +26,13 @@ class RadiativeCooling(RadiativeCoolingBase):
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
             emissivity (float | numpy.ndarray): Emissivity (—).
-            sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
+            stefan_boltzmann_constant (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
         """
         super().__init__(
             ambient_temperature_c=ambient_temperature_c,
             outer_diameter_m=outer_diameter_m,
             emissivity=emissivity,
-            sigma=sigma,
+            stefan_boltzmann_constant=stefan_boltzmann_constant,
             zerok=273.0,
             **kwargs,
         )
