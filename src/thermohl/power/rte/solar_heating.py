@@ -45,7 +45,9 @@ def solar_irradiance(
         float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
     """
     solar_altitude_rad = sun.solar_altitude(latitude_deg, month, day, hour)
-    clearness_factor = solar_radiation.catm(np.rad2deg(solar_altitude_rad))
+    clearness_factor = solar_radiation.atmosphere_turbidity(
+        np.rad2deg(solar_altitude_rad)
+    )
     return np.where(solar_altitude_rad > 0.0, clearness_factor, 0.0)
 
 

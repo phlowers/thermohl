@@ -26,7 +26,7 @@ class _SRad:
         self.clean = clean
         self.indus = indus
 
-    def catm(
+    def atmosphere_turbidity(
         self, x: floatArrayLike, trb: Optional[floatArrayLike] = 0.0
     ) -> floatArrayLike:
         """Compute coefficient for atmosphere turbidity.
@@ -77,7 +77,9 @@ class _SRad:
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azimuth)
         )
         altitude_factor = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
-        clearness_factor = self.catm(np.rad2deg(solar_altitude_rad), trb)
+        clearness_factor = self.atmosphere_turbidity(
+            np.rad2deg(solar_altitude_rad), trb
+        )
         solar_irradiance = (
             altitude_factor * clearness_factor * np.sin(incidence_angle_rad)
         )
