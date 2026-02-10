@@ -19,7 +19,7 @@ class JouleHeating(PowerTerm):
     def __init__(
         self,
         transit: floatArrayLike,
-        km: floatArrayLike,
+        magnetic_coeff: floatArrayLike,
         kl: floatArrayLike,
         RDC20: floatArrayLike,
         T20: floatArrayLike = 20.0,
@@ -31,14 +31,14 @@ class JouleHeating(PowerTerm):
 
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
-            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
             kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
         self.current_a = transit
-        self.magnetic_coeff = km
+        self.magnetic_coeff = magnetic_coeff
         self.temp_coeff_linear = kl
         self.dc_resistance_20c = RDC20
         self.reference_temp_c = T20
