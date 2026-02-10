@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'RDCLow',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
 
@@ -91,7 +91,7 @@ class Args:
         self.alpha = 0.5  # solar absorption (1)
         self.epsilon = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        self.RDC20 = 2.5e-05
+        self.dc_resistance_20c_ohm_m = 2.5e-05
 
         self.magnetic_coeff = 1.006  # coefficient for magnetic effects (1)
         self.magnetic_coeff_per_a = 0.016  # coefficient for magnetic effects (A**-1)
