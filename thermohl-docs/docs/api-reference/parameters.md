@@ -47,7 +47,7 @@ units, default values and in which set of power terms they are used.
 | alpha     | 0.5           | N/A        | yes           | yes          | yes          | yes         | solar absorption                                             |
 | epsilon   | 0.5           | N/A        | yes           | yes          | yes          | yes         | emissivity                                                   |
 | RDC20     | 2.5E-05       | Ohm.m⁻¹    | yes           | no           | yes          | yes         | electric resistance per unit length (DC) at 20°C             |
-| km        | 1.006         | N/A        | yes           | no           | yes          | yes         | coefficient for magnetic effects                             |
+| magnetic_coeff        | 1.006         | N/A        | yes           | no           | yes          | yes         | coefficient for magnetic effects                             |
 | ki        | 0.016         | A⁻¹        | no            | no           | yes          | yes         | coefficient for magnetic effects                             |
 | kl        | 3.8E-03       | K⁻¹        | yes           | no           | yes          | yes         | linear resistance augmentation with temperature              |
 | kq        | 8.0E-07       | K⁻²        | no            | no           | yes          | yes         | quadratic resistance augmentation with temperature           |

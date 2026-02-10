@@ -13,12 +13,12 @@ from thermohl.power.cigre import JouleHeating
 joule_heating_instances = [
     JouleHeating(
         transit=np.array([100.0, 150.0, 200.0]),
-        km=np.array([1.0, 1.0, 1.0]),
+        magnetic_coeff=np.array([1.0, 1.0, 1.0]),
         kl=np.array([0.004, 0.004, 0.004]),
         RDC20=np.array([0.1, 0.1, 0.1]),
         T20=np.array([20.0, 18.0, 22.0]),
     ),
-    JouleHeating(transit=100.0, km=1.0, kl=0.004, RDC20=0.1, T20=20.0),
+    JouleHeating(transit=100.0, magnetic_coeff=1.0, kl=0.004, RDC20=0.1, T20=20.0),
 ]
 
 
@@ -68,13 +68,13 @@ def test_joule_heating_value_array(joule_heating):
 
 def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
     transit = np.array([100.0, 150.0])
-    km = np.array([1.0, 1.0, 1.0])
+    magnetic_coeff = np.array([1.0, 1.0, 1.0])
     kl = np.array([0.004, 0.004])
     RDC20 = np.array([0.1, 0.1])
     T20 = np.array([20.0, 20.0])
     T = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        joule_heating = JouleHeating(transit, km, kl, RDC20, T20)
+        joule_heating = JouleHeating(transit, magnetic_coeff, kl, RDC20, T20)
         joule_heating.value(T)
 
 
@@ -124,11 +124,11 @@ def test_joule_heating_derivative_array(joule_heating):
 
 def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
     transit = np.array([100.0, 150.0])
-    km = np.array([1.0, 1.0, 1.0])
+    magnetic_coeff = np.array([1.0, 1.0, 1.0])
     kl = np.array([0.004, 0.004])
     RDC20 = np.array([0.1, 0.1])
     T20 = np.array([20.0, 20.0])
     conductor_temperature = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        joule_heating = JouleHeating(transit, km, kl, RDC20, T20)
+        joule_heating = JouleHeating(transit, magnetic_coeff, kl, RDC20, T20)
         joule_heating.derivative(conductor_temperature)

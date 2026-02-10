@@ -154,7 +154,7 @@ RDC20:
   max: 1.0E-03
   std: 0.03
   relative_std: true
-km:
+magnetic_coeff:
   dist: null
 ki:
   dist: null

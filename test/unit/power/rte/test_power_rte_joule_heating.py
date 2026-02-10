@@ -17,7 +17,7 @@ joule_heating_instances = [
         core_diameter_m=np.array([0.005]),
         outer_area_m2=np.array([0.0001]),
         core_area_m2=np.array([0.00005]),
-        km=np.array([1.0]),
+        magnetic_coeff=np.array([1.0]),
         ki=np.array([0.1]),
         kl=np.array([0.004]),
         kq=np.array([0.0001]),
@@ -31,7 +31,7 @@ joule_heating_instances = [
         core_diameter_m=0.005,
         outer_area_m2=0.0001,
         core_area_m2=0.00005,
-        km=1.0,
+        magnetic_coeff=1.0,
         ki=0.1,
         kl=0.004,
         kq=0.0001,
@@ -80,11 +80,11 @@ def test_ks(joule_heating):
 def test_kem(joule_heating):
     outer_area_m2 = np.array([0.0001])
     core_area_m2 = np.array([0.00005])
-    km = np.array([1.0])
+    magnetic_coeff = np.array([1.0])
     ki = np.array([0.1])
     expected_kem = 1.02
 
-    result = joule_heating._kem(outer_area_m2, core_area_m2, km, ki)
+    result = joule_heating._kem(outer_area_m2, core_area_m2, magnetic_coeff, ki)
 
     np.testing.assert_allclose(result, expected_kem, rtol=1e-5)
 
