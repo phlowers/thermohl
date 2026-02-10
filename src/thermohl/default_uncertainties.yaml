@@ -166,7 +166,7 @@ linear_resistance_temp_high_ohm_m:
   dist: null
 linear_resistance_temp_low_ohm_m:
   dist: null
-THigh:
+temp_high_c:
   dist: null
-TLow:
+temp_low_c:
   dist: null

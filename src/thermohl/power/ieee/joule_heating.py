@@ -18,20 +18,20 @@ class JouleHeating(PowerTerm):
 
     @staticmethod
     def _c(
-        TLow: floatArrayLike,
-        THigh: floatArrayLike,
+        temp_low_c: floatArrayLike,
+        temp_high_c: floatArrayLike,
         linear_resistance_temp_low_ohm_m: floatArrayLike,
         linear_resistance_temp_high_ohm_m: floatArrayLike,
     ) -> floatArrayLike:
         return (
             linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
-        ) / (THigh - TLow)
+        ) / (temp_high_c - temp_low_c)
 
     def __init__(
         self,
         transit: floatArrayLike,
-        TLow: floatArrayLike,
-        THigh: floatArrayLike,
+        temp_low_c: floatArrayLike,
+        temp_high_c: floatArrayLike,
         linear_resistance_temp_low_ohm_m: floatArrayLike,
         linear_resistance_temp_high_ohm_m: floatArrayLike,
         **kwargs: Any,
@@ -42,20 +42,20 @@ class JouleHeating(PowerTerm):
 
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
-            TLow (float | numpy.ndarray): Temperature for linear_resistance_temp_low_ohm_m measurement (°C).
-            THigh (float | numpy.ndarray): Temperature for linear_resistance_temp_high_ohm_m measurement (°C).
-            linear_resistance_temp_low_ohm_m (float | numpy.ndarray): Electric resistance per unit length at TLow (Ω·m⁻¹).
-            linear_resistance_temp_high_ohm_m (float | numpy.ndarray): Electric resistance per unit length at THigh (Ω·m⁻¹).
+            temp_low_c (float | numpy.ndarray): Temperature for linear_resistance_temp_low_ohm_m measurement (°C).
+            temp_high_c (float | numpy.ndarray): Temperature for linear_resistance_temp_high_ohm_m measurement (°C).
+            linear_resistance_temp_low_ohm_m (float | numpy.ndarray): Electric resistance per unit length at temp_low_c (Ω·m⁻¹).
+            linear_resistance_temp_high_ohm_m (float | numpy.ndarray): Electric resistance per unit length at temp_high_c (Ω·m⁻¹).
 
         """
-        self.temp_low_c = TLow
-        self.temp_high_c = THigh
+        self.temp_low_c = temp_low_c
+        self.temp_high_c = temp_high_c
         self.dc_resistance_low_c = linear_resistance_temp_low_ohm_m
         self.dc_resistance_high_c = linear_resistance_temp_high_ohm_m
         self.current_a = transit
         self.temp_coeff_linear = JouleHeating._c(
-            TLow,
-            THigh,
+            temp_low_c,
+            temp_high_c,
             linear_resistance_temp_low_ohm_m,
             linear_resistance_temp_high_ohm_m,
         )

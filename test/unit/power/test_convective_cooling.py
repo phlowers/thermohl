@@ -19,8 +19,8 @@ def set_default_values_scalar():
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature_c"] = 40.0
-    dic["THigh"] = 75.0
-    dic["TLow"] = 25.0
+    dic["temp_high_c"] = 75.0
+    dic["temp_low_c"] = 25.0
     dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
     dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
     dic["azimuth"] = 90.0
@@ -42,8 +42,8 @@ def set_default_values_array():
     dic["emissivity"] = np.array([0.8, 0.9])
     dic["solar_absorptivity"] = np.array([0.8, 0.9])
     dic["ambient_temperature_c"] = np.array([40.0, 32])
-    dic["THigh"] = np.array([75.0, 70.0])
-    dic["TLow"] = np.array([25.0, 20])
+    dic["temp_high_c"] = np.array([75.0, 70.0])
+    dic["temp_low_c"] = np.array([25.0, 20])
     dic["linear_resistance_temp_high_ohm_m"] = np.array([8.688e-05, 8.688e-05])
     dic["linear_resistance_temp_low_ohm_m"] = np.array([7.283e-05, 7.283e-05])
     dic["azimuth"] = np.array([90.0, 90.0])
