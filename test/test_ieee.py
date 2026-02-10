@@ -25,7 +25,7 @@ def test_compare_powers():
     dic["ambient_temperature_c"] = 40.0
     dic["THigh"] = 75.0
     dic["TLow"] = 25.0
-    dic["RDCHigh"] = 8.688e-05
+    dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
     dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
     dic["azimuth"] = 90.0
     dic["latitude_deg"] = 30.0

@@ -162,7 +162,7 @@ temperature_coeff_linear:
   dist: null
 temperature_coeff_quadratic:
   dist: null
-RDCHigh:
+linear_resistance_temp_high_ohm_m:
   dist: null
 linear_resistance_temp_low_ohm_m:
   dist: null
