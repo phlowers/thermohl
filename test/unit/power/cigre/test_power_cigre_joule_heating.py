@@ -41,7 +41,11 @@ def test_joule_heating_value_scalar(joule_heating):
     expected = (
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
-        * (1.0 + joule_heating.temp_coeff_linear * (T - joule_heating.reference_temp_c))
+        * (
+            1.0
+            + joule_heating.temp_coeff_linear
+            * (T - joule_heating.reference_temperature_c)
+        )
         * joule_heating.current_a**2
     )
 
@@ -63,7 +67,11 @@ def test_joule_heating_value_array(joule_heating):
     expected = (
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
-        * (1.0 + joule_heating.temp_coeff_linear * (T - joule_heating.reference_temp_c))
+        * (
+            1.0
+            + joule_heating.temp_coeff_linear
+            * (T - joule_heating.reference_temperature_c)
+        )
         * joule_heating.current_a**2
     )
 

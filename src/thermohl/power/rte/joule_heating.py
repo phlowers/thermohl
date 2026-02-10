@@ -60,7 +60,7 @@ class JouleHeating(PowerTerm):
         self.temp_coeff_linear = temperature_coeff_linear
         self.temp_coeff_quadratic = temperature_coeff_quadratic
         self.dc_resistance_20c = dc_resistance_20c_ohm_m
-        self.reference_temp_c = reference_temperature_c
+        self.reference_temperature_c = reference_temperature_c
         self.frequency_hz = frequency_hz
 
     def _rdc(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
@@ -73,7 +73,7 @@ class JouleHeating(PowerTerm):
         Returns:
             float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
-        temp_delta_c = conductor_temp_c - self.reference_temp_c
+        temp_delta_c = conductor_temp_c - self.reference_temperature_c
         return self.dc_resistance_20c * (
             1.0
             + self.temp_coeff_linear * temp_delta_c

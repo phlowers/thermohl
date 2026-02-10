@@ -41,7 +41,7 @@ class JouleHeating(PowerTerm):
         self.magnetic_coeff = magnetic_coeff
         self.temp_coeff_linear = temperature_coeff_linear
         self.dc_resistance_20c = dc_resistance_20c_ohm_m
-        self.reference_temp_c = reference_temperature_c
+        self.reference_temperature_c = reference_temperature_c
 
     def value(self, conductor_temp_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
@@ -58,7 +58,8 @@ class JouleHeating(PowerTerm):
             * self.dc_resistance_20c
             * (
                 1.0
-                + self.temp_coeff_linear * (conductor_temp_c - self.reference_temp_c)
+                + self.temp_coeff_linear
+                * (conductor_temp_c - self.reference_temperature_c)
             )
             * self.current_a**2
         )
