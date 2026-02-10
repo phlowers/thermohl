@@ -19,7 +19,7 @@ def test_compare_powers():
     # large tolerances used in our tests ...
 
     dic["wind_speed_ms"] = 0.61
-    dic["wa"] = 0.0
+    dic["wind_angle_deg"] = 0.0
     dic["epsilon"] = 0.8
     dic["alpha"] = 0.8
     dic["ambient_temperature_c"] = 40.0

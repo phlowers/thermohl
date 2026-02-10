@@ -103,7 +103,7 @@ def plot_solar_heating(dic):
 
 def plot_convective_cooling(dic):
     wind_speed_ms = np.linspace(0, 1, 5)
-    wa = dic["azimuth"] - np.array([0, 45, 90])
+    wind_angle_deg = dic["azimuth"] - np.array([0, 45, 90])
     Tc = np.linspace(0.0, 80.0, 41)
     ambient_temperatures = np.linspace(-10, 40, 6)
 
@@ -115,14 +115,14 @@ def plot_convective_cooling(dic):
         dict(label="olla", cm=cm.winter, model=olla.ConvectiveCooling(**dic)),
     ]
 
-    fig, ax = plt.subplots(nrows=len(wind_speed_ms), ncols=len(wa))
+    fig, ax = plt.subplots(nrows=len(wind_speed_ms), ncols=len(wind_angle_deg))
     for i, u in enumerate(wind_speed_ms):
-        for j, a in enumerate(wa):
+        for j, a in enumerate(wind_angle_deg):
             for m, ambient_temperature_c in enumerate(ambient_temperatures):
                 dic.update(
                     [
                         ("wind_speed_ms", u),
-                        ("wa", a),
+                        ("wind_angle_deg", a),
                         ("ambient_temperature_c", ambient_temperature_c),
                     ]
                 )
@@ -143,7 +143,7 @@ def plot_convective_cooling(dic):
                 ax[i, j].set_ylim([-50, 100])
     for i in range(len(wind_speed_ms)):
         ax[i, 0].set_ylabel("Convective Cooling per unit length (Wm**-1)")
-    for j in range(len(wa)):
+    for j in range(len(wind_angle_deg)):
         ax[-1, j].set_xlabel("Conductor temperature (C)")
     ax[0, -1].legend()
 
