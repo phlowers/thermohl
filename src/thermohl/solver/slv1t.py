@@ -111,7 +111,7 @@ class Solver1T(Solver_):
             transit=reshape(self.args.transit, N, n),
             ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
             wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
+            wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
             Pa=reshape(self.args.Pa, N, n),
             rh=reshape(self.args.rh, N, n),
             pr=reshape(self.args.pr, N, n),

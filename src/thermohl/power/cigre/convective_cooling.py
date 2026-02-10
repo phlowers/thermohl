@@ -22,7 +22,7 @@ class ConvectiveCooling(PowerTerm):
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         ambient_temperature_c: floatArrayLike,
-        ws: floatArrayLike,
+        wind_speed_ms: floatArrayLike,
         wa: floatArrayLike,
         D: floatArrayLike,
         R: floatArrayLike,
@@ -37,7 +37,7 @@ class ConvectiveCooling(PowerTerm):
             altitude (float | numpy.ndarray): Altitude (m).
             azimuth (float | numpy.ndarray): Azimuth (deg).
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
+            wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
             wa (float | numpy.ndarray): Wind angle regarding north (deg).
             D (float | numpy.ndarray): External diameter (m).
             R (float | numpy.ndarray): Cable roughness (—).
@@ -46,7 +46,7 @@ class ConvectiveCooling(PowerTerm):
         """
         self.altitude_m = altitude
         self.ambient_temp_c = ambient_temperature_c
-        self.wind_speed_ms = ws
+        self.wind_speed_ms = wind_speed_ms
         self.outer_diameter_m = D
         self.roughness_ratio = R
         self.gravity_ms2 = g

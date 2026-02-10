@@ -17,7 +17,7 @@ def solver():
         "max_len": lambda: 1,
         "transit": np.array([0]),
         "ambient_temperature_c": np.array([25]),
-        "ws": np.array([0]),
+        "wind_speed_ms": np.array([0]),
         "wa": np.array([0]),
         "Pa": np.array([101325]),
         "rh": np.array([50]),

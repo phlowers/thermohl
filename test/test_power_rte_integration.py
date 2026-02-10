@@ -80,7 +80,7 @@ class ExcelSheet:
             + 0.00000000638 * self.args["altitude"] ** 2
         ) / (1 + 0.00367 * Tf)
         mu = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
-        Re = self.args["ws"] * self.args["D"] * rho / mu
+        Re = self.args["wind_speed_ms"] * self.args["D"] * rho / mu
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
         wa = np.deg2rad(self.args["wa"])
         K = 1.194 - np.cos(wa) + 0.194 * np.cos(2 * wa) + 0.368 * np.sin(2 * wa)
@@ -173,7 +173,7 @@ def scenarios():
             20.0,
             20.0,
         ],
-        ws=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
+        wind_speed_ms=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
         wa=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
         Qs=[
             np.nan,

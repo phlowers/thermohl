@@ -38,7 +38,7 @@ if __name__ == "__main__":
         day=21,
         hour=0,
         ambient_temperature_c=20.0,
-        ws=2.0,
+        wind_speed_ms=2.0,
         wa=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
         transit=np.nan,
     )

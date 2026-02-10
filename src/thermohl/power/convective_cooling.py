@@ -21,7 +21,7 @@ class ConvectiveCoolingBase(PowerTerm):
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         ambient_temperature_c: floatArrayLike,
-        ws: floatArrayLike,
+        wind_speed_ms: floatArrayLike,
         wa: floatArrayLike,
         D: floatArrayLike,
         rho: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
@@ -31,7 +31,7 @@ class ConvectiveCoolingBase(PowerTerm):
     ):
         self.altitude_m = altitude
         self.ambient_temp_c = ambient_temperature_c
-        self.wind_speed_ms = ws
+        self.wind_speed_ms = wind_speed_ms
         self.attack_angle_rad = np.arcsin(
             np.sin(np.deg2rad(np.abs(azimuth - wa) % 180.0))
         )
