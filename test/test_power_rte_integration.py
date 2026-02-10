@@ -43,7 +43,7 @@ class ExcelSheet:
         kem = np.where(
             (core_diameter_m > 0.0) & (self.args["nbc"] == 3),
             self.args["magnetic_coeff"]
-            + self.args["ki"]
+            + self.args["magnetic_coeff_per_a"]
             * transit
             / (self.args["outer_area_m2"] - self.args["core_area_m2"])
             * 1.0e-06,
@@ -148,7 +148,7 @@ def excel_conductor_data():
             RDC20=[0.0272, 0.146, 0.0583, 0.089, 0.18, 0.0657],
             kl=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
             magnetic_coeff=[1.006, 1.0, 1.0, 1.0, 1.0, 1.006],
-            ki=[0.016, 0.0, 0.0, 0.0, 0.0, 0.016],
+            magnetic_coeff_per_a=[0.016, 0.0, 0.0, 0.0, 0.0, 0.016],
             kq=[8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07],
             nbc=[3, 0, 0, 2, 2, 3],
         )

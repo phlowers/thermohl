@@ -156,7 +156,7 @@ RDC20:
   relative_std: true
 magnetic_coeff:
   dist: null
-ki:
+magnetic_coeff_per_a:
   dist: null
 kl:
   dist: null

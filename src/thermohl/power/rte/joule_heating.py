@@ -24,7 +24,7 @@ class JouleHeating(PowerTerm):
         outer_area_m2: floatArrayLike,
         core_area_m2: floatArrayLike,
         magnetic_coeff: floatArrayLike,
-        ki: floatArrayLike,
+        magnetic_coeff_per_a: floatArrayLike,
         kl: floatArrayLike,
         kq: floatArrayLike,
         RDC20: floatArrayLike,
@@ -43,7 +43,7 @@ class JouleHeating(PowerTerm):
             outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
             core_area_m2 (float | numpy.ndarray): Core cross-sectional area (m²).
             magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
-            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
+            magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
             kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             kq (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
             RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
@@ -54,7 +54,9 @@ class JouleHeating(PowerTerm):
         self.current_a = transit
         self.outer_diameter_m = outer_diameter_m
         self.core_diameter_m = core_diameter_m
-        self.magnetic_coeff = self._kem(outer_area_m2, core_area_m2, magnetic_coeff, ki)
+        self.magnetic_coeff = self._kem(
+            outer_area_m2, core_area_m2, magnetic_coeff, magnetic_coeff_per_a
+        )
         self.temp_coeff_linear = kl
         self.temp_coeff_quadratic = kq
         self.dc_resistance_20c = RDC20
@@ -113,7 +115,7 @@ class JouleHeating(PowerTerm):
         outer_area_m2: floatArrayLike,
         core_area_m2: floatArrayLike,
         magnetic_coeff: floatArrayLike,
-        ki: floatArrayLike,
+        magnetic_coeff_per_a: floatArrayLike,
     ) -> floatArrayLike:
         """
         Compute magnetic coefficient.
@@ -122,7 +124,7 @@ class JouleHeating(PowerTerm):
             outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
             core_area_m2 (float | numpy.ndarray): Core cross-sectional area (m²).
             magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
-            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
+            magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
 
         Returns:
             floatArrayLike: Computed magnetic coefficient (—).
@@ -132,7 +134,7 @@ class JouleHeating(PowerTerm):
             * np.ones_like(outer_area_m2)
             * np.ones_like(core_area_m2)
             * np.ones_like(magnetic_coeff)
-            * np.ones_like(ki)
+            * np.ones_like(magnetic_coeff_per_a)
         )
         is_scalar = scale.shape == ()
         if is_scalar:
@@ -141,7 +143,7 @@ class JouleHeating(PowerTerm):
         core_area = core_area_m2 * scale
         outer_area = outer_area_m2 * scale
         has_core = core_area > 0.0
-        magnetic_slope = ki * scale
+        magnetic_slope = magnetic_coeff_per_a * scale
         magnetic_coeff = magnetic_coeff * scale
         magnetic_coeff[has_core] += (
             magnetic_slope[has_core]
