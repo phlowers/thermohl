@@ -11,7 +11,7 @@ latitude_deg:
   max: 55.
   std: 4.4E-04
   relative_std: false
-lon:
+longitude_deg:
   dist: null
   min: -4.9
   max: +8.3
