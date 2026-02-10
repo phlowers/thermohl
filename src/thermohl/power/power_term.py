@@ -43,7 +43,7 @@ class PowerTerm(ABC):
     def derivative(
         self,
         conductor_temperature_c: floatArrayLike,
-        temp_increment: float = _TEMP_INCREMENT,
+        temperature_increment: float = _TEMP_INCREMENT,
     ) -> floatArrayLike:
         r"""Compute power term derivative regarding temperature in function of temperature.
 
@@ -53,13 +53,13 @@ class PowerTerm(ABC):
 
         Args:
             conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
-            temp_increment (float, optional): Temperature increment. The default is 1.0E-03.
+            temperature_increment (float, optional): Temperature increment. The default is 1.0E-03.
 
         Returns:
             float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return (
-            self.value(conductor_temperature_c + temp_increment)
-            - self.value(conductor_temperature_c - temp_increment)
-        ) / (2.0 * temp_increment)
+            self.value(conductor_temperature_c + temperature_increment)
+            - self.value(conductor_temperature_c - temperature_increment)
+        ) / (2.0 * temperature_increment)
