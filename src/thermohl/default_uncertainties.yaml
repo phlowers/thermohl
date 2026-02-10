@@ -21,7 +21,7 @@ altitude:
   max: 3000.
   std: 10.
   relative_std: false
-azm:
+azimuth:
   dist: 'wrapnorm'
   std: 10.
   relative_std: false

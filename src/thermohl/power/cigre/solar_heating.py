@@ -19,7 +19,7 @@ class SolarHeating(PowerTerm):
     @staticmethod
     def _solar_radiation(
         lat: floatArrayLike,
-        azm: floatArrayLike,
+        azimuth: floatArrayLike,
         albedo: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -38,7 +38,7 @@ class SolarHeating(PowerTerm):
             / np.cos(solar_altitude_rad)
         )
         incidence_angle_rad = np.arccos(
-            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azm)
+            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azimuth)
         )
         direct_term = 0.5 * np.pi * albedo * np.sin(solar_altitude_rad) + np.sin(
             incidence_angle_rad
@@ -65,7 +65,7 @@ class SolarHeating(PowerTerm):
     def __init__(
         self,
         lat: floatArrayLike,
-        azm: floatArrayLike,
+        azimuth: floatArrayLike,
         al: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -81,7 +81,7 @@ class SolarHeating(PowerTerm):
 
         Args:
             lat (float | numpy.ndarray): Latitude.
-            azm (float | numpy.ndarray): Azimuth.
+            azimuth (float | numpy.ndarray): Azimuth.
             al (float | numpy.ndarray): Albedo.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
@@ -93,7 +93,7 @@ class SolarHeating(PowerTerm):
         self.solar_absorptivity = alpha
         if srad is None:
             self.solar_irradiance = SolarHeating._solar_radiation(
-                np.deg2rad(lat), np.deg2rad(azm), al, month, day, hour
+                np.deg2rad(lat), np.deg2rad(azimuth), al, month, day, hour
             )
         else:
             self.solar_irradiance = srad

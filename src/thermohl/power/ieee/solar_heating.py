@@ -17,7 +17,7 @@ class SolarHeating(SolarHeatingBase):
         self,
         lat: floatArrayLike,
         altitude: floatArrayLike,
-        azm: floatArrayLike,
+        azimuth: floatArrayLike,
         tb: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -34,7 +34,7 @@ class SolarHeating(SolarHeatingBase):
         Args:
             lat (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
-            azm (float | numpy.ndarray): Azimuth.
+            azimuth (float | numpy.ndarray): Azimuth.
             tb (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
@@ -64,5 +64,5 @@ class SolarHeating(SolarHeatingBase):
             ],
         )
         super().__init__(
-            lat, altitude, azm, tb, month, day, hour, D, alpha, est, srad, **kwargs
+            lat, altitude, azimuth, tb, month, day, hour, D, alpha, est, srad, **kwargs
         )

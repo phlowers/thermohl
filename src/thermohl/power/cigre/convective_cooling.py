@@ -20,7 +20,7 @@ class ConvectiveCooling(PowerTerm):
     def __init__(
         self,
         altitude: floatArrayLike,
-        azm: floatArrayLike,
+        azimuth: floatArrayLike,
         Ta: floatArrayLike,
         ws: floatArrayLike,
         wa: floatArrayLike,
@@ -35,7 +35,7 @@ class ConvectiveCooling(PowerTerm):
 
         Args:
             altitude (float | numpy.ndarray): Altitude (m).
-            azm (float | numpy.ndarray): Azimuth (deg).
+            azimuth (float | numpy.ndarray): Azimuth (deg).
             Ta (float | numpy.ndarray): Ambient temperature (°C).
             ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
             wa (float | numpy.ndarray): Wind angle regarding north (deg).
@@ -50,7 +50,9 @@ class ConvectiveCooling(PowerTerm):
         self.outer_diameter_m = D
         self.roughness_ratio = R
         self.gravity_ms2 = g
-        self.attack_angle_rad = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.0)))
+        self.attack_angle_rad = np.arcsin(
+            np.sin(np.deg2rad(np.abs(azimuth - wa) % 180.0))
+        )
 
     def _nu_forced(
         self, film_temp_c: floatArrayLike, kinematic_viscosity: floatArrayLike

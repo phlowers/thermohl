@@ -23,7 +23,7 @@ def set_default_values_scalar():
     dic["TLow"] = 25.0
     dic["RDCHigh"] = 8.688e-05
     dic["RDCLow"] = 7.283e-05
-    dic["azm"] = 90.0
+    dic["azimuth"] = 90.0
     dic["lat"] = 30.0
     dic["tb"] = 0.0
     dic["altitude"] = 0.0
@@ -46,7 +46,7 @@ def set_default_values_array():
     dic["TLow"] = np.array([25.0, 20])
     dic["RDCHigh"] = np.array([8.688e-05, 8.688e-05])
     dic["RDCLow"] = np.array([7.283e-05, 7.283e-05])
-    dic["azm"] = np.array([90.0, 90.0])
+    dic["azimuth"] = np.array([90.0, 90.0])
     dic["lat"] = np.array([30.0, 30.0])
     dic["tb"] = np.array([0.0, 0.0])
     dic["altitude"] = np.array([0.0, 0.0])

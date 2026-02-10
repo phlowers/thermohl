@@ -27,7 +27,7 @@ def test_compare_powers():
     dic["TLow"] = 25.0
     dic["RDCHigh"] = 8.688e-05
     dic["RDCLow"] = 7.283e-05
-    dic["azm"] = 90.0
+    dic["azimuth"] = 90.0
     dic["lat"] = 30.0
     dic["tb"] = 0.0
     dic["altitude"] = 0.0
@@ -66,5 +66,5 @@ def test_compare_powers():
     )
     np.isclose(np.rad2deg(sz), 114.0, rtol=0.001)
 
-    th = np.arccos(np.cos(sa) * np.cos(sz - dic["azm"]))
+    th = np.arccos(np.cos(sa) * np.cos(sz - dic["azimuth"]))
     np.isclose(np.rad2deg(th), 76.1, rtol=0.02)

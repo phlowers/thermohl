@@ -173,7 +173,7 @@ def scenarios():
         ],
         lat=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         altitude=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-        azm=90.0,
+        azimuth=90.0,
         transit=[
             1000.0,
             1000.0,
@@ -213,7 +213,7 @@ def test_compare_power():
 
     d1 = df2dct(ds)
     ds["wa"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(ds["azm"] - ds["wa"]) % 180.0)))
+        np.arcsin(np.sin(np.deg2rad(np.abs(ds["azimuth"] - ds["wa"]) % 180.0)))
     )
     d2 = df2dct(ds)
     del (ds, n)
@@ -237,7 +237,7 @@ def test_solar_heating():
     ones = np.ones(n)
 
     lat = np.array([40.0, 46.0, 46.0, 46.0, 46.0])
-    azm = np.array([90.0, 0.0, 0.0, 0.0, 0.0])
+    azimuth = np.array([90.0, 0.0, 0.0, 0.0, 0.0])
     month = np.array([7, 3, 3, 3, 3])
     day = np.array([19, 7, 14, 7, 7])
     hour = np.array([14.0, 12.0, 17.0, 12.0, 12.0])
@@ -245,6 +245,6 @@ def test_solar_heating():
     alpha = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
-    s = rte.SolarHeating(lat, azm, month, day, hour, D, alpha, Qs=np.nan)
+    s = rte.SolarHeating(lat, azimuth, month, day, hour, D, alpha, Qs=np.nan)
 
     assert np.allclose(p, s.value(ones), 0.1)
