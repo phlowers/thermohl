@@ -23,7 +23,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
 
     def __init__(
         self,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         Ta: floatArrayLike,
         ws: floatArrayLike,
@@ -36,7 +36,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            alt (float | numpy.ndarray): Altitude (m).
+            altitude (float | numpy.ndarray): Altitude (m).
             azm (float | numpy.ndarray): Azimuth (deg).
             Ta (float | numpy.ndarray): Ambient temperature (°C).
             ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
@@ -45,7 +45,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
 
         """
         super().__init__(
-            alt,
+            altitude,
             azm,
             Ta,
             ws,
@@ -72,7 +72,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         """
         film_temp_c = 0.5 * (T + self.ambient_temp_c)
         temp_delta_c = T - self.ambient_temp_c
-        # very slight difference with air.IEEE.volumic_mass() in coefficient before alt**2
+        # very slight difference with air.IEEE.volumic_mass() in coefficient before altitude**2
         air_density = (
             1.293 - 1.525e-04 * self.altitude_m + 6.38e-09 * self.altitude_m**2
         ) / (1 + 0.00367 * film_temp_c)

@@ -51,7 +51,7 @@ if __name__ == "__main__":
     N = 9999
     dct = dict(
         lat=np.random.uniform(42.0, 51.0, N),
-        alt=np.random.uniform(0.0, 1600.0, N),
+        altitude=np.random.uniform(0.0, 1600.0, N),
         azm=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),

@@ -18,7 +18,7 @@ class ConvectiveCoolingBase(PowerTerm):
 
     def __init__(
         self,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         Ta: floatArrayLike,
         ws: floatArrayLike,
@@ -29,7 +29,7 @@ class ConvectiveCoolingBase(PowerTerm):
         lambda_: Callable[[floatArrayLike], floatArrayLike],
         **kwargs: Any,
     ):
-        self.altitude_m = alt
+        self.altitude_m = altitude
         self.ambient_temp_c = Ta
         self.wind_speed_ms = ws
         self.attack_angle_rad = np.arcsin(np.sin(np.deg2rad(np.abs(azm - wa) % 180.0)))

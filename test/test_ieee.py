@@ -30,7 +30,7 @@ def test_compare_powers():
     dic["azm"] = 90.0
     dic["lat"] = 30.0
     dic["tb"] = 0.0
-    dic["alt"] = 0.0
+    dic["altitude"] = 0.0
     dic["D"] = 28.14 * 1.0e-03
     dic["d"] = 10.4 * 1.0e-03
     dic["month"] = 6

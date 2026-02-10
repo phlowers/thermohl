@@ -19,7 +19,7 @@ class ConvectiveCooling(PowerTerm):
 
     def __init__(
         self,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         Ta: floatArrayLike,
         ws: floatArrayLike,
@@ -34,7 +34,7 @@ class ConvectiveCooling(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            alt (float | numpy.ndarray): Altitude (m).
+            altitude (float | numpy.ndarray): Altitude (m).
             azm (float | numpy.ndarray): Azimuth (deg).
             Ta (float | numpy.ndarray): Ambient temperature (°C).
             ws (float | numpy.ndarray): Wind speed (m·s⁻¹).
@@ -44,7 +44,7 @@ class ConvectiveCooling(PowerTerm):
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
 
         """
-        self.altitude_m = alt
+        self.altitude_m = altitude
         self.ambient_temp_c = Ta
         self.wind_speed_ms = ws
         self.outer_diameter_m = D

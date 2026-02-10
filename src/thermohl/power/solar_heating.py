@@ -63,7 +63,7 @@ class _SRad:
     def __call__(
         self,
         lat: floatArrayLike,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         trb: floatArrayLike,
         month: intArrayLike,
@@ -76,7 +76,7 @@ class _SRad:
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azm)
         )
-        altitude_factor = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
+        altitude_factor = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
         clearness_factor = self.catm(np.rad2deg(solar_altitude_rad), trb)
         solar_irradiance = (
             altitude_factor * clearness_factor * np.sin(incidence_angle_rad)
@@ -90,7 +90,7 @@ class SolarHeatingBase(PowerTerm):
     def __init__(
         self,
         lat: floatArrayLike,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         tb: floatArrayLike,
         month: intArrayLike,
@@ -106,7 +106,7 @@ class SolarHeatingBase(PowerTerm):
         if srad is None:
             self.solar_irradiance = est(
                 np.deg2rad(lat),
-                alt,
+                altitude,
                 np.deg2rad(azm),
                 tb,
                 month,

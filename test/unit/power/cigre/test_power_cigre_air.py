@@ -13,20 +13,20 @@ from thermohl.power.cigre import Air
 
 def test_volumic_mass_scalar():
     Tc = 25.0
-    alt = 1000.0
-    expected = 1.2925 * np.exp(-1.16e-04 * alt)
+    altitude = 1000.0
+    expected = 1.2925 * np.exp(-1.16e-04 * altitude)
 
-    result = Air.volumic_mass(Tc, alt)
+    result = Air.volumic_mass(Tc, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_volumic_mass_array():
     Tc = np.array([15.0, 20.0, 25.0])
-    alt = np.array([0.0, 500.0, 1000.0])
-    expected = 1.2925 * np.exp(-1.16e-04 * alt)
+    altitude = np.array([0.0, 500.0, 1000.0])
+    expected = 1.2925 * np.exp(-1.16e-04 * altitude)
 
-    result = Air.volumic_mass(Tc, alt)
+    result = Air.volumic_mass(Tc, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -42,27 +42,27 @@ def test_volumic_mass_default_altitude():
 
 def test_volumic_mass_mismatched_array_sizes():
     Tc = np.array([15.0, 20.0])
-    alt = np.array([0.0, 500.0, 1000.0])
+    altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.volumic_mass(Tc, alt)
+        Air.volumic_mass(Tc, altitude)
 
 
 def test_relative_density_scalar():
     Tc = 25.0
-    alt = 1000.0
-    expected = np.exp(-1.16e-04 * alt)
+    altitude = 1000.0
+    expected = np.exp(-1.16e-04 * altitude)
 
-    result = Air.relative_density(Tc, alt)
+    result = Air.relative_density(Tc, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_relative_density_array():
     Tc = np.array([15.0, 20.0, 25.0])
-    alt = np.array([0.0, 500.0, 1000.0])
-    expected = np.exp(-1.16e-04 * alt)
+    altitude = np.array([0.0, 500.0, 1000.0])
+    expected = np.exp(-1.16e-04 * altitude)
 
-    result = Air.relative_density(Tc, alt)
+    result = Air.relative_density(Tc, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -78,9 +78,9 @@ def test_relative_density_default_altitude():
 
 def test_relative_density_mismatched_array_sizes():
     Tc = np.array([15.0, 20.0])
-    alt = np.array([0.0, 500.0, 1000.0])
+    altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.relative_density(Tc, alt)
+        Air.relative_density(Tc, altitude)
 
 
 def test_kinematic_viscosity_scalar():
@@ -121,20 +121,20 @@ def test_kinematic_viscosity_zero_temperature():
 
 def test_dynamic_viscosity_scalar():
     Tc = 25.0
-    alt = 1000.0
-    expected = Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
+    altitude = 1000.0
+    expected = Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, altitude)
 
-    result = Air.dynamic_viscosity(Tc, alt)
+    result = Air.dynamic_viscosity(Tc, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_dynamic_viscosity_array():
     Tc = np.array([15.0, 20.0, 25.0])
-    alt = np.array([0.0, 500.0, 1000.0])
-    expected = Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
+    altitude = np.array([0.0, 500.0, 1000.0])
+    expected = Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, altitude)
 
-    result = Air.dynamic_viscosity(Tc, alt)
+    result = Air.dynamic_viscosity(Tc, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -150,9 +150,9 @@ def test_dynamic_viscosity_default_altitude():
 
 def test_dynamic_viscosity_mismatched_array_sizes():
     Tc = np.array([15.0, 20.0])
-    alt = np.array([0.0, 500.0, 1000.0])
+    altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.dynamic_viscosity(Tc, alt)
+        Air.dynamic_viscosity(Tc, altitude)
 
 
 def test_thermal_conductivity_scalar():

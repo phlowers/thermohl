@@ -15,7 +15,7 @@ lon:
   dist: null
   min: -4.9
   max: +8.3
-alt:
+altitude:
   dist: 'truncnorm'
   min: 0.
   max: 3000.
