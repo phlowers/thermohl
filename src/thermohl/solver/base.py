@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'tb', 'transit', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'RDCLow',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'linear_resistance_temp_low_ohm_m',
     #     'THigh', 'TLow'
     # ]
 
@@ -102,9 +102,11 @@ class Args:
         # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
         self.RDCHigh = 3.05e-05
         # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
-        self.RDCLow = 2.66e-05
+        self.linear_resistance_temp_low_ohm_m = 2.66e-05
         self.THigh = 60.0  # temperature for RDCHigh measurement (°C)
-        self.TLow = 20.0  # temperature for RDCLow measurement (°C)
+        self.TLow = (
+            20.0  # temperature for linear_resistance_temp_low_ohm_m measurement (°C)
+        )
 
     def keys(self) -> KeysView[str]:
         """Get list of members as dict keys."""
