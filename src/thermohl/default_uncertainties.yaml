@@ -120,7 +120,7 @@ A:
   max: 2.0E-03
   std: 2.5E-04
   relative_std: true
-R:
+cable_roughness:
   dist: 'truncnorm'
   min: 0.02
   max: 0.20

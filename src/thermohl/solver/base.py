@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'lat', 'lon', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
-    #     'd', 'outer_diameter_m', 'a', 'A', 'R', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
+    #     'd', 'outer_diameter_m', 'a', 'A', 'cable_roughness', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
 
@@ -84,7 +84,7 @@ class Args:
         self.outer_diameter_m = 3.0e-02  # external (global) diameter (m)
         self.a = 2.84e-04  # core section (m**2)
         self.A = 7.07e-04  # external (global) section (m**2)
-        self.R = 4.0e-02  # roughness (1)
+        self.cable_roughness = 4.0e-02  # roughness (1)
         self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
         self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 

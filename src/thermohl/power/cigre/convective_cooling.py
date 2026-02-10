@@ -25,7 +25,7 @@ class ConvectiveCooling(PowerTerm):
         wind_speed_ms: floatArrayLike,
         wind_angle_deg: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        R: floatArrayLike,
+        cable_roughness: floatArrayLike,
         g: float = 9.81,
         **kwargs: Any,
     ):
@@ -40,7 +40,7 @@ class ConvectiveCooling(PowerTerm):
             wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
             wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
-            R (float | numpy.ndarray): Cable roughness (—).
+            cable_roughness (float | numpy.ndarray): Cable roughness (—).
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
 
         """
@@ -48,7 +48,7 @@ class ConvectiveCooling(PowerTerm):
         self.ambient_temp_c = ambient_temperature_c
         self.wind_speed_ms = wind_speed_ms
         self.outer_diameter_m = outer_diameter_m
-        self.roughness_ratio = R
+        self.roughness_ratio = cable_roughness
         self.gravity_ms2 = g
         self.attack_angle_rad = np.arcsin(
             np.sin(np.deg2rad(np.abs(azimuth - wind_angle_deg) % 180.0))
@@ -70,7 +70,7 @@ class ConvectiveCooling(PowerTerm):
         Notes:
             The function calculates the Nusselt number based on the relative density of air,
             the Reynolds number, and empirical correlations. The correlations are adjusted
-            depending on the Reynolds number and the roughness ratio R. The function also
+            depending on the Reynolds number and the roughness ratio cable_roughness. The function also
             considers the angle of attack (da) to adjust the coefficients.
         """
         relative_density = Air.relative_density(film_temp_c, self.altitude_m)
