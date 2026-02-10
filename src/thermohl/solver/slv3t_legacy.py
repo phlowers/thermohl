@@ -44,7 +44,9 @@ class Solver3TL(Solver3T):
         UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
         BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
 
-        core_diameter_array = self.args.d * np.ones((self.args.max_len(),))
+        core_diameter_array = self.args.core_diameter_m * np.ones(
+            (self.args.max_len(),)
+        )
         indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
         heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(
             core_diameter_array
@@ -88,7 +90,7 @@ class Solver3TL(Solver3T):
 
         max_len = self.args.max_len()
         Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
+        target_ = self._check_target(target, self.args.core_diameter_m, max_len)
 
         # pre-compute indexes
         surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]

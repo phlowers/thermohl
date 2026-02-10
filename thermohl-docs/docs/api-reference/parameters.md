@@ -37,7 +37,7 @@ units, default values and in which set of power terms they are used.
 | tb        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |
 | transit   | 100           | A          | yes           | yes          | yes          | yes         | transit intensity                                            |
 | m         | 1.5           | kg.m⁻¹     | yes           | yes          | yes          | yes         | mass per unit length (only used in transient mode)           |
-| d         | 1.9E-02       | m          | no            | no           | yes          | yes         | core diameter                                                |
+| core_diameter_m         | 1.9E-02       | m          | no            | no           | yes          | yes         | core diameter                                                |
 | outer_diameter_m         | 3.0E-02       | m          | yes           | yes          | yes          | yes         | external (global) diameter                                   |
 | a         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
 | A         | 7.07E-04      | m²         | no            | no           | yes          | yes         | external (global) section                                    |

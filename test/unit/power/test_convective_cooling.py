@@ -28,7 +28,7 @@ def set_default_values_scalar():
     dic["tb"] = 0.0
     dic["altitude"] = 0.0
     dic["outer_diameter_m"] = 28.14 * 1.0e-03
-    dic["d"] = 10.4 * 1.0e-03
+    dic["core_diameter_m"] = 10.4 * 1.0e-03
     dic["month"] = 6
     dic["day"] = 10
     dic["hour"] = 11.0
@@ -51,7 +51,7 @@ def set_default_values_array():
     dic["tb"] = np.array([0.0, 0.0])
     dic["altitude"] = np.array([0.0, 0.0])
     dic["outer_diameter_m"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
-    dic["d"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
+    dic["core_diameter_m"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
     dic["month"] = np.array([6, 3])
     dic["day"] = np.array([10, 13])
     dic["hour"] = np.array([11.0, 8.0])

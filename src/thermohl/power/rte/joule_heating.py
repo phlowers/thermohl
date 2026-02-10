@@ -20,7 +20,7 @@ class JouleHeating(PowerTerm):
         self,
         transit: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        d: floatArrayLike,
+        core_diameter_m: floatArrayLike,
         A: floatArrayLike,
         a: floatArrayLike,
         km: floatArrayLike,
@@ -39,7 +39,7 @@ class JouleHeating(PowerTerm):
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
-            d (float | numpy.ndarray): Core diameter (m).
+            core_diameter_m (float | numpy.ndarray): Core diameter (m).
             A (float | numpy.ndarray): External (total) cross-sectional area (m²).
             a (float | numpy.ndarray): Core cross-sectional area (m²).
             km (float | numpy.ndarray): Coefficient for magnetic effects (—).
@@ -53,7 +53,7 @@ class JouleHeating(PowerTerm):
         """
         self.current_a = transit
         self.outer_diameter_m = outer_diameter_m
-        self.core_diameter_m = d
+        self.core_diameter_m = core_diameter_m
         self.magnetic_coeff = self._kem(A, a, km, ki)
         self.temp_coeff_linear = kl
         self.temp_coeff_quadratic = kq

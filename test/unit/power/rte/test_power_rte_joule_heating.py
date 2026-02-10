@@ -14,7 +14,7 @@ joule_heating_instances = [
     JouleHeating(
         transit=np.array([10.0]),
         outer_diameter_m=np.array([0.01]),
-        d=np.array([0.005]),
+        core_diameter_m=np.array([0.005]),
         A=np.array([0.0001]),
         a=np.array([0.00005]),
         km=np.array([1.0]),
@@ -28,7 +28,7 @@ joule_heating_instances = [
     JouleHeating(
         transit=10.0,
         outer_diameter_m=0.01,
-        d=0.005,
+        core_diameter_m=0.005,
         A=0.0001,
         a=0.00005,
         km=1.0,

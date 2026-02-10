@@ -96,7 +96,7 @@ m:
   max: 5.0
   std: 0.05
   relative_std: true
-d:
+core_diameter_m:
   dist: 'truncnorm'
   min: 0.
   max: 0.05

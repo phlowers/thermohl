@@ -79,12 +79,13 @@ class Solver3T(Solver_):
         """
         c = 0.5 * np.ones((self.args.max_len(),))
         outer_diameter_m = self.args.outer_diameter_m * np.ones_like(c)
-        d = self.args.d * np.ones_like(c)
-        i = np.nonzero(d > 0.0)[0]
-        c[i] -= (d[i] ** 2 / (outer_diameter_m[i] ** 2 - d[i] ** 2)) * np.log(
-            outer_diameter_m[i] / d[i]
-        )
-        return c, outer_diameter_m, d, i
+        core_diameter_m = self.args.core_diameter_m * np.ones_like(c)
+        i = np.nonzero(core_diameter_m > 0.0)[0]
+        c[i] -= (
+            core_diameter_m[i] ** 2
+            / (outer_diameter_m[i] ** 2 - core_diameter_m[i] ** 2)
+        ) * np.log(outer_diameter_m[i] / core_diameter_m[i])
+        return c, outer_diameter_m, core_diameter_m, i
 
     def update(self) -> None:
         """
@@ -125,9 +126,9 @@ class Solver3T(Solver_):
             float | numpy.ndarray: Array of average temperatures.
         """
         ambient_temperature_c = 0.5 * (ts + tc)
-        _, outer_diameter_m, d, ix = self.mgc
+        _, outer_diameter_m, core_diameter_m, ix = self.mgc
         ambient_temperature_c[ix] = _profile_bim_avg(
-            ts[ix], tc[ix], 0.5 * d[ix], 0.5 * outer_diameter_m[ix]
+            ts[ix], tc[ix], 0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]
         )
         return ambient_temperature_c
 
@@ -229,7 +230,9 @@ class Solver3T(Solver_):
             delta_y=1.0e-03,
         )
         if np.max(err) > tol or cnt == maxiter:
-            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
+            print(
+                f"rstat_analytic max err is {np.max(err):.3E} in {cnt:core_diameter_m} iterations"
+            )
 
         # format output
         z = self.average(x, y)
@@ -251,10 +254,12 @@ class Solver3T(Solver_):
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        c, outer_diameter_m, d, ix = self.mgc
+        c, outer_diameter_m, core_diameter_m, ix = self.mgc
         c1 = c / (2.0 * np.pi * self.args.l)
         c2 = 0.5 * np.ones_like(c1)
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * outer_diameter_m[ix])
+        a, b = _profile_bim_avg_coeffs(
+            0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]
+        )
         c2[ix] = a / b
         return c1, c2
 
@@ -369,7 +374,7 @@ class Solver3T(Solver_):
         )
 
     @staticmethod
-    def _check_target(target, d, max_len):
+    def _check_target(target, core_diameter_m, max_len):
         """
         Validates and processes the target temperature input.
 
@@ -388,7 +393,7 @@ class Solver3T(Solver_):
         """
         # check target
         if target == "auto":
-            d_ = d * np.ones(max_len)
+            d_ = core_diameter_m * np.ones(max_len)
             target_ = np.array(
                 [
                     Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
@@ -428,11 +433,11 @@ class Solver3T(Solver_):
 
         max_len = self.args.max_len()
         Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.d, max_len)
+        target_ = self._check_target(target, self.args.core_diameter_m, max_len)
 
         # pre-compute indexes
-        c, outer_diameter_m, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * outer_diameter_m)
+        c, outer_diameter_m, core_diameter_m, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * core_diameter_m, 0.5 * outer_diameter_m)
 
         js = np.nonzero(target_ == Solver_.Names.surf)[0]
         ja = np.nonzero(target_ == Solver_.Names.avg)[0]
@@ -517,7 +522,9 @@ class Solver3T(Solver_):
             delta_y=1.0e-03,
         )
         if np.max(err) > tol or cnt == maxiter:
-            print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
+            print(
+                f"rstat_analytic max err is {np.max(err):.3E} in {cnt:core_diameter_m} iterations"
+            )
 
         # format output
         df = pd.DataFrame({Solver_.Names.transit: x})

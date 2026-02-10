@@ -22,7 +22,7 @@ class ExcelSheet:
     def joule_heating(self, ambient_temperature_c, transit=None):
         if transit is None:
             transit = self.args["transit"]
-        d = self.args["d"]
+        core_diameter_m = self.args["core_diameter_m"]
         outer_diameter_m = self.args["outer_diameter_m"]
         Rdc = self.args["RDC20"] * (
             1.0
@@ -33,15 +33,15 @@ class ExcelSheet:
             8
             * np.pi
             * 50.0
-            * (outer_diameter_m - d) ** 2
-            / ((outer_diameter_m**2 - d**2) * 1.0e07 * Rdc)
+            * (outer_diameter_m - core_diameter_m) ** 2
+            / ((outer_diameter_m**2 - core_diameter_m**2) * 1.0e07 * Rdc)
         )
         a = 7 * z**2 / (315 + 3 * z**2)
         b = 56 / (211 + z**2)
-        beta = 1.0 - d / outer_diameter_m
+        beta = 1.0 - core_diameter_m / outer_diameter_m
         kep = 1 + a * (1.0 - 0.5 * beta - b * beta**2)
         kem = np.where(
-            (d > 0.0) & (self.args["nbc"] == 3),
+            (core_diameter_m > 0.0) & (self.args["nbc"] == 3),
             self.args["km"]
             + self.args["ki"] * transit / (self.args["A"] - self.args["a"]) * 1.0e-06,
             1.0,
@@ -138,7 +138,7 @@ def excel_conductor_data():
                 "Petunia612",
             ],
             outer_diameter_m=[44.0, 19.6, 31.06, 26.4, 19.6, 32.1],
-            d=[21.28, 0.0, 0.0, 12.0, 8.4, 13.25],
+            core_diameter_m=[21.28, 0.0, 0.0, 12.0, 8.4, 13.25],
             A=[1317, 228, 570, 412, 228, 612],
             a=[0, 0, 0, 0, 0, 0],
             B=[1049, 228, 570, 323, 185, 508],
@@ -154,7 +154,7 @@ def excel_conductor_data():
     df["a"] = df["A"] - df["B"]
     df.drop(columns=["B"], inplace=True)
     df["outer_diameter_m"] *= 1.0e-03
-    df["d"] *= 1.0e-03
+    df["core_diameter_m"] *= 1.0e-03
     df["A"] *= 1.0e-06
     df["a"] *= 1.0e-06
     df["RDC20"] *= 1.0e-03
