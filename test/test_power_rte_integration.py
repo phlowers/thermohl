@@ -202,7 +202,7 @@ def scenarios():
         ],
         wind_speed_ms=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
         wind_angle_deg=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
-        Qs=[
+        measured_solar_irradiance_w_m2=[
             np.nan,
             np.nan,
             np.nan,
@@ -298,7 +298,7 @@ def test_solar_heating():
         hour,
         outer_diameter_m,
         solar_absorptivity,
-        Qs=np.nan,
+        measured_solar_irradiance_w_m2=np.nan,
     )
 
     assert np.allclose(p, s.value(ones), 0.1)

@@ -59,7 +59,7 @@ class SolarHeating(SolarHeatingBase):
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        Qs: Optional[floatArrayLike] = None,
+        measured_solar_irradiance_w_m2: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Build with args.
@@ -74,11 +74,13 @@ class SolarHeating(SolarHeatingBase):
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter_m (float | numpy.ndarray): external diameter.
             solar_absorptivity (numpy.ndarray): Solar absorption coefficient.
-            Qs (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
+            measured_solar_irradiance_w_m2 (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
         self.solar_absorptivity = solar_absorptivity
-        if np.isnan(Qs).all():
-            Qs = solar_irradiance(np.deg2rad(latitude_deg), month, day, hour)
+        if np.isnan(measured_solar_irradiance_w_m2).all():
+            measured_solar_irradiance_w_m2 = solar_irradiance(
+                np.deg2rad(latitude_deg), month, day, hour
+            )
         solar_altitude_rad = sun.solar_altitude(
             np.deg2rad(latitude_deg), month, day, hour
         )
@@ -88,6 +90,6 @@ class SolarHeating(SolarHeatingBase):
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - np.deg2rad(azimuth))
         )
-        irradiance = Qs * np.sin(incidence_angle_rad)
+        irradiance = measured_solar_irradiance_w_m2 * np.sin(incidence_angle_rad)
         self.solar_irradiance = np.maximum(irradiance, 0.0)
         self.outer_diameter_m = outer_diameter_m
