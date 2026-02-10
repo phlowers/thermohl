@@ -71,7 +71,7 @@ class SolarHeating(PowerTerm):
         day: intArrayLike,
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        alpha: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
         srad: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
@@ -87,10 +87,10 @@ class SolarHeating(PowerTerm):
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter_m (float | numpy.ndarray): external diameter.
-            alpha (float | numpy.ndarray): Solar absorption coefficient.
+            solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
             srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
         """
-        self.solar_absorptivity = alpha
+        self.solar_absorptivity = solar_absorptivity
         if srad is None:
             self.solar_irradiance = SolarHeating._solar_radiation(
                 np.deg2rad(latitude_deg), np.deg2rad(azimuth), albedo, month, day, hour

@@ -59,7 +59,7 @@ def test_power_1d():
     for s in _solvers():
         d = s.args.__dict__.copy()
         d["transit"] = np.linspace(0.0, +999.0, n)
-        d["alpha"] = np.linspace(0.5, 0.9, n)
+        d["solar_absorptivity"] = np.linspace(0.5, 0.9, n)
         d["ambient_temperature_c"] = np.linspace(-10.0, +50.0, n)
         for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
             p.__init__(**d)

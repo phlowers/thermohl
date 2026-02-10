@@ -97,12 +97,12 @@ class SolarHeatingBase(PowerTerm):
         day: intArrayLike,
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        alpha: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
         est: _SRad,
         srad: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
-        self.solar_absorptivity = alpha
+        self.solar_absorptivity = solar_absorptivity
         if srad is None:
             self.solar_irradiance = est(
                 np.deg2rad(latitude_deg),

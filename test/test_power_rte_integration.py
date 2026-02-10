@@ -78,7 +78,7 @@ class ExcelSheet:
         O7 = np.pi / 2
         O2 = np.arccos(np.cos(np.deg2rad(Q6)) * np.cos(Q8 - O7))
         q *= np.sin(O2)
-        return q * self.args["outer_diameter_m"] * self.args["alpha"]
+        return q * self.args["outer_diameter_m"] * self.args["solar_absorptivity"]
 
     def convective_cooling(self, Ts):
         outer_diameter_m = self.args["outer_diameter_m"]
@@ -229,7 +229,7 @@ def scenarios():
             700.0,
             700.0,
         ],
-        alpha=0.9,
+        solar_absorptivity=0.9,
         emissivity=0.8,
         tb=0.0,
         month=[3, 3, 3, 3, 3, 3, 3, 6, 6, 6],
@@ -287,11 +287,18 @@ def test_solar_heating():
     day = np.array([19, 7, 14, 7, 7])
     hour = np.array([14.0, 12.0, 17.0, 12.0, 12.0])
     outer_diameter_m = 4.4e-02 * ones
-    alpha = 0.9 * ones
+    solar_absorptivity = 0.9 * ones
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
     s = rte.SolarHeating(
-        latitude_deg, azimuth, month, day, hour, outer_diameter_m, alpha, Qs=np.nan
+        latitude_deg,
+        azimuth,
+        month,
+        day,
+        hour,
+        outer_diameter_m,
+        solar_absorptivity,
+        Qs=np.nan,
     )
 
     assert np.allclose(p, s.value(ones), 0.1)

@@ -142,7 +142,7 @@ solar_heating_instances = [
         day=np.array([21, 22]),
         hour=np.array([12.0, 13.0]),
         outer_diameter_m=np.array([0.01, 0.02]),
-        alpha=np.array([0.9, 0.8]),
+        solar_absorptivity=np.array([0.9, 0.8]),
         srad=np.array([800.0, 900.0]),
     ),
     SolarHeating(
@@ -154,7 +154,7 @@ solar_heating_instances = [
         day=21,
         hour=12.0,
         outer_diameter_m=0.01,
-        alpha=0.9,
+        solar_absorptivity=0.9,
         srad=800.0,
     ),
 ]
