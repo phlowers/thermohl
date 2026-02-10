@@ -99,11 +99,11 @@ class SolarHeatingBase(PowerTerm):
         outer_diameter_m: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
-        srad: Optional[floatArrayLike] = None,
+        precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         self.solar_absorptivity = solar_absorptivity
-        if srad is None:
+        if precomputed_solar_radiation is None:
             self.solar_irradiance = est(
                 np.deg2rad(latitude_deg),
                 altitude,
@@ -114,7 +114,7 @@ class SolarHeatingBase(PowerTerm):
                 hour,
             )
         else:
-            self.solar_irradiance = np.maximum(srad, 0.0)
+            self.solar_irradiance = np.maximum(precomputed_solar_radiation, 0.0)
         self.outer_diameter_m = outer_diameter_m
 
     def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
