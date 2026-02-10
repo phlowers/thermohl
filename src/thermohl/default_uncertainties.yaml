@@ -64,7 +64,7 @@ pr:
   max: 0.05
   std: 7.0E-08
   relative_std: false
-ws:
+wind_speed_ms:
   dist: 'truncnorm'
   min: 0.
   max: 100.

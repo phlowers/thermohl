@@ -18,7 +18,7 @@ def test_compare_powers():
     # there are a lot of rounding in the standard guide, hence the relatively
     # large tolerances used in our tests ...
 
-    dic["ws"] = 0.61
+    dic["wind_speed_ms"] = 0.61
     dic["wa"] = 0.0
     dic["epsilon"] = 0.8
     dic["alpha"] = 0.8

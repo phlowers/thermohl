@@ -31,7 +31,7 @@ units, default values and in which set of power terms they are used.
 | day       | 21            | N/A        | yes           | yes          | yes          | yes         | day of the month (int in [1, 31])                            |
 | hour      | 12            | N/A        | yes           | yes          | yes          | yes         | hour of the day (float in[0, 24[)                            |
 | ambient_temperature_c        | 15            | celsius    | yes           | yes          | yes          | yes         | ambient temperature                                          |
-| ws        | 0             | m.s⁻¹      | yes           | yes          | yes          | yes         | wind speed                                                   |
+| wind_speed_ms        | 0             | m.s⁻¹      | yes           | yes          | yes          | yes         | wind speed                                                   |
 | wa        | 90            | degree     | yes           | yes          | yes          | yes         | wind angle (regarding north)                                 |
 | al        | 0.8           | N/A        | yes           | no           | no           | no          | albedo                                                       |
 | tb        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |

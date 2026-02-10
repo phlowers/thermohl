@@ -34,7 +34,7 @@ def test_balance():
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
         ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
+        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wa=np.random.uniform(0.0, 90.0, N),
         transit=np.random.uniform(40.0, 4000.0, N),
         d=np.random.randint(2, size=N) * solver.default_values()["d"],
@@ -73,7 +73,7 @@ def test_consistency():
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
         ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
+        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wa=np.random.uniform(0.0, 90.0, N),
         d=np.random.randint(2, size=N) * solver.default_values()["d"],
     )
