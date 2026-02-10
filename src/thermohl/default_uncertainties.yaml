@@ -80,7 +80,7 @@ albedo:
   max: 1.
   std: 0.
   relative_std: false
-tb:
+turbidity:
   dist: null
   min: 0.
   max: 1.

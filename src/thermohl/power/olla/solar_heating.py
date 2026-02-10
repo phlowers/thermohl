@@ -45,13 +45,13 @@ class SolarHeating(ieee.SolarHeating):
             precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
 
         """
-        if "tb" in kwargs.keys():
-            kwargs.pop("tb")
+        if "turbidity" in kwargs.keys():
+            kwargs.pop("turbidity")
         super().__init__(
             latitude_deg=latitude_deg,
             altitude=altitude,
             azimuth=azimuth,
-            tb=0.0,
+            turbidity=0.0,
             month=month,
             day=day,
             hour=hour,

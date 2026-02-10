@@ -34,7 +34,7 @@ units, default values and in which set of power terms they are used.
 | wind_speed_ms        | 0             | m.s⁻¹      | yes           | yes          | yes          | yes         | wind speed                                                   |
 | wind_angle_deg        | 90            | degree     | yes           | yes          | yes          | yes         | wind angle (regarding north)                                 |
 | albedo        | 0.8           | N/A        | yes           | no           | no           | no          | albedo                                                       |
-| tb        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |
+| turbidity        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |
 | transit   | 100           | A          | yes           | yes          | yes          | yes         | transit intensity                                            |
 | m         | 1.5           | kg.m⁻¹     | yes           | yes          | yes          | yes         | mass per unit length (only used in transient mode)           |
 | core_diameter_m         | 1.9E-02       | m          | no            | no           | yes          | yes         | core diameter                                                |
@@ -67,5 +67,5 @@ $ R_{\text{DC,high}} - R_{\text{DC,low}} = (T_{\text{high}} - T_{\text{low}}) \c
 
 If you use direct solar radiation formula (with `precomputed_solar_radiation` key), you can
 ignore the following parameters : `latitude_deg`, `longitude_deg`, `month`, `day`,
-`hour`, `albedo` and `tb`.
+`hour`, `albedo` and `turbidity`.
 

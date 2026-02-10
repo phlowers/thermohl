@@ -231,7 +231,7 @@ def scenarios():
         ],
         solar_absorptivity=0.9,
         emissivity=0.8,
-        tb=0.0,
+        turbidity=0.0,
         month=[3, 3, 3, 3, 3, 3, 3, 6, 6, 6],
         day=[7, 7, 7, 7, 7, 7, 7, 21, 21, 21],
         hour=[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 12.0, 12.0, 19.0, 12.0],
