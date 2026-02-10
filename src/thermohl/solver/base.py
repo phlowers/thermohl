@@ -57,7 +57,7 @@ class Args:
     def _set_default_values(self) -> None:
         """Set default values."""
 
-        self.Qs = np.nan  # solar irradiance
+        self.measured_solar_irradiance_w_m2 = np.nan  # solar irradiance
         self.latitude_deg = 45.0  # latitude (deg)
         self.longitude_deg = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
