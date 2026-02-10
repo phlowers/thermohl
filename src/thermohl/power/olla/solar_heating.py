@@ -24,7 +24,7 @@ class SolarHeating(ieee.SolarHeating):
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -42,7 +42,7 @@ class SolarHeating(ieee.SolarHeating):
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter_m (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
-            srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
 
         """
         if "tb" in kwargs.keys():
@@ -57,6 +57,6 @@ class SolarHeating(ieee.SolarHeating):
             hour=hour,
             outer_diameter_m=outer_diameter_m,
             solar_absorptivity=solar_absorptivity,
-            srad=srad,
+            precomputed_solar_radiation=precomputed_solar_radiation,
             **kwargs,
         )

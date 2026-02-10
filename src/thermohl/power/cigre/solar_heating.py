@@ -72,7 +72,7 @@ class SolarHeating(PowerTerm):
         hour: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -88,15 +88,15 @@ class SolarHeating(PowerTerm):
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter_m (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
-            srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
         """
         self.solar_absorptivity = solar_absorptivity
-        if srad is None:
+        if precomputed_solar_radiation is None:
             self.solar_irradiance = SolarHeating._solar_radiation(
                 np.deg2rad(latitude_deg), np.deg2rad(azimuth), albedo, month, day, hour
             )
         else:
-            self.solar_irradiance = srad
+            self.solar_irradiance = precomputed_solar_radiation
         self.outer_diameter_m = outer_diameter_m
 
     def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
