@@ -37,8 +37,8 @@ def srad():
     return _SRad(clean, indus)
 
 
-def test_srad_atmosphere_scalar(srad):
-    x = 30.0
+def test_srad_atmosphere_turbidity_scalar(srad):
+    solar_altitude_deg = 30.0
     turbidity = 0.5
     omt = 1.0 - turbidity
     A = omt * srad.clean[6] + turbidity * srad.indus[6]
@@ -49,22 +49,22 @@ def test_srad_atmosphere_scalar(srad):
     F = omt * srad.clean[1] + turbidity * srad.indus[1]
     G = omt * srad.clean[0] + turbidity * srad.indus[0]
     expected = (
-        A * x**6
-        + B * x**5
-        + C * x**4
-        + outer_diameter_m * x**3
-        + E * x**2
-        + F * x**1
+        A * solar_altitude_deg**6
+        + B * solar_altitude_deg**5
+        + C * solar_altitude_deg**4
+        + outer_diameter_m * solar_altitude_deg**3
+        + E * solar_altitude_deg**2
+        + F * solar_altitude_deg**1
         + G
     )
 
-    result = srad.atmosphere_turbidity(x, turbidity)
+    result = srad.atmosphere_turbidity(solar_altitude_deg, turbidity)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_atmosphere_turbidity_array(srad):
-    x = np.array([30.0, 40.0])
+    solar_altitude_deg = np.array([30.0, 40.0])
     turbidity = np.array([0.5, 0.7])
     omt = 1.0 - turbidity
     A = omt * srad.clean[6] + turbidity * srad.indus[6]
@@ -75,16 +75,16 @@ def test_srad_atmosphere_turbidity_array(srad):
     F = omt * srad.clean[1] + turbidity * srad.indus[1]
     G = omt * srad.clean[0] + turbidity * srad.indus[0]
     expected = (
-        A * x**6
-        + B * x**5
-        + C * x**4
-        + outer_diameter_m * x**3
-        + E * x**2
-        + F * x**1
+        A * solar_altitude_deg**6
+        + B * solar_altitude_deg**5
+        + C * solar_altitude_deg**4
+        + outer_diameter_m * solar_altitude_deg**3
+        + E * solar_altitude_deg**2
+        + F * solar_altitude_deg**1
         + G
     )
 
-    result = srad.atmosphere_turbidity(x, turbidity)
+    result = srad.atmosphere_turbidity(solar_altitude_deg, turbidity)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
