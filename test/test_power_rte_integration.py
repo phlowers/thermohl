@@ -53,7 +53,7 @@ class ExcelSheet:
         csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
         O4 = csm[self.args["month"] - 1] + self.args["day"]
         O5 = self.args["hour"]
-        O6 = np.deg2rad(self.args["lat"])
+        O6 = np.deg2rad(self.args["latitude_deg"])
         Q4 = np.deg2rad(23.46 * np.sin(np.deg2rad((284 + O4) / 365 * 360)))
         Q5 = np.deg2rad((O5 - 12) * 15)
         Q6 = np.rad2deg(
@@ -203,7 +203,7 @@ def scenarios():
             np.nan,
             np.nan,
         ],
-        lat=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
+        latitude_deg=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         altitude=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         azimuth=90.0,
         transit=[
@@ -270,7 +270,7 @@ def test_solar_heating():
     n = 5
     ones = np.ones(n)
 
-    lat = np.array([40.0, 46.0, 46.0, 46.0, 46.0])
+    latitude_deg = np.array([40.0, 46.0, 46.0, 46.0, 46.0])
     azimuth = np.array([90.0, 0.0, 0.0, 0.0, 0.0])
     month = np.array([7, 3, 3, 3, 3])
     day = np.array([19, 7, 14, 7, 7])
@@ -280,7 +280,7 @@ def test_solar_heating():
 
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
     s = rte.SolarHeating(
-        lat, azimuth, month, day, hour, outer_diameter_m, alpha, Qs=np.nan
+        latitude_deg, azimuth, month, day, hour, outer_diameter_m, alpha, Qs=np.nan
     )
 
     assert np.allclose(p, s.value(ones), 0.1)

@@ -201,7 +201,7 @@ if __name__ == "__main__":
     plt.close("all")
 
     dic = solver.default_values()
-    dic["lat"] = 45.0
+    dic["latitude_deg"] = 45.0
     dic["tb"] = 0.33
     dic["al"] = 0.85
 

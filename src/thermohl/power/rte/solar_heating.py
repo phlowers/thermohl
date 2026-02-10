@@ -26,7 +26,7 @@ solar_radiation = _SRad(clean=CLEAN_AIR_COEFFICIENTS, indus=POLLUTED_AIR_COEFFIC
 
 
 def solar_irradiance(
-    lat: floatArrayLike,
+    latitude_deg: floatArrayLike,
     month: intArrayLike,
     day: intArrayLike,
     hour: floatArrayLike,
@@ -36,7 +36,7 @@ def solar_irradiance(
     Difference with IEEE version are neither turbidity or altitude influence.
 
     Args:
-        lat (float | numpy.ndarray): Latitude in radians.
+        latitude_deg (float | numpy.ndarray): Latitude in radians.
         month (int | numpy.ndarray): Month (1-12).
         day (int | numpy.ndarray): Day of the month.
         hour (float | numpy.ndarray): Hour of the day (0-24).
@@ -44,7 +44,7 @@ def solar_irradiance(
     Returns:
         float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
     """
-    solar_altitude_rad = sun.solar_altitude(lat, month, day, hour)
+    solar_altitude_rad = sun.solar_altitude(latitude_deg, month, day, hour)
     clearness_factor = solar_radiation.catm(np.rad2deg(solar_altitude_rad))
     return np.where(solar_altitude_rad > 0.0, clearness_factor, 0.0)
 
@@ -52,7 +52,7 @@ def solar_irradiance(
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
-        lat: floatArrayLike,
+        latitude_deg: floatArrayLike,
         azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -67,7 +67,7 @@ class SolarHeating(SolarHeatingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
+            latitude_deg (float | numpy.ndarray): Latitude.
             azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
@@ -78,9 +78,13 @@ class SolarHeating(SolarHeatingBase):
         """
         self.solar_absorptivity = alpha
         if np.isnan(Qs).all():
-            Qs = solar_irradiance(np.deg2rad(lat), month, day, hour)
-        solar_altitude_rad = sun.solar_altitude(np.deg2rad(lat), month, day, hour)
-        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(lat), month, day, hour)
+            Qs = solar_irradiance(np.deg2rad(latitude_deg), month, day, hour)
+        solar_altitude_rad = sun.solar_altitude(
+            np.deg2rad(latitude_deg), month, day, hour
+        )
+        solar_azimuth_rad = sun.solar_azimuth(
+            np.deg2rad(latitude_deg), month, day, hour
+        )
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - np.deg2rad(azimuth))
         )

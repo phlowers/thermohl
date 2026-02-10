@@ -15,7 +15,7 @@ from thermohl.power import _SRad, SolarHeatingBase
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
-        lat: floatArrayLike,
+        latitude_deg: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         tb: floatArrayLike,
@@ -32,7 +32,7 @@ class SolarHeating(SolarHeatingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
+            latitude_deg (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
             azimuth (float | numpy.ndarray): Azimuth.
             tb (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
@@ -64,7 +64,7 @@ class SolarHeating(SolarHeatingBase):
             ],
         )
         super().__init__(
-            lat,
+            latitude_deg,
             altitude,
             azimuth,
             tb,

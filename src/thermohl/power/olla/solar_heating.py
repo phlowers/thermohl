@@ -16,7 +16,7 @@ class SolarHeating(ieee.SolarHeating):
 
     def __init__(
         self,
-        lat: floatArrayLike,
+        latitude_deg: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         month: intArrayLike,
@@ -34,7 +34,7 @@ class SolarHeating(ieee.SolarHeating):
         should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
+            latitude_deg (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
             azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
@@ -48,7 +48,7 @@ class SolarHeating(ieee.SolarHeating):
         if "tb" in kwargs.keys():
             kwargs.pop("tb")
         super().__init__(
-            lat=lat,
+            latitude_deg=latitude_deg,
             altitude=altitude,
             azimuth=azimuth,
             tb=0.0,

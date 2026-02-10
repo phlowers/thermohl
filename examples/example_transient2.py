@@ -32,7 +32,7 @@ if __name__ == "__main__":
 
     # Solver input and solver
     dct = dict(
-        lat=45.0,
+        latitude_deg=45.0,
         altitude=100.0,
         azimuth=90.0,
         month=3,

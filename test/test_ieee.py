@@ -28,7 +28,7 @@ def test_compare_powers():
     dic["RDCHigh"] = 8.688e-05
     dic["RDCLow"] = 7.283e-05
     dic["azimuth"] = 90.0
-    dic["lat"] = 30.0
+    dic["latitude_deg"] = 30.0
     dic["tb"] = 0.0
     dic["altitude"] = 0.0
     dic["outer_diameter_m"] = 28.14 * 1.0e-03
@@ -57,12 +57,12 @@ def test_compare_powers():
     assert np.isclose(np.rad2deg(ha), -15.0)
 
     sa = sun.solar_altitude(
-        np.deg2rad(dic["lat"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude_deg"]), dic["month"], dic["day"], dic["hour"]
     )
     assert np.isclose(np.rad2deg(sa), 74.8, rtol=0.002)
 
     sz = sun.solar_azimuth(
-        np.deg2rad(dic["lat"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude_deg"]), dic["month"], dic["day"], dic["hour"]
     )
     np.isclose(np.rad2deg(sz), 114.0, rtol=0.001)
 
