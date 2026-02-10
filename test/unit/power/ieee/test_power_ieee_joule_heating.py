@@ -14,11 +14,11 @@ from thermohl.power.ieee import JouleHeating
 def test_c_scalar():
     TLow = 20.0
     THigh = 80.0
-    RDCLow = 0.1
+    linear_resistance_temp_low_ohm_m = 0.1
     RDCHigh = 0.2
-    expected = (RDCHigh - RDCLow) / (THigh - TLow)
+    expected = (RDCHigh - linear_resistance_temp_low_ohm_m) / (THigh - TLow)
 
-    result = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
+    result = JouleHeating._c(TLow, THigh, linear_resistance_temp_low_ohm_m, RDCHigh)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -26,11 +26,11 @@ def test_c_scalar():
 def test_c_array():
     TLow = np.array([20.0, 30.0])
     THigh = np.array([80.0, 90.0])
-    RDCLow = np.array([0.1, 0.15])
+    linear_resistance_temp_low_ohm_m = np.array([0.1, 0.15])
     RDCHigh = np.array([0.2, 0.25])
-    expected = (RDCHigh - RDCLow) / (THigh - TLow)
+    expected = (RDCHigh - linear_resistance_temp_low_ohm_m) / (THigh - TLow)
 
-    result = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
+    result = JouleHeating._c(TLow, THigh, linear_resistance_temp_low_ohm_m, RDCHigh)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -38,11 +38,11 @@ def test_c_array():
 def test_c_mixed():
     TLow = 20.0
     THigh = np.array([80.0, 90.0])
-    RDCLow = 0.1
+    linear_resistance_temp_low_ohm_m = 0.1
     RDCHigh = np.array([0.2, 0.25])
-    expected = (RDCHigh - RDCLow) / (THigh - TLow)
+    expected = (RDCHigh - linear_resistance_temp_low_ohm_m) / (THigh - TLow)
 
-    result = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
+    result = JouleHeating._c(TLow, THigh, linear_resistance_temp_low_ohm_m, RDCHigh)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -52,21 +52,21 @@ joule_heating_instances = [
         transit=np.array([100.0]),
         TLow=np.array([20.0, 25.0]),
         THigh=np.array([80.0, 85.0]),
-        RDCLow=np.array([0.1, 0.15]),
+        linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
         RDCHigh=np.array([0.2, 0.25]),
     ),
     JouleHeating(
         transit=100.0,
         TLow=20.0,
         THigh=80.0,
-        RDCLow=0.1,
+        linear_resistance_temp_low_ohm_m=0.1,
         RDCHigh=0.2,
     ),
     JouleHeating(
         transit=100.0,
         TLow=np.array([20.0, 25.0]),
         THigh=np.array([80.0, 85.0]),
-        RDCLow=np.array([0.1, 0.15]),
+        linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
         RDCHigh=np.array([0.2, 0.25]),
     ),
 ]
@@ -158,9 +158,11 @@ def test_value_array_temperature_different_shape_should_throw_error():
     transit = 100.0
     TLow = np.array([20.0, 25.0])
     THigh = np.array([80.0, 85.0])
-    RDCLow = np.array([0.1, 0.15])
+    linear_resistance_temp_low_ohm_m = np.array([0.1, 0.15])
     RDCHigh = np.array([0.2, 0.25])
-    joule_heating = JouleHeating(transit, TLow, THigh, RDCLow, RDCHigh)
+    joule_heating = JouleHeating(
+        transit, TLow, THigh, linear_resistance_temp_low_ohm_m, RDCHigh
+    )
     T = np.array([30.0, 40.0, 50.0])
 
     with pytest.raises(ValueError):
