@@ -23,7 +23,7 @@ class ConvectiveCoolingBase(PowerTerm):
         ambient_temperature_c: floatArrayLike,
         wind_speed_ms: floatArrayLike,
         wind_angle_deg: floatArrayLike,
-        D: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
         rho: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         mu: Callable[[floatArrayLike], floatArrayLike],
         lambda_: Callable[[floatArrayLike], floatArrayLike],
@@ -35,7 +35,7 @@ class ConvectiveCoolingBase(PowerTerm):
         self.attack_angle_rad = np.arcsin(
             np.sin(np.deg2rad(np.abs(azimuth - wind_angle_deg) % 180.0))
         )
-        self.outer_diameter_m = D
+        self.outer_diameter_m = outer_diameter_m
 
         self.air_density = rho
         self.dynamic_viscosity = mu

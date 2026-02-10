@@ -78,11 +78,13 @@ class Solver3T(Solver_):
                 Indices where surface diameter `d_` is greater than 0.
         """
         c = 0.5 * np.ones((self.args.max_len(),))
-        D = self.args.D * np.ones_like(c)
+        outer_diameter_m = self.args.outer_diameter_m * np.ones_like(c)
         d = self.args.d * np.ones_like(c)
         i = np.nonzero(d > 0.0)[0]
-        c[i] -= (d[i] ** 2 / (D[i] ** 2 - d[i] ** 2)) * np.log(D[i] / d[i])
-        return c, D, d, i
+        c[i] -= (d[i] ** 2 / (outer_diameter_m[i] ** 2 - d[i] ** 2)) * np.log(
+            outer_diameter_m[i] / d[i]
+        )
+        return c, outer_diameter_m, d, i
 
     def update(self) -> None:
         """
@@ -123,9 +125,9 @@ class Solver3T(Solver_):
             float | numpy.ndarray: Array of average temperatures.
         """
         ambient_temperature_c = 0.5 * (ts + tc)
-        _, D, d, ix = self.mgc
+        _, outer_diameter_m, d, ix = self.mgc
         ambient_temperature_c[ix] = _profile_bim_avg(
-            ts[ix], tc[ix], 0.5 * d[ix], 0.5 * D[ix]
+            ts[ix], tc[ix], 0.5 * d[ix], 0.5 * outer_diameter_m[ix]
         )
         return ambient_temperature_c
 
@@ -249,10 +251,10 @@ class Solver3T(Solver_):
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        c, D, d, ix = self.mgc
+        c, outer_diameter_m, d, ix = self.mgc
         c1 = c / (2.0 * np.pi * self.args.l)
         c2 = 0.5 * np.ones_like(c1)
-        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * D[ix])
+        a, b = _profile_bim_avg_coeffs(0.5 * d[ix], 0.5 * outer_diameter_m[ix])
         c2[ix] = a / b
         return c1, c2
 
@@ -429,8 +431,8 @@ class Solver3T(Solver_):
         target_ = self._check_target(target, self.args.d, max_len)
 
         # pre-compute indexes
-        c, D, d, ix = self.mgc
-        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
+        c, outer_diameter_m, d, ix = self.mgc
+        a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * outer_diameter_m)
 
         js = np.nonzero(target_ == Solver_.Names.surf)[0]
         ja = np.nonzero(target_ == Solver_.Names.avg)[0]

@@ -73,7 +73,7 @@ solar_heating_instances = [
             month=np.array([6, 6, 6]),
             day=np.array([21, 21, 21]),
             hour=np.array([12.0, 12.0, 12.0]),
-            D=np.array([0.01, 0.01, 0.01]),
+            outer_diameter_m=np.array([0.01, 0.01, 0.01]),
             alpha=np.array([0.9, 0.9, 0.9]),
         ),
         np.array([12.3978, 11.8759, 11.2545]),
@@ -86,7 +86,7 @@ solar_heating_instances = [
             month=6,
             day=21,
             hour=12.0,
-            D=0.01,
+            outer_diameter_m=0.01,
             alpha=0.9,
         ),
         12.3978,
@@ -117,10 +117,12 @@ def test_solar_heating_value_array():
     month = np.array([6, 6, 6])
     day = np.array([21, 21, 21])
     hour = np.array([12.0, 12.0, 12.0])
-    D = np.array([0.01, 0.01, 0.01])
+    outer_diameter_m = np.array([0.01, 0.01, 0.01])
     alpha = np.array([0.9, 0.9, 0.9])
     T = np.array([25.0, 30.0, 35.0])
-    solar_heating = SolarHeating(lat, azimuth, albedo, month, day, hour, D, alpha)
+    solar_heating = SolarHeating(
+        lat, azimuth, albedo, month, day, hour, outer_diameter_m, alpha
+    )
     expected = np.array([12.3978, 11.8759, 11.2545])
 
     result = solar_heating.value(T)
@@ -135,11 +137,13 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
     month = np.array([6, 6, 6])
     day = np.array([21, 21])
     hour = np.array([12.0, 12.0])
-    D = np.array([0.01, 0.01])
+    outer_diameter_m = np.array([0.01, 0.01])
     alpha = np.array([0.9, 0.9])
     T = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        solar_heating = SolarHeating(lat, azimuth, albedo, month, day, hour, D, alpha)
+        solar_heating = SolarHeating(
+            lat, azimuth, albedo, month, day, hour, outer_diameter_m, alpha
+        )
         solar_heating.value(T)
 
 
@@ -184,9 +188,11 @@ def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
     month = np.array([6, 6, 6])
     day = np.array([21, 21])
     hour = np.array([12.0, 12.0])
-    D = np.array([0.01, 0.01])
+    outer_diameter_m = np.array([0.01, 0.01])
     alpha = np.array([0.9, 0.9])
     conductor_temperature = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
-        solar_heating = SolarHeating(lat, azimuth, albedo, month, day, hour, D, alpha)
+        solar_heating = SolarHeating(
+            lat, azimuth, albedo, month, day, hour, outer_diameter_m, alpha
+        )
         solar_heating.derivative(conductor_temperature)

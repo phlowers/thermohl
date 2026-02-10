@@ -13,7 +13,7 @@ from thermohl.power.rte import JouleHeating
 joule_heating_instances = [
     JouleHeating(
         transit=np.array([10.0]),
-        D=np.array([0.01]),
+        outer_diameter_m=np.array([0.01]),
         d=np.array([0.005]),
         A=np.array([0.0001]),
         a=np.array([0.00005]),
@@ -27,7 +27,7 @@ joule_heating_instances = [
     ),
     JouleHeating(
         transit=10.0,
-        D=0.01,
+        outer_diameter_m=0.01,
         d=0.005,
         A=0.0001,
         a=0.00005,

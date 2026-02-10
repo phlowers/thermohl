@@ -24,7 +24,7 @@ class ConvectiveCooling(PowerTerm):
         ambient_temperature_c: floatArrayLike,
         wind_speed_ms: floatArrayLike,
         wind_angle_deg: floatArrayLike,
-        D: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
         R: floatArrayLike,
         g: float = 9.81,
         **kwargs: Any,
@@ -39,7 +39,7 @@ class ConvectiveCooling(PowerTerm):
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
             wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
-            D (float | numpy.ndarray): External diameter (m).
+            outer_diameter_m (float | numpy.ndarray): External diameter (m).
             R (float | numpy.ndarray): Cable roughness (—).
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
 
@@ -47,7 +47,7 @@ class ConvectiveCooling(PowerTerm):
         self.altitude_m = altitude
         self.ambient_temp_c = ambient_temperature_c
         self.wind_speed_ms = wind_speed_ms
-        self.outer_diameter_m = D
+        self.outer_diameter_m = outer_diameter_m
         self.roughness_ratio = R
         self.gravity_ms2 = g
         self.attack_angle_rad = np.arcsin(

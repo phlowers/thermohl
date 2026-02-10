@@ -18,7 +18,7 @@ conv_cool_instances = [
         ambient_temperature_c=np.array([25.0]),
         wind_speed_ms=np.array([10.0]),
         wind_angle_deg=np.array([11.0]),
-        D=np.array([0.01]),
+        outer_diameter_m=np.array([0.01]),
         alpha=np.array([0.5]),
     ),
     ConvectiveCooling(
@@ -27,7 +27,7 @@ conv_cool_instances = [
         ambient_temperature_c=25.0,
         wind_speed_ms=10.0,
         wind_angle_deg=11.0,
-        D=0.01,
+        outer_diameter_m=0.01,
         alpha=0.5,
     ),
 ]

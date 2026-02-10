@@ -44,11 +44,19 @@ def test_srad_catm_scalar(srad):
     A = omt * srad.clean[6] + trb * srad.indus[6]
     B = omt * srad.clean[5] + trb * srad.indus[5]
     C = omt * srad.clean[4] + trb * srad.indus[4]
-    D = omt * srad.clean[3] + trb * srad.indus[3]
+    outer_diameter_m = omt * srad.clean[3] + trb * srad.indus[3]
     E = omt * srad.clean[2] + trb * srad.indus[2]
     F = omt * srad.clean[1] + trb * srad.indus[1]
     G = omt * srad.clean[0] + trb * srad.indus[0]
-    expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+    expected = (
+        A * x**6
+        + B * x**5
+        + C * x**4
+        + outer_diameter_m * x**3
+        + E * x**2
+        + F * x**1
+        + G
+    )
 
     result = srad.catm(x, trb)
 
@@ -62,11 +70,19 @@ def test_srad_catm_array(srad):
     A = omt * srad.clean[6] + trb * srad.indus[6]
     B = omt * srad.clean[5] + trb * srad.indus[5]
     C = omt * srad.clean[4] + trb * srad.indus[4]
-    D = omt * srad.clean[3] + trb * srad.indus[3]
+    outer_diameter_m = omt * srad.clean[3] + trb * srad.indus[3]
     E = omt * srad.clean[2] + trb * srad.indus[2]
     F = omt * srad.clean[1] + trb * srad.indus[1]
     G = omt * srad.clean[0] + trb * srad.indus[0]
-    expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+    expected = (
+        A * x**6
+        + B * x**5
+        + C * x**4
+        + outer_diameter_m * x**3
+        + E * x**2
+        + F * x**1
+        + G
+    )
 
     result = srad.catm(x, trb)
 
@@ -125,7 +141,7 @@ solar_heating_instances = [
         month=np.array([6, 7]),
         day=np.array([21, 22]),
         hour=np.array([12.0, 13.0]),
-        D=np.array([0.01, 0.02]),
+        outer_diameter_m=np.array([0.01, 0.02]),
         alpha=np.array([0.9, 0.8]),
         srad=np.array([800.0, 900.0]),
     ),
@@ -137,7 +153,7 @@ solar_heating_instances = [
         month=6,
         day=21,
         hour=12.0,
-        D=0.01,
+        outer_diameter_m=0.01,
         alpha=0.9,
         srad=800.0,
     ),
