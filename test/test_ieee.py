@@ -23,8 +23,8 @@ def test_compare_powers():
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature_c"] = 40.0
-    dic["THigh"] = 75.0
-    dic["TLow"] = 25.0
+    dic["temp_high_c"] = 75.0
+    dic["temp_low_c"] = 25.0
     dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
     dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
     dic["azimuth"] = 90.0

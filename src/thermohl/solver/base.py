@@ -40,7 +40,7 @@ class Args:
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'tb', 'transit', 'm',
     #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
-    #     'THigh', 'TLow'
+    #     'temp_high_c', 'temp_low_c'
     # ]
 
     def __init__(self, dic: Optional[dict[str, Any]] = None):
@@ -99,14 +99,14 @@ class Args:
         self.temperature_coeff_linear = 3.8e-03
         # quadratic resistance augmentation with temperature (K**-2)
         self.temperature_coeff_quadratic = 8.0e-07
-        # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
+        # electric resistance per unit length (DC) at temp_high_c (Ohm.m**-1)
         self.linear_resistance_temp_high_ohm_m = 3.05e-05
-        # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
+        # electric resistance per unit length (DC) at temp_low_c (Ohm.m**-1)
         self.linear_resistance_temp_low_ohm_m = 2.66e-05
-        self.THigh = (
+        self.temp_high_c = (
             60.0  # temperature for linear_resistance_temp_high_ohm_m measurement (°C)
         )
-        self.TLow = (
+        self.temp_low_c = (
             20.0  # temperature for linear_resistance_temp_low_ohm_m measurement (°C)
         )
 
