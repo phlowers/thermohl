@@ -37,7 +37,7 @@ def srad():
     return _SRad(clean, indus)
 
 
-def test_srad_catm_scalar(srad):
+def test_srad_atmosphere_scalar(srad):
     x = 30.0
     trb = 0.5
     omt = 1.0 - trb
@@ -58,12 +58,12 @@ def test_srad_catm_scalar(srad):
         + G
     )
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_turbidity(x, trb)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
-def test_srad_catm_array(srad):
+def test_srad_atmosphere_turbidity_array(srad):
     x = np.array([30.0, 40.0])
     trb = np.array([0.5, 0.7])
     omt = 1.0 - trb
@@ -84,7 +84,7 @@ def test_srad_catm_array(srad):
         + G
     )
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_turbidity(x, trb)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -101,7 +101,7 @@ def test_srad_call_scalar(srad):
     sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
@@ -122,7 +122,7 @@ def test_srad_call_array(srad):
     sz = sun.solar_azimuth(latitude_deg, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
