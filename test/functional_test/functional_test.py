@@ -39,7 +39,7 @@ def scn2dict(d: dict) -> dict:
 
     dic["lat"] = d["latitude"]
     dic["lon"] = d["longitude"]
-    dic["alt"] = d["altitude"]
+    dic["altitude"] = d["altitude"]
     dic["azm"] = 90.0
     dic["Ta"] = d["weather_temperature"]
     dic["ws"] = d["wind_speed"]

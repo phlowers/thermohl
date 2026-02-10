@@ -16,7 +16,7 @@ def test_max_len_with_mixed_types():
     dic = {
         "lat": np.array([45.0, 46.0]),
         "lon": 10.0,
-        "alt": np.array([20.0, 25.0, 30.0]),
+        "altitude": np.array([20.0, 25.0, 30.0]),
     }
     args = Args(dic)
 
@@ -55,7 +55,7 @@ def test_max_len_with_varied_lengths():
     dic = {
         "lat": np.array([45.0, 46.0]),
         "lon": np.array([10.0]),
-        "alt": np.array([20.0, 25.0, 30.0]),
+        "altitude": np.array([20.0, 25.0, 30.0]),
     }
     args = Args(dic)
 
@@ -93,20 +93,20 @@ def test_extend_to_max_len_with_scalar():
 
 
 def test_extend_to_max_len_with_mixed_types():
-    dic = {"lat": np.array([45.0, 46.0]), "lon": 10.0, "alt": np.array([20.0])}
+    dic = {"lat": np.array([45.0, 46.0]), "lon": 10.0, "altitude": np.array([20.0])}
     args = Args(dic)
 
     args.extend_to_max_len()
 
     assert isinstance(args.lat, ndarray)
     assert isinstance(args.lon, ndarray)
-    assert isinstance(args.alt, ndarray)
+    assert isinstance(args.altitude, ndarray)
     assert len(args.lat) == 2
     assert len(args.lon) == 2
-    assert len(args.alt) == 2
+    assert len(args.altitude) == 2
     np.testing.assert_array_equal(args.lat, np.array([45.0, 46.0]))
     np.testing.assert_array_equal(args.lon, np.array([10.0, 10.0]))
-    np.testing.assert_array_equal(args.alt, np.array([20.0, 20.0]))
+    np.testing.assert_array_equal(args.altitude, np.array([20.0, 20.0]))
 
 
 def test_extend_to_max_len_with_empty_dict():
@@ -145,7 +145,11 @@ def test_compress_with_non_unique_values():
 
 
 def test_compress_with_mixed_values():
-    dic = {"lat": np.array([45.0, 45.0]), "lon": np.array([10.0, 11.0]), "alt": 20.0}
+    dic = {
+        "lat": np.array([45.0, 45.0]),
+        "lon": np.array([10.0, 11.0]),
+        "altitude": 20.0,
+    }
     args = Args(dic)
 
     args.compress()
@@ -153,9 +157,9 @@ def test_compress_with_mixed_values():
     assert isinstance(args.lat, float)
     assert args.lat == 45.0
     assert isinstance(args.lon, ndarray)
-    assert isinstance(args.alt, float)
+    assert isinstance(args.altitude, float)
     np.testing.assert_array_equal(args.lon, np.array([10.0, 11.0]))
-    assert args.alt == 20.0
+    assert args.altitude == 20.0
 
 
 def test_compress_with_empty_dict():

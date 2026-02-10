@@ -12,20 +12,24 @@ class Air:
     """Air quantities."""
 
     @staticmethod
-    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
+    def volumic_mass(
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""Compute air volumic mass.
 
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (°C).
-            alt (float | numpy.ndarray, optional): Altitude above sea level (m). The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea level (m). The default is 0.
 
         Returns:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
-        return (1.293 - 1.525e-04 * alt + 6.379e-09 * alt**2) / (1.0 + 0.00367 * Tc)
+        return (1.293 - 1.525e-04 * altitude + 6.379e-09 * altitude**2) / (
+            1.0 + 0.00367 * Tc
+        )
 
     @staticmethod
     def dynamic_viscosity(Tc: floatArrayLike) -> floatArrayLike:

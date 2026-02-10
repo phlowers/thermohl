@@ -14,24 +14,26 @@ class Air:
     """CIGRE air models."""
 
     @staticmethod
-    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
+    def volumic_mass(
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""Compute air volumic mass.
 
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (in Celsius).
-            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
-        return 1.2925 * Air.relative_density(Tc, alt)
+        return 1.2925 * Air.relative_density(Tc, altitude)
 
     @staticmethod
     def relative_density(
-        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         """Compute relative density, ie density ratio regarding density at zero altitude.
 
@@ -43,13 +45,13 @@ class Air:
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (in Celsius).
-            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Relative density of air.
 
         """
-        return np.exp(-1.16e-04 * alt) * np.ones_like(Tc)
+        return np.exp(-1.16e-04 * altitude) * np.ones_like(Tc)
 
     @staticmethod
     def kinematic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
@@ -66,7 +68,7 @@ class Air:
 
     @staticmethod
     def dynamic_viscosity(
-        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
@@ -74,13 +76,13 @@ class Air:
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (in Celsius)
-            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
-        return Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, alt)
+        return Air.kinematic_viscosity(Tc) * Air.volumic_mass(Tc, altitude)
 
     @staticmethod
     def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:

@@ -75,7 +75,7 @@ def test_srad_catm_array(srad):
 
 def test_srad_call_scalar(srad):
     lat = 45.0
-    alt = 1000.0
+    altitude = 1000.0
     azm = 180.0
     trb = 0.5
     month = 6
@@ -84,19 +84,19 @@ def test_srad_call_scalar(srad):
     sa = sun.solar_altitude(lat, month, day, hour)
     sz = sun.solar_azimuth(lat, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-    K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
+    K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.catm(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, alt, azm, trb, month, day, hour)
+    result = srad(lat, altitude, azm, trb, month, day, hour)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_call_array(srad):
     lat = np.array([45.0, 50.0])
-    alt = np.array([1000.0, 2000.0])
+    altitude = np.array([1000.0, 2000.0])
     azm = np.array([180.0, 190.0])
     trb = np.array([0.5, 0.7])
     month = np.array([6, 7])
@@ -105,12 +105,12 @@ def test_srad_call_array(srad):
     sa = sun.solar_altitude(lat, month, day, hour)
     sz = sun.solar_azimuth(lat, month, day, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-    K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
+    K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.catm(np.rad2deg(sa), trb)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, alt, azm, trb, month, day, hour)
+    result = srad(lat, altitude, azm, trb, month, day, hour)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -119,7 +119,7 @@ def test_srad_call_array(srad):
 solar_heating_instances = [
     SolarHeating(
         lat=np.array([45.0, 50.0]),
-        alt=np.array([1000.0, 2000.0]),
+        altitude=np.array([1000.0, 2000.0]),
         azm=np.array([180.0, 190.0]),
         tb=np.array([0.5, 0.7]),
         month=np.array([6, 7]),
@@ -131,7 +131,7 @@ solar_heating_instances = [
     ),
     SolarHeating(
         lat=45.0,
-        alt=1000.0,
+        altitude=1000.0,
         azm=180.0,
         tb=0.5,
         month=6,

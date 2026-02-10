@@ -12,20 +12,24 @@ from thermohl.power.ieee import Air
 
 def test_volumic_mass_scalar():
     Tc = 25.0
-    alt = 1000.0
-    expected = (1.293 - 1.525e-04 * alt + 6.379e-09 * alt**2) / (1.0 + 0.00367 * Tc)
+    altitude = 1000.0
+    expected = (1.293 - 1.525e-04 * altitude + 6.379e-09 * altitude**2) / (
+        1.0 + 0.00367 * Tc
+    )
 
-    result = Air.volumic_mass(Tc, alt)
+    result = Air.volumic_mass(Tc, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_volumic_mass_array():
     Tc = np.array([25.0, 30.0])
-    alt = np.array([1000.0, 2000.0])
-    expected = (1.293 - 1.525e-04 * alt + 6.379e-09 * alt**2) / (1.0 + 0.00367 * Tc)
+    altitude = np.array([1000.0, 2000.0])
+    expected = (1.293 - 1.525e-04 * altitude + 6.379e-09 * altitude**2) / (
+        1.0 + 0.00367 * Tc
+    )
 
-    result = Air.volumic_mass(Tc, alt)
+    result = Air.volumic_mass(Tc, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 

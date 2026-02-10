@@ -7,7 +7,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-<img src="assets/images/logos/thermohl_logo.png" width="200" height="200" alt="Phlowers logo" style="float: right; display: block; margin: 0 auto"/>
+<img src="assets/images/logos/thermohl_logo.png" width="200" height="200" altitude="Phlowers logo" style="float: right; display: block; margin: 0 auto"/>
 
 # ThermOHL
 

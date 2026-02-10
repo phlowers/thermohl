@@ -15,7 +15,7 @@ from thermohl.power.cigre import Air
 conv_cool_instances = [
     (
         ConvectiveCooling(
-            alt=np.array([100.0]),
+            altitude=np.array([100.0]),
             azm=np.array([45.0]),
             Ta=np.array([25.0]),
             ws=np.array([5.0]),
@@ -27,7 +27,7 @@ conv_cool_instances = [
     ),
     (
         ConvectiveCooling(
-            alt=100.0,
+            altitude=100.0,
             azm=45.0,
             Ta=25.0,
             ws=5.0,

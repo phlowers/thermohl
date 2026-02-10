@@ -17,7 +17,7 @@ class SolarHeating(ieee.SolarHeating):
     def __init__(
         self,
         lat: floatArrayLike,
-        alt: floatArrayLike,
+        altitude: floatArrayLike,
         azm: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -35,7 +35,7 @@ class SolarHeating(ieee.SolarHeating):
 
         Args:
             lat (float | numpy.ndarray): Latitude.
-            alt (float | numpy.ndarray): Altitude.
+            altitude (float | numpy.ndarray): Altitude.
             azm (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
@@ -49,7 +49,7 @@ class SolarHeating(ieee.SolarHeating):
             kwargs.pop("tb")
         super().__init__(
             lat=lat,
-            alt=alt,
+            altitude=altitude,
             azm=azm,
             tb=0.0,
             month=month,
