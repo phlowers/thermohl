@@ -66,7 +66,7 @@ class SolarHeating(PowerTerm):
         self,
         latitude_deg: floatArrayLike,
         azimuth: floatArrayLike,
-        al: floatArrayLike,
+        albedo: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
@@ -82,7 +82,7 @@ class SolarHeating(PowerTerm):
         Args:
             latitude_deg (float | numpy.ndarray): Latitude.
             azimuth (float | numpy.ndarray): Azimuth.
-            al (float | numpy.ndarray): Albedo.
+            albedo (float | numpy.ndarray): Albedo.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
@@ -93,7 +93,7 @@ class SolarHeating(PowerTerm):
         self.solar_absorptivity = alpha
         if srad is None:
             self.solar_irradiance = SolarHeating._solar_radiation(
-                np.deg2rad(latitude_deg), np.deg2rad(azimuth), al, month, day, hour
+                np.deg2rad(latitude_deg), np.deg2rad(azimuth), albedo, month, day, hour
             )
         else:
             self.solar_irradiance = srad

@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
+    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'tb', 'transit', 'm',
     #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
@@ -73,7 +73,7 @@ class Args:
         self.pr = 0.0  # rain precipitation rate (m.s**-1)
         self.wind_speed_ms = 0.0  # wind speed (m.s**-1)
         self.wind_angle_deg = 90.0  # wind angle (deg, regarding north)
-        self.al = 0.8  # albedo (1)
+        self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.tb = 0.1
 

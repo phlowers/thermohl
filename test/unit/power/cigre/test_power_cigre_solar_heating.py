@@ -75,7 +75,7 @@ solar_heating_instances = [
         SolarHeating(
             latitude_deg=np.array([45.0, 50.0, 55.0]),
             azimuth=np.array([180.0, 180.0, 180.0]),
-            al=np.array([0.2, 0.2, 0.2]),
+            albedo=np.array([0.2, 0.2, 0.2]),
             month=np.array([6, 6, 6]),
             day=np.array([21, 21, 21]),
             hour=np.array([12.0, 12.0, 12.0]),
@@ -88,7 +88,7 @@ solar_heating_instances = [
         SolarHeating(
             latitude_deg=45.0,
             azimuth=180.0,
-            al=0.2,
+            albedo=0.2,
             month=6,
             day=21,
             hour=12.0,
