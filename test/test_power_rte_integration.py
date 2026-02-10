@@ -85,12 +85,12 @@ class ExcelSheet:
             - 0.0001525 * self.args["altitude"]
             + 0.00000000638 * self.args["altitude"] ** 2
         ) / (1 + 0.00367 * Tf)
-        mu = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
+        dynamic_viscosity = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
         Re = (
             self.args["wind_speed_ms"]
             * self.args["outer_diameter_m"]
             * air_density
-            / mu
+            / dynamic_viscosity
         )
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
         wind_angle_deg = np.deg2rad(self.args["wind_angle_deg"])
