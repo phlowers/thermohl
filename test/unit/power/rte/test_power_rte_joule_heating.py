@@ -23,7 +23,7 @@ joule_heating_instances = [
         temperature_coeff_quadratic=np.array([0.0001]),
         dc_resistance_20c_ohm_m=np.array([0.02]),
         reference_temperature_c=20.0,
-        f=50.0,
+        frequency_hz=50.0,
     ),
     JouleHeating(
         transit=10.0,
@@ -37,7 +37,7 @@ joule_heating_instances = [
         temperature_coeff_quadratic=0.0001,
         dc_resistance_20c_ohm_m=0.02,
         reference_temperature_c=20.0,
-        f=50.0,
+        frequency_hz=50.0,
     ),
 ]
 

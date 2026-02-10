@@ -49,7 +49,7 @@ def plot_skin_effect():
                 ("outer_diameter_m", outer_diameter_m),
                 ("core_diameter_m", core_diameter_m),
                 ("dc_resistance_20c_ohm_m", R),
-                ("f", 50.0),
+                ("frequency_hz", 50.0),
             ]
         )
         jh = olla.JouleHeating(**di)
