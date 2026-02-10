@@ -43,16 +43,16 @@ class Args:
     #     'temp_high_c', 'temp_low_c'
     # ]
 
-    def __init__(self, dic: Optional[dict[str, Any]] = None):
+    def __init__(self, input_dict: Optional[dict[str, Any]] = None):
         # add default values
         self._set_default_values()
         # use values from input dict
-        if dic is None:
-            dic = {}
+        if input_dict is None:
+            input_dict = {}
         keys = self.keys()
-        for k in dic:
-            if k in keys and dic[k] is not None:
-                self[k] = dic[k]
+        for key in input_dict:
+            if key in keys and input_dict[key] is not None:
+                self[key] = input_dict[key]
 
     def _set_default_values(self) -> None:
         """Set default values."""
