@@ -23,7 +23,7 @@ class ConvectiveCooling(PowerTerm):
         azimuth: floatArrayLike,
         ambient_temperature_c: floatArrayLike,
         wind_speed_ms: floatArrayLike,
-        wa: floatArrayLike,
+        wind_angle_deg: floatArrayLike,
         D: floatArrayLike,
         R: floatArrayLike,
         g: float = 9.81,
@@ -38,7 +38,7 @@ class ConvectiveCooling(PowerTerm):
             azimuth (float | numpy.ndarray): Azimuth (deg).
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wa (float | numpy.ndarray): Wind angle regarding north (deg).
+            wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
             D (float | numpy.ndarray): External diameter (m).
             R (float | numpy.ndarray): Cable roughness (—).
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
@@ -51,7 +51,7 @@ class ConvectiveCooling(PowerTerm):
         self.roughness_ratio = R
         self.gravity_ms2 = g
         self.attack_angle_rad = np.arcsin(
-            np.sin(np.deg2rad(np.abs(azimuth - wa) % 180.0))
+            np.sin(np.deg2rad(np.abs(azimuth - wind_angle_deg) % 180.0))
         )
 
     def _nu_forced(

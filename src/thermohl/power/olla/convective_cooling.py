@@ -21,7 +21,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         azimuth: floatArrayLike,
         ambient_temperature_c: floatArrayLike,
         wind_speed_ms: floatArrayLike,
-        wa: floatArrayLike,
+        wind_angle_deg: floatArrayLike,
         D: floatArrayLike,
         **kwargs: Any,
     ):
@@ -34,7 +34,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             azimuth (float | numpy.ndarray): Azimuth (deg).
             ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
             wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wa (float | numpy.ndarray): Wind angle regarding north (deg).
+            wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
             D (float | numpy.ndarray): External diameter (m).
 
         """
@@ -43,7 +43,7 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             azimuth,
             ambient_temperature_c,
             wind_speed_ms,
-            wa,
+            wind_angle_deg,
             D,
             Air.volumic_mass,
             Air.dynamic_viscosity,

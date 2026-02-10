@@ -70,7 +70,7 @@ wind_speed_ms:
   max: 100.
   std: 0.1
   relative_std: true
-wa:
+wind_angle_deg:
   dist: 'vonmises'
   std: 10.
   relative_std: false

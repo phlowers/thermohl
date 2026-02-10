@@ -82,8 +82,13 @@ class ExcelSheet:
         mu = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
         Re = self.args["wind_speed_ms"] * self.args["D"] * rho / mu
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
-        wa = np.deg2rad(self.args["wa"])
-        K = 1.194 - np.cos(wa) + 0.194 * np.cos(2 * wa) + 0.368 * np.sin(2 * wa)
+        wind_angle_deg = np.deg2rad(self.args["wind_angle_deg"])
+        K = (
+            1.194
+            - np.cos(wind_angle_deg)
+            + 0.194 * np.cos(2 * wind_angle_deg)
+            + 0.368 * np.sin(2 * wind_angle_deg)
+        )
         PCn = (
             3.645
             * rho**0.5
@@ -174,7 +179,7 @@ def scenarios():
             20.0,
         ],
         wind_speed_ms=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
-        wa=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
+        wind_angle_deg=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
         Qs=[
             np.nan,
             np.nan,
@@ -228,8 +233,10 @@ def test_compare_power():
     from thermohl.utils import df2dct
 
     d1 = df2dct(ds)
-    ds["wa"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(ds["azimuth"] - ds["wa"]) % 180.0)))
+    ds["wind_angle_deg"] = np.rad2deg(
+        np.arcsin(
+            np.sin(np.deg2rad(np.abs(ds["azimuth"] - ds["wind_angle_deg"]) % 180.0))
+        )
     )
     d2 = df2dct(ds)
     del (ds, n)
