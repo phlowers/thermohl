@@ -50,7 +50,7 @@ units, default values and in which set of power terms they are used.
 | magnetic_coeff        | 1.006         | N/A        | yes           | no           | yes          | yes         | coefficient for magnetic effects                             |
 | magnetic_coeff_per_a        | 0.016         | A⁻¹        | no            | no           | yes          | yes         | coefficient for magnetic effects                             |
 | temperature_coeff_linear        | 3.8E-03       | K⁻¹        | yes           | no           | yes          | yes         | linear resistance augmentation with temperature              |
-| kq        | 8.0E-07       | K⁻²        | no            | no           | yes          | yes         | quadratic resistance augmentation with temperature           |
+| temperature_coeff_quadratic        | 8.0E-07       | K⁻²        | no            | no           | yes          | yes         | quadratic resistance augmentation with temperature           |
 | RDCHigh   | 3.05E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at THigh            |
 | RDCLow    | 2.66E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at TLow             |
 | THigh     | 60            | celsius    | no            | yes          | no           | no          | temperature for RDCHigh measurement                          |

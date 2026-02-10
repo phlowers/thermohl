@@ -27,7 +27,8 @@ class ExcelSheet:
         Rdc = self.args["RDC20"] * (
             1.0
             + self.args["temperature_coeff_linear"] * (ambient_temperature_c - 20.0)
-            + self.args["kq"] * (ambient_temperature_c - 20.0) ** 2
+            + self.args["temperature_coeff_quadratic"]
+            * (ambient_temperature_c - 20.0) ** 2
         )
         z = (
             8
@@ -149,7 +150,14 @@ def excel_conductor_data():
             temperature_coeff_linear=[0.004, 0.0036, 0.0036, 0.004, 0.0036, 0.0036],
             magnetic_coeff=[1.006, 1.0, 1.0, 1.0, 1.0, 1.006],
             magnetic_coeff_per_a=[0.016, 0.0, 0.0, 0.0, 0.0, 0.016],
-            kq=[8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07, 8.0e-07],
+            temperature_coeff_quadratic=[
+                8.0e-07,
+                8.0e-07,
+                8.0e-07,
+                8.0e-07,
+                8.0e-07,
+                8.0e-07,
+            ],
             nbc=[3, 0, 0, 2, 2, 3],
         )
     )

@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'Pa', 'rh', 'pr', 'wind_speed_ms', 'wind_angle_deg', 'al', 'tb', 'transit', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'kq', 'RDCHigh', 'RDCLow',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'RDCHigh', 'RDCLow',
     #     'THigh', 'TLow'
     # ]
 
@@ -98,7 +98,7 @@ class Args:
         # linear resistance augmentation with temperature (K**-1)
         self.temperature_coeff_linear = 3.8e-03
         # quadratic resistance augmentation with temperature (K**-2)
-        self.kq = 8.0e-07
+        self.temperature_coeff_quadratic = 8.0e-07
         # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
         self.RDCHigh = 3.05e-05
         # electric resistance per unit length (DC) at TLow (Ohm.m**-1)

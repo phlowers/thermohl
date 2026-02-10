@@ -160,7 +160,7 @@ magnetic_coeff_per_a:
   dist: null
 temperature_coeff_linear:
   dist: null
-kq:
+temperature_coeff_quadratic:
   dist: null
 RDCHigh:
   dist: null
