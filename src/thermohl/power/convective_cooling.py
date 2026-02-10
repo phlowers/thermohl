@@ -24,7 +24,7 @@ class ConvectiveCoolingBase(PowerTerm):
         wind_speed_ms: floatArrayLike,
         wind_angle_deg: floatArrayLike,
         outer_diameter_m: floatArrayLike,
-        rho: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
+        air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         mu: Callable[[floatArrayLike], floatArrayLike],
         lambda_: Callable[[floatArrayLike], floatArrayLike],
         **kwargs: Any,
@@ -37,7 +37,7 @@ class ConvectiveCoolingBase(PowerTerm):
         )
         self.outer_diameter_m = outer_diameter_m
 
-        self.air_density = rho
+        self.air_density = air_density
         self.dynamic_viscosity = mu
         self.thermal_conductivity = lambda_
 

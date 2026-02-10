@@ -80,13 +80,18 @@ class ExcelSheet:
         outer_diameter_m = self.args["outer_diameter_m"]
         Tf = 0.5 * (Ts + self.args["ambient_temperature_c"])
         lm = 0.02424 + 0.00007477 * Tf - 0.000000004407 * Tf**2
-        rho = (
+        air_density = (
             1.293
             - 0.0001525 * self.args["altitude"]
             + 0.00000000638 * self.args["altitude"] ** 2
         ) / (1 + 0.00367 * Tf)
         mu = (0.000001458 * (Tf + 273) ** 1.5) / (Tf + 383.4)
-        Re = self.args["wind_speed_ms"] * self.args["outer_diameter_m"] * rho / mu
+        Re = (
+            self.args["wind_speed_ms"]
+            * self.args["outer_diameter_m"]
+            * air_density
+            / mu
+        )
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
         wind_angle_deg = np.deg2rad(self.args["wind_angle_deg"])
         K = (
@@ -97,7 +102,7 @@ class ExcelSheet:
         )
         PCn = (
             3.645
-            * rho**0.5
+            * air_density**0.5
             * outer_diameter_m**0.75
             * np.sign(Ts - self.args["ambient_temperature_c"])
             * np.abs(Ts - self.args["ambient_temperature_c"]) ** 1.25
