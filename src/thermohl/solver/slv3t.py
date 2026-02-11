@@ -106,7 +106,7 @@ class Solver3T(Solver_):
         self.radiative_cooling.__init__(**self.args.__dict__)
         self.precipitation_cooling.__init__(**self.args.__dict__)
 
-        self.mgc = self._morgan_coefficients()
+        self.morgan_coefficients = self._morgan_coefficients()
 
         self.args.compress()
 
@@ -126,7 +126,7 @@ class Solver3T(Solver_):
             float | numpy.ndarray: Array of average temperatures.
         """
         ambient_temperature_c = 0.5 * (ts + tc)
-        _, outer_diameter_m, core_diameter_m, ix = self.mgc
+        _, outer_diameter_m, core_diameter_m, ix = self.morgan_coefficients
         ambient_temperature_c[ix] = _profile_bim_avg(
             ts[ix], tc[ix], 0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]
         )
@@ -186,7 +186,7 @@ class Solver3T(Solver_):
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
-        heat_capacity_jkgk, _, _, _ = self.mgc
+        heat_capacity_jkgk, _, _, _ = self.morgan_coefficients
         return (
             core_temperature_c - surface_temperature_c
         ) - heat_capacity_jkgk * self.joule(
@@ -260,7 +260,9 @@ class Solver3T(Solver_):
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = self.mgc
+        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = (
+            self.morgan_coefficients
+        )
         c1 = heat_capacity_jkgk / (
             2.0 * np.pi * self.args.radial_thermal_conductivity_wmk
         )
@@ -446,7 +448,9 @@ class Solver3T(Solver_):
         target_ = self._check_target(target, self.args.core_diameter_m, max_len)
 
         # pre-compute indexes
-        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = self.mgc
+        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = (
+            self.morgan_coefficients
+        )
         a, b = _profile_bim_avg_coeffs(0.5 * core_diameter_m, 0.5 * outer_diameter_m)
 
         js = np.nonzero(target_ == Solver_.Names.surf)[0]
