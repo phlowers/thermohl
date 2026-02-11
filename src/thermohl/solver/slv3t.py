@@ -173,21 +173,25 @@ class Solver3T(Solver_):
             - self.precipitation_cooling.value(ts)
         )
 
-    def morgan(self, ts: floatArray, tc: floatArray) -> floatArray:
+    def morgan(
+        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+    ) -> floatArray:
         """
         Computes the Morgan function for given temperature arrays.
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
 
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
         heat_capacity_jkgk, _, _, _ = self.mgc
-        return (tc - ts) - heat_capacity_jkgk * self.joule(ts, tc) / (
-            2.0 * np.pi * self.args.radial_thermal_conductivity_wmk
-        )
+        return (
+            core_temperature_c - surface_temperature_c
+        ) - heat_capacity_jkgk * self.joule(
+            surface_temperature_c, core_temperature_c
+        ) / (2.0 * np.pi * self.args.radial_thermal_conductivity_wmk)
 
     def steady_temperature(
         self,
