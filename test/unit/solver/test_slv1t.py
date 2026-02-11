@@ -20,7 +20,7 @@ def solver():
         "wind_speed_ms": np.array([0]),
         "wind_angle_deg": np.array([0]),
         "ambient_pressure_pa": np.array([101325]),
-        "rh": np.array([50]),
+        "relative_humidity": np.array([50]),
         "pr": np.array([0]),
         "m": 1.0,
         "c": 1.0,

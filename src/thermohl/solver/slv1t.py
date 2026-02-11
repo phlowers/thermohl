@@ -113,7 +113,7 @@ class Solver1T(Solver_):
             wind_angle_deg=reshape(self.args.wind_angle_deg, N, n),
             wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
             ambient_pressure_pa=reshape(self.args.ambient_pressure_pa, N, n),
-            rh=reshape(self.args.rh, N, n),
+            relative_humidity=reshape(self.args.relative_humidity, N, n),
             pr=reshape(self.args.pr, N, n),
         )
         del (month, day, hour)
