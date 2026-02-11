@@ -346,7 +346,7 @@ class Solver3T(Solver_):
 
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
-        imc = 1.0 / (self.args.m * self.args.c)
+        imc = 1.0 / (self.args.linear_mass_kgm * self.args.c)
 
         # init
         ts = np.zeros((N, n))

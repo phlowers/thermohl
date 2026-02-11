@@ -90,7 +90,7 @@ current_a:
   max: 4999.
   std: 0.03
   relative_std: true
-m:
+linear_mass_kgm:
   dist: 'truncnorm'
   min: 0.1
   max: 5.0

@@ -22,7 +22,7 @@ def solver():
         "ambient_pressure_pa": np.array([101325]),
         "relative_humidity": np.array([50]),
         "precipitation_rate_ms": np.array([0]),
-        "m": 1.0,
+        "linear_mass_kgm": 1.0,
         "c": 1.0,
         "month": 1,
         "day": 1,
