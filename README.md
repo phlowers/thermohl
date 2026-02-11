@@ -111,11 +111,11 @@ If you use uv, open a terminal and enter the following commands:
   uv sync --group docs
 ```
 
-Then, in the same terminal, build the doc with:
+Then, in the same terminal, in the `thermohl-docs` folder, build the doc with:
 
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+* `mkdocs serve` (or `uv run mkdocs serve`) - Start the live-reloading docs server.
+* `mkdocs build` (or `uv run mkdocs build`) - Build the documentation site.
+* `mkdocs -h` (or `uv run mkdocs -h`) - Print help message and exit.
 
 The documentation can then be accessed locally from http://127.0.0.1:8000.
 
