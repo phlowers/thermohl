@@ -98,7 +98,7 @@ class Solver3TL(Solver3T):
         core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.transit = i
+            self.args.current_a = i
             self.jh.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
