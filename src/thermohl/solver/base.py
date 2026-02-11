@@ -325,15 +325,15 @@ def _set_dates(
     day: floatArrayLike,
     hour: floatArrayLike,
     time: floatArray,
-    n: int,
+    input_size: int,
 ) -> Tuple[intArray, intArray, floatArray]:
     """
     Set months, days and hours as 2D arrays.
 
     This function is used in transient temperature computations. Inputs month,
-    day and hour are floats or 1D arrays of size n; input t is a time vector of
-    size N with evaluation times in seconds. It sets arrays months, days and
-    hours, of size (N, n) such that
+    day and hour are floats or 1D arrays of size input_size; input t is a time vector of
+    size time_size with evaluation times in seconds. It sets arrays months, days and
+    hours, of size (time_size, input_size) such that
         months[i, j] = datetime(month[j], day[j], hour[j]) + t[i] .
 
     Args:
@@ -341,38 +341,41 @@ def _set_dates(
         day (floatArrayLike): Array of floats or float representing the days.
         hour (floatArrayLike): Array of floats or float representing the hours.
         time (floatArray): Array of floats representing the time vector in seconds.
-        n (int): Size of the input arrays month, day, and hour.
+        input_size (int): Size of the input arrays month, day, and hour.
 
     Returns:
     Tuple[intArray, intArray, floatArray]:
-        - months (intArray): 2D array of shape (N, n) with month values.
-        - days (intArray): 2D array of shape (N, n) with day values.
-        - hours (floatArray): 2D array of shape (N, n) with hour values.
+        - months (intArray): 2D array of shape (time_size, input_size) with month values.
+        - days (intArray): 2D array of shape (time_size, input_size) with day values.
+        - hours (floatArray): 2D array of shape (time_size, input_size) with hour values.
     """
-    oi = np.ones((n,), dtype=int)
-    of = np.ones((n,), dtype=float)
-    month2 = month * oi
-    day2 = day * oi
-    hour2 = hour * of
+    ones_int = np.ones((input_size,), dtype=int)
+    ones_float = np.ones((input_size,), dtype=float)
+    month2 = month * ones_int
+    day2 = day * ones_int
+    hour2 = hour * ones_float
 
-    N = len(time)
-    months = np.zeros((N, n), dtype=int)
-    days = np.zeros((N, n), dtype=int)
-    hours = np.zeros((N, n), dtype=float)
+    time_size = len(time)
+    months = np.zeros((time_size, input_size), dtype=int)
+    days = np.zeros((time_size, input_size), dtype=int)
+    hours = np.zeros((time_size, input_size), dtype=float)
 
-    td = np.array(
+    time_delta = np.array(
         [datetime.timedelta()]
         + [
             datetime.timedelta(seconds=float(time[i] - time[i - 1]))
-            for i in range(1, N)
+            for i in range(1, time_size)
         ]
     )
 
-    for j in range(n):
-        hj = int(np.floor(hour2[j]))
-        dj = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hj)))
-        t0 = datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hj) + dj
-        ts = pd.Series(t0 + td)
+    for j in range(input_size):
+        hour_j = int(np.floor(hour2[j]))
+        time_delta_j = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hour_j)))
+        t0 = (
+            datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hour_j)
+            + time_delta_j
+        )
+        ts = pd.Series(t0 + time_delta)
         months[:, j] = ts.dt.month
         days[:, j] = ts.dt.day
         hours[:, j] = (
