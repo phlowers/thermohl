@@ -320,7 +320,12 @@ def test_morgan_coefficients_large_values():
 
 def test_joule_basic():
     solver = Solver3T()
-    solver.mgc = (np.array([0.5]), np.array([1.0]), np.array([0.5]), np.array([0]))
+    solver.morgan_coefficients = (
+        np.array([0.5]),
+        np.array([1.0]),
+        np.array([0.5]),
+        np.array([0]),
+    )
     ts = np.array([300.0])
     tc = np.array([400.0])
     expected = np.array([0.0])
@@ -358,7 +363,12 @@ def test_balance_basic():
 
 def test_morgan_basic():
     solver = Solver3T()
-    solver.mgc = (np.array([0.5]), np.array([1.0]), np.array([0.5]), np.array([0]))
+    solver.morgan_coefficients = (
+        np.array([0.5]),
+        np.array([1.0]),
+        np.array([0.5]),
+        np.array([0]),
+    )
     solver.joule_heating = MagicMock()
     solver.joule_heating.value = MagicMock(return_value=np.array([100.0]))
     solver.joule = MagicMock(return_value=np.array([100.0]))

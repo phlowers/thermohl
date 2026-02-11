@@ -82,7 +82,7 @@ class Solver3TL(Solver3T):
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
-        morgan_coefficient = self.mgc[0]
+        morgan_coefficient = self.morgan_coefficients[0]
         return (
             core_temperature_c - surface_temperature_c
         ) - morgan_coefficient * self.joule(surface_temperature_c, core_temperature_c)
@@ -122,7 +122,7 @@ class Solver3TL(Solver3T):
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        c1, _ = self.mgc
+        c1, _ = self.morgan_coefficients
         c2 = 0.5 * np.ones_like(c1)
         return c1, c2
 
@@ -186,7 +186,7 @@ class Solver3TL(Solver3T):
             dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
                 dti
                 / tau
-                * self.mgc[0]
+                * self.morgan_coefficients[0]
                 * self.joule_heating.value(ambient_temperature_c[i, :])
             )
             tc[i, :] = ambient_temperature_c[i, :] + 0.5 * dT[i, :]
