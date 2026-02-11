@@ -51,7 +51,7 @@ def test_power_default():
             s.solar_heating,
             s.convective_cooling,
             s.radiative_cooling,
-            s.pc,
+            s.precipitation_cooling,
         ]:
             p.__init__(**s.args.__dict__)
             assert np.isscalar(p.value(0.0))
@@ -72,7 +72,7 @@ def test_power_1d():
             s.solar_heating,
             s.convective_cooling,
             s.radiative_cooling,
-            s.pc,
+            s.precipitation_cooling,
         ]:
             p.__init__(**d)
             v = p.value(0.0)

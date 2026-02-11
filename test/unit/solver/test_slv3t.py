@@ -339,8 +339,8 @@ def test_balance_basic():
     solver.convective_cooling.value = MagicMock(return_value=np.array([30.0]))
     solver.radiative_cooling = MagicMock()
     solver.radiative_cooling.value = MagicMock(return_value=np.array([10.0]))
-    solver.pc = MagicMock()
-    solver.pc.value = MagicMock(return_value=np.array([5.0]))
+    solver.precipitation_cooling = MagicMock()
+    solver.precipitation_cooling.value = MagicMock(return_value=np.array([5.0]))
 
     ts = np.array([300])
     tc = np.array([400])
@@ -353,7 +353,7 @@ def test_balance_basic():
     solver.solar_heating.value.assert_called_once_with(ts)
     solver.convective_cooling.value.assert_called_once_with(ts)
     solver.radiative_cooling.value.assert_called_once_with(ts)
-    solver.pc.value.assert_called_once_with(ts)
+    solver.precipitation_cooling.value.assert_called_once_with(ts)
 
 
 def test_morgan_basic():
