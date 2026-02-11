@@ -101,30 +101,34 @@ class Solver3TL(Solver3T):
         average_indices = np.nonzero(target_ == Solver_.Names.avg)[0]
         core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
-        def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.current_a = i
+        def newtheader(
+            current_a: floatArray, tg: floatArray
+        ) -> Tuple[floatArray, floatArray]:
+            self.args.current_a = current_a
             self.joule_heating.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
+            surface_temperature = np.ones_like(tg) * np.nan
+            core_temperature = np.ones_like(tg) * np.nan
 
-            ts[surface_indices] = Tmax[surface_indices]
-            tc[surface_indices] = tg[surface_indices]
+            surface_temperature[surface_indices] = Tmax[surface_indices]
+            core_temperature[surface_indices] = tg[surface_indices]
 
-            ts[average_indices] = tg[average_indices]
-            tc[average_indices] = 2 * Tmax[average_indices] - ts[average_indices]
+            surface_temperature[average_indices] = tg[average_indices]
+            core_temperature[average_indices] = (
+                2 * Tmax[average_indices] - surface_temperature[average_indices]
+            )
 
-            tc[core_indices] = Tmax[core_indices]
-            ts[core_indices] = tg[core_indices]
+            core_temperature[core_indices] = Tmax[core_indices]
+            surface_temperature[core_indices] = tg[core_indices]
 
-            return ts, tc
+            return surface_temperature, core_temperature
 
         return Tmax, newtheader
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        c1, _ = self.morgan_coefficients
-        c2 = 0.5 * np.ones_like(c1)
-        return c1, c2
+        morgan_coeff_1, _ = self.morgan_coefficients
+        morgan_coeff_2 = 0.5 * np.ones_like(morgan_coeff_1)
+        return morgan_coeff_1, morgan_coeff_2
 
     def transient_temperature_legacy(
         self,
