@@ -337,8 +337,8 @@ def test_balance_basic():
     solver.solar_heating.value = MagicMock(return_value=np.array([50.0]))
     solver.convective_cooling = MagicMock()
     solver.convective_cooling.value = MagicMock(return_value=np.array([30.0]))
-    solver.rc = MagicMock()
-    solver.rc.value = MagicMock(return_value=np.array([10.0]))
+    solver.radiative_cooling = MagicMock()
+    solver.radiative_cooling.value = MagicMock(return_value=np.array([10.0]))
     solver.pc = MagicMock()
     solver.pc.value = MagicMock(return_value=np.array([5.0]))
 
@@ -352,7 +352,7 @@ def test_balance_basic():
     solver.joule.assert_called_once_with(ts, tc)
     solver.solar_heating.value.assert_called_once_with(ts)
     solver.convective_cooling.value.assert_called_once_with(ts)
-    solver.rc.value.assert_called_once_with(ts)
+    solver.radiative_cooling.value.assert_called_once_with(ts)
     solver.pc.value.assert_called_once_with(ts)
 
 

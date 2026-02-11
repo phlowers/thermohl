@@ -167,19 +167,19 @@ def plot_radiative_cooling(dic):
     for i, ambient_temperature_c in enumerate(ambient_temperatures):
         dic["ambient_temperature_c"] = ambient_temperature_c
 
-        rc = cigre.RadiativeCooling(**dic)
+        radiative_cooling = cigre.RadiativeCooling(**dic)
         plt.plot(
             Tc,
-            rc.value(Tc),
+            radiative_cooling.value(Tc),
             ls="-",
             c=cl[i],
             label="T$_a$=%.0f C" % (ambient_temperature_c,),
         )
-        rc = ieee.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ls="--", c=cl[i])
+        radiative_cooling = ieee.RadiativeCooling(**dic)
+        plt.plot(Tc, radiative_cooling.value(Tc), ls="--", c=cl[i])
 
-        rc = olla.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ":", c=cl[i])
+        radiative_cooling = olla.RadiativeCooling(**dic)
+        plt.plot(Tc, radiative_cooling.value(Tc), ":", c=cl[i])
 
     plt.grid(True)
     plt.xlabel("Conductor temperature (C)")

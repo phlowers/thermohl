@@ -59,7 +59,7 @@ class Solver1T(Solver_):
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.solar_heating.value(T)
             df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
+            df[Solver_.Names.prad] = self.radiative_cooling.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)
 
         return df
@@ -148,7 +148,7 @@ class Solver1T(Solver_):
                 dr[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
                 dr[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
                 dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(T[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
+                dr[Solver_.Names.prad][i, :] = self.radiative_cooling.value(T[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
 
         # squeeze return values if n is 1
@@ -197,7 +197,7 @@ class Solver1T(Solver_):
         T_ = T * np.ones(shape)
         joule_heating = (
             self.convective_cooling.value(T_)
-            + self.rc.value(T_)
+            + self.radiative_cooling.value(T_)
             + self.pc.value(T_)
             - self.solar_heating.value(T_)
         )
@@ -222,7 +222,7 @@ class Solver1T(Solver_):
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.solar_heating.value(T)
             df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
+            df[Solver_.Names.prad] = self.radiative_cooling.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)
 
         return df
