@@ -160,7 +160,7 @@ class Solver3TL(Solver3T):
         Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
 
         # shortcuts for time-loop
-        imc = 1.0 / (self.args.linear_mass_kgm * self.args.c)
+        imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
         ts = np.zeros((N, n))
