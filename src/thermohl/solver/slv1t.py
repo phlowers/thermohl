@@ -58,7 +58,7 @@ class Solver1T(Solver_):
         if return_power:
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.solar_heating.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)
 
@@ -147,7 +147,7 @@ class Solver1T(Solver_):
                 self.update()
                 dr[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
                 dr[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
+                dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(T[i, :])
                 dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
 
@@ -196,7 +196,7 @@ class Solver1T(Solver_):
         shape = (self.args.max_len(),)
         T_ = T * np.ones(shape)
         joule_heating = (
-            self.cc.value(T_)
+            self.convective_cooling.value(T_)
             + self.rc.value(T_)
             + self.pc.value(T_)
             - self.solar_heating.value(T_)
@@ -221,7 +221,7 @@ class Solver1T(Solver_):
         if return_power:
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.solar_heating.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)
 
