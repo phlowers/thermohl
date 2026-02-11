@@ -93,14 +93,14 @@ class Solver3T(Solver_):
         and recalculating the Morgan coefficients.
         This method performs the following steps:
         1. Extends the arguments to their maximum length.
-        2. Reinitializes the `jh`, `sh`, `cc`, `rc`, and `pc` components using the updated arguments.
+        2. Reinitializes the `joule_heating`, `sh`, `cc`, `rc`, and `pc` components using the updated arguments.
         3. Recalculates the Morgan coefficients using the updated dimensions.
         4. Compresses the arguments.
         Returns:
             None
         """
         self.args.extend_to_max_len()
-        self.jh.__init__(**self.args.__dict__)
+        self.joule_heating.__init__(**self.args.__dict__)
         self.sh.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
         self.rc.__init__(**self.args.__dict__)
@@ -148,7 +148,7 @@ class Solver3T(Solver_):
         - Returns the Joule heating values based on the adjusted temperatures.
         """
         ambient_temperature_c = self.average(ts, tc)
-        return self.jh.value(ambient_temperature_c)
+        return self.joule_heating.value(ambient_temperature_c)
 
     def balance(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
         """
@@ -369,7 +369,7 @@ class Solver3T(Solver_):
             ambient_temperature_c[i, :] = (
                 ambient_temperature_c[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
             )
-            mrg = c1 * (self.jh.value(ambient_temperature_c[i, :]) - bal)
+            mrg = c1 * (self.joule_heating.value(ambient_temperature_c[i, :]) - bal)
             tc[i, :] = ambient_temperature_c[i, :] + c2 * mrg
             ts[i, :] = tc[i, :] - mrg
 
@@ -451,7 +451,7 @@ class Solver3T(Solver_):
         # get correct input for quasi-newton solver
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
             self.args.current_a = i
-            self.jh.__init__(**self.args.__dict__)
+            self.joule_heating.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
 
@@ -508,7 +508,7 @@ class Solver3T(Solver_):
         # solve system
         s = Solver1T(
             self.args.__dict__,
-            type(self.jh),
+            type(self.joule_heating),
             type(self.sh),
             type(self.cc),
             type(self.rc),
@@ -546,7 +546,7 @@ class Solver3T(Solver_):
                 df[Solver_.Names.tcore] = tc
 
             if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ambient_temperature_c)
+                df[Solver_.Names.pjle] = self.joule_heating.value(ambient_temperature_c)
                 df[Solver_.Names.psol] = self.sh.value(ts)
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)

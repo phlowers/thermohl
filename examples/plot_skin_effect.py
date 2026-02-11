@@ -52,10 +52,10 @@ def plot_skin_effect():
                 ("frequency_hz", 50.0),
             ]
         )
-        jh = olla.JouleHeating(**di)
+        joule_heating = olla.JouleHeating(**di)
         plt.plot(
             x,
-            jh._ks(R),
+            joule_heating._ks(R),
             "-",
             c=cl[i],
             label="with $r_{in}/r_{out}$=%.2f" % (core_diameter_m,),
