@@ -248,7 +248,7 @@ class Solver(ABC):
         self.args = Args(dic)
         self.args.extend_to_max_len()
         self.joule_heating = joule(**self.args.__dict__)
-        self.sh = solar(**self.args.__dict__)
+        self.solar_heating = solar(**self.args.__dict__)
         self.cc = convective(**self.args.__dict__)
         self.rc = radiative(**self.args.__dict__)
         self.pc = precipitation(**self.args.__dict__)
@@ -257,7 +257,7 @@ class Solver(ABC):
     def update(self) -> None:
         self.args.extend_to_max_len()
         self.joule_heating.__init__(**self.args.__dict__)
-        self.sh.__init__(**self.args.__dict__)
+        self.solar_heating.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
@@ -266,7 +266,7 @@ class Solver(ABC):
     def balance(self, T: floatArrayLike) -> floatArrayLike:
         return (
             self.joule_heating.value(T)
-            + self.sh.value(T)
+            + self.solar_heating.value(T)
             - self.cc.value(T)
             - self.rc.value(T)
             - self.pc.value(T)
