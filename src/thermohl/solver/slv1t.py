@@ -119,7 +119,7 @@ class Solver1T(Solver_):
         del (month, day, hour)
 
         # shortcuts for time-loop
-        imc = 1.0 / (self.args.linear_mass_kgm * self.args.c)
+        imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
         T = np.zeros((N, n))

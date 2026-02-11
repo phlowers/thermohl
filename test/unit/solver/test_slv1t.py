@@ -23,7 +23,7 @@ def solver():
         "relative_humidity": np.array([50]),
         "precipitation_rate_ms": np.array([0]),
         "linear_mass_kgm": 1.0,
-        "c": 1.0,
+        "heat_capacity_jkgk": 1.0,
         "month": 1,
         "day": 1,
         "hour": 0,

@@ -68,24 +68,24 @@ class Solver3T(Solver_):
         Returns:
         --------
         Tuple[numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[float], numpy.ndarray[int]]
-            - c : numpy.ndarray[float]
+            - heat_capacity_jkgk : numpy.ndarray[float]
                 Coefficient array for heat flux.
             - D_ : numpy.ndarray[float]
-                Array of core diameters, broadcasted to the shape of `c`.
+                Array of core diameters, broadcasted to the shape of `heat_capacity_jkgk`.
             - d_ : numpy.ndarray[float]
-                Array of surface diameters, broadcasted to the shape of `c`.
+                Array of surface diameters, broadcasted to the shape of `heat_capacity_jkgk`.
             - i : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        c = 0.5 * np.ones((self.args.max_len(),))
-        outer_diameter_m = self.args.outer_diameter_m * np.ones_like(c)
-        core_diameter_m = self.args.core_diameter_m * np.ones_like(c)
+        heat_capacity_jkgk = 0.5 * np.ones((self.args.max_len(),))
+        outer_diameter_m = self.args.outer_diameter_m * np.ones_like(heat_capacity_jkgk)
+        core_diameter_m = self.args.core_diameter_m * np.ones_like(heat_capacity_jkgk)
         i = np.nonzero(core_diameter_m > 0.0)[0]
-        c[i] -= (
+        heat_capacity_jkgk[i] -= (
             core_diameter_m[i] ** 2
             / (outer_diameter_m[i] ** 2 - core_diameter_m[i] ** 2)
         ) * np.log(outer_diameter_m[i] / core_diameter_m[i])
-        return c, outer_diameter_m, core_diameter_m, i
+        return heat_capacity_jkgk, outer_diameter_m, core_diameter_m, i
 
     def update(self) -> None:
         """
@@ -184,8 +184,8 @@ class Solver3T(Solver_):
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
-        c, _, _, _ = self.mgc
-        return (tc - ts) - c * self.joule(ts, tc) / (
+        heat_capacity_jkgk, _, _, _ = self.mgc
+        return (tc - ts) - heat_capacity_jkgk * self.joule(ts, tc) / (
             2.0 * np.pi * self.args.radial_thermal_conductivity_wmk
         )
 
@@ -256,8 +256,10 @@ class Solver3T(Solver_):
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
-        c, outer_diameter_m, core_diameter_m, ix = self.mgc
-        c1 = c / (2.0 * np.pi * self.args.radial_thermal_conductivity_wmk)
+        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = self.mgc
+        c1 = heat_capacity_jkgk / (
+            2.0 * np.pi * self.args.radial_thermal_conductivity_wmk
+        )
         c2 = 0.5 * np.ones_like(c1)
         a, b = _profile_bim_avg_coeffs(
             0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]
@@ -348,7 +350,7 @@ class Solver3T(Solver_):
 
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
-        imc = 1.0 / (self.args.linear_mass_kgm * self.args.c)
+        imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
         ts = np.zeros((N, n))
@@ -438,7 +440,7 @@ class Solver3T(Solver_):
         target_ = self._check_target(target, self.args.core_diameter_m, max_len)
 
         # pre-compute indexes
-        c, outer_diameter_m, core_diameter_m, ix = self.mgc
+        heat_capacity_jkgk, outer_diameter_m, core_diameter_m, ix = self.mgc
         a, b = _profile_bim_avg_coeffs(0.5 * core_diameter_m, 0.5 * outer_diameter_m)
 
         js = np.nonzero(target_ == Solver_.Names.surf)[0]

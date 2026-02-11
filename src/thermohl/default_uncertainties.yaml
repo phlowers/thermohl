@@ -132,7 +132,7 @@ radial_thermal_conductivity_wmk:
   max: 1.5
   std: 0.1
   relative_std: false
-c:
+heat_capacity_jkgk:
   dist: 'truncnorm'
   min: 500.
   max: 1000.
