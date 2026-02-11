@@ -250,7 +250,7 @@ class Solver(ABC):
         self.joule_heating = joule(**self.args.__dict__)
         self.solar_heating = solar(**self.args.__dict__)
         self.convective_cooling = convective(**self.args.__dict__)
-        self.rc = radiative(**self.args.__dict__)
+        self.radiative_cooling = radiative(**self.args.__dict__)
         self.pc = precipitation(**self.args.__dict__)
         self.args.compress()
 
@@ -259,7 +259,7 @@ class Solver(ABC):
         self.joule_heating.__init__(**self.args.__dict__)
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
-        self.rc.__init__(**self.args.__dict__)
+        self.radiative_cooling.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
         self.args.compress()
 
@@ -268,7 +268,7 @@ class Solver(ABC):
             self.joule_heating.value(T)
             + self.solar_heating.value(T)
             - self.convective_cooling.value(T)
-            - self.rc.value(T)
+            - self.radiative_cooling.value(T)
             - self.pc.value(T)
         )
 
