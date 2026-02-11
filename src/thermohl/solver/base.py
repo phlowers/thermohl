@@ -134,13 +134,13 @@ class Args:
             int: The maximum length of the values in the dictionary. If the dictionary is empty
             or all values are of types that do not have a length, the method returns 1.
         """
-        n = 1
+        result = 1
         for k in self.keys():
             try:
-                n = max(n, len(self[k]))
+                result = max(result, len(self[k]))
             except TypeError:
                 pass
-        return n
+        return result
 
     def extend_to_max_len(self) -> None:
         """
@@ -157,18 +157,18 @@ class Args:
         Returns:
             None
         """
-        n = self.max_len()
+        max_len = self.max_len()
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
                 t = self[k].dtype
-                c = len(self[k]) == n
+                c = len(self[k]) == max_len
             else:
                 t = type(self[k])
                 c = False
             if c:
                 self[k] = self[k][:]
             else:
-                self[k] = self[k] * np.ones((n,), dtype=t)
+                self[k] = self[k] * np.ones((max_len,), dtype=t)
 
     def compress(self) -> None:
         """
@@ -178,11 +178,11 @@ class Args:
         Returns:
             None
         """
-        for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                u = np.unique(self[k])
+        for key in self.keys():
+            if isinstance(self[key], np.ndarray):
+                u = np.unique(self[key])
                 if len(u) == 1:
-                    self[k] = u[0]
+                    self[key] = u[0]
 
 
 class Solver(ABC):
