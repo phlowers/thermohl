@@ -340,7 +340,7 @@ class Solver3T(Solver_):
             wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
             ambient_pressure_pa=reshape(self.args.ambient_pressure_pa, N, n),
             relative_humidity=reshape(self.args.relative_humidity, N, n),
-            pr=reshape(self.args.pr, N, n),
+            precipitation_rate_ms=reshape(self.args.precipitation_rate_ms, N, n),
         )
         del (month, day, hour)
 

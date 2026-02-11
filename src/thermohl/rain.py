@@ -79,7 +79,7 @@ class PrecipitationCooling(PowerTerm):
         rain_rate_ms,
         snow_rate_ms,
     ):
-        # ! -- pr and ps in m.s**-1
+        # ! -- precipitation_rate_ms and ps in m.s**-1
         water_density = thermodynamics.Water.volumic_mass(ambient_temp_c)
         rain_mass_flux = np.sqrt(
             (rain_rate_ms * water_density) ** 2

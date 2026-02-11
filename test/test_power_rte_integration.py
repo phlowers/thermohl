@@ -266,13 +266,13 @@ def test_compare_power():
     pj = rte.JouleHeating(**d1)
     ps = rte.SolarHeating(**d1)
     pc = rte.ConvectiveCooling(**d1)
-    pr = rte.RadiativeCooling(**d1)
+    precipitation_rate_ms = rte.RadiativeCooling(**d1)
     ex = ExcelSheet(d2)
 
     assert np.allclose(ex.joule_heating(T), pj.value(T))
     assert np.allclose(ex.solar_heating(), ps.value(0.0))
     assert np.allclose(ex.convective_cooling(T), pc.value(T))
-    assert np.allclose(ex.radiative_cooling(T), pr.value(T))
+    assert np.allclose(ex.radiative_cooling(T), precipitation_rate_ms.value(T))
 
 
 def test_solar_heating():
