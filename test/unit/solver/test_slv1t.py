@@ -21,7 +21,7 @@ def solver():
         "wind_angle_deg": np.array([0]),
         "ambient_pressure_pa": np.array([101325]),
         "relative_humidity": np.array([50]),
-        "pr": np.array([0]),
+        "precipitation_rate_ms": np.array([0]),
         "m": 1.0,
         "c": 1.0,
         "month": 1,

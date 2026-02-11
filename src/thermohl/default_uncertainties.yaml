@@ -58,7 +58,7 @@ relative_humidity:
   max: 1.
   std: 0.05
   relative_std: false
-pr:
+precipitation_rate_ms:
   dist: 'truncnorm'
   min: 0.
   max: 0.05
