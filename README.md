@@ -81,11 +81,6 @@ Use it ! You can report to the user guide section.
     import thermohl
     print(thermohl.__version__)
 ```
-Use it ! You can report to the user guide section.
-```shell
-    import thermohl
-    print(thermohl.__version__)
-```
 
 ## Developers
 
