@@ -52,7 +52,7 @@ ambient_pressure_pa:
   max: 1.050E+05
   std: 0.05
   relative_std: True
-rh:
+relative_humidity:
   dist: 'truncnorm'
   min: 0.
   max: 1.
