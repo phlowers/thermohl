@@ -57,7 +57,7 @@ class Solver1T(Solver_):
 
         if return_power:
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
+            df[Solver_.Names.psol] = self.solar_heating.value(T)
             df[Solver_.Names.pcnv] = self.cc.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)
@@ -146,7 +146,7 @@ class Solver1T(Solver_):
                     self.args[k] = de[k][i, :]
                 self.update()
                 dr[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
+                dr[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
                 dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
                 dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
@@ -199,7 +199,7 @@ class Solver1T(Solver_):
             self.cc.value(T_)
             + self.rc.value(T_)
             + self.pc.value(T_)
-            - self.sh.value(T_)
+            - self.solar_heating.value(T_)
         )
 
         def fun(i: floatArray) -> floatArrayLike:
@@ -220,7 +220,7 @@ class Solver1T(Solver_):
 
         if return_power:
             df[Solver_.Names.pjle] = self.joule_heating.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
+            df[Solver_.Names.psol] = self.solar_heating.value(T)
             df[Solver_.Names.pcnv] = self.cc.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)
             df[Solver_.Names.ppre] = self.pc.value(T)

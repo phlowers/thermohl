@@ -333,8 +333,8 @@ def test_joule_basic():
 def test_balance_basic():
     solver = Solver3T()
     solver.joule = MagicMock(return_value=np.array([100.0]))
-    solver.sh = MagicMock()
-    solver.sh.value = MagicMock(return_value=np.array([50.0]))
+    solver.solar_heating = MagicMock()
+    solver.solar_heating.value = MagicMock(return_value=np.array([50.0]))
     solver.cc = MagicMock()
     solver.cc.value = MagicMock(return_value=np.array([30.0]))
     solver.rc = MagicMock()
@@ -350,7 +350,7 @@ def test_balance_basic():
 
     np.testing.assert_array_almost_equal(result, expected)
     solver.joule.assert_called_once_with(ts, tc)
-    solver.sh.value.assert_called_once_with(ts)
+    solver.solar_heating.value.assert_called_once_with(ts)
     solver.cc.value.assert_called_once_with(ts)
     solver.rc.value.assert_called_once_with(ts)
     solver.pc.value.assert_called_once_with(ts)

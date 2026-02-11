@@ -93,7 +93,7 @@ class Solver3T(Solver_):
         and recalculating the Morgan coefficients.
         This method performs the following steps:
         1. Extends the arguments to their maximum length.
-        2. Reinitializes the `joule_heating`, `sh`, `cc`, `rc`, and `pc` components using the updated arguments.
+        2. Reinitializes the `joule_heating`, `solar_heating`, `cc`, `rc`, and `pc` components using the updated arguments.
         3. Recalculates the Morgan coefficients using the updated dimensions.
         4. Compresses the arguments.
         Returns:
@@ -101,7 +101,7 @@ class Solver3T(Solver_):
         """
         self.args.extend_to_max_len()
         self.joule_heating.__init__(**self.args.__dict__)
-        self.sh.__init__(**self.args.__dict__)
+        self.solar_heating.__init__(**self.args.__dict__)
         self.cc.__init__(**self.args.__dict__)
         self.rc.__init__(**self.args.__dict__)
         self.pc.__init__(**self.args.__dict__)
@@ -167,7 +167,7 @@ class Solver3T(Solver_):
         """
         return (
             self.joule(ts, tc)
-            + self.sh.value(ts)
+            + self.solar_heating.value(ts)
             - self.cc.value(ts)
             - self.rc.value(ts)
             - self.pc.value(ts)
@@ -247,7 +247,7 @@ class Solver3T(Solver_):
 
         if return_power:
             df[Solver_.Names.pjle] = self.joule(x, y)
-            df[Solver_.Names.psol] = self.sh.value(x)
+            df[Solver_.Names.psol] = self.solar_heating.value(x)
             df[Solver_.Names.pcnv] = self.cc.value(x)
             df[Solver_.Names.prad] = self.rc.value(x)
             df[Solver_.Names.ppre] = self.pc.value(x)
@@ -283,7 +283,7 @@ class Solver3T(Solver_):
 
             for i in range(len(time)):
                 dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
+                dr[Solver_.Names.psol][i, :] = self.solar_heating.value(ts[i, :])
                 dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
                 dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
                 dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
@@ -509,7 +509,7 @@ class Solver3T(Solver_):
         s = Solver1T(
             self.args.__dict__,
             type(self.joule_heating),
-            type(self.sh),
+            type(self.solar_heating),
             type(self.cc),
             type(self.rc),
             type(self.pc),
@@ -547,7 +547,7 @@ class Solver3T(Solver_):
 
             if return_power:
                 df[Solver_.Names.pjle] = self.joule_heating.value(ambient_temperature_c)
-                df[Solver_.Names.psol] = self.sh.value(ts)
+                df[Solver_.Names.psol] = self.solar_heating.value(ts)
                 df[Solver_.Names.pcnv] = self.cc.value(ts)
                 df[Solver_.Names.prad] = self.rc.value(ts)
                 df[Solver_.Names.ppre] = self.pc.value(ts)
