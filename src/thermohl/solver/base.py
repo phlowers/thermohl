@@ -79,7 +79,7 @@ class Args:
 
         self.current_a = 100.0  # current_a intensity (A)
 
-        self.m = 1.5  # mass per unit length (kg.m**-1)
+        self.linear_mass_kgm = 1.5  # mass per unit length (kg.m**-1)
         self.core_diameter_m = 1.9e-02  # core diameter (m)
         self.outer_diameter_m = 3.0e-02  # external (global) diameter (m)
         self.core_area_m2 = 2.84e-04  # core section (m**2)
