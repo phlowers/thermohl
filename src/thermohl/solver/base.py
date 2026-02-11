@@ -77,7 +77,7 @@ class Args:
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
 
-        self.transit = 100.0  # transit intensity (outer_area_m2)
+        self.transit = 100.0  # transit intensity (A)
 
         self.m = 1.5  # mass per unit length (kg.m**-1)
         self.core_diameter_m = 1.9e-02  # core diameter (m)
