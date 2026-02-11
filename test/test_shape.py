@@ -46,7 +46,7 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
 def test_power_default():
     """Check that PowerTerm.value(x) returns correct shape depending on init dict and temperature input."""
     for s in _solvers():
-        for p in [s.joule_heating, s.solar_heating, s.cc, s.rc, s.pc]:
+        for p in [s.joule_heating, s.solar_heating, s.convective_cooling, s.rc, s.pc]:
             p.__init__(**s.args.__dict__)
             assert np.isscalar(p.value(0.0))
             assert p.value(np.array([0.0])).shape == (1,)
@@ -61,7 +61,7 @@ def test_power_1d():
         d["current_a"] = np.linspace(0.0, +999.0, n)
         d["solar_absorptivity"] = np.linspace(0.5, 0.9, n)
         d["ambient_temperature_c"] = np.linspace(-10.0, +50.0, n)
-        for p in [s.joule_heating, s.solar_heating, s.cc, s.rc, s.pc]:
+        for p in [s.joule_heating, s.solar_heating, s.convective_cooling, s.rc, s.pc]:
             p.__init__(**d)
             v = p.value(0.0)
             assert np.isscalar(v) or v.shape == (n,)
