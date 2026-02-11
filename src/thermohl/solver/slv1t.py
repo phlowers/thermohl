@@ -56,7 +56,7 @@ class Solver1T(Solver_):
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.sh.value(T)
             df[Solver_.Names.pcnv] = self.cc.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)
@@ -145,7 +145,7 @@ class Solver1T(Solver_):
                 for k in de.keys():
                     self.args[k] = de[k][i, :]
                 self.update()
-                dr[Solver_.Names.pjle][i, :] = self.jh.value(T[i, :])
+                dr[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
                 dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
                 dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
                 dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
@@ -195,7 +195,7 @@ class Solver1T(Solver_):
         # solve with bisection
         shape = (self.args.max_len(),)
         T_ = T * np.ones(shape)
-        jh = (
+        joule_heating = (
             self.cc.value(T_)
             + self.rc.value(T_)
             + self.pc.value(T_)
@@ -204,8 +204,8 @@ class Solver1T(Solver_):
 
         def fun(i: floatArray) -> floatArrayLike:
             self.args.current_a = i
-            self.jh.__init__(**self.args.__dict__)
-            return self.jh.value(T_) - jh
+            self.joule_heating.__init__(**self.args.__dict__)
+            return self.joule_heating.value(T_) - joule_heating
 
         A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
 
@@ -219,7 +219,7 @@ class Solver1T(Solver_):
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(T)
             df[Solver_.Names.psol] = self.sh.value(T)
             df[Solver_.Names.pcnv] = self.cc.value(T)
             df[Solver_.Names.prad] = self.rc.value(T)

@@ -99,7 +99,7 @@ class Solver3TL(Solver3T):
 
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
             self.args.current_a = i
-            self.jh.__init__(**self.args.__dict__)
+            self.joule_heating.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
 
@@ -180,7 +180,10 @@ class Solver3TL(Solver3T):
                 ambient_temperature_c[i - 1, :] + dti * imc * bal
             )
             dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
-                dti / tau * self.mgc[0] * self.jh.value(ambient_temperature_c[i, :])
+                dti
+                / tau
+                * self.mgc[0]
+                * self.joule_heating.value(ambient_temperature_c[i, :])
             )
             tc[i, :] = ambient_temperature_c[i, :] + 0.5 * dT[i, :]
             ts[i, :] = ambient_temperature_c[i, :] - 0.5 * dT[i, :]

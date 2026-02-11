@@ -359,8 +359,8 @@ def test_balance_basic():
 def test_morgan_basic():
     solver = Solver3T()
     solver.mgc = (np.array([0.5]), np.array([1.0]), np.array([0.5]), np.array([0]))
-    solver.jh = MagicMock()
-    solver.jh.value = MagicMock(return_value=np.array([100.0]))
+    solver.joule_heating = MagicMock()
+    solver.joule_heating.value = MagicMock(return_value=np.array([100.0]))
     solver.joule = MagicMock(return_value=np.array([100.0]))
     solver.args = MagicMock()
     solver.args.radial_thermal_conductivity_wmk = 1.0
