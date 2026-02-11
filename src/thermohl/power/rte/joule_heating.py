@@ -18,7 +18,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        transit: floatArrayLike,
+        current_a: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         core_diameter_m: floatArrayLike,
         outer_area_m2: floatArrayLike,
@@ -37,7 +37,7 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            transit (float | numpy.ndarray): Transit intensity (A).
+            current_a (float | numpy.ndarray): Transit intensity (A).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
             core_diameter_m (float | numpy.ndarray): Core diameter (m).
             outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
@@ -51,7 +51,7 @@ class JouleHeating(PowerTerm):
             frequency_hz (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
-        self.current_a = transit
+        self.current_a = current_a
         self.outer_diameter_m = outer_diameter_m
         self.core_diameter_m = core_diameter_m
         self.magnetic_coeff = self._kem(

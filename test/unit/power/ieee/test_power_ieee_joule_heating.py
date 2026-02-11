@@ -70,21 +70,21 @@ def test_c_mixed():
 
 joule_heating_instances = [
     JouleHeating(
-        transit=np.array([100.0]),
+        current_a=np.array([100.0]),
         temp_low_c=np.array([20.0, 25.0]),
         temp_high_c=np.array([80.0, 85.0]),
         linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
         linear_resistance_temp_high_ohm_m=np.array([0.2, 0.25]),
     ),
     JouleHeating(
-        transit=100.0,
+        current_a=100.0,
         temp_low_c=20.0,
         temp_high_c=80.0,
         linear_resistance_temp_low_ohm_m=0.1,
         linear_resistance_temp_high_ohm_m=0.2,
     ),
     JouleHeating(
-        transit=100.0,
+        current_a=100.0,
         temp_low_c=np.array([20.0, 25.0]),
         temp_high_c=np.array([80.0, 85.0]),
         linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
@@ -176,13 +176,13 @@ def test_value_array_temperature(joule_heating):
 
 
 def test_value_array_temperature_different_shape_should_throw_error():
-    transit = 100.0
+    current_a = 100.0
     temp_low_c = np.array([20.0, 25.0])
     temp_high_c = np.array([80.0, 85.0])
     linear_resistance_temp_low_ohm_m = np.array([0.1, 0.15])
     linear_resistance_temp_high_ohm_m = np.array([0.2, 0.25])
     joule_heating = JouleHeating(
-        transit,
+        current_a,
         temp_low_c,
         temp_high_c,
         linear_resistance_temp_low_ohm_m,

@@ -334,7 +334,7 @@ class Solver3T(Solver_):
             month=month,
             day=day,
             hour=hour,
-            transit=reshape(self.args.transit, N, n),
+            current_a=reshape(self.args.current_a, N, n),
             ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
             wind_angle_deg=reshape(self.args.wind_angle_deg, N, n),
             wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
@@ -446,7 +446,7 @@ class Solver3T(Solver_):
 
         # get correct input for quasi-newton solver
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
-            self.args.transit = i
+            self.args.current_a = i
             self.jh.__init__(**self.args.__dict__)
             ts = np.ones_like(tg) * np.nan
             tc = np.ones_like(tg) * np.nan
@@ -514,7 +514,7 @@ class Solver3T(Solver_):
         x, y, cnt, err = quasi_newton_2d(
             balance,
             morgan,
-            r[Solver_.Names.transit].values,
+            r[Solver_.Names.current_a].values,
             Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
@@ -527,7 +527,7 @@ class Solver3T(Solver_):
             )
 
         # format output
-        df = pd.DataFrame({Solver_.Names.transit: x})
+        df = pd.DataFrame({Solver_.Names.current_a: x})
 
         if return_err:
             df["err"] = err

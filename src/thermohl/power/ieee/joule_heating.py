@@ -29,7 +29,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        transit: floatArrayLike,
+        current_a: floatArrayLike,
         temp_low_c: floatArrayLike,
         temp_high_c: floatArrayLike,
         linear_resistance_temp_low_ohm_m: floatArrayLike,
@@ -41,7 +41,7 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            transit (float | numpy.ndarray): Transit intensity (A).
+            current_a (float | numpy.ndarray): Transit intensity (A).
             temp_low_c (float | numpy.ndarray): Temperature for linear_resistance_temp_low_ohm_m measurement (°C).
             temp_high_c (float | numpy.ndarray): Temperature for linear_resistance_temp_high_ohm_m measurement (°C).
             linear_resistance_temp_low_ohm_m (float | numpy.ndarray): Electric resistance per unit length at temp_low_c (Ω·m⁻¹).
@@ -52,7 +52,7 @@ class JouleHeating(PowerTerm):
         self.temp_high_c = temp_high_c
         self.dc_resistance_low_c = linear_resistance_temp_low_ohm_m
         self.dc_resistance_high_c = linear_resistance_temp_high_ohm_m
-        self.current_a = transit
+        self.current_a = current_a
         self.temp_coeff_linear = JouleHeating._c(
             temp_low_c,
             temp_high_c,

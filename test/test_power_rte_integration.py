@@ -19,9 +19,9 @@ class ExcelSheet:
         self.args = Args(dic)
         self.args.nbc = dic["nbc"]
 
-    def joule_heating(self, ambient_temperature_c, transit=None):
-        if transit is None:
-            transit = self.args["transit"]
+    def joule_heating(self, ambient_temperature_c, current_a=None):
+        if current_a is None:
+            current_a = self.args["current_a"]
         core_diameter_m = self.args["core_diameter_m"]
         outer_diameter_m = self.args["outer_diameter_m"]
         Rdc = self.args["dc_resistance_20c_ohm_m"] * (
@@ -45,13 +45,13 @@ class ExcelSheet:
             (core_diameter_m > 0.0) & (self.args["nbc"] == 3),
             self.args["magnetic_coeff"]
             + self.args["magnetic_coeff_per_a"]
-            * transit
+            * current_a
             / (self.args["outer_area_m2"] - self.args["core_area_m2"])
             * 1.0e-06,
             1.0,
         )
         Rac = Rdc * kep * kem
-        return Rac * self.args["transit"] ** 2
+        return Rac * self.args["current_a"] ** 2
 
     def solar_heating(self):
         csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
@@ -217,7 +217,7 @@ def scenarios():
         latitude_deg=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         altitude=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
         azimuth=90.0,
-        transit=[
+        current_a=[
             1000.0,
             1000.0,
             1800.0,

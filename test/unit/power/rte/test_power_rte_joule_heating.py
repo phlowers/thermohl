@@ -12,7 +12,7 @@ from thermohl.power.rte import JouleHeating
 
 joule_heating_instances = [
     JouleHeating(
-        transit=np.array([10.0]),
+        current_a=np.array([10.0]),
         outer_diameter_m=np.array([0.01]),
         core_diameter_m=np.array([0.005]),
         outer_area_m2=np.array([0.0001]),
@@ -26,7 +26,7 @@ joule_heating_instances = [
         frequency_hz=50.0,
     ),
     JouleHeating(
-        transit=10.0,
+        current_a=10.0,
         outer_diameter_m=0.01,
         core_diameter_m=0.005,
         outer_area_m2=0.0001,
