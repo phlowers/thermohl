@@ -363,7 +363,7 @@ def test_morgan_basic():
     solver.jh.value = MagicMock(return_value=np.array([100.0]))
     solver.joule = MagicMock(return_value=np.array([100.0]))
     solver.args = MagicMock()
-    solver.args.l = 1.0
+    solver.args.radial_thermal_conductivity_wmk = 1.0
 
     ts = np.array([300])
     tc = np.array([400])

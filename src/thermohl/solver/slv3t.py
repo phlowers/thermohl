@@ -185,7 +185,9 @@ class Solver3T(Solver_):
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
         c, _, _, _ = self.mgc
-        return (tc - ts) - c * self.joule(ts, tc) / (2.0 * np.pi * self.args.l)
+        return (tc - ts) - c * self.joule(ts, tc) / (
+            2.0 * np.pi * self.args.radial_thermal_conductivity_wmk
+        )
 
     def steady_temperature(
         self,
@@ -255,7 +257,7 @@ class Solver3T(Solver_):
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
         c, outer_diameter_m, core_diameter_m, ix = self.mgc
-        c1 = c / (2.0 * np.pi * self.args.l)
+        c1 = c / (2.0 * np.pi * self.args.radial_thermal_conductivity_wmk)
         c2 = 0.5 * np.ones_like(c1)
         a, b = _profile_bim_avg_coeffs(
             0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]

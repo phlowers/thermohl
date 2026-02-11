@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'relative_humidity', 'precipitation_rate_ms', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'current_a', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'l', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'radial_thermal_conductivity_wmk', 'c', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
     #     'temp_high_c', 'temp_low_c'
     # ]
 
@@ -85,7 +85,9 @@ class Args:
         self.core_area_m2 = 2.84e-04  # core section (m**2)
         self.outer_area_m2 = 7.07e-04  # external (global) section (m**2)
         self.roughness_ratio = 4.0e-02  # roughness (1)
-        self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
+        self.radial_thermal_conductivity_wmk = (
+            1.0  # radial thermal conductivity (W.m**-1.K**-1)
+        )
         self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 
         self.solar_absorptivity = 0.5  # solar absorption (1)

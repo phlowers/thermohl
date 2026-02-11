@@ -42,7 +42,7 @@ units, default values and in which set of power terms they are used.
 | core_area_m2         | 2.84E-04      | m²         | no            | no           | yes          | yes         | core section                                                 |
 | A         | 7.07E-04      | m²         | no            | no           | yes          | yes         | external (global) section                                    |
 | roughness_ratio         | 4.0E-02       | N/A        | yes           | no           | no           | no          | roughness                                                    |
-| l         | 1.0           | W.m⁻¹.K⁻¹  | no            | no           | yes          | yes         | radial thermal conductivity (not used in 1t equation)        |
+| radial_thermal_conductivity_wmk         | 1.0           | W.m⁻¹.K⁻¹  | no            | no           | yes          | yes         | radial thermal conductivity (not used in 1t equation)        |
 | c         | 500           | J.kg⁻¹.K⁻¹ | yes           | yes          | yes          | yes         | specific heat capacity (only used in transient mode)         |
 | solar_absorptivity     | 0.5           | N/A        | yes           | yes          | yes          | yes         | solar absorption                                             |
 | emissivity   | 0.5           | N/A        | yes           | yes          | yes          | yes         | emissivity                                                   |
