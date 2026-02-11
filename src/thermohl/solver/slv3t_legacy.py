@@ -56,7 +56,7 @@ class Solver3TL(Solver3T):
         )
         return heat_flux_coefficients, indices_non_zero_diameter
 
-    def average(self, ts, tc):
+    def average(self, surface_temperature_c, core_temperature_c):
         """
         Compute average temperature given surface and core temperature.
 
@@ -64,24 +64,28 @@ class Solver3TL(Solver3T):
         conductors.
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
         """
-        return 0.5 * (ts + tc)
+        return 0.5 * (surface_temperature_c + core_temperature_c)
 
-    def morgan(self, ts: floatArray, tc: floatArray) -> floatArray:
+    def morgan(
+        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+    ) -> floatArray:
         """
         Computes the Morgan function for given temperature arrays.
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
 
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
         morgan_coefficient = self.mgc[0]
-        return (tc - ts) - morgan_coefficient * self.joule(ts, tc)
+        return (
+            core_temperature_c - surface_temperature_c
+        ) - morgan_coefficient * self.joule(surface_temperature_c, core_temperature_c)
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: strListLike

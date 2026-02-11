@@ -58,7 +58,11 @@ def test_balance():
             s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
         )
         assert np.allclose(
-            s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.morgan(
+                surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+            ).values,
+            0.0,
+            atol=tol,
         )
 
 
@@ -96,10 +100,16 @@ def test_consistency():
             s.args.current_a = df["current_a"].values
             s.update()
             assert np.allclose(
-                s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.balance(ts=df["t_surf"], tc=df["t_core"]).values,
+                0.0,
+                atol=tol,
             )
             assert np.allclose(
-                s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.morgan(
+                    surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                ).values,
+                0.0,
+                atol=tol,
             )
             # 3t solve
             dg = s.steady_temperature(
