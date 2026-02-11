@@ -251,7 +251,7 @@ class Solver(ABC):
         self.solar_heating = solar(**self.args.__dict__)
         self.convective_cooling = convective(**self.args.__dict__)
         self.radiative_cooling = radiative(**self.args.__dict__)
-        self.pc = precipitation(**self.args.__dict__)
+        self.precipitation_cooling = precipitation(**self.args.__dict__)
         self.args.compress()
 
     def update(self) -> None:
@@ -260,7 +260,7 @@ class Solver(ABC):
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
         self.radiative_cooling.__init__(**self.args.__dict__)
-        self.pc.__init__(**self.args.__dict__)
+        self.precipitation_cooling.__init__(**self.args.__dict__)
         self.args.compress()
 
     def balance(self, T: floatArrayLike) -> floatArrayLike:
@@ -269,7 +269,7 @@ class Solver(ABC):
             + self.solar_heating.value(T)
             - self.convective_cooling.value(T)
             - self.radiative_cooling.value(T)
-            - self.pc.value(T)
+            - self.precipitation_cooling.value(T)
         )
 
     @abstractmethod

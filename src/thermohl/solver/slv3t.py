@@ -93,7 +93,7 @@ class Solver3T(Solver_):
         and recalculating the Morgan coefficients.
         This method performs the following steps:
         1. Extends the arguments to their maximum length.
-        2. Reinitializes the `joule_heating`, `solar_heating`, `convective_cooling`, `radiative_cooling`, and `pc` components using the updated arguments.
+        2. Reinitializes the `joule_heating`, `solar_heating`, `convective_cooling`, `radiative_cooling`, and `precipitation_cooling` components using the updated arguments.
         3. Recalculates the Morgan coefficients using the updated dimensions.
         4. Compresses the arguments.
         Returns:
@@ -104,7 +104,7 @@ class Solver3T(Solver_):
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
         self.radiative_cooling.__init__(**self.args.__dict__)
-        self.pc.__init__(**self.args.__dict__)
+        self.precipitation_cooling.__init__(**self.args.__dict__)
 
         self.mgc = self._morgan_coefficients()
 
@@ -170,7 +170,7 @@ class Solver3T(Solver_):
             + self.solar_heating.value(ts)
             - self.convective_cooling.value(ts)
             - self.radiative_cooling.value(ts)
-            - self.pc.value(ts)
+            - self.precipitation_cooling.value(ts)
         )
 
     def morgan(self, ts: floatArray, tc: floatArray) -> floatArray:
@@ -250,7 +250,7 @@ class Solver3T(Solver_):
             df[Solver_.Names.psol] = self.solar_heating.value(x)
             df[Solver_.Names.pcnv] = self.convective_cooling.value(x)
             df[Solver_.Names.prad] = self.radiative_cooling.value(x)
-            df[Solver_.Names.ppre] = self.pc.value(x)
+            df[Solver_.Names.ppre] = self.precipitation_cooling.value(x)
 
         return df
 
@@ -286,7 +286,9 @@ class Solver3T(Solver_):
                 dr[Solver_.Names.psol][i, :] = self.solar_heating.value(ts[i, :])
                 dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(ts[i, :])
                 dr[Solver_.Names.prad][i, :] = self.radiative_cooling.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+                dr[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(
+                    ts[i, :]
+                )
 
         if n == 1:
             keys = list(dr.keys())
@@ -512,7 +514,7 @@ class Solver3T(Solver_):
             type(self.solar_heating),
             type(self.convective_cooling),
             type(self.radiative_cooling),
-            type(self.pc),
+            type(self.precipitation_cooling),
         )
         r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
         x, y, cnt, err = quasi_newton_2d(
@@ -550,6 +552,6 @@ class Solver3T(Solver_):
                 df[Solver_.Names.psol] = self.solar_heating.value(ts)
                 df[Solver_.Names.pcnv] = self.convective_cooling.value(ts)
                 df[Solver_.Names.prad] = self.radiative_cooling.value(ts)
-                df[Solver_.Names.ppre] = self.pc.value(ts)
+                df[Solver_.Names.ppre] = self.precipitation_cooling.value(ts)
 
         return df
