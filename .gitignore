@@ -16,3 +16,6 @@ build
 dist
 doc/_build
 /thermohl-docs/site/
+
+# Generated version file
+src/thermohl/_version.py
