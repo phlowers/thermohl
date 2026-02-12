@@ -17,9 +17,16 @@ from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
 
-def _profile_mom(ts: float, tc: float, r: floatArrayLike, re: float) -> floatArrayLike:
+def _profile_mom(
+    surface_temperature_c: float,
+    core_temperature_c: float,
+    r: floatArrayLike,
+    re: float,
+) -> floatArrayLike:
     """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
-    return ts + (tc - ts) * (1.0 - (r / re) ** 2)
+    return surface_temperature_c + (core_temperature_c - surface_temperature_c) * (
+        1.0 - (r / re) ** 2
+    )
 
 
 def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArrayLike:
@@ -39,11 +46,14 @@ def _profile_bim_avg_coeffs(
 
 
 def _profile_bim_avg(
-    ts: floatArrayLike, tc: floatArrayLike, ri: floatArrayLike, re: floatArrayLike
+    surface_temperature_c: floatArrayLike,
+    core_temperature_c: floatArrayLike,
+    ri: floatArrayLike,
+    re: floatArrayLike,
 ) -> floatArrayLike:
     """Analytical formulation for average temperature in _profile_bim."""
     a, b = _profile_bim_avg_coeffs(ri, re)
-    return tc - (a / b) * (tc - ts)
+    return core_temperature_c - (a / b) * (core_temperature_c - surface_temperature_c)
 
 
 class Solver3T(Solver_):
@@ -110,7 +120,9 @@ class Solver3T(Solver_):
 
         self.args.compress()
 
-    def average(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
+    def average(
+        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+    ) -> floatArrayLike:
         """
         Compute average temperature given surface and core temperature.
 
@@ -119,26 +131,31 @@ class Solver3T(Solver_):
         bi-material conductors, we have geometrical terms to take into account.
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
 
         Returns:
             float | numpy.ndarray: Array of average temperatures.
         """
-        ambient_temperature_c = 0.5 * (ts + tc)
+        ambient_temperature_c = 0.5 * (surface_temperature_c + core_temperature_c)
         _, outer_diameter_m, core_diameter_m, ix = self.morgan_coefficients
         ambient_temperature_c[ix] = _profile_bim_avg(
-            ts[ix], tc[ix], 0.5 * core_diameter_m[ix], 0.5 * outer_diameter_m[ix]
+            surface_temperature_c[ix],
+            core_temperature_c[ix],
+            0.5 * core_diameter_m[ix],
+            0.5 * outer_diameter_m[ix],
         )
         return ambient_temperature_c
 
-    def joule(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
+    def joule(
+        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+    ) -> floatArrayLike:
         """
         Calculate the Joule heating effect.
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
 
         Returns:
             float | numpy.ndarray: The calculated Joule heating values.
@@ -147,10 +164,12 @@ class Solver3T(Solver_):
         - The function computes the average temperature `temperature`.
         - Returns the Joule heating values based on the adjusted temperatures.
         """
-        ambient_temperature_c = self.average(ts, tc)
+        ambient_temperature_c = self.average(surface_temperature_c, core_temperature_c)
         return self.joule_heating.value(ambient_temperature_c)
 
-    def balance(self, ts: floatArray, tc: floatArray) -> floatArrayLike:
+    def balance(
+        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+    ) -> floatArrayLike:
         """
         Calculate the thermal balance.
 
@@ -159,18 +178,18 @@ class Solver3T(Solver_):
         components (convection, radiation, and conduction).
 
         Args:
-            ts (numpy.ndarray): Array of surface temperatures.
-            tc (numpy.ndarray): Array of core temperatures.
+            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
+            core_temperature_c (numpy.ndarray): Array of core temperatures.
 
         Returns:
             float | numpy.ndarray: The resulting thermal balance.
         """
         return (
-            self.joule(ts, tc)
-            + self.solar_heating.value(ts)
-            - self.convective_cooling.value(ts)
-            - self.radiative_cooling.value(ts)
-            - self.precipitation_cooling.value(ts)
+            self.joule(surface_temperature_c, core_temperature_c)
+            + self.solar_heating.value(surface_temperature_c)
+            - self.convective_cooling.value(surface_temperature_c)
+            - self.radiative_cooling.value(surface_temperature_c)
+            - self.precipitation_cooling.value(surface_temperature_c)
         )
 
     def morgan(
@@ -274,26 +293,40 @@ class Solver3T(Solver_):
         return c1, c2
 
     def _transient_temperature_results(
-        self, time, ts, ambient_temperature_c, tc, return_power, n
+        self,
+        time,
+        surface_temperature_c,
+        ambient_temperature_c,
+        core_temperature_c,
+        return_power,
+        n,
     ):
         dr = {
             Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
+            Solver_.Names.tsurf: surface_temperature_c,
             Solver_.Names.tavg: ambient_temperature_c,
-            Solver_.Names.tcore: tc,
+            Solver_.Names.tcore: core_temperature_c,
         }
 
         if return_power:
             for power in Solver_.Names.powers():
-                dr[power] = np.zeros_like(ts)
+                dr[power] = np.zeros_like(surface_temperature_c)
 
             for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.solar_heating.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.radiative_cooling.value(ts[i, :])
+                dr[Solver_.Names.pjle][i, :] = self.joule(
+                    surface_temperature_c[i, :], core_temperature_c[i, :]
+                )
+                dr[Solver_.Names.psol][i, :] = self.solar_heating.value(
+                    surface_temperature_c[i, :]
+                )
+                dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(
+                    surface_temperature_c[i, :]
+                )
+                dr[Solver_.Names.prad][i, :] = self.radiative_cooling.value(
+                    surface_temperature_c[i, :]
+                )
                 dr[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(
-                    ts[i, :]
+                    surface_temperature_c[i, :]
                 )
 
         if n == 1:
@@ -369,28 +402,37 @@ class Solver3T(Solver_):
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
-        ts = np.zeros((N, n))
+        surface_temperature_c = np.zeros((N, n))
         ambient_temperature_c = np.zeros((N, n))
-        tc = np.zeros((N, n))
-        ts[0, :] = surface_temperature_0_c
-        tc[0, :] = core_temperature_0_c
-        ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
+        core_temperature_c = np.zeros((N, n))
+        surface_temperature_c[0, :] = surface_temperature_0_c
+        core_temperature_c[0, :] = core_temperature_0_c
+        ambient_temperature_c[0, :] = self.average(
+            surface_temperature_c[0, :], core_temperature_c[0, :]
+        )
 
         # main time loop
         for i in range(1, len(time)):
             for k in de.keys():
                 self.args[k] = de[k][i, :]
             self.update()
-            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
+            bal = self.balance(
+                surface_temperature_c[i - 1, :], core_temperature_c[i - 1, :]
+            )
             ambient_temperature_c[i, :] = (
                 ambient_temperature_c[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
             )
             mrg = c1 * (self.joule_heating.value(ambient_temperature_c[i, :]) - bal)
-            tc[i, :] = ambient_temperature_c[i, :] + c2 * mrg
-            ts[i, :] = tc[i, :] - mrg
+            core_temperature_c[i, :] = ambient_temperature_c[i, :] + c2 * mrg
+            surface_temperature_c[i, :] = core_temperature_c[i, :] - mrg
 
         return self._transient_temperature_results(
-            time, ts, ambient_temperature_c, tc, return_power, n
+            time,
+            surface_temperature_c,
+            ambient_temperature_c,
+            core_temperature_c,
+            return_power,
+            n,
         )
 
     @staticmethod
@@ -470,20 +512,22 @@ class Solver3T(Solver_):
         def newtheader(i: floatArray, tg: floatArray) -> Tuple[floatArray, floatArray]:
             self.args.current_a = i
             self.joule_heating.__init__(**self.args.__dict__)
-            ts = np.ones_like(tg) * np.nan
-            tc = np.ones_like(tg) * np.nan
+            surface_temperature_c = np.ones_like(tg) * np.nan
+            core_temperature_c = np.ones_like(tg) * np.nan
 
-            ts[js] = Tmax[js]
-            tc[js] = tg[js]
+            surface_temperature_c[js] = Tmax[js]
+            core_temperature_c[js] = tg[js]
 
-            ts[ja] = tg[ja]
-            tc[ja] = 2 * Tmax[ja] - ts[ja]
-            tc[jx] = (b[jx] * Tmax[jx] - a[jx] * ts[jx]) / (b[jx] - a[jx])
+            surface_temperature_c[ja] = tg[ja]
+            core_temperature_c[ja] = 2 * Tmax[ja] - surface_temperature_c[ja]
+            core_temperature_c[jx] = (
+                b[jx] * Tmax[jx] - a[jx] * surface_temperature_c[jx]
+            ) / (b[jx] - a[jx])
 
-            tc[jc] = Tmax[jc]
-            ts[jc] = tg[jc]
+            core_temperature_c[jc] = Tmax[jc]
+            surface_temperature_c[jc] = tg[jc]
 
-            return ts, tc
+            return surface_temperature_c, core_temperature_c
 
         return Tmax, newtheader
 
@@ -516,12 +560,12 @@ class Solver3T(Solver_):
         Tmax, newtheader = self._steady_intensity_header(T, target)
 
         def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
-            ts, tc = newtheader(i, tg)
-            return self.balance(ts, tc)
+            surface_temperature_c, core_temperature_c = newtheader(i, tg)
+            return self.balance(surface_temperature_c, core_temperature_c)
 
         def morgan(i: floatArray, tg: floatArray) -> floatArray:
-            ts, tc = newtheader(i, tg)
-            return self.morgan(ts, tc)
+            surface_temperature_c, core_temperature_c = newtheader(i, tg)
+            return self.morgan(surface_temperature_c, core_temperature_c)
 
         # solve system
         s = Solver1T(
@@ -555,19 +599,27 @@ class Solver3T(Solver_):
             df["err"] = err
 
         if return_temp or return_power:
-            ts, tc = newtheader(x, y)
-            ambient_temperature_c = self.average(ts, tc)
+            surface_temperature_c, core_temperature_c = newtheader(x, y)
+            ambient_temperature_c = self.average(
+                surface_temperature_c, core_temperature_c
+            )
 
             if return_temp:
-                df[Solver_.Names.tsurf] = ts
+                df[Solver_.Names.tsurf] = surface_temperature_c
                 df[Solver_.Names.tavg] = ambient_temperature_c
-                df[Solver_.Names.tcore] = tc
+                df[Solver_.Names.tcore] = core_temperature_c
 
             if return_power:
                 df[Solver_.Names.pjle] = self.joule_heating.value(ambient_temperature_c)
-                df[Solver_.Names.psol] = self.solar_heating.value(ts)
-                df[Solver_.Names.pcnv] = self.convective_cooling.value(ts)
-                df[Solver_.Names.prad] = self.radiative_cooling.value(ts)
-                df[Solver_.Names.ppre] = self.precipitation_cooling.value(ts)
+                df[Solver_.Names.psol] = self.solar_heating.value(surface_temperature_c)
+                df[Solver_.Names.pcnv] = self.convective_cooling.value(
+                    surface_temperature_c
+                )
+                df[Solver_.Names.prad] = self.radiative_cooling.value(
+                    surface_temperature_c
+                )
+                df[Solver_.Names.ppre] = self.precipitation_cooling.value(
+                    surface_temperature_c
+                )
 
         return df
