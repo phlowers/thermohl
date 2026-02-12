@@ -60,12 +60,12 @@ def _truncnorm_mean_std(
     )
     normalizer = _psi(beta) - _psi(alpha)
     mean_value = mean + standard_deviation * (_phi(alpha) - _phi(beta)) / normalizer
-    std_value = standard_deviation * np.sqrt(
+    standard_value = standard_deviation * np.sqrt(
         1
         + (alpha * _phi(alpha) - beta * _phi(beta)) / normalizer
         - ((_phi(alpha) - _phi(beta)) / normalizer) ** 2
     )
-    return mean_value, std_value
+    return mean_value, standard_value
 
 
 @depends_on_optional("scipy")
