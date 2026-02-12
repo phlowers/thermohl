@@ -132,23 +132,23 @@ class Solver3TL(Solver3T):
 
     def transient_temperature_legacy(
         self,
-        time: floatArray = np.array([]),
+        time_s: floatArray = np.array([]),
         surface_temperature_0_c: Optional[floatArrayLike] = None,
         core_temperature_0_c: Optional[floatArrayLike] = None,
-        tau: float = 600.0,
+        time_constant_s: float = 600.0,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
         Compute transient-state temperature with legacy method.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
+            time_s (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0_c (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
             core_temperature_0_c (float): Initial core temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
-            tau (float): A time-constant to add some inertia. The default is 600.
+            time_constant_s (float): A time-constant to add some inertia. The default is 600.
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
@@ -157,9 +157,9 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (n for input dict entries, N for time)
+        # get sizes (n for input dict entries, N for time_s)
         n = self.args.max_len()
-        N = len(time)
+        N = len(time_s)
         if N < 2:
             raise ValueError()
 
@@ -189,15 +189,15 @@ class Solver3TL(Solver3T):
         ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]
 
-        for i in range(1, len(time)):
+        for i in range(1, len(time_s)):
             bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            dti = time[i] - time[i - 1]
+            dti = time_s[i] - time_s[i - 1]
             ambient_temperature_c[i, :] = (
                 ambient_temperature_c[i - 1, :] + dti * imc * bal
             )
-            dT[i, :] = (1.0 - dti / tau) * dT[i - 1, :] + (
+            dT[i, :] = (1.0 - dti / time_constant_s) * dT[i - 1, :] + (
                 dti
-                / tau
+                / time_constant_s
                 * self.morgan_coefficients[0]
                 * self.joule_heating.value(ambient_temperature_c[i, :])
             )
@@ -205,5 +205,5 @@ class Solver3TL(Solver3T):
             ts[i, :] = ambient_temperature_c[i, :] - 0.5 * dT[i, :]
 
         return self._transient_temperature_results(
-            time, ts, ambient_temperature_c, tc, return_power, n
+            time_s, ts, ambient_temperature_c, tc, return_power, n
         )

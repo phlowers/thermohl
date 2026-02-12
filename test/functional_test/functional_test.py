@@ -87,7 +87,7 @@ def test_transient_temperature():
     atol = 0.5
 
     # this is hard-coded, maybe it should be put in the yaml file ...
-    tau = 600.0
+    time_constant_s = 600.0
     dt = 10.0
     minute = 60
 
@@ -107,14 +107,14 @@ def test_transient_temperature():
             rf = s.steady_temperature(Tsg=e["T_mean_final"], Tcg=e["T_mean_final"])
 
             # time
-            time = np.arange(0.0, 1800.0, dt)
+            time_s = np.arange(0.0, 1800.0, dt)
 
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
-                time=time,
+                time_s=time_s,
                 surface_temperature_0_c=ri["t_surf"],
                 core_temperature_0_c=ri["t_core"],
-                tau=tau,
+                time_constant_s=time_constant_s,
             )
 
             # check final temp
