@@ -157,10 +157,10 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (n for input dict entries, N for time_s)
-        n = self.args.max_len()
-        N = len(time_s)
-        if N < 2:
+        # get sizes (input_size for input dict entries, time_size for time_s)
+        input_size = self.args.max_len()
+        time_size = len(time_s)
+        if time_size < 2:
             raise ValueError()
 
         # get initial temperature
@@ -179,31 +179,48 @@ class Solver3TL(Solver3T):
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
-        ts = np.zeros((N, n))
-        ambient_temperature_c = np.zeros((N, n))
-        tc = np.zeros((N, n))
-        dT = np.zeros((N, n))
+        surface_temperature_c = np.zeros((time_size, input_size))
+        ambient_temperature_c = np.zeros((time_size, input_size))
+        core_temperature_c = np.zeros((time_size, input_size))
+        temperature_difference_c = np.zeros((time_size, input_size))
 
-        ts[0, :] = surface_temperature_0_c
-        tc[0, :] = core_temperature_0_c
-        ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
-        dT[0, :] = tc[0, :] - ts[0, :]
+        surface_temperature_c[0, :] = surface_temperature_0_c
+        core_temperature_c[0, :] = core_temperature_0_c
+        ambient_temperature_c[0, :] = self.average(
+            surface_temperature_c[0, :], core_temperature_c[0, :]
+        )
+        temperature_difference_c[0, :] = (
+            core_temperature_c[0, :] - surface_temperature_c[0, :]
+        )
 
         for i in range(1, len(time_s)):
-            bal = self.balance(ts[i - 1, :], tc[i - 1, :])
-            dti = time_s[i] - time_s[i - 1]
-            ambient_temperature_c[i, :] = (
-                ambient_temperature_c[i - 1, :] + dti * imc * bal
+            balance = self.balance(
+                surface_temperature_c[i - 1, :], core_temperature_c[i - 1, :]
             )
-            dT[i, :] = (1.0 - dti / time_constant_s) * dT[i - 1, :] + (
-                dti
+            time_difference = time_s[i] - time_s[i - 1]
+            ambient_temperature_c[i, :] = (
+                ambient_temperature_c[i - 1, :] + time_difference * imc * balance
+            )
+            temperature_difference_c[i, :] = (
+                1.0 - time_difference / time_constant_s
+            ) * temperature_difference_c[i - 1, :] + (
+                time_difference
                 / time_constant_s
                 * self.morgan_coefficients[0]
                 * self.joule_heating.value(ambient_temperature_c[i, :])
             )
-            tc[i, :] = ambient_temperature_c[i, :] + 0.5 * dT[i, :]
-            ts[i, :] = ambient_temperature_c[i, :] - 0.5 * dT[i, :]
+            core_temperature_c[i, :] = (
+                ambient_temperature_c[i, :] + 0.5 * temperature_difference_c[i, :]
+            )
+            surface_temperature_c[i, :] = (
+                ambient_temperature_c[i, :] - 0.5 * temperature_difference_c[i, :]
+            )
 
         return self._transient_temperature_results(
-            time_s, ts, ambient_temperature_c, tc, return_power, n
+            time_s,
+            surface_temperature_c,
+            ambient_temperature_c,
+            core_temperature_c,
+            return_power,
+            input_size,
         )
