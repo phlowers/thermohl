@@ -7,13 +7,14 @@
 
 [build-system]
 requires = [
-    "setuptools>=68.0.0",
+    "setuptools>=68",
+    "setuptools-scm[toml]>=8",
 ]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "thermohl"
-version = "1.4.0"
+dynamic = ["version"]
 
 description = "Calculations relative to temperature and ampacity in overhead conductors."
 license = "MPL-2.0"
@@ -92,3 +93,18 @@ exclude_also = [
     ]
 
 ignore_errors = true
+
+[tool.ruff]
+extend-exclude = [
+    "src/thermohl/_version.py",
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.setuptools_scm]
+# Write version in a file while building
+write_to = "src/thermohl/_version.py"
+version_scheme = "post-release"
+local_scheme = "no-local-version"

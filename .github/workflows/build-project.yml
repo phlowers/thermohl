@@ -17,6 +17,8 @@ jobs:
     name: Lint
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install uv and Set up Python
         uses: astral-sh/setup-uv@v7
@@ -42,6 +44,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v5
+      with:
+        fetch-depth: 0
 
     - name: Install uv and Set up Python
       uses: astral-sh/setup-uv@v7
@@ -67,6 +71,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
 
       - name: Install uv and Set up Python
         uses: astral-sh/setup-uv@v7
