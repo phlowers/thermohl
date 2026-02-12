@@ -36,7 +36,7 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
         a = dict(
             time=t,
             surface_temperature_0_c=ds[solver.Solver.Names.tsurf].values,
-            Tc0=ds[solver.Solver.Names.tcore].values,
+            core_temperature_0_c=ds[solver.Solver.Names.tcore].values,
         )
     else:
         raise NotImplementedError
