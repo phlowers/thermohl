@@ -133,7 +133,7 @@ class Solver3TL(Solver3T):
     def transient_temperature_legacy(
         self,
         time: floatArray = np.array([]),
-        Ts0: Optional[floatArrayLike] = None,
+        surface_temperature_0_c: Optional[floatArrayLike] = None,
         Tc0: Optional[floatArrayLike] = None,
         tau: float = 600.0,
         return_power: bool = False,
@@ -144,7 +144,7 @@ class Solver3TL(Solver3T):
         Args:
             time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
-            Ts0 (float): Initial surface temperature. If set to None, the ambient temperature from
+            surface_temperature_0_c (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
             Tc0 (float): Initial core temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
@@ -164,8 +164,12 @@ class Solver3TL(Solver3T):
             raise ValueError()
 
         # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.ambient_temperature_c
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
+        surface_temperature_0_c = (
+            surface_temperature_0_c
+            if surface_temperature_0_c is not None
+            else self.args.ambient_temperature_c
+        )
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + surface_temperature_0_c
 
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
@@ -176,7 +180,7 @@ class Solver3TL(Solver3T):
         tc = np.zeros((N, n))
         dT = np.zeros((N, n))
 
-        ts[0, :] = Ts0
+        ts[0, :] = surface_temperature_0_c
         tc[0, :] = Tc0
         ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]

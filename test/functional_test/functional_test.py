@@ -111,7 +111,10 @@ def test_transient_temperature():
 
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
-                time=time, Ts0=ri["t_surf"], Tc0=ri["t_core"], tau=tau
+                time=time,
+                surface_temperature_0_c=ri["t_surf"],
+                Tc0=ri["t_core"],
+                tau=tau,
             )
 
             # check final temp

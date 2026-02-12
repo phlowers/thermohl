@@ -35,7 +35,7 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[solver.Solver.Names.tsurf].values,
+            surface_temperature_0_c=ds[solver.Solver.Names.tsurf].values,
             Tc0=ds[solver.Solver.Names.tcore].values,
         )
     else:
