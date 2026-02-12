@@ -134,7 +134,7 @@ class Solver3TL(Solver3T):
         self,
         time: floatArray = np.array([]),
         surface_temperature_0_c: Optional[floatArrayLike] = None,
-        Tc0: Optional[floatArrayLike] = None,
+        core_temperature_0_c: Optional[floatArrayLike] = None,
         tau: float = 600.0,
         return_power: bool = False,
     ) -> Dict[str, Any]:
@@ -146,7 +146,7 @@ class Solver3TL(Solver3T):
                 computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0_c (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
-            Tc0 (float): Initial core temperature. If set to None, the ambient temperature from
+            core_temperature_0_c (float): Initial core temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
             tau (float): A time-constant to add some inertia. The default is 600.
             return_power (bool, optional): Return power term values. The default is False.
@@ -169,7 +169,11 @@ class Solver3TL(Solver3T):
             if surface_temperature_0_c is not None
             else self.args.ambient_temperature_c
         )
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + surface_temperature_0_c
+        core_temperature_0_c = (
+            core_temperature_0_c
+            if core_temperature_0_c is not None
+            else 1.0 + surface_temperature_0_c
+        )
 
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
@@ -181,7 +185,7 @@ class Solver3TL(Solver3T):
         dT = np.zeros((N, n))
 
         ts[0, :] = surface_temperature_0_c
-        tc[0, :] = Tc0
+        tc[0, :] = core_temperature_0_c
         ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
         dT[0, :] = tc[0, :] - ts[0, :]
 

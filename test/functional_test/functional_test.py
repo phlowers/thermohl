@@ -113,7 +113,7 @@ def test_transient_temperature():
             rl = s.transient_temperature_legacy(
                 time=time,
                 surface_temperature_0_c=ri["t_surf"],
-                Tc0=ri["t_core"],
+                core_temperature_0_c=ri["t_core"],
                 tau=tau,
             )
 
