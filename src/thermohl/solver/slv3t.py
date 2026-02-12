@@ -265,7 +265,7 @@ class Solver3T(Solver_):
         core_temperature_guess_ = core_temperature_guess_c * np.ones(shape)
 
         # solve system
-        x, y, cnt, err = quasi_newton_2d(
+        x, y, iterations, err = quasi_newton_2d(
             func1=self.balance,
             func2=self.morgan,
             x_init=surface_temperature_guess_,
@@ -275,9 +275,9 @@ class Solver3T(Solver_):
             delta_x=1.0e-03,
             delta_y=1.0e-03,
         )
-        if np.max(err) > tol or cnt == maxiter:
+        if np.max(err) > tol or iterations == maxiter:
             print(
-                f"rstat_analytic max err is {np.max(err):.3E} in {cnt:core_diameter_m} iterations"
+                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:core_diameter_m} iterations"
             )
 
         # format output
@@ -598,7 +598,7 @@ class Solver3T(Solver_):
             type(self.precipitation_cooling),
         )
         r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
-        x, y, cnt, err = quasi_newton_2d(
+        x, y, iterations, err = quasi_newton_2d(
             balance,
             morgan,
             r[Solver_.Names.current_a].values,
@@ -608,9 +608,9 @@ class Solver3T(Solver_):
             delta_x=1.0e-03,
             delta_y=1.0e-03,
         )
-        if np.max(err) > tol or cnt == maxiter:
+        if np.max(err) > tol or iterations == maxiter:
             print(
-                f"rstat_analytic max err is {np.max(err):.3E} in {cnt:core_diameter_m} iterations"
+                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:core_diameter_m} iterations"
             )
 
         # format output
