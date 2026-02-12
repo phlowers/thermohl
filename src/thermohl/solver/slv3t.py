@@ -307,7 +307,7 @@ class Solver3T(Solver_):
     def transient_temperature(
         self,
         time: floatArray = np.array([]),
-        Ts0: Optional[floatArrayLike] = None,
+        surface_temperature_0_c: Optional[floatArrayLike] = None,
         Tc0: Optional[floatArrayLike] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
@@ -316,7 +316,7 @@ class Solver3T(Solver_):
 
         Args:
             time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
-            Ts0 (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            surface_temperature_0_c (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             Tc0 (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             return_power (bool, optional): Return power term values. The default is False.
 
@@ -331,8 +331,12 @@ class Solver3T(Solver_):
             raise ValueError()
 
         # get initial temperature
-        Ts0 = Ts0 if Ts0 is not None else self.args.ambient_temperature_c
-        Tc0 = Tc0 if Tc0 is not None else 1.0 + Ts0
+        surface_temperature_0_c = (
+            surface_temperature_0_c
+            if surface_temperature_0_c is not None
+            else self.args.ambient_temperature_c
+        )
+        Tc0 = Tc0 if Tc0 is not None else 1.0 + surface_temperature_0_c
 
         # get month, day and hours
         month, day, hour = _set_dates(
@@ -364,7 +368,7 @@ class Solver3T(Solver_):
         ts = np.zeros((N, n))
         ambient_temperature_c = np.zeros((N, n))
         tc = np.zeros((N, n))
-        ts[0, :] = Ts0
+        ts[0, :] = surface_temperature_0_c
         tc[0, :] = Tc0
         ambient_temperature_c[0, :] = self.average(ts[0, :], tc[0, :])
 
