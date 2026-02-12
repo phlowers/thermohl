@@ -96,24 +96,25 @@ def truncnorm(
         )
 
     target_mean = mean
-    target_std_dev = standard_deviation
+    target_standard_deviation = standard_deviation
     alpha, beta, mean, standard_deviation = _truncnorm_header(
-        lower_bound, upper_bound, target_mean, target_std_dev
+        lower_bound, upper_bound, target_mean, target_standard_deviation
     )
-    dist = scipy.stats.truncnorm(alpha, beta, mean, standard_deviation)
+    distribution = scipy.stats.truncnorm(alpha, beta, mean, standard_deviation)
 
-    actual_mean = dist.mean()
-    actual_std = dist.std()
+    actual_mean = distribution.mean()
+    actual_standard_deviation = distribution.std()
 
     mean_tol = mean_tolerance
     std_tol = std_tolerance
     if relative_tolerance:
         mean_tol *= target_mean
-        std_tol *= target_std_dev
-    if np.abs(target_std_dev - actual_std) >= std_tol:
+        std_tol *= target_standard_deviation
+    if np.abs(target_standard_deviation - actual_standard_deviation) >= std_tol:
         warnings.warn(
             "Required std cannot be achieved (%.3E instead of %.3E). Choose a lower std, extend your "
-            "bounds or change your distribution." % (target_std_dev, actual_std),
+            "bounds or change your distribution."
+            % (target_standard_deviation, actual_standard_deviation),
             RuntimeWarning,
         )
     if np.abs(target_mean - actual_mean) >= mean_tol:
@@ -124,7 +125,7 @@ def truncnorm(
             RuntimeWarning,
         )
 
-    return dist
+    return distribution
 
 
 @depends_on_optional("scipy")
@@ -154,16 +155,16 @@ class WrappedNormal(object):
             Union[int, np.random.Generator, np.random.RandomState]
         ] = None,
     ) -> floatArrayLike:
-        smpl = scipy.stats.norm.rvs(
+        sample = scipy.stats.norm.rvs(
             loc=self.mean_value,
             scale=self.standard_deviation,
             size=size,
             random_state=random_state,
         )
-        smpl = smpl % _twopi
-        smpl[smpl < self.lower_bound] += _twopi
-        smpl[smpl > self.upper_bound] -= _twopi
-        return smpl
+        sample = sample % _twopi
+        sample[sample < self.lower_bound] += _twopi
+        sample[sample > self.upper_bound] -= _twopi
+        return sample
 
     def mean(self) -> float:
         return self.mean_value
