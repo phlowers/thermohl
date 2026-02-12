@@ -227,8 +227,8 @@ class Solver3T(Solver_):
 
     def steady_temperature(
         self,
-        Tsg: Optional[floatArrayLike] = None,
-        Tcg: Optional[floatArrayLike] = None,
+        surface_temperature_guess_c: Optional[floatArrayLike] = None,
+        core_temperature_guess_c: Optional[floatArrayLike] = None,
         tol: float = DP.tol,
         maxiter: int = DP.maxiter,
         return_err: bool = False,
@@ -238,8 +238,8 @@ class Solver3T(Solver_):
         Compute the steady-state temperature distribution.
 
         Args:
-            Tsg (float | numpy.ndarray | None): Initial guess for the surface temperature. If None, ambient temperature is used.
-            Tcg (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
+            surface_temperature_guess_c (float | numpy.ndarray | None): Initial guess for the surface temperature. If None, ambient temperature is used.
+            core_temperature_guess_c (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
             tol (float): Tolerance for the quasi-Newton solver.
             maxiter (int): Maximum number of iterations for the quasi-Newton solver.
             return_err (bool): If True, the error of the solution is included in the returned DataFrame.
@@ -251,17 +251,25 @@ class Solver3T(Solver_):
 
         # if no guess provided, use ambient temp
         shape = (self.args.max_len(),)
-        Tsg = Tsg if Tsg is not None else 1.0 * self.args.ambient_temperature_c
-        Tcg = Tcg if Tcg is not None else 1.5 * np.abs(self.args.ambient_temperature_c)
-        Tsg_ = Tsg * np.ones(shape)
-        Tcg_ = Tcg * np.ones(shape)
+        surface_temperature_guess_c = (
+            surface_temperature_guess_c
+            if surface_temperature_guess_c is not None
+            else 1.0 * self.args.ambient_temperature_c
+        )
+        core_temperature_guess_c = (
+            core_temperature_guess_c
+            if core_temperature_guess_c is not None
+            else 1.5 * np.abs(self.args.ambient_temperature_c)
+        )
+        surface_temperature_guess_ = surface_temperature_guess_c * np.ones(shape)
+        core_temperature_guess_ = core_temperature_guess_c * np.ones(shape)
 
         # solve system
         x, y, cnt, err = quasi_newton_2d(
             func1=self.balance,
             func2=self.morgan,
-            x_init=Tsg_,
-            y_init=Tcg_,
+            x_init=surface_temperature_guess_,
+            y_init=core_temperature_guess_,
             relative_tolerance=tol,
             max_iterations=maxiter,
             delta_x=1.0e-03,

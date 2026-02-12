@@ -50,7 +50,12 @@ def test_balance():
         t1 = t1["t"].values
         # 3t solve
         df = s.steady_temperature(
-            Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64
+            surface_temperature_guess_c=t1,
+            core_temperature_guess_c=t1,
+            return_err=True,
+            return_power=True,
+            tol=tol,
+            maxiter=64,
         )
         # checks
         assert np.all(df["err"] < tol)
@@ -119,8 +124,8 @@ def test_consistency():
             )
             # 3t solve
             dg = s.steady_temperature(
-                Tsg=df["t_surf"].round(1).values,
-                Tcg=df["t_core"].round(1).values,
+                surface_temperature_guess_c=df["t_surf"].round(1).values,
+                core_temperature_guess_c=df["t_core"].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,

@@ -104,7 +104,10 @@ def test_transient_temperature():
             # final steady state
             s.args["current_a"] = e["iac"]
             s.update()
-            rf = s.steady_temperature(Tsg=e["T_mean_final"], Tcg=e["T_mean_final"])
+            rf = s.steady_temperature(
+                surface_temperature_guess_c=e["T_mean_final"],
+                core_temperature_guess_c=e["T_mean_final"],
+            )
 
             # time
             time_s = np.arange(0.0, 1800.0, dt)
