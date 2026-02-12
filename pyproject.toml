@@ -52,7 +52,8 @@ lint = [
 ]
 dev = [
     { include-group = 'test' },
-    { include-group = 'lint' }
+    { include-group = 'lint' },
+    "pre-commit",
 ]
 docs = [
     "mkdocs >= 1.6.1",
