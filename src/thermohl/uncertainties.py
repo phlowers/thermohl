@@ -60,21 +60,23 @@ def _get_dist(uncertainty_spec: dict, mean_value: float) -> frozen_dist:
     -- based on parameters in dict uncertainty_spec and with mean mean_value"""
     mean = mean_value
     # set std
-    std_dev = uncertainty_spec["std"]
+    standard_deviation = uncertainty_spec["std"]
     if uncertainty_spec["relative_std"]:
-        std_dev *= mean
+        standard_deviation *= mean
     # if std is 0., return uniform
-    if std_dev == 0.0:
+    if standard_deviation == 0.0:
         return scipy.stats.uniform(mean, mean)
 
     # select ditribution
     if uncertainty_spec["dist"] == "truncnorm":
         lower_bound, upper_bound = uncertainty_spec["min"], uncertainty_spec["max"]
-        dist = distributions.truncnorm(lower_bound, upper_bound, mean, std_dev)
+        dist = distributions.truncnorm(
+            lower_bound, upper_bound, mean, standard_deviation
+        )
     elif uncertainty_spec["dist"] == "vonmises":
-        dist = distributions.vonmises(np.deg2rad(mean), np.deg2rad(std_dev))
+        dist = distributions.vonmises(np.deg2rad(mean), np.deg2rad(standard_deviation))
     elif uncertainty_spec["dist"] == "wrapnorm":
-        dist = distributions.wrapnorm(np.deg2rad(mean), np.deg2rad(std_dev))
+        dist = distributions.wrapnorm(np.deg2rad(mean), np.deg2rad(standard_deviation))
     else:
         raise ValueError("Dist keyword not supported")
 
