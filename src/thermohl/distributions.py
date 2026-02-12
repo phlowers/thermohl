@@ -43,24 +43,24 @@ def _psi(value: float) -> float:
 
 
 def _truncnorm_header(
-    lower_bound: float, upper_bound: float, mean: float, std_dev: float
+    lower_bound: float, upper_bound: float, mean: float, standard_deviation: float
 ) -> tuple[float, float, float, float]:
     """Utility code factoring."""
-    alpha = (lower_bound - mean) / std_dev
-    beta = (upper_bound - mean) / std_dev
-    return alpha, beta, mean, std_dev
+    alpha = (lower_bound - mean) / standard_deviation
+    beta = (upper_bound - mean) / standard_deviation
+    return alpha, beta, mean, standard_deviation
 
 
 def _truncnorm_mean_std(
-    lower_bound: float, upper_bound: float, mean: float, std_dev: float
+    lower_bound: float, upper_bound: float, mean: float, standard_deviation: float
 ) -> tuple[float, float]:
     """Real mean and std of truncated normal distribution."""
-    alpha, beta, mean, std_dev = _truncnorm_header(
-        lower_bound, upper_bound, mean, std_dev
+    alpha, beta, mean, standard_deviation = _truncnorm_header(
+        lower_bound, upper_bound, mean, standard_deviation
     )
     normalizer = _psi(beta) - _psi(alpha)
-    mean_value = mean + std_dev * (_phi(alpha) - _phi(beta)) / normalizer
-    std_value = std_dev * np.sqrt(
+    mean_value = mean + standard_deviation * (_phi(alpha) - _phi(beta)) / normalizer
+    std_value = standard_deviation * np.sqrt(
         1
         + (alpha * _phi(alpha) - beta * _phi(beta)) / normalizer
         - ((_phi(alpha) - _phi(beta)) / normalizer) ** 2
@@ -73,7 +73,7 @@ def truncnorm(
     lower_bound: float,
     upper_bound: float,
     mean: float,
-    std_dev: float,
+    standard_deviation: float,
     mean_tolerance: float = 1.0e-03,
     std_tolerance: float = 1.0e-02,
     relative_tolerance: bool = True,
@@ -89,15 +89,18 @@ def truncnorm(
             "Input mean (%.3E) should be in [lower_bound, upper_bound] range (%.3E, %.3E)."
             % (mean, lower_bound, upper_bound)
         )
-    if std_dev < 0.0:
-        raise ValueError("Input std_dev (%.3E) should be positive." % (std_dev,))
+    if standard_deviation < 0.0:
+        raise ValueError(
+            "Input standard_deviation (%.3E) should be positive."
+            % (standard_deviation,)
+        )
 
     target_mean = mean
-    target_std_dev = std_dev
-    alpha, beta, mean, std_dev = _truncnorm_header(
+    target_std_dev = standard_deviation
+    alpha, beta, mean, standard_deviation = _truncnorm_header(
         lower_bound, upper_bound, target_mean, target_std_dev
     )
-    dist = scipy.stats.truncnorm(alpha, beta, mean, std_dev)
+    dist = scipy.stats.truncnorm(alpha, beta, mean, standard_deviation)
 
     actual_mean = dist.mean()
     actual_std = dist.std()
@@ -128,8 +131,10 @@ def truncnorm(
 class WrappedNormal(object):
     """Wrapped-Normal distribution. Not as complete as a scipy.stat distribution."""
 
-    def __init__(self, mean: float, std_dev: float, lower_bound: float = 0.0):
-        if std_dev < 0:
+    def __init__(
+        self, mean: float, standard_deviation: float, lower_bound: float = 0.0
+    ):
+        if standard_deviation < 0:
             raise ValueError("Std should be positive.")
         if mean < lower_bound or mean >= lower_bound + _twopi:
             raise ValueError(
@@ -138,7 +143,7 @@ class WrappedNormal(object):
         self.lower_bound = lower_bound
         self.upper_bound = lower_bound + _twopi
         self.mean_value = mean
-        self.std_dev = std_dev
+        self.standard_deviation = standard_deviation
         return
 
     @depends_on_optional("scipy")
@@ -151,7 +156,7 @@ class WrappedNormal(object):
     ) -> floatArrayLike:
         smpl = scipy.stats.norm.rvs(
             loc=self.mean_value,
-            scale=self.std_dev,
+            scale=self.standard_deviation,
             size=size,
             random_state=random_state,
         )
@@ -167,7 +172,7 @@ class WrappedNormal(object):
         return self.mean_value
 
     def var(self) -> float:
-        return 1 - np.exp(-0.5 * self.std_dev**2)
+        return 1 - np.exp(-0.5 * self.standard_deviation**2)
 
     def std(self) -> float:
         return np.sqrt(self.var())
@@ -176,7 +181,7 @@ class WrappedNormal(object):
         return np.quantile(self.rvs(9999), q)
 
 
-def wrapnorm(mean: float, std_dev: float) -> WrappedNormal:
+def wrapnorm(mean: float, standard_deviation: float) -> WrappedNormal:
     """Get Wrapped Normal distribution.
     -- in radians, in [0, 2*pi]
     """
@@ -187,13 +192,13 @@ def wrapnorm(mean: float, std_dev: float) -> WrappedNormal:
             % (mean, mean_wrapped),
             RuntimeWarning,
         )
-    if std_dev >= _twopi:
+    if standard_deviation >= _twopi:
         warnings.warn(
             "Required std cannot be achieved (%.3E > 2*pi). Choose a lower std "
-            "or change your distribution." % (std_dev,),
+            "or change your distribution." % (standard_deviation,),
             RuntimeWarning,
         )
-    return WrappedNormal(mean_wrapped, std_dev)
+    return WrappedNormal(mean_wrapped, standard_deviation)
 
 
 @depends_on_optional("scipy")
@@ -203,11 +208,11 @@ def _vonmises_circ_var(kappa: float) -> float:
 
 
 @depends_on_optional("scipy")
-def _vonmises_kappa(std_dev: float) -> float:
+def _vonmises_kappa(standard_deviation: float) -> float:
     """Get von Mises parameter that matches std in input."""
     from scipy.optimize import newton
 
-    circ_variance = 1.0 - np.exp(-0.5 * std_dev**2)
+    circ_variance = 1.0 - np.exp(-0.5 * standard_deviation**2)
     kappa_guess = 0.5 / circ_variance
 
     def fun(x: float) -> float:
@@ -216,13 +221,13 @@ def _vonmises_kappa(std_dev: float) -> float:
     try:
         kappa = newton(fun, x0=kappa_guess, tol=1.0e-06, maxiter=32)
     except RuntimeError:
-        kappa = 1 / std_dev**2
+        kappa = 1 / standard_deviation**2
 
     return kappa
 
 
 @depends_on_optional("scipy")
-def vonmises(mean: float, std_dev: float) -> frozen_dist:
+def vonmises(mean: float, standard_deviation: float) -> frozen_dist:
     """Get von Mises distribution.
     -- in radians, in [-pi,+pi]
     """
@@ -235,14 +240,17 @@ def vonmises(mean: float, std_dev: float) -> frozen_dist:
             % (mean, mean_wrapped),
             RuntimeWarning,
         )
-    if std_dev < 0.0:
-        raise ValueError("Input std_dev (%.3E) should be positive." % (std_dev,))
+    if standard_deviation < 0.0:
+        raise ValueError(
+            "Input standard_deviation (%.3E) should be positive."
+            % (standard_deviation,)
+        )
     sigmax = _twopi / np.sqrt(12)
-    if std_dev >= sigmax:
+    if standard_deviation >= sigmax:
         warnings.warn(
             "Required std cannot be achieved (%.3E > %.3E). Choose a lower std "
-            "or change your distribution." % (std_dev, sigmax),
+            "or change your distribution." % (standard_deviation, sigmax),
             RuntimeWarning,
         )
-    kappa = _vonmises_kappa(std_dev)
+    kappa = _vonmises_kappa(standard_deviation)
     return scipy.stats.vonmises_line(kappa, loc=mean_wrapped)
