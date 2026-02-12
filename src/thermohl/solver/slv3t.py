@@ -84,18 +84,29 @@ class Solver3T(Solver_):
                 Array of core diameters, broadcasted to the shape of `heat_capacity_jkgk`.
             - d_ : numpy.ndarray[float]
                 Array of surface diameters, broadcasted to the shape of `heat_capacity_jkgk`.
-            - i : numpy.ndarray[int]
+            - positive_surface_diameter_indices : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
         heat_capacity_jkgk = 0.5 * np.ones((self.args.max_len(),))
         outer_diameter_m = self.args.outer_diameter_m * np.ones_like(heat_capacity_jkgk)
         core_diameter_m = self.args.core_diameter_m * np.ones_like(heat_capacity_jkgk)
-        i = np.nonzero(core_diameter_m > 0.0)[0]
-        heat_capacity_jkgk[i] -= (
-            core_diameter_m[i] ** 2
-            / (outer_diameter_m[i] ** 2 - core_diameter_m[i] ** 2)
-        ) * np.log(outer_diameter_m[i] / core_diameter_m[i])
-        return heat_capacity_jkgk, outer_diameter_m, core_diameter_m, i
+        positive_surface_diameter_indices = np.nonzero(core_diameter_m > 0.0)[0]
+        heat_capacity_jkgk[positive_surface_diameter_indices] -= (
+            core_diameter_m[positive_surface_diameter_indices] ** 2
+            / (
+                outer_diameter_m[positive_surface_diameter_indices] ** 2
+                - core_diameter_m[positive_surface_diameter_indices] ** 2
+            )
+        ) * np.log(
+            outer_diameter_m[positive_surface_diameter_indices]
+            / core_diameter_m[positive_surface_diameter_indices]
+        )
+        return (
+            heat_capacity_jkgk,
+            outer_diameter_m,
+            core_diameter_m,
+            positive_surface_diameter_indices,
+        )
 
     def update(self) -> None:
         """
@@ -138,12 +149,14 @@ class Solver3T(Solver_):
             float | numpy.ndarray: Array of average temperatures.
         """
         ambient_temperature_c = 0.5 * (surface_temperature_c + core_temperature_c)
-        _, outer_diameter_m, core_diameter_m, ix = self.morgan_coefficients
-        ambient_temperature_c[ix] = _profile_bim_avg(
-            surface_temperature_c[ix],
-            core_temperature_c[ix],
-            0.5 * core_diameter_m[ix],
-            0.5 * outer_diameter_m[ix],
+        _, outer_diameter_m, core_diameter_m, positive_surface_diameter_indices = (
+            self.morgan_coefficients
+        )
+        ambient_temperature_c[positive_surface_diameter_indices] = _profile_bim_avg(
+            surface_temperature_c[positive_surface_diameter_indices],
+            core_temperature_c[positive_surface_diameter_indices],
+            0.5 * core_diameter_m[positive_surface_diameter_indices],
+            0.5 * outer_diameter_m[positive_surface_diameter_indices],
         )
         return ambient_temperature_c
 
