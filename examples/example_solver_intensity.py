@@ -13,10 +13,12 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
+from thermohl.solver.enums.power_type import PowerType
+from thermohl.solver.enums.variable_type import VariableType
 
 
 def test_solve(dct, Trep, tol=1.0e-06, mxi=64):
-    """Given an input dictionnary, a default tolerance and a maximum number of
+    """Given an input dictionary, a default tolerance and a maximum number of
     iterations, compute the surface temperature for the four available models.
     Print compute time, Return a DataFrame with both input and computed
     temperature."""
@@ -83,9 +85,12 @@ if __name__ == "__main__":
         slv = d["model"]
         df = slv.steady_intensity(Trep, tol=tol, maxiter=mxi, return_power=True)
         df["pb"] = (
-            df["P_joule"] + df["P_solar"] - df["P_convection"] - df["P_radiation"]
+            df[PowerType.JOULE]
+            + df[PowerType.SOLAR]
+            - df[PowerType.CONVECTION]
+            - df[PowerType.RADIATION]
         )
-        slv.dc["transit"] = df["I_max"].values
+        slv.dc[VariableType.TRANSIT] = df["I_max"].values
         df["TIrep"] = slv.steady_temperature(return_power=False)["T_surf"]
 
         ax[0, i].hist(df["pb"], bins=100)

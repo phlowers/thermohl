@@ -15,6 +15,8 @@ from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Solver as Solver_
 from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
+from thermohl.solver.enums.power_type import PowerType
+from thermohl.solver.enums.variable_type import VariableType
 from thermohl.utils import bisect_v
 
 
@@ -50,17 +52,17 @@ class Solver1T(Solver_):
         )
 
         # format output
-        df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
+        df = pd.DataFrame(data=T, columns=[VariableType.TEMPERATURE])
 
         if return_err:
-            df[Solver_.Names.err] = err
+            df[VariableType.ERROR] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+            df[PowerType.JOULE] = self.jh.value(T)
+            df[PowerType.SOLAR] = self.sh.value(T)
+            df[PowerType.CONVECTION] = self.cc.value(T)
+            df[PowerType.RADIATION] = self.rc.value(T)
+            df[PowerType.RAIN] = self.pc.value(T)
 
         return df
 
@@ -135,26 +137,26 @@ class Solver1T(Solver_):
             )
 
         # save results
-        dr = dict(time=time, T=T)
+        dr = {VariableType.TIME: time, VariableType.TEMPERATURE: T}
 
-        # manage return dict 2 : powers
+        # manage return dict 2: powers
         if return_power:
-            for c in Solver_.Names.powers():
+            for c in Solver_.powers():
                 dr[c] = np.zeros_like(T)
             for i in range(N):
                 for k in de.keys():
                     self.args[k] = de[k][i, :]
                 self.update()
-                dr[Solver_.Names.pjle][i, :] = self.jh.value(T[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
+                dr[PowerType.JOULE][i, :] = self.jh.value(T[i, :])
+                dr[PowerType.SOLAR][i, :] = self.sh.value(T[i, :])
+                dr[PowerType.CONVECTION][i, :] = self.cc.value(T[i, :])
+                dr[PowerType.RADIATION][i, :] = self.rc.value(T[i, :])
+                dr[PowerType.RAIN][i, :] = self.pc.value(T[i, :])
 
         # squeeze return values if n is 1
         if n == 1:
             keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
+            keys.remove(VariableType.TIME)
             for k in keys:
                 dr[k] = dr[k][:, 0]
 
@@ -213,16 +215,16 @@ class Solver1T(Solver_):
         self.args.transit = transit
 
         # format output
-        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
+        df = pd.DataFrame(data=A, columns=[VariableType.TRANSIT])
 
         if return_err:
-            df[Solver_.Names.err] = err
+            df[VariableType.ERROR] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+            df[PowerType.JOULE] = self.jh.value(T)
+            df[PowerType.SOLAR] = self.sh.value(T)
+            df[PowerType.CONVECTION] = self.cc.value(T)
+            df[PowerType.RADIATION] = self.rc.value(T)
+            df[PowerType.RAIN] = self.pc.value(T)
 
         return df
