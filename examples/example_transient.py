@@ -65,10 +65,10 @@ if __name__ == "__main__":
     for i, key in enumerate(slv):
         elm = slv[key]
         elm.dc["transit"] = transit
-        df = elm.steady_temperature()
+        dct = elm.steady_temperature()
         elm.dc["transit"] = np.nan
         cl = "C%d" % (i % 10,)
-        T1 = df["T_surf"].values
+        T1 = dct["T_surf"]
         T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)["T_surf"]
         plt.plot(t, T1, "--", c=cl, label="%s - steady" % (key,))
         plt.plot(t, T2, "-", c=cl, label="%s - transient" % (key,))
@@ -83,14 +83,14 @@ if __name__ == "__main__":
     plt.figure()
     elm = slv["rte"]
     elm.dc["transit"] = transit
-    df = elm.steady_temperature(return_avg=True, return_core=True)
+    dct = elm.steady_temperature(return_avg=True, return_core=True)
     elm.dc["transit"] = np.nan
     cl = "C0"
     dg = elm.transient_temperature(
         t, T0=T1[0], transit=transit, return_avg=True, return_core=True
     )
-    plt.fill_between(t, df["T_surf"], df["T_core"], fc=cl, alpha=0.33)
-    plt.plot(t, df["T_avg"], "--", c=cl, label="%s - steady" % (key,))
+    plt.fill_between(t, dct["T_surf"], dct["T_core"], fc=cl, alpha=0.33)
+    plt.plot(t, dct["T_avg"], "--", c=cl, label="%s - steady" % (key,))
 
     plt.fill_between(t, dg["T_surf"], dg["T_core"], fc=cl, alpha=0.33)
     plt.plot(t, dg["T_avg"], "-", c=cl, label="%s - transient" % (key,))

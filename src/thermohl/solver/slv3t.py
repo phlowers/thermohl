@@ -8,7 +8,6 @@
 from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, strListLike, intArray
 from thermohl.power import PowerTerm
@@ -190,7 +189,7 @@ class Solver3T(Solver_):
         maxiter: int = DP.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """
         Compute the steady-state temperature distribution.
 
@@ -203,7 +202,7 @@ class Solver3T(Solver_):
             return_power (bool): If True, power-related values are included in the returned DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame containing the steady-state temperatures and optionally the error and power-related values.
+            dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and power-related values.
         """
 
         # if no guess provided, use ambient temp
@@ -229,21 +228,12 @@ class Solver3T(Solver_):
 
         # format output
         z = self.average(x, y)
-        df = pd.DataFrame(
-            {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
+        result = self.format_output(
+            [Solver_.Names.tsurf, Solver_.Names.tavg, Solver_.Names.tcore], [x, z, y]
         )
+        self.add_error_and_power_if_needed(x, err, result, return_err, return_power)
 
-        if return_err:
-            df[Solver_.Names.err] = err
-
-        if return_power:
-            df[Solver_.Names.pjle] = self.joule(x, y)
-            df[Solver_.Names.psol] = self.sh.value(x)
-            df[Solver_.Names.pcnv] = self.cc.value(x)
-            df[Solver_.Names.prad] = self.rc.value(x)
-            df[Solver_.Names.ppre] = self.pc.value(x)
-
-        return df
+        return result
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
@@ -459,7 +449,7 @@ class Solver3T(Solver_):
         return_err: bool = False,
         return_temp: bool = True,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """
         Compute the steady-state intensity for a given temperature profile.
 
@@ -473,7 +463,7 @@ class Solver3T(Solver_):
             return_power (bool): If True, return the power profiles in the output DataFrame. Default is True.
 
         Returns:
-            pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
+            dict[str, np.ndarray]: A dictionary with intensity and other results (depending on inputs) in the keys.
         """
 
         Tmax, newtheader = self._steady_intensity_header(T, target)
@@ -499,7 +489,7 @@ class Solver3T(Solver_):
         x, y, cnt, err = quasi_newton_2d(
             balance,
             morgan,
-            r[Solver_.Names.transit].values,
+            r[Solver_.Names.transit],
             Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
@@ -510,25 +500,18 @@ class Solver3T(Solver_):
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
         # format output
-        df = pd.DataFrame({Solver_.Names.transit: x})
-
-        if return_err:
-            df["err"] = err
+        result = self.format_output([Solver_.Names.transit], [x])
+        self.add_error_if_needed(err, result, return_err)
 
         if return_temp or return_power:
             ts, tc = newtheader(x, y)
             ta = self.average(ts, tc)
 
             if return_temp:
-                df[Solver_.Names.tsurf] = ts
-                df[Solver_.Names.tavg] = ta
-                df[Solver_.Names.tcore] = tc
+                result[Solver_.Names.tsurf] = ts
+                result[Solver_.Names.tavg] = ta
+                result[Solver_.Names.tcore] = tc
 
-            if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ta)
-                df[Solver_.Names.psol] = self.sh.value(ts)
-                df[Solver_.Names.pcnv] = self.cc.value(ts)
-                df[Solver_.Names.prad] = self.rc.value(ts)
-                df[Solver_.Names.ppre] = self.pc.value(ts)
+            self.add_powers_if_needed(ta, result, return_power, temperature_surface=ts)
 
-        return df
+        return result

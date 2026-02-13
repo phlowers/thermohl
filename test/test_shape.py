@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-import pandas as pd
 
 from thermohl import solver
 
@@ -19,24 +18,24 @@ def _solvers():
     return li
 
 
-def _ampargs(s: solver.Solver, t: pd.DataFrame):
+def _ampargs(s: solver.Solver, t: dict[str, np.ndarray]):
     if isinstance(s, solver.Solver1T):
-        a = dict(T=t[solver.Solver.Names.temp].values)
+        a = dict(T=t[solver.Solver.Names.temp])
     elif isinstance(s, solver.Solver3T):
-        a = dict(T=t[solver.Solver.Names.tsurf].values, target=solver.Solver.Names.surf)
+        a = dict(T=t[solver.Solver.Names.tsurf], target=solver.Solver.Names.surf)
     else:
         raise NotImplementedError
     return a
 
 
-def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
+def _traargs(s: solver.Solver, ds: dict[str, np.ndarray], t):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
+        a = dict(time=t, T0=ds[solver.Solver.Names.temp])
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[solver.Solver.Names.tsurf].values,
-            Tc0=ds[solver.Solver.Names.tcore].values,
+            Ts0=ds[solver.Solver.Names.tsurf],
+            Tc0=ds[solver.Solver.Names.tcore],
         )
     else:
         raise NotImplementedError
@@ -75,8 +74,13 @@ def test_steady_default():
         t = s.steady_temperature()
         a = _ampargs(s, t)
         i = s.steady_intensity(**a)
-        assert len(t) == 1
-        assert len(i) == 1
+        check_number_of_lines_in_result(t, 1)
+        check_number_of_lines_in_result(i, 1)
+
+
+def check_number_of_lines_in_result(dictionary, expected_lines: int):
+    for key, val in dictionary.items():
+        assert val.shape == (expected_lines,)
 
 
 def test_steady_1d():
@@ -87,8 +91,8 @@ def test_steady_1d():
         t = s.steady_temperature()
         a = _ampargs(s, t)
         i = s.steady_intensity(**a)
-        assert len(t) == n
-        assert len(i) == n
+        check_number_of_lines_in_result(t, n)
+        check_number_of_lines_in_result(i, n)
 
 
 def test_steady_1d_mix():
@@ -100,8 +104,8 @@ def test_steady_1d_mix():
         t = s.steady_temperature()
         a = _ampargs(s, t)
         i = s.steady_intensity(**a)
-        assert len(t) == n
-        assert len(i) == n
+        check_number_of_lines_in_result(t, n)
+        check_number_of_lines_in_result(i, n)
 
 
 def test_transient_0():

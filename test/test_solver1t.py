@@ -38,20 +38,20 @@ def test_balance():
     )
 
     for s in _solvers(dic):
-        df = s.steady_temperature(
+        dct = s.steady_temperature(
             return_err=True, return_power=True, tol=tol, maxiter=64
         )
-        assert np.all(df["err"] < tol)
+        assert np.all(dct["err"] < tol)
         bl = np.abs(
-            df["P_joule"]
-            + df["P_solar"]
-            - df["P_convection"]
-            - df["P_radiation"]
-            - df["P_precipitation"]
+            dct["P_joule"]
+            + dct["P_solar"]
+            - dct["P_convection"]
+            - dct["P_radiation"]
+            - dct["P_precipitation"]
         )
         atol = np.maximum(
-            np.abs(s.balance(df["t"] + 0.5 * df["err"])),
-            np.abs(s.balance(df["t"] - 0.5 * df["err"])),
+            np.abs(s.balance(dct["t"] + 0.5 * dct["err"])),
+            np.abs(s.balance(dct["t"] - 0.5 * dct["err"])),
         )
         assert np.allclose(bl, 0.0, atol=atol)
 
@@ -73,20 +73,20 @@ def test_consistency():
     )
 
     for s in _solvers(dic):
-        df = s.steady_intensity(
+        result = s.steady_intensity(
             T=100.0, return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
         bl = (
-            df["P_joule"]
-            + df["P_solar"]
-            - df["P_convection"]
-            - df["P_radiation"]
-            - df["P_precipitation"]
+            result["P_joule"]
+            + result["P_solar"]
+            - result["P_convection"]
+            - result["P_radiation"]
+            - result["P_precipitation"]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
-        s.args["transit"] = df["transit"].values
+        s.args["transit"] = result["transit"]
         s.update()
         dg = s.steady_temperature(
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
-        assert np.allclose(dg["t"].values, 100.0)
+        assert np.allclose(dg["t"], 100.0)
