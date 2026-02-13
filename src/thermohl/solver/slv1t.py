@@ -82,10 +82,10 @@ class Solver1T(Solver_):
             Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
         """
 
-        # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
-        if N < 2:
+        # get sizes
+        args_size = self.args.max_len()
+        time_size = len(time)
+        if time_size < 2:
             raise ValueError("The length of the time array must be at least 2.")
 
         # get initial temperature
@@ -98,23 +98,29 @@ class Solver1T(Solver_):
 
         # get month, day and hours
         month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
+            self.args.month, self.args.day, self.args.hour, time, args_size
         )
 
-        # Two dicts, one (dc) with static quantities (with all elements of size n), the other (de)
-        # with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
+        # A dict with time-changing quantities (with all elements of size time_size * args_size)
         de = dict(
             month=month,
             day=day,
             hour=hour,
-            current_a=reshape(self.args.current_a, N, n),
-            ambient_temperature_c=reshape(self.args.ambient_temperature_c, N, n),
-            wind_angle_deg=reshape(self.args.wind_angle_deg, N, n),
-            wind_speed_ms=reshape(self.args.wind_speed_ms, N, n),
-            ambient_pressure_pa=reshape(self.args.ambient_pressure_pa, N, n),
-            relative_humidity=reshape(self.args.relative_humidity, N, n),
-            precipitation_rate_ms=reshape(self.args.precipitation_rate_ms, N, n),
+            current_a=reshape(self.args.current_a, time_size, args_size),
+            ambient_temperature_c=reshape(
+                self.args.ambient_temperature_c, time_size, args_size
+            ),
+            wind_angle_deg=reshape(self.args.wind_angle_deg, time_size, args_size),
+            wind_speed_ms=reshape(self.args.wind_speed_ms, time_size, args_size),
+            ambient_pressure_pa=reshape(
+                self.args.ambient_pressure_pa, time_size, args_size
+            ),
+            relative_humidity=reshape(
+                self.args.relative_humidity, time_size, args_size
+            ),
+            precipitation_rate_ms=reshape(
+                self.args.precipitation_rate_ms, time_size, args_size
+            ),
         )
         del (month, day, hour)
 
@@ -122,7 +128,7 @@ class Solver1T(Solver_):
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
-        T = np.zeros((N, n))
+        T = np.zeros((time_size, args_size))
         T[0, :] = T0
 
         # main time loop
@@ -135,30 +141,34 @@ class Solver1T(Solver_):
             )
 
         # save results
-        dr = dict(time=time, T=T)
+        result = dict(time=time, T=T)
 
         # manage return dict 2 : powers
         if return_power:
-            for c in Solver_.Names.powers():
-                dr[c] = np.zeros_like(T)
-            for i in range(N):
-                for k in de.keys():
-                    self.args[k] = de[k][i, :]
+            for power in Solver_.Names.powers():
+                result[power] = np.zeros_like(T)
+            for i in range(time_size):
+                for key in de.keys():
+                    self.args[key] = de[key][i, :]
                 self.update()
-                dr[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
-                dr[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(T[i, :])
-                dr[Solver_.Names.prad][i, :] = self.radiative_cooling.value(T[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(T[i, :])
+                result[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
+                result[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
+                result[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(
+                    T[i, :]
+                )
+                result[Solver_.Names.prad][i, :] = self.radiative_cooling.value(T[i, :])
+                result[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(
+                    T[i, :]
+                )
 
-        # squeeze return values if n is 1
-        if n == 1:
-            keys = list(dr.keys())
+        # squeeze return values if args_size is 1
+        if args_size == 1:
+            keys = list(result.keys())
             keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
+            for key in keys:
+                result[key] = result[key][:, 0]
 
-        return dr
+        return result
 
     def steady_intensity(
         self,
