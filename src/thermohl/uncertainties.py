@@ -198,12 +198,12 @@ def _compute(
 ):
     """Code factorization"""
     if mode == "temperature":
-        r = solver_instance.steady_temperature(**return_config)
+        result = solver_instance.steady_temperature(**return_config)
     elif mode == "intensity":
-        r = solver_instance.steady_intensity(target_temp, **return_config)
+        result = solver_instance.steady_intensity(target_temp, **return_config)
     else:
         raise ValueError()
-    return r
+    return result
 
 
 def _steady_uncertainties(
