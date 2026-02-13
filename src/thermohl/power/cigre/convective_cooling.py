@@ -81,7 +81,6 @@ class ConvectiveCooling(PowerTerm):
             / kinematic_viscosity
         )
 
-        # TODO: rename variables with explicit names
         s = (
             np.ones_like(film_temperature_c)
             * np.ones_like(kinematic_viscosity)
@@ -148,7 +147,6 @@ class ConvectiveCooling(PowerTerm):
             / ((film_temperature_c + 273.15) * kinematic_viscosity**2)
         )
         gr_prandtl = grashof * Air.prandtl(film_temperature_c)
-        # TODO: rename variables with explicit names
         ia = gr_prandtl < 1.0e04
         A2 = np.ones_like(gr_prandtl) * 0.480
         m2 = np.ones_like(gr_prandtl) * 0.250
