@@ -56,12 +56,12 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             Air.thermal_conductivity,
         )
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
         ----------
-        T : float or np.ndarray
+        conductor_temperature_c : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -70,8 +70,8 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        film_temperature_c = 0.5 * (T + self.ambient_temp_c)
-        temperature_delta_c = T - self.ambient_temp_c
+        film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
+        temperature_delta_c = conductor_temperature_c - self.ambient_temp_c
         # very slight difference with air.IEEE.volumic_mass() in coefficient before altitude**2
         air_density = (
             1.293 - 1.525e-04 * self.altitude_m + 6.38e-09 * self.altitude_m**2
