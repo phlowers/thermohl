@@ -20,39 +20,54 @@ from thermohl.utils import quasi_newton_2d
 def _profile_mom(
     surface_temperature_c: float,
     core_temperature_c: float,
-    r: floatArrayLike,
-    re: float,
+    radius: floatArrayLike,
+    outer_radius: float,
 ) -> floatArrayLike:
     """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
     return surface_temperature_c + (core_temperature_c - surface_temperature_c) * (
-        1.0 - (r / re) ** 2
+        1.0 - (radius / outer_radius) ** 2
     )
 
 
-def _phi(r: floatArrayLike, ri: floatArrayLike, re: floatArrayLike) -> floatArrayLike:
+def _phi(
+    radius: floatArrayLike, core_radius: floatArrayLike, outer_radius: floatArrayLike
+) -> floatArrayLike:
     """Primitive function used in _profile_bim*** functions."""
-    ri2 = ri**2
-    return (0.5 * (r**2 - ri2) - ri2 * np.log(r / ri)) / (re**2 - ri2)
+    core_radius_2 = core_radius**2
+    return (
+        0.5 * (radius**2 - core_radius_2) - core_radius_2 * np.log(radius / core_radius)
+    ) / (outer_radius**2 - core_radius_2)
 
 
 def _profile_bim_avg_coeffs(
-    ri: floatArrayLike, re: floatArrayLike
+    core_radius: floatArrayLike, outer_radius: floatArrayLike
 ) -> tuple[floatArrayLike, floatArrayLike]:
-    ri2 = ri**2
-    re2 = re**2
-    a = 0.5 * (re2 - ri2) ** 2 - re2 * ri2 * (2.0 * np.log(re / ri) - 1.0) - ri**4
-    b = 2.0 * re2 * (re2 - ri2) * _phi(re, ri, re)
+    core_radius_2 = core_radius**2
+    outer_radius_2 = outer_radius**2
+    a = (
+        0.5 * (outer_radius_2 - core_radius_2) ** 2
+        - outer_radius_2
+        * core_radius_2
+        * (2.0 * np.log(outer_radius / core_radius) - 1.0)
+        - core_radius**4
+    )
+    b = (
+        2.0
+        * outer_radius_2
+        * (outer_radius_2 - core_radius_2)
+        * _phi(outer_radius, core_radius, outer_radius)
+    )
     return a, b
 
 
 def _profile_bim_avg(
     surface_temperature_c: floatArrayLike,
     core_temperature_c: floatArrayLike,
-    ri: floatArrayLike,
-    re: floatArrayLike,
+    core_radius: floatArrayLike,
+    outer_radius: floatArrayLike,
 ) -> floatArrayLike:
     """Analytical formulation for average temperature in _profile_bim."""
-    a, b = _profile_bim_avg_coeffs(ri, re)
+    a, b = _profile_bim_avg_coeffs(core_radius, outer_radius)
     return core_temperature_c - (a / b) * (core_temperature_c - surface_temperature_c)
 
 
