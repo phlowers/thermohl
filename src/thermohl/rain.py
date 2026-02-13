@@ -135,7 +135,7 @@ class PrecipitationCooling(PowerTerm):
             / (air_heat_capacity * air_pressure_pa)
         )
         return np.where(
-            temperature_delta_c != 0.0,
+            ~np.isclose(temperature_delta_c, 0.0, atol=0.0005),
             evaporation_mass_flux,
             np.zeros_like(conductor_temperature_c),
         )
