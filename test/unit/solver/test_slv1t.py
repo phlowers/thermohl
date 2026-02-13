@@ -15,15 +15,15 @@ from thermohl.solver.slv1t import Solver1T
 def solver():
     args = {
         "max_len": lambda: 1,
-        "transit": np.array([0]),
-        "Ta": np.array([25]),
-        "ws": np.array([0]),
-        "wa": np.array([0]),
-        "Pa": np.array([101325]),
-        "rh": np.array([50]),
-        "pr": np.array([0]),
-        "m": 1.0,
-        "c": 1.0,
+        "current_a": np.array([0]),
+        "ambient_temperature_c": np.array([25]),
+        "wind_speed_ms": np.array([0]),
+        "wind_angle_deg": np.array([0]),
+        "ambient_pressure_pa": np.array([101325]),
+        "relative_humidity": np.array([50]),
+        "precipitation_rate_ms": np.array([0]),
+        "linear_mass_kgm": 1.0,
+        "heat_capacity_jkgk": 1.0,
         "month": 1,
         "day": 1,
         "hour": 0,
@@ -87,9 +87,9 @@ def test_transient_temperature_default(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["conductor_temperature_c"]) == len(time)
 
 
 def test_transient_temperature_with_initial_temp(solver):
@@ -100,10 +100,10 @@ def test_transient_temperature_with_initial_temp(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
-    assert result["T"][0] == T0
+    assert len(result["conductor_temperature_c"]) == len(time)
+    assert result["conductor_temperature_c"][0] == T0
 
 
 def test_transient_temperature_with_error(solver):
@@ -113,9 +113,9 @@ def test_transient_temperature_with_error(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["conductor_temperature_c"]) == len(time)
     assert Solver1T.Names.pjle in result
     assert Solver1T.Names.psol in result
     assert Solver1T.Names.pcnv in result
@@ -129,7 +129,7 @@ def test_steady_intensity_default(solver):
     result = solver.steady_intensity(T)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
+    assert Solver1T.Names.current_a in result.columns
     assert Solver1T.Names.pjle in result.columns
     assert Solver1T.Names.psol in result.columns
     assert Solver1T.Names.pcnv in result.columns
@@ -143,7 +143,7 @@ def test_steady_intensity_with_error(solver):
     result = solver.steady_intensity(T, return_err=True)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
+    assert Solver1T.Names.current_a in result.columns
     assert Solver1T.Names.err in result.columns
 
 
@@ -153,7 +153,7 @@ def test_steady_intensity_no_power(solver):
     result = solver.steady_intensity(T, return_power=False)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
+    assert Solver1T.Names.current_a in result.columns
     assert Solver1T.Names.pjle not in result.columns
     assert Solver1T.Names.psol not in result.columns
     assert Solver1T.Names.pcnv not in result.columns
@@ -171,4 +171,4 @@ def test_steady_intensity_custom_params(solver):
     result = solver.steady_intensity(T, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.transit in result.columns
+    assert Solver1T.Names.current_a in result.columns

@@ -45,22 +45,28 @@ class Solver1T(Solver_):
         """
 
         # solve with bisection
-        T, err = bisect_v(
+        conductor_temperature_c, err = bisect_v(
             lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
         )
 
         # format output
-        df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
+        df = pd.DataFrame(data=conductor_temperature_c, columns=[Solver_.Names.temp])
 
         if return_err:
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(conductor_temperature_c)
+            df[Solver_.Names.psol] = self.solar_heating.value(conductor_temperature_c)
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(
+                conductor_temperature_c
+            )
+            df[Solver_.Names.prad] = self.radiative_cooling.value(
+                conductor_temperature_c
+            )
+            df[Solver_.Names.ppre] = self.precipitation_cooling.value(
+                conductor_temperature_c
+            )
 
         return df
 
@@ -82,83 +88,102 @@ class Solver1T(Solver_):
             Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
         """
 
-        # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
-        if N < 2:
+        # get sizes
+        args_size = self.args.max_len()
+        time_size = len(time)
+        if time_size < 2:
             raise ValueError("The length of the time array must be at least 2.")
 
         # get initial temperature
         if T0 is None:
             T0 = (
-                self.args.Ta
-                if isinstance(self.args.Ta, numbers.Number)
-                else self.args.Ta[0]
+                self.args.ambient_temperature_c
+                if isinstance(self.args.ambient_temperature_c, numbers.Number)
+                else self.args.ambient_temperature_c[0]
             )
 
         # get month, day and hours
         month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
+            self.args.month, self.args.day, self.args.hour, time, args_size
         )
 
-        # Two dicts, one (dc) with static quantities (with all elements of size n), the other (de)
-        # with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
+        # A dict with time-changing quantities (with all elements of size time_size * args_size)
         de = dict(
             month=month,
             day=day,
             hour=hour,
-            transit=reshape(self.args.transit, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
+            current_a=reshape(self.args.current_a, time_size, args_size),
+            ambient_temperature_c=reshape(
+                self.args.ambient_temperature_c, time_size, args_size
+            ),
+            wind_angle_deg=reshape(self.args.wind_angle_deg, time_size, args_size),
+            wind_speed_ms=reshape(self.args.wind_speed_ms, time_size, args_size),
+            ambient_pressure_pa=reshape(
+                self.args.ambient_pressure_pa, time_size, args_size
+            ),
+            relative_humidity=reshape(
+                self.args.relative_humidity, time_size, args_size
+            ),
+            precipitation_rate_ms=reshape(
+                self.args.precipitation_rate_ms, time_size, args_size
+            ),
         )
         del (month, day, hour)
 
         # shortcuts for time-loop
-        imc = 1.0 / (self.args.m * self.args.c)
+        imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
-        T = np.zeros((N, n))
-        T[0, :] = T0
+        conductor_temperature_c = np.zeros((time_size, args_size))
+        conductor_temperature_c[0, :] = T0
 
         # main time loop
         for i in range(1, len(time)):
             for k, v in de.items():
                 self.args[k] = v[i, :]
             self.update()
-            T[i, :] = (
-                T[i - 1, :] + (time[i] - time[i - 1]) * self.balance(T[i - 1, :]) * imc
+            conductor_temperature_c[i, :] = (
+                conductor_temperature_c[i - 1, :]
+                + (time[i] - time[i - 1])
+                * self.balance(conductor_temperature_c[i - 1, :])
+                * imc
             )
 
         # save results
-        dr = dict(time=time, T=T)
+        result = dict(time=time, conductor_temperature_c=conductor_temperature_c)
 
         # manage return dict 2 : powers
         if return_power:
-            for c in Solver_.Names.powers():
-                dr[c] = np.zeros_like(T)
-            for i in range(N):
-                for k in de.keys():
-                    self.args[k] = de[k][i, :]
+            for power in Solver_.Names.powers():
+                result[power] = np.zeros_like(conductor_temperature_c)
+            for i in range(time_size):
+                for key in de.keys():
+                    self.args[key] = de[key][i, :]
                 self.update()
-                dr[Solver_.Names.pjle][i, :] = self.jh.value(T[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(T[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(T[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(T[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(T[i, :])
+                result[Solver_.Names.pjle][i, :] = self.joule_heating.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.psol][i, :] = self.solar_heating.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.prad][i, :] = self.radiative_cooling.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(
+                    conductor_temperature_c[i, :]
+                )
 
-        # squeeze return values if n is 1
-        if n == 1:
-            keys = list(dr.keys())
+        # squeeze return values if args_size is 1
+        if args_size == 1:
+            keys = list(result.keys())
             keys.remove(Solver_.Names.time)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
+            for key in keys:
+                result[key] = result[key][:, 0]
 
-        return dr
+        return result
 
     def steady_intensity(
         self,
@@ -189,40 +214,40 @@ class Solver1T(Solver_):
 
         """
 
-        # save transit in arg
-        transit = self.args.transit
+        # save current_a in arg
+        current_a = self.args.current_a
 
         # solve with bisection
         shape = (self.args.max_len(),)
         T_ = T * np.ones(shape)
-        jh = (
-            self.cc.value(T_)
-            + self.rc.value(T_)
-            + self.pc.value(T_)
-            - self.sh.value(T_)
+        joule_heating = (
+            self.convective_cooling.value(T_)
+            + self.radiative_cooling.value(T_)
+            + self.precipitation_cooling.value(T_)
+            - self.solar_heating.value(T_)
         )
 
         def fun(i: floatArray) -> floatArrayLike:
-            self.args.transit = i
-            self.jh.__init__(**self.args.__dict__)
-            return self.jh.value(T_) - jh
+            self.args.current_a = i
+            self.joule_heating.__init__(**self.args.__dict__)
+            return self.joule_heating.value(T_) - joule_heating
 
         A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
 
-        # restore previous transit
-        self.args.transit = transit
+        # restore previous current_a
+        self.args.current_a = current_a
 
         # format output
-        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit])
+        df = pd.DataFrame(data=A, columns=[Solver_.Names.current_a])
 
         if return_err:
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.jh.value(T)
-            df[Solver_.Names.psol] = self.sh.value(T)
-            df[Solver_.Names.pcnv] = self.cc.value(T)
-            df[Solver_.Names.prad] = self.rc.value(T)
-            df[Solver_.Names.ppre] = self.pc.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(T)
+            df[Solver_.Names.psol] = self.solar_heating.value(T)
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
+            df[Solver_.Names.prad] = self.radiative_cooling.value(T)
+            df[Solver_.Names.ppre] = self.precipitation_cooling.value(T)
 
         return df

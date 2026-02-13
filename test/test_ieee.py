@@ -18,21 +18,21 @@ def test_compare_powers():
     # there are a lot of rounding in the standard guide, hence the relatively
     # large tolerances used in our tests ...
 
-    dic["ws"] = 0.61
-    dic["wa"] = 0.0
-    dic["epsilon"] = 0.8
-    dic["alpha"] = 0.8
-    dic["Ta"] = 40.0
-    dic["THigh"] = 75.0
-    dic["TLow"] = 25.0
-    dic["RDCHigh"] = 8.688e-05
-    dic["RDCLow"] = 7.283e-05
-    dic["azm"] = 90.0
-    dic["lat"] = 30.0
-    dic["tb"] = 0.0
-    dic["alt"] = 0.0
-    dic["D"] = 28.14 * 1.0e-03
-    dic["d"] = 10.4 * 1.0e-03
+    dic["wind_speed_ms"] = 0.61
+    dic["wind_angle_deg"] = 0.0
+    dic["emissivity"] = 0.8
+    dic["solar_absorptivity"] = 0.8
+    dic["ambient_temperature_c"] = 40.0
+    dic["temp_high_c"] = 75.0
+    dic["temp_low_c"] = 25.0
+    dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
+    dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
+    dic["azimuth"] = 90.0
+    dic["latitude_deg"] = 30.0
+    dic["turbidity"] = 0.0
+    dic["altitude"] = 0.0
+    dic["outer_diameter_m"] = 28.14 * 1.0e-03
+    dic["core_diameter_m"] = 10.4 * 1.0e-03
     dic["month"] = 6
     dic["day"] = 10
     dic["hour"] = 11.0
@@ -42,8 +42,8 @@ def test_compare_powers():
     assert np.isclose(ieee.ConvectiveCooling(**dic).value(T), 81.93, rtol=0.002)
     assert np.isclose(ieee.RadiativeCooling(**dic).value(T), 39.1, rtol=0.001)
     assert np.isclose(ieee.SolarHeating(**dic).value(T), 22.44, rtol=0.001)
-    jh = ieee.JouleHeating(**dic)
-    assert np.isclose(jh._rdc(T), 9.390e-05, rtol=1.0e-09)
+    joule_heating = ieee.JouleHeating(**dic)
+    assert np.isclose(joule_heating._rdc(T), 9.390e-05, rtol=1.0e-09)
 
     # additional debug
     ieee.SolarHeating(**dic).value(T)
@@ -53,18 +53,18 @@ def test_compare_powers():
     sd = sun.solar_declination(dic["month"], dic["day"])
     assert np.isclose(np.rad2deg(sd), 23.0, rtol=0.001)
 
-    ha = sun.hour_angle(dic["hour"], minute=0.0, second=0.0)
+    ha = sun.hour_angle(dic["hour"], solar_minute=0.0, solar_second=0.0)
     assert np.isclose(np.rad2deg(ha), -15.0)
 
     sa = sun.solar_altitude(
-        np.deg2rad(dic["lat"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude_deg"]), dic["month"], dic["day"], dic["hour"]
     )
     assert np.isclose(np.rad2deg(sa), 74.8, rtol=0.002)
 
     sz = sun.solar_azimuth(
-        np.deg2rad(dic["lat"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude_deg"]), dic["month"], dic["day"], dic["hour"]
     )
     np.isclose(np.rad2deg(sz), 114.0, rtol=0.001)
 
-    th = np.arccos(np.cos(sa) * np.cos(sz - dic["azm"]))
+    th = np.arccos(np.cos(sa) * np.cos(sz - dic["azimuth"]))
     np.isclose(np.rad2deg(th), 76.1, rtol=0.02)

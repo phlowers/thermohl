@@ -15,25 +15,25 @@ from thermohl.power.cigre import Air
 conv_cool_instances = [
     (
         ConvectiveCooling(
-            alt=np.array([100.0]),
-            azm=np.array([45.0]),
-            Ta=np.array([25.0]),
-            ws=np.array([5.0]),
-            wa=np.array([30.0]),
-            D=np.array([0.01]),
-            R=np.array([0.02]),
+            altitude=np.array([100.0]),
+            azimuth=np.array([45.0]),
+            ambient_temperature_c=np.array([25.0]),
+            wind_speed_ms=np.array([5.0]),
+            wind_angle_deg=np.array([30.0]),
+            outer_diameter_m=np.array([0.01]),
+            roughness_ratio=np.array([0.02]),
         ),
         np.ndarray,
     ),
     (
         ConvectiveCooling(
-            alt=100.0,
-            azm=45.0,
-            Ta=25.0,
-            ws=5.0,
-            wa=30.0,
-            D=0.01,
-            R=0.02,
+            altitude=100.0,
+            azimuth=45.0,
+            ambient_temperature_c=25.0,
+            wind_speed_ms=5.0,
+            wind_angle_deg=30.0,
+            outer_diameter_m=0.01,
+            roughness_ratio=0.02,
         ),
         float,
     ),
@@ -93,8 +93,8 @@ def test_nu_forced_array_values(convective_cooling, expected_type):
 def test_nu_forced_boundary_conditions(convective_cooling, expected_type):
     Tf = np.array([30.0])
     nu = np.array([1.5e-5])
-    convective_cooling.R = np.array([0.05])
-    convective_cooling.ws = np.array([100.0])
+    convective_cooling.roughness_ratio = np.array([0.05])
+    convective_cooling.wind_speed_ms = np.array([100.0])
     expected_result = np.array([115.5214])
 
     result = convective_cooling._nu_forced(Tf, nu)

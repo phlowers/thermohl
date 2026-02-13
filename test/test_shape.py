@@ -35,8 +35,8 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[solver.Solver.Names.tsurf].values,
-            Tc0=ds[solver.Solver.Names.tcore].values,
+            surface_temperature_0_c=ds[solver.Solver.Names.tsurf].values,
+            core_temperature_0_c=ds[solver.Solver.Names.tcore].values,
         )
     else:
         raise NotImplementedError
@@ -46,7 +46,13 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
 def test_power_default():
     """Check that PowerTerm.value(x) returns correct shape depending on init dict and temperature input."""
     for s in _solvers():
-        for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
+        for p in [
+            s.joule_heating,
+            s.solar_heating,
+            s.convective_cooling,
+            s.radiative_cooling,
+            s.precipitation_cooling,
+        ]:
             p.__init__(**s.args.__dict__)
             assert np.isscalar(p.value(0.0))
             assert p.value(np.array([0.0])).shape == (1,)
@@ -58,10 +64,16 @@ def test_power_1d():
     n = 61
     for s in _solvers():
         d = s.args.__dict__.copy()
-        d["transit"] = np.linspace(0.0, +999.0, n)
-        d["alpha"] = np.linspace(0.5, 0.9, n)
-        d["Ta"] = np.linspace(-10.0, +50.0, n)
-        for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
+        d["current_a"] = np.linspace(0.0, +999.0, n)
+        d["solar_absorptivity"] = np.linspace(0.5, 0.9, n)
+        d["ambient_temperature_c"] = np.linspace(-10.0, +50.0, n)
+        for p in [
+            s.joule_heating,
+            s.solar_heating,
+            s.convective_cooling,
+            s.radiative_cooling,
+            s.precipitation_cooling,
+        ]:
             p.__init__(**d)
             v = p.value(0.0)
             assert np.isscalar(v) or v.shape == (n,)
@@ -82,7 +94,7 @@ def test_steady_default():
 def test_steady_1d():
     n = 61
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
@@ -94,8 +106,8 @@ def test_steady_1d():
 def test_steady_1d_mix():
     n = 61
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
-        s.args.transit = np.array([199.0])
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
+        s.args.current_a = np.array([199.0])
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)
@@ -126,7 +138,7 @@ def test_transient_0():
 def test_transient_1():
     n = 7
     for s in _solvers():
-        s.args.Ta = np.linspace(-10, +50, n)
+        s.args.ambient_temperature_c = np.linspace(-10, +50, n)
         s.update()
 
         t = np.linspace(0, 3600, 361)

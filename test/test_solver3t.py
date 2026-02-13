@@ -27,17 +27,18 @@ def test_balance():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
-        alt=np.random.uniform(0.0, 1600.0, N),
-        azm=np.random.uniform(0.0, 360.0, N),
+        latitude_deg=np.random.uniform(42.0, 51.0, N),
+        altitude=np.random.uniform(0.0, 1600.0, N),
+        azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        Ta=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
-        wa=np.random.uniform(0.0, 90.0, N),
-        transit=np.random.uniform(40.0, 4000.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
+        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
+        wind_angle_deg=np.random.uniform(0.0, 90.0, N),
+        current_a=np.random.uniform(40.0, 4000.0, N),
+        core_diameter_m=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter_m"],
     )
 
     for s in _solvers(dic):
@@ -49,15 +50,28 @@ def test_balance():
         t1 = t1["t"].values
         # 3t solve
         df = s.steady_temperature(
-            Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64
+            surface_temperature_guess_c=t1,
+            core_temperature_guess_c=t1,
+            return_err=True,
+            return_power=True,
+            tol=tol,
+            maxiter=64,
         )
         # checks
         assert np.all(df["err"] < tol)
         assert np.allclose(
-            s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.balance(
+                surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+            ).values,
+            0.0,
+            atol=tol,
         )
         assert np.allclose(
-            s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.morgan(
+                surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+            ).values,
+            0.0,
+            atol=tol,
         )
 
 
@@ -66,16 +80,17 @@ def test_consistency():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
-        alt=np.random.uniform(0.0, 1600.0, N),
-        azm=np.random.uniform(0.0, 360.0, N),
+        latitude_deg=np.random.uniform(42.0, 51.0, N),
+        altitude=np.random.uniform(0.0, 1600.0, N),
+        azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        Ta=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
-        wa=np.random.uniform(0.0, 90.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
+        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
+        wind_angle_deg=np.random.uniform(0.0, 90.0, N),
+        core_diameter_m=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter_m"],
     )
 
     for s in _solvers(dic):
@@ -91,18 +106,26 @@ def test_consistency():
             )
             assert np.all(df["err"] < tol)
             # set args intensity to newly founds ampacities
-            s.args.transit = df["transit"].values
+            s.args.current_a = df["current_a"].values
             s.update()
             assert np.allclose(
-                s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.balance(
+                    surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                ).values,
+                0.0,
+                atol=tol,
             )
             assert np.allclose(
-                s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.morgan(
+                    surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                ).values,
+                0.0,
+                atol=tol,
             )
             # 3t solve
             dg = s.steady_temperature(
-                Tsg=df["t_surf"].round(1).values,
-                Tcg=df["t_core"].round(1).values,
+                surface_temperature_guess_c=df["t_surf"].round(1).values,
+                core_temperature_guess_c=df["t_core"].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,

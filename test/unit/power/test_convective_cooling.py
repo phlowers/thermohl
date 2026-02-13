@@ -14,21 +14,21 @@ from thermohl.power.ieee import ConvectiveCooling
 
 def set_default_values_scalar():
     dic = solver.default_values()
-    dic["ws"] = 0.61
-    dic["wa"] = 0.0
-    dic["epsilon"] = 0.8
-    dic["alpha"] = 0.8
-    dic["Ta"] = 40.0
-    dic["THigh"] = 75.0
-    dic["TLow"] = 25.0
-    dic["RDCHigh"] = 8.688e-05
-    dic["RDCLow"] = 7.283e-05
-    dic["azm"] = 90.0
-    dic["lat"] = 30.0
-    dic["tb"] = 0.0
-    dic["alt"] = 0.0
-    dic["D"] = 28.14 * 1.0e-03
-    dic["d"] = 10.4 * 1.0e-03
+    dic["wind_speed_ms"] = 0.61
+    dic["wind_angle_deg"] = 0.0
+    dic["emissivity"] = 0.8
+    dic["solar_absorptivity"] = 0.8
+    dic["ambient_temperature_c"] = 40.0
+    dic["temp_high_c"] = 75.0
+    dic["temp_low_c"] = 25.0
+    dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
+    dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
+    dic["azimuth"] = 90.0
+    dic["latitude_deg"] = 30.0
+    dic["turbidity"] = 0.0
+    dic["altitude"] = 0.0
+    dic["outer_diameter_m"] = 28.14 * 1.0e-03
+    dic["core_diameter_m"] = 10.4 * 1.0e-03
     dic["month"] = 6
     dic["day"] = 10
     dic["hour"] = 11.0
@@ -37,21 +37,21 @@ def set_default_values_scalar():
 
 def set_default_values_array():
     dic = solver.default_values()
-    dic["ws"] = np.array([0.61, 0.83])
-    dic["wa"] = np.array([0.0, 42.1])
-    dic["epsilon"] = np.array([0.8, 0.9])
-    dic["alpha"] = np.array([0.8, 0.9])
-    dic["Ta"] = np.array([40.0, 32])
-    dic["THigh"] = np.array([75.0, 70.0])
-    dic["TLow"] = np.array([25.0, 20])
-    dic["RDCHigh"] = np.array([8.688e-05, 8.688e-05])
-    dic["RDCLow"] = np.array([7.283e-05, 7.283e-05])
-    dic["azm"] = np.array([90.0, 90.0])
-    dic["lat"] = np.array([30.0, 30.0])
-    dic["tb"] = np.array([0.0, 0.0])
-    dic["alt"] = np.array([0.0, 0.0])
-    dic["D"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
-    dic["d"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
+    dic["wind_speed_ms"] = np.array([0.61, 0.83])
+    dic["wind_angle_deg"] = np.array([0.0, 42.1])
+    dic["emissivity"] = np.array([0.8, 0.9])
+    dic["solar_absorptivity"] = np.array([0.8, 0.9])
+    dic["ambient_temperature_c"] = np.array([40.0, 32])
+    dic["temp_high_c"] = np.array([75.0, 70.0])
+    dic["temp_low_c"] = np.array([25.0, 20])
+    dic["linear_resistance_temp_high_ohm_m"] = np.array([8.688e-05, 8.688e-05])
+    dic["linear_resistance_temp_low_ohm_m"] = np.array([7.283e-05, 7.283e-05])
+    dic["azimuth"] = np.array([90.0, 90.0])
+    dic["latitude_deg"] = np.array([30.0, 30.0])
+    dic["turbidity"] = np.array([0.0, 0.0])
+    dic["altitude"] = np.array([0.0, 0.0])
+    dic["outer_diameter_m"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
+    dic["core_diameter_m"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
     dic["month"] = np.array([6, 3])
     dic["day"] = np.array([10, 13])
     dic["hour"] = np.array([11.0, 8.0])
@@ -125,7 +125,7 @@ def test_value_natural_scalar(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.D**0.75
+        * convective_cooling.outer_diameter_m**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -150,7 +150,7 @@ def test_value_natural_array(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.D**0.75
+        * convective_cooling.outer_diameter_m**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -173,16 +173,18 @@ def test_convective_cooling_value_scalar(convective_cooling, expected):
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (T + convective_cooling.Ta),
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            0.5 * (T + convective_cooling.ambient_temp_c),
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
         convective_cooling._value_natural(
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
     )
@@ -205,16 +207,18 @@ def test_convective_cooling_value_array(convective_cooling, expected):
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (T + convective_cooling.Ta),
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            0.5 * (T + convective_cooling.ambient_temp_c),
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
         convective_cooling._value_natural(
-            T - convective_cooling.Ta,
-            convective_cooling.rho(
-                0.5 * (T + convective_cooling.Ta), convective_cooling.alt
+            T - convective_cooling.ambient_temp_c,
+            convective_cooling.air_density(
+                0.5 * (T + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude_m,
             ),
         ),
     )

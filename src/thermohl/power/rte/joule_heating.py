@@ -18,18 +18,18 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        transit: floatArrayLike,
-        D: floatArrayLike,
-        d: floatArrayLike,
-        A: floatArrayLike,
-        a: floatArrayLike,
-        km: floatArrayLike,
-        ki: floatArrayLike,
-        kl: floatArrayLike,
-        kq: floatArrayLike,
-        RDC20: floatArrayLike,
-        T20: floatArrayLike = 20.0,
-        f: floatArrayLike = 50.0,
+        current_a: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
+        core_diameter_m: floatArrayLike,
+        outer_area_m2: floatArrayLike,
+        core_area_m2: floatArrayLike,
+        magnetic_coeff: floatArrayLike,
+        magnetic_coeff_per_a: floatArrayLike,
+        temperature_coeff_linear: floatArrayLike,
+        temperature_coeff_quadratic: floatArrayLike,
+        linear_resistance_dc_20c_ohm_m: floatArrayLike,
+        reference_temperature_c: floatArrayLike = 20.0,
+        frequency_hz: floatArrayLike = 50.0,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -37,44 +37,50 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            transit (float | numpy.ndarray): Transit intensity (A).
-            D (float | numpy.ndarray): External diameter (m).
-            d (float | numpy.ndarray): Core diameter (m).
-            A (float | numpy.ndarray): External (total) cross-sectional area (m²).
-            a (float | numpy.ndarray): Core cross-sectional area (m²).
-            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
-            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
-            kl (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
-            kq (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
-            RDC20 (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
-            T20 (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
-            f (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
+            current_a (float | numpy.ndarray): Transit intensity (A).
+            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            core_diameter_m (float | numpy.ndarray): Core diameter (m).
+            outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
+            core_area_m2 (float | numpy.ndarray): Core cross-sectional area (m²).
+            magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
+            temperature_coeff_linear (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
+            temperature_coeff_quadratic (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
+            linear_resistance_dc_20c_ohm_m (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
+            reference_temperature_c (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
+            frequency_hz (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
-        self.transit = transit
-        self.D = D
-        self.d = d
-        self.kem = self._kem(A, a, km, ki)
-        self.kl = kl
-        self.kq = kq
-        self.RDC20 = RDC20
-        self.T20 = T20
-        self.f = f
+        self.current_a = current_a
+        self.outer_diameter_m = outer_diameter_m
+        self.core_diameter_m = core_diameter_m
+        self.magnetic_coeff = self._kem(
+            outer_area_m2, core_area_m2, magnetic_coeff, magnetic_coeff_per_a
+        )
+        self.temp_coeff_linear = temperature_coeff_linear
+        self.temp_coeff_quadratic = temperature_coeff_quadratic
+        self.dc_resistance_20c = linear_resistance_dc_20c_ohm_m
+        self.reference_temperature_c = reference_temperature_c
+        self.frequency_hz = frequency_hz
 
-    def _rdc(self, T: floatArrayLike) -> floatArrayLike:
+    def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         """
         Compute resistance per unit length for direct current.
 
         Args:
-            T (float | numpy.ndarray): Temperature at which to compute the resistance (°C).
+            conductor_temperature_c (float | numpy.ndarray): Temperature at which to compute the resistance (°C).
 
         Returns:
             float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
-        dt = T - self.T20
-        return self.RDC20 * (1.0 + self.kl * dt + self.kq * dt**2)
+        temperature_delta_c = conductor_temperature_c - self.reference_temperature_c
+        return self.dc_resistance_20c * (
+            1.0
+            + self.temp_coeff_linear * temperature_delta_c
+            + self.temp_coeff_quadratic * temperature_delta_c**2
+        )
 
-    def _ks(self, rdc: floatArrayLike) -> floatArrayLike:
+    def _ks(self, dc_resistance: floatArrayLike) -> floatArrayLike:
         """
         Compute skin-effect coefficient.
 
@@ -83,74 +89,82 @@ class JouleHeating(PowerTerm):
         approximation as described in the RTE's document.
 
         Args:
-            rdc (float | numpy.ndarray): The resistance value(s) for which the skin-effect coefficient is to be computed (Ω·m⁻¹).
+            dc_resistance (float | numpy.ndarray): The resistance value(s) for which the skin-effect coefficient is to be computed (Ω·m⁻¹).
 
         Returns:
             floatArrayLike: The computed skin-effect coefficient(s) (—).
         """
-        z = (
+        skin_param = (
             8
             * np.pi
-            * self.f
-            * (self.D - self.d) ** 2
-            / ((self.D**2 - self.d**2) * 1.0e07 * rdc)
+            * self.frequency_hz
+            * (self.outer_diameter_m - self.core_diameter_m) ** 2
+            / (
+                (self.outer_diameter_m**2 - self.core_diameter_m**2)
+                * 1.0e07
+                * dc_resistance
+            )
         )
-        a = 7 * z**2 / (315 + 3 * z**2)
-        b = 56 / (211 + z**2)
-        beta = 1.0 - self.d / self.D
-        return 1.0 + a * (1.0 - 0.5 * beta - b * beta**2)
+        coeff_a = 7 * skin_param**2 / (315 + 3 * skin_param**2)
+        coeff_b = 56 / (211 + skin_param**2)
+        core_ratio = 1.0 - self.core_diameter_m / self.outer_diameter_m
+        return 1.0 + coeff_a * (1.0 - 0.5 * core_ratio - coeff_b * core_ratio**2)
 
     def _kem(
         self,
-        A: floatArrayLike,
-        a: floatArrayLike,
-        km: floatArrayLike,
-        ki: floatArrayLike,
+        outer_area_m2: floatArrayLike,
+        core_area_m2: floatArrayLike,
+        magnetic_coeff: floatArrayLike,
+        magnetic_coeff_per_a: floatArrayLike,
     ) -> floatArrayLike:
         """
         Compute magnetic coefficient.
 
         Args:
-            A (float | numpy.ndarray): External (total) cross-sectional area (m²).
-            a (float | numpy.ndarray): Core cross-sectional area (m²).
-            km (float | numpy.ndarray): Coefficient for magnetic effects (—).
-            ki (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
+            outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
+            core_area_m2 (float | numpy.ndarray): Core cross-sectional area (m²).
+            magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
+            magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
 
         Returns:
             floatArrayLike: Computed magnetic coefficient (—).
         """
-        s = (
-            np.ones_like(self.transit)
-            * np.ones_like(A)
-            * np.ones_like(a)
-            * np.ones_like(km)
-            * np.ones_like(ki)
+        scale = (
+            np.ones_like(self.current_a)
+            * np.ones_like(outer_area_m2)
+            * np.ones_like(core_area_m2)
+            * np.ones_like(magnetic_coeff)
+            * np.ones_like(magnetic_coeff_per_a)
         )
-        z = s.shape == ()
-        if z:
-            s = np.array([1.0])
-        I_ = self.transit * s
-        a_ = a * s
-        A_ = A * s
-        m = a_ > 0.0
-        ki_ = ki * s
-        kem = km * s
-        kem[m] += ki_[m] * I_[m] / ((A_[m] - a_[m]) * 1.0e06)
-        if z:
-            kem = kem[0]
-        return kem
+        is_scalar = scale.shape == ()
+        if is_scalar:
+            scale = np.array([1.0])
+        current = self.current_a * scale
+        core_area = core_area_m2 * scale
+        outer_area = outer_area_m2 * scale
+        has_core = core_area > 0.0
+        magnetic_slope = magnetic_coeff_per_a * scale
+        magnetic_coeff = magnetic_coeff * scale
+        magnetic_coeff[has_core] += (
+            magnetic_slope[has_core]
+            * current[has_core]
+            / ((outer_area[has_core] - core_area[has_core]) * 1.0e06)
+        )
+        if is_scalar:
+            magnetic_coeff = magnetic_coeff[0]
+        return magnetic_coeff
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        rdc = self._rdc(T)
-        ks = self._ks(rdc)
-        rac = self.kem * ks * rdc
-        return rac * self.transit**2
+        dc_resistance = self._rdc(conductor_temperature_c)
+        skin_effect_coeff = self._ks(dc_resistance)
+        ac_resistance = self.magnetic_coeff * skin_effect_coeff * dc_resistance
+        return ac_resistance * self.current_a**2

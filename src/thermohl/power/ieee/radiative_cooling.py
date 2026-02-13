@@ -20,28 +20,28 @@ class RadiativeCooling(PowerTerm):
 
     def __init__(
         self,
-        Ta: floatArrayLike,
-        D: floatArrayLike,
-        epsilon: floatArrayLike,
+        ambient_temperature_c: floatArrayLike,
+        outer_diameter_m: floatArrayLike,
+        emissivity: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
 
         Args:
-            Ta (float | numpy.ndarray): Ambient temperature (°C).
-            D (float | numpy.ndarray): External diameter (m).
-            epsilon (float | numpy.ndarray): Emissivity (—).
+            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
+            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            emissivity (float | numpy.ndarray): Emissivity (—).
 
         """
-        self.Ta = Ta
-        self.D = D
-        self.epsilon = epsilon
+        self.ambient_temp_c = ambient_temperature_c
+        self.outer_diameter_m = outer_diameter_m
+        self.emissivity = emissivity
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -49,9 +49,12 @@ class RadiativeCooling(PowerTerm):
         """
         return (
             17.8
-            * self.epsilon
-            * self.D
-            * (((T + 273.0) / 100.0) ** 4 - ((self.Ta + 273.0) / 100.0) ** 4)
+            * self.emissivity
+            * self.outer_diameter_m
+            * (
+                ((conductor_temperature_c + 273.0) / 100.0) ** 4
+                - ((self.ambient_temp_c + 273.0) / 100.0) ** 4
+            )
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
@@ -64,4 +67,10 @@ class RadiativeCooling(PowerTerm):
             float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
-        return 4.0 * 1.78e-07 * self.epsilon * self.D * conductor_temperature**3
+        return (
+            4.0
+            * 1.78e-07
+            * self.emissivity
+            * self.outer_diameter_m
+            * conductor_temperature**3
+        )

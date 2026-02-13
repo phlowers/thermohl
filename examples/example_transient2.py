@@ -24,29 +24,29 @@ if __name__ == "__main__":
     Im = 3000.0
     tau = 1000.0
     t = np.linspace(0.0, 7200.0, 721)
-    transit = I0 * np.ones_like(tau) + (Im - I0) * (
+    current_a = I0 * np.ones_like(tau) + (Im - I0) * (
         np.where(np.abs(1800 - t) <= tau, 1, 0)
         + np.where(np.abs(5400 - t) <= tau, 1, 0)
     )
-    transit = np.column_stack(3 * (transit,))
+    current_a = np.column_stack(3 * (current_a,))
 
     # Solver input and solver
     dct = dict(
-        lat=45.0,
-        alt=100.0,
-        azm=90.0,
+        latitude_deg=45.0,
+        altitude=100.0,
+        azimuth=90.0,
         month=3,
         day=21,
         hour=0,
-        Ta=np.array([0.0, 15.0, 30.0]),
-        ws=2.0,
-        wa=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
-        transit=np.nan,
+        ambient_temperature_c=np.array([0.0, 15.0, 30.0]),
+        wind_speed_ms=2.0,
+        wind_angle_deg=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
+        current_a=np.nan,
     )
 
-    # plot transit over time
+    # plot current_a over time
     plt.figure()
-    plt.plot(t, transit[:, 0])
+    plt.plot(t, current_a[:, 0])
     plt.grid(True)
     plt.xlabel("Time (s)")
     plt.ylabel("Transit (A)")
@@ -65,14 +65,14 @@ if __name__ == "__main__":
     plt.figure()
     for i, key in enumerate(slv):
         elm = slv[key]
-        elm.dc["transit"] = transit[:, 1]
-        elm.dc["Ta"] = elm.dc["Ta"][1]
+        elm.dc["current_a"] = current_a[:, 1]
+        elm.dc["ambient_temperature_c"] = elm.dc["ambient_temperature_c"][1]
         df = elm.steady_temperature()
-        elm.dc["transit"] = np.nan
-        elm.dc["Ta"] = dct["Ta"]
+        elm.dc["current_a"] = np.nan
+        elm.dc["ambient_temperature_c"] = dct["ambient_temperature_c"]
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
-        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)
+        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), current_a=current_a)
         for j in range(3):
             plt.plot(t, T2["T_surf"][:, j], "-", c=cl, label="%s - transient" % (key,))
         # plt.plot(t, T1, '--', c=cl, label='%s - steady' % (key,))

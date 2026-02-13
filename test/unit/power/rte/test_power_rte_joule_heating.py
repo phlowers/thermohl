@@ -12,32 +12,32 @@ from thermohl.power.rte import JouleHeating
 
 joule_heating_instances = [
     JouleHeating(
-        transit=np.array([10.0]),
-        D=np.array([0.01]),
-        d=np.array([0.005]),
-        A=np.array([0.0001]),
-        a=np.array([0.00005]),
-        km=np.array([1.0]),
-        ki=np.array([0.1]),
-        kl=np.array([0.004]),
-        kq=np.array([0.0001]),
-        RDC20=np.array([0.02]),
-        T20=20.0,
-        f=50.0,
+        current_a=np.array([10.0]),
+        outer_diameter_m=np.array([0.01]),
+        core_diameter_m=np.array([0.005]),
+        outer_area_m2=np.array([0.0001]),
+        core_area_m2=np.array([0.00005]),
+        magnetic_coeff=np.array([1.0]),
+        magnetic_coeff_per_a=np.array([0.1]),
+        temperature_coeff_linear=np.array([0.004]),
+        temperature_coeff_quadratic=np.array([0.0001]),
+        linear_resistance_dc_20c_ohm_m=np.array([0.02]),
+        reference_temperature_c=20.0,
+        frequency_hz=50.0,
     ),
     JouleHeating(
-        transit=10.0,
-        D=0.01,
-        d=0.005,
-        A=0.0001,
-        a=0.00005,
-        km=1.0,
-        ki=0.1,
-        kl=0.004,
-        kq=0.0001,
-        RDC20=0.02,
-        T20=20.0,
-        f=50.0,
+        current_a=10.0,
+        outer_diameter_m=0.01,
+        core_diameter_m=0.005,
+        outer_area_m2=0.0001,
+        core_area_m2=0.00005,
+        magnetic_coeff=1.0,
+        magnetic_coeff_per_a=0.1,
+        temperature_coeff_linear=0.004,
+        temperature_coeff_quadratic=0.0001,
+        linear_resistance_dc_20c_ohm_m=0.02,
+        reference_temperature_c=20.0,
+        frequency_hz=50.0,
     ),
 ]
 
@@ -78,13 +78,15 @@ def test_ks(joule_heating):
     ids=["JouleHeating with arrays", "JouleHeating with scalars"],
 )
 def test_kem(joule_heating):
-    A = np.array([0.0001])
-    a = np.array([0.00005])
-    km = np.array([1.0])
-    ki = np.array([0.1])
+    outer_area_m2 = np.array([0.0001])
+    core_area_m2 = np.array([0.00005])
+    magnetic_coeff = np.array([1.0])
+    magnetic_coeff_per_a = np.array([0.1])
     expected_kem = 1.02
 
-    result = joule_heating._kem(A, a, km, ki)
+    result = joule_heating._kem(
+        outer_area_m2, core_area_m2, magnetic_coeff, magnetic_coeff_per_a
+    )
 
     np.testing.assert_allclose(result, expected_kem, rtol=1e-5)
 

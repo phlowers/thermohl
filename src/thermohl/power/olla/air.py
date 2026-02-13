@@ -20,7 +20,9 @@ class Air:
     """`Wikipedia <https://fr.wikipedia.org/wiki/Air> models."""
 
     @staticmethod
-    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
+    def volumic_mass(
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""
         Compute air volumic mass.
 
@@ -28,14 +30,14 @@ class Air:
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (in Celsius).
-            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
         Tk = kelvin(Tc)
-        return 1.292 * _zerok * np.exp(-3.42e-02 * alt / Tk) / Tk
+        return 1.292 * _zerok * np.exp(-3.42e-02 * altitude / Tk) / Tk
 
     @staticmethod
     def dynamic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
@@ -53,19 +55,19 @@ class Air:
 
     @staticmethod
     def kinematic_viscosity(
-        Tc: floatArrayLike, alt: floatArrayLike = 0.0
+        Tc: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
         Args:
             Tc (float | numpy.ndarray): Air temperature (in Celsius)
-            alt (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
+            altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Kinematic viscosity in m²·s⁻¹.
 
         """
-        return Air.dynamic_viscosity(Tc) / Air.volumic_mass(Tc, alt=alt)
+        return Air.dynamic_viscosity(Tc) / Air.volumic_mass(Tc, altitude=altitude)
 
     @staticmethod
     def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:
