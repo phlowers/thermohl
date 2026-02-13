@@ -10,6 +10,7 @@ import pandas as pd
 
 from thermohl.power import rte
 from thermohl.solver import Args
+from thermohl.solver.enums.variable_type import VariableType
 
 
 class ExcelSheet:
@@ -21,7 +22,7 @@ class ExcelSheet:
 
     def joule_heating(self, Ta, transit=None):
         if transit is None:
-            transit = self.args["transit"]
+            transit = self.args[VariableType.TRANSIT.value]
         d = self.args["d"]
         D = self.args["D"]
         Rdc = self.args["RDC20"] * (
@@ -39,7 +40,7 @@ class ExcelSheet:
             1.0,
         )
         Rac = Rdc * kep * kem
-        return Rac * self.args["transit"] ** 2
+        return Rac * self.args[VariableType.TRANSIT.value] ** 2
 
     def solar_heating(self):
         csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])

@@ -8,15 +8,28 @@
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver import HeatEquationType
+from thermohl.solver.enums.solver_type import SolverType
+from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.enums.temperature_location import TemperatureLocation
+from thermohl.solver.enums.cable_location import CableLocation
 
 _nprs = 123456
 
 
 def _solvers(dic=None):
     return [
-        solver._factory(dic=dic, heateq=he, model=m)
-        for he in ["3t", "3tl"]
-        for m in ["rte", "cigre", "ieee", "olla"]
+        solver._factory(dic=dic, heat_equation=heat_equation, model=m)
+        for heat_equation in [
+            HeatEquationType.WITH_THREE_TEMPERATURES,
+            HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+        ]
+        for m in [
+            SolverType.SOLVER_RTE,
+            SolverType.SOLVER_CIGRE,
+            SolverType.SOLVER_IEEE,
+            SolverType.SOLVER_OLLA,
+        ]
     ]
 
 
@@ -42,22 +55,34 @@ def test_balance():
 
     for s in _solvers(dic):
         # compute guess with 1t solver
-        s1 = solver._factory(dic=dic, heateq="1t", model="ieee")
+        s1 = solver._factory(
+            dic=dic,
+            heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
+            model=SolverType.SOLVER_IEEE,
+        )
         t1 = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
         )
-        t1 = t1["t"].values
+        t1 = t1[VariableType.TEMPERATURE].values
         # 3t solve
         df = s.steady_temperature(
             Tsg=t1, Tcg=t1, return_err=True, return_power=True, tol=tol, maxiter=64
         )
         # checks
-        assert np.all(df["err"] < tol)
+        assert np.all(df[VariableType.ERROR] < tol)
         assert np.allclose(
-            s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.balance(
+                ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]
+            ).values,
+            0.0,
+            atol=tol,
         )
         assert np.allclose(
-            s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+            s.morgan(
+                ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]
+            ).values,
+            0.0,
+            atol=tol,
         )
 
 
@@ -79,34 +104,48 @@ def test_consistency():
     )
 
     for s in _solvers(dic):
-        for t in ["surf", "avg", "core"]:
+        d = {
+            CableLocation.SURFACE: TemperatureLocation.SURFACE,
+            CableLocation.AVERAGE: TemperatureLocation.AVERAGE,
+            CableLocation.CORE: TemperatureLocation.CORE,
+        }
+
+        for location, temperature_at_location in d.items():
             # solve intensity with different targets
             df = s.steady_intensity(
                 T=100.0,
-                target=t,
+                target=location,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
                 maxiter=64,
             )
-            assert np.all(df["err"] < tol)
+            assert np.all(df[VariableType.ERROR] < tol)
             # set args intensity to newly founds ampacities
-            s.args.transit = df["transit"].values
+            s.args.I = df[VariableType.TRANSIT].values
             s.update()
             assert np.allclose(
-                s.balance(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.balance(
+                    ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]
+                ).values,
+                0.0,
+                atol=tol,
             )
             assert np.allclose(
-                s.morgan(ts=df["t_surf"], tc=df["t_core"]).values, 0.0, atol=tol
+                s.morgan(
+                    ts=df[TemperatureLocation.SURFACE], tc=df[TemperatureLocation.CORE]
+                ).values,
+                0.0,
+                atol=tol,
             )
             # 3t solve
             dg = s.steady_temperature(
-                Tsg=df["t_surf"].round(1).values,
-                Tcg=df["t_core"].round(1).values,
+                Tsg=df[TemperatureLocation.SURFACE].round(1).values,
+                Tcg=df[TemperatureLocation.CORE].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
                 maxiter=64,
             )
             # check consistency
-            assert np.allclose(dg["t_" + t].values, 100.0)
+            assert np.allclose(dg[temperature_at_location].values, 100.0)

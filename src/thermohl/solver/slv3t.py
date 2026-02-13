@@ -10,9 +10,13 @@ from typing import Tuple, Type, Optional, Dict, Any, Callable
 import numpy as np
 import pandas as pd
 
-from thermohl import floatArrayLike, floatArray, strListLike, intArray
+from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
 from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
+from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
+from thermohl.solver.enums.power_type import PowerType
+from thermohl.solver.enums.temperature_location import TemperatureLocation
+from thermohl.solver.enums.variable_type import VariableType
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
@@ -230,18 +234,22 @@ class Solver3T(Solver_):
         # format output
         z = self.average(x, y)
         df = pd.DataFrame(
-            {Solver_.Names.tsurf: x, Solver_.Names.tavg: z, Solver_.Names.tcore: y}
+            {
+                TemperatureLocation.SURFACE: x,
+                TemperatureLocation.AVERAGE: z,
+                TemperatureLocation.CORE: y,
+            }
         )
 
         if return_err:
-            df[Solver_.Names.err] = err
+            df[VariableType.ERROR] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.joule(x, y)
-            df[Solver_.Names.psol] = self.sh.value(x)
-            df[Solver_.Names.pcnv] = self.cc.value(x)
-            df[Solver_.Names.prad] = self.rc.value(x)
-            df[Solver_.Names.ppre] = self.pc.value(x)
+            df[PowerType.JOULE] = self.joule(x, y)
+            df[PowerType.SOLAR] = self.sh.value(x)
+            df[PowerType.CONVECTION] = self.cc.value(x)
+            df[PowerType.RADIATION] = self.rc.value(x)
+            df[PowerType.RAIN] = self.pc.value(x)
 
         return df
 
@@ -256,26 +264,26 @@ class Solver3T(Solver_):
 
     def _transient_temperature_results(self, time, ts, ta, tc, return_power, n):
         dr = {
-            Solver_.Names.time: time,
-            Solver_.Names.tsurf: ts,
-            Solver_.Names.tavg: ta,
-            Solver_.Names.tcore: tc,
+            VariableType.TIME: time,
+            TemperatureLocation.SURFACE: ts,
+            TemperatureLocation.AVERAGE: ta,
+            TemperatureLocation.CORE: tc,
         }
 
         if return_power:
-            for power in Solver_.Names.powers():
+            for power in Solver_.powers():
                 dr[power] = np.zeros_like(ts)
 
             for i in range(len(time)):
-                dr[Solver_.Names.pjle][i, :] = self.joule(ts[i, :], tc[i, :])
-                dr[Solver_.Names.psol][i, :] = self.sh.value(ts[i, :])
-                dr[Solver_.Names.pcnv][i, :] = self.cc.value(ts[i, :])
-                dr[Solver_.Names.prad][i, :] = self.rc.value(ts[i, :])
-                dr[Solver_.Names.ppre][i, :] = self.pc.value(ts[i, :])
+                dr[PowerType.JOULE][i, :] = self.joule(ts[i, :], tc[i, :])
+                dr[PowerType.SOLAR][i, :] = self.sh.value(ts[i, :])
+                dr[PowerType.CONVECTION][i, :] = self.cc.value(ts[i, :])
+                dr[PowerType.RADIATION][i, :] = self.rc.value(ts[i, :])
+                dr[PowerType.RAIN][i, :] = self.pc.value(ts[i, :])
 
         if n == 1:
             keys = list(dr.keys())
-            keys.remove(Solver_.Names.time)
+            keys.remove(VariableType.TIME)
             for k in keys:
                 dr[k] = dr[k][:, 0]
 
@@ -359,15 +367,15 @@ class Solver3T(Solver_):
         return self._transient_temperature_results(time, ts, ta, tc, return_power, n)
 
     @staticmethod
-    def _check_target(target, d, max_len):
+    def _check_target(target: CableLocationListLike, d, max_len):
         """
         Validates and processes the target temperature input.
 
         Args:
-            target (str | list[str]): The target temperature(s) to be validated. It can be:
-                - "auto": which sets the target automatically.
-                - A string: must be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
-                - A list of strings: each string must be one of Solver_.Names.surf, Solver_.Names.avg, or Solver_.Names.core.
+            target (CableLocation | list[CableLocation]): The target temperature(s) to be validated. It can be:
+                - None: which sets the target automatically.
+                - A CableLocation: must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
+                - A list of CableLocation: each element of the list must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
             max_len (int): The expected length of the target list if target is a list.
 
         Returns:
@@ -377,42 +385,31 @@ class Solver3T(Solver_):
             ValueError: If the target is invalid or its length doesn't match max_len.
         """
         # check target
-        if target == "auto":
+        if target is None:
             d_ = d * np.ones(max_len)
             target_ = np.array(
                 [
-                    Solver_.Names.core if d_[i] > 0.0 else Solver_.Names.avg
+                    CableLocation.CORE if d_[i] > 0.0 else CableLocation.AVERAGE
                     for i in range(max_len)
                 ]
             )
-        elif isinstance(target, str):
-            if target not in [
-                Solver_.Names.surf,
-                Solver_.Names.avg,
-                Solver_.Names.core,
-            ]:
-                raise ValueError(
-                    f"Target temperature should be in "
-                    f"{[Solver_.Names.surf, Solver_.Names.avg, Solver_.Names.core]};"
-                    f" got {target} instead."
-                )
-            else:
-                target_ = np.array([target for _ in range(max_len)])
+        elif isinstance(target, CableLocation):
+            target_ = np.array([target for _ in range(max_len)])
         else:
             if len(target) != max_len:
                 raise ValueError()
             for t in target:
                 if t not in [
-                    Solver_.Names.surf,
-                    Solver_.Names.avg,
-                    Solver_.Names.core,
+                    CableLocation.SURFACE,
+                    CableLocation.AVERAGE,
+                    CableLocation.CORE,
                 ]:
                     raise ValueError()
             target_ = np.array(target)
         return target_
 
     def _steady_intensity_header(
-        self, T: floatArrayLike, target: strListLike
+        self, T: floatArrayLike, target: CableLocationListLike
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
@@ -424,9 +421,9 @@ class Solver3T(Solver_):
         c, D, d, ix = self.mgc
         a, b = _profile_bim_avg_coeffs(0.5 * d, 0.5 * D)
 
-        js = np.nonzero(target_ == Solver_.Names.surf)[0]
-        ja = np.nonzero(target_ == Solver_.Names.avg)[0]
-        jc = np.nonzero(target_ == Solver_.Names.core)[0]
+        js = np.nonzero(target_ == CableLocation.SURFACE)[0]
+        ja = np.nonzero(target_ == CableLocation.AVERAGE)[0]
+        jc = np.nonzero(target_ == CableLocation.CORE)[0]
         jx = np.intersect1d(ix, ja)
 
         # get correct input for quasi-newton solver
@@ -453,7 +450,7 @@ class Solver3T(Solver_):
     def steady_intensity(
         self,
         T: floatArrayLike = np.array([]),
-        target: strListLike = "auto",
+        target: CableLocationListLike = None,
         tol: float = DP.tol,
         maxiter: int = DP.maxiter,
         return_err: bool = False,
@@ -465,7 +462,7 @@ class Solver3T(Solver_):
 
         Args:
             T (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
-            target (str | list[str]): Target specification for the solver. Default is "auto".
+            target (CableLocation | list[CableLocation]): Target specification for the solver. Default is None.
             tol (float): Tolerance for the solver. Default is DP.tol.
             maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.
             return_err (bool): If True, return the error in the output DataFrame. Default is False.
@@ -499,7 +496,7 @@ class Solver3T(Solver_):
         x, y, cnt, err = quasi_newton_2d(
             balance,
             morgan,
-            r[Solver_.Names.transit].values,
+            r[VariableType.TRANSIT].values,
             Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
@@ -510,25 +507,25 @@ class Solver3T(Solver_):
             print(f"rstat_analytic max err is {np.max(err):.3E} in {cnt:d} iterations")
 
         # format output
-        df = pd.DataFrame({Solver_.Names.transit: x})
+        df = pd.DataFrame({VariableType.TRANSIT: x})
 
         if return_err:
-            df["err"] = err
+            df[VariableType.ERROR] = err
 
         if return_temp or return_power:
             ts, tc = newtheader(x, y)
             ta = self.average(ts, tc)
 
             if return_temp:
-                df[Solver_.Names.tsurf] = ts
-                df[Solver_.Names.tavg] = ta
-                df[Solver_.Names.tcore] = tc
+                df[TemperatureLocation.SURFACE] = ts
+                df[TemperatureLocation.AVERAGE] = ta
+                df[TemperatureLocation.CORE] = tc
 
             if return_power:
-                df[Solver_.Names.pjle] = self.jh.value(ta)
-                df[Solver_.Names.psol] = self.sh.value(ts)
-                df[Solver_.Names.pcnv] = self.cc.value(ts)
-                df[Solver_.Names.prad] = self.rc.value(ts)
-                df[Solver_.Names.ppre] = self.pc.value(ts)
+                df[PowerType.JOULE] = self.jh.value(ta)
+                df[PowerType.SOLAR] = self.sh.value(ts)
+                df[PowerType.CONVECTION] = self.cc.value(ts)
+                df[PowerType.RADIATION] = self.rc.value(ts)
+                df[PowerType.RAIN] = self.pc.value(ts)
 
         return df

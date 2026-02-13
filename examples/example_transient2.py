@@ -11,6 +11,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver.enums.solver_type import SolverType
+from thermohl.solver.enums.variable_type import VariableType
 
 if __name__ == "__main__":
     import matplotlib
@@ -54,7 +56,12 @@ if __name__ == "__main__":
     plt.show()
 
     # dict with all 4 solvers
-    kys = ["cigre", "ieee", "rte", "rtem"]
+    kys = [
+        SolverType.SOLVER_CIGRE,
+        SolverType.SOLVER_IEEE,
+        SolverType.SOLVER_RTE,
+        SolverType.SOLVER_OLLA,
+    ]
     slv = dict(
         cigre=solver.cigre(dct),
         ieee=solver.ieee(dct),
@@ -65,10 +72,10 @@ if __name__ == "__main__":
     plt.figure()
     for i, key in enumerate(slv):
         elm = slv[key]
-        elm.dc["transit"] = transit[:, 1]
+        elm.dc[VariableType.TRANSIT] = transit[:, 1]
         elm.dc["Ta"] = elm.dc["Ta"][1]
         df = elm.steady_temperature()
-        elm.dc["transit"] = np.nan
+        elm.dc[VariableType.TRANSIT] = np.nan
         elm.dc["Ta"] = dct["Ta"]
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values

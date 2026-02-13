@@ -23,6 +23,7 @@ from thermohl import (
     numberArrayLike,
 )
 from thermohl.power import PowerTerm
+from thermohl.solver.enums.power_type import PowerType
 
 
 class _DEFPARAM:
@@ -189,33 +190,6 @@ class Solver(ABC):
     __init__ function.
     """
 
-    class Names:
-        pjle = "P_joule"
-        psol = "P_solar"
-        pcnv = "P_convection"
-        prad = "P_radiation"
-        ppre = "P_precipitation"
-        err = "err"
-        surf = "surf"
-        avg = "avg"
-        core = "core"
-        time = "time"
-        transit = "transit"
-        temp = "t"
-        tsurf = "t_surf"
-        tavg = "t_avg"
-        tcore = "t_core"
-
-        @staticmethod
-        def powers() -> tuple[str, str, str, str, str]:
-            return (
-                Solver.Names.pjle,
-                Solver.Names.psol,
-                Solver.Names.pcnv,
-                Solver.Names.prad,
-                Solver.Names.ppre,
-            )
-
     def __init__(
         self,
         dic: Optional[dict[str, Any]] = None,
@@ -264,6 +238,16 @@ class Solver(ABC):
             - self.cc.value(T)
             - self.rc.value(T)
             - self.pc.value(T)
+        )
+
+    @staticmethod
+    def powers() -> tuple[PowerType, PowerType, PowerType, PowerType, PowerType]:
+        return (
+            PowerType.JOULE,
+            PowerType.SOLAR,
+            PowerType.CONVECTION,
+            PowerType.RADIATION,
+            PowerType.RAIN,
         )
 
     @abstractmethod
