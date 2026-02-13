@@ -46,7 +46,7 @@ units, default values and in which set of power terms they are used.
 | heat_capacity_jkgk         | 500           | J.kg⁻¹.K⁻¹ | yes           | yes          | yes          | yes         | specific heat capacity (only used in transient mode)         |
 | solar_absorptivity     | 0.5           | N/A        | yes           | yes          | yes          | yes         | solar absorption                                             |
 | emissivity   | 0.5           | N/A        | yes           | yes          | yes          | yes         | emissivity                                                   |
-| dc_resistance_20c_ohm_m     | 2.5E-05       | Ohm.m⁻¹    | yes           | no           | yes          | yes         | electric resistance per unit length (DC) at 20°C             |
+| linear_resistance_dc_20c_ohm_m     | 2.5E-05       | Ohm.m⁻¹    | yes           | no           | yes          | yes         | electric resistance per unit length (DC) at 20°C             |
 | magnetic_coeff        | 1.006         | N/A        | yes           | no           | yes          | yes         | coefficient for magnetic effects                             |
 | magnetic_coeff_per_a        | 0.016         | A⁻¹        | no            | no           | yes          | yes         | coefficient for magnetic effects                             |
 | temperature_coeff_linear        | 3.8E-03       | K⁻¹        | yes           | no           | yes          | yes         | linear resistance augmentation with temperature              |

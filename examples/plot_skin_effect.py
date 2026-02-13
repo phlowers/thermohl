@@ -48,7 +48,7 @@ def plot_skin_effect():
             [
                 ("outer_diameter_m", outer_diameter_m),
                 ("core_diameter_m", core_diameter_m),
-                ("dc_resistance_20c_ohm_m", R),
+                ("linear_resistance_dc_20c_ohm_m", R),
                 ("frequency_hz", 50.0),
             ]
         )
