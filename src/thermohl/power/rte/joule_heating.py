@@ -27,7 +27,7 @@ class JouleHeating(PowerTerm):
         magnetic_coeff_per_a: floatArrayLike,
         temperature_coeff_linear: floatArrayLike,
         temperature_coeff_quadratic: floatArrayLike,
-        dc_resistance_20c_ohm_m: floatArrayLike,
+        linear_resistance_dc_20c_ohm_m: floatArrayLike,
         reference_temperature_c: floatArrayLike = 20.0,
         frequency_hz: floatArrayLike = 50.0,
         **kwargs: Any,
@@ -46,7 +46,7 @@ class JouleHeating(PowerTerm):
             magnetic_coeff_per_a (float | numpy.ndarray): Coefficient for magnetic effects (A⁻¹).
             temperature_coeff_linear (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             temperature_coeff_quadratic (float | numpy.ndarray): Quadratic resistance augmentation with temperature (K⁻²).
-            dc_resistance_20c_ohm_m (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
+            linear_resistance_dc_20c_ohm_m (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             reference_temperature_c (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
             frequency_hz (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
@@ -59,7 +59,7 @@ class JouleHeating(PowerTerm):
         )
         self.temp_coeff_linear = temperature_coeff_linear
         self.temp_coeff_quadratic = temperature_coeff_quadratic
-        self.dc_resistance_20c = dc_resistance_20c_ohm_m
+        self.dc_resistance_20c = linear_resistance_dc_20c_ohm_m
         self.reference_temperature_c = reference_temperature_c
         self.frequency_hz = frequency_hz
 

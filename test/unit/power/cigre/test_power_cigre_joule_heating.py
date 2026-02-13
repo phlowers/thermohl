@@ -15,14 +15,14 @@ joule_heating_instances = [
         current_a=np.array([100.0, 150.0, 200.0]),
         magnetic_coeff=np.array([1.0, 1.0, 1.0]),
         temperature_coeff_linear=np.array([0.004, 0.004, 0.004]),
-        dc_resistance_20c_ohm_m=np.array([0.1, 0.1, 0.1]),
+        linear_resistance_dc_20c_ohm_m=np.array([0.1, 0.1, 0.1]),
         reference_temperature_c=np.array([20.0, 18.0, 22.0]),
     ),
     JouleHeating(
         current_a=100.0,
         magnetic_coeff=1.0,
         temperature_coeff_linear=0.004,
-        dc_resistance_20c_ohm_m=0.1,
+        linear_resistance_dc_20c_ohm_m=0.1,
         reference_temperature_c=20.0,
     ),
 ]
@@ -84,7 +84,7 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
     current_a = np.array([100.0, 150.0])
     magnetic_coeff = np.array([1.0, 1.0, 1.0])
     temperature_coeff_linear = np.array([0.004, 0.004])
-    dc_resistance_20c_ohm_m = np.array([0.1, 0.1])
+    linear_resistance_dc_20c_ohm_m = np.array([0.1, 0.1])
     reference_temperature_c = np.array([20.0, 20.0])
     T = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
@@ -92,7 +92,7 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
             current_a,
             magnetic_coeff,
             temperature_coeff_linear,
-            dc_resistance_20c_ohm_m,
+            linear_resistance_dc_20c_ohm_m,
             reference_temperature_c,
         )
         joule_heating.value(T)
@@ -146,7 +146,7 @@ def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
     current_a = np.array([100.0, 150.0])
     magnetic_coeff = np.array([1.0, 1.0, 1.0])
     temperature_coeff_linear = np.array([0.004, 0.004])
-    dc_resistance_20c_ohm_m = np.array([0.1, 0.1])
+    linear_resistance_dc_20c_ohm_m = np.array([0.1, 0.1])
     reference_temperature_c = np.array([20.0, 20.0])
     conductor_temperature = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
@@ -154,7 +154,7 @@ def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
             current_a,
             magnetic_coeff,
             temperature_coeff_linear,
-            dc_resistance_20c_ohm_m,
+            linear_resistance_dc_20c_ohm_m,
             reference_temperature_c,
         )
         joule_heating.derivative(conductor_temperature)

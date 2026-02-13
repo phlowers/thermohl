@@ -39,7 +39,7 @@ class Args:
 
     # __slots__ = [
     #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'relative_humidity', 'precipitation_rate_ms', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'current_a', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'radial_thermal_conductivity_wmk', 'heat_capacity_jkgk', 'solar_absorptivity', 'emissivity', 'dc_resistance_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
+    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'radial_thermal_conductivity_wmk', 'heat_capacity_jkgk', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
     #     'temp_high_c', 'temp_low_c'
     # ]
 
@@ -93,7 +93,7 @@ class Args:
         self.solar_absorptivity = 0.5  # solar absorption (1)
         self.emissivity = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        self.dc_resistance_20c_ohm_m = 2.5e-05
+        self.linear_resistance_dc_20c_ohm_m = 2.5e-05
 
         self.magnetic_coeff = 1.006  # coefficient for magnetic effects (1)
         self.magnetic_coeff_per_a = 0.016  # coefficient for magnetic effects (A**-1)

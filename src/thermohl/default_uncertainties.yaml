@@ -148,7 +148,7 @@ emissivity:
   dist: null
   min: 0.13
   max: 0.83
-dc_resistance_20c_ohm_m:
+linear_resistance_dc_20c_ohm_m:
   dist: 'truncnorm'
   min: 1.0E-05
   max: 1.0E-03
