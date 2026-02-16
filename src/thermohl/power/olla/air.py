@@ -36,8 +36,13 @@ class Air:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
-        Tk = kelvin(air_temperature_c)
-        return 1.292 * _zerok * np.exp(-3.42e-02 * altitude / Tk) / Tk
+        air_temperature_k = kelvin(air_temperature_c)
+        return (
+            1.292
+            * _zerok
+            * np.exp(-3.42e-02 * altitude / air_temperature_k)
+            / air_temperature_k
+        )
 
     @staticmethod
     def dynamic_viscosity(air_temperature_c: floatArrayLike) -> floatArrayLike:
@@ -50,8 +55,13 @@ class Air:
             float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
-        Tk = kelvin(air_temperature_c)
-        return 8.8848e-15 * Tk**3 - 3.2398e-11 * Tk**2 + 6.2657e-08 * Tk + 2.3543e-06
+        air_temperature_k = kelvin(air_temperature_c)
+        return (
+            8.8848e-15 * air_temperature_k**3
+            - 3.2398e-11 * air_temperature_k**2
+            + 6.2657e-08 * air_temperature_k
+            + 2.3543e-06
+        )
 
     @staticmethod
     def kinematic_viscosity(
@@ -84,5 +94,10 @@ class Air:
             float | numpy.ndarray: Thermal conductivity in W·m⁻¹·K⁻¹.
 
         """
-        Tk = kelvin(air_temperature_c)
-        return 1.5207e-11 * Tk**3 - 4.8570e-08 * Tk**2 + 1.0184e-04 * Tk - 3.9333e-04
+        air_temperature_k = kelvin(air_temperature_c)
+        return (
+            1.5207e-11 * air_temperature_k**3
+            - 4.8570e-08 * air_temperature_k**2
+            + 1.0184e-04 * air_temperature_k
+            - 3.9333e-04
+        )
