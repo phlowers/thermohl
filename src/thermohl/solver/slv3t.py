@@ -569,7 +569,7 @@ class Solver3T(Solver_):
 
     def steady_intensity(
         self,
-        T: floatArrayLike = np.array([]),
+        max_conductor_temperature_c: floatArrayLike = np.array([]),
         target: strListLike = "auto",
         tol: float = DP.tol,
         maxiter: int = DP.maxiter,
@@ -581,7 +581,7 @@ class Solver3T(Solver_):
         Compute the steady-state intensity for a given temperature profile.
 
         Args:
-            T (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
+            max_conductor_temperature_c (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
             target (str | list[str]): Target specification for the solver. Default is "auto".
             tol (float): Tolerance for the solver. Default is DP.tol.
             maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.
@@ -593,7 +593,9 @@ class Solver3T(Solver_):
             pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
 
-        Tmax, newtheader = self._steady_intensity_header(T, target)
+        Tmax, newtheader = self._steady_intensity_header(
+            max_conductor_temperature_c, target
+        )
 
         def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
             surface_temperature_c, core_temperature_c = newtheader(i, tg)

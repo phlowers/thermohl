@@ -76,7 +76,11 @@ def test_consistency():
 
     for s in _solvers(dic):
         df = s.steady_intensity(
-            T=100.0, return_err=True, return_power=True, tol=1.0e-09, maxiter=64
+            max_conductor_temperature_c=100.0,
+            return_err=True,
+            return_power=True,
+            tol=1.0e-09,
+            maxiter=64,
         )
         bl = (
             df["P_joule"]

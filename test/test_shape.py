@@ -21,9 +21,12 @@ def _solvers():
 
 def _ampargs(s: solver.Solver, t: pd.DataFrame):
     if isinstance(s, solver.Solver1T):
-        a = dict(T=t[solver.Solver.Names.temp].values)
+        a = dict(max_conductor_temperature_c=t[solver.Solver.Names.temp].values)
     elif isinstance(s, solver.Solver3T):
-        a = dict(T=t[solver.Solver.Names.tsurf].values, target=solver.Solver.Names.surf)
+        a = dict(
+            max_conductor_temperature_c=t[solver.Solver.Names.tsurf].values,
+            target=solver.Solver.Names.surf,
+        )
     else:
         raise NotImplementedError
     return a

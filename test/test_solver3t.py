@@ -97,7 +97,7 @@ def test_consistency():
         for t in ["surf", "avg", "core"]:
             # solve intensity with different targets
             df = s.steady_intensity(
-                T=100.0,
+                max_conductor_temperature_c=100.0,
                 target=t,
                 return_err=True,
                 return_power=True,

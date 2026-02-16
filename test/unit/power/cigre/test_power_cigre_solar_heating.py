@@ -109,9 +109,9 @@ solar_heating_instances = [
     ],
 )
 def test_solar_heating_value_scalar(solar_heating, expected):
-    T = 25.0
+    conductor_temperature_c = 25.0
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -125,7 +125,7 @@ def test_solar_heating_value_array():
     hour = np.array([12.0, 12.0, 12.0])
     outer_diameter_m = np.array([0.01, 0.01, 0.01])
     solar_absorptivity = np.array([0.9, 0.9, 0.9])
-    T = np.array([25.0, 30.0, 35.0])
+    conductor_temperature_c = np.array([25.0, 30.0, 35.0])
     solar_heating = SolarHeating(
         latitude_deg,
         azimuth,
@@ -138,7 +138,7 @@ def test_solar_heating_value_array():
     )
     expected = np.array([12.3978, 11.8759, 11.2545])
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -152,7 +152,7 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
     hour = np.array([12.0, 12.0])
     outer_diameter_m = np.array([0.01, 0.01])
     solar_absorptivity = np.array([0.9, 0.9])
-    T = np.array([25.0, 30.0])
+    conductor_temperature_c = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
         solar_heating = SolarHeating(
             latitude_deg,
@@ -164,7 +164,7 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
             outer_diameter_m,
             solar_absorptivity,
         )
-        solar_heating.value(T)
+        solar_heating.value(conductor_temperature_c)
 
 
 @pytest.mark.parametrize(

@@ -169,14 +169,14 @@ solar_heating_instances = [
     ],
 )
 def test_solar_heating_value_scalar(solar_heating):
-    T = 50.0
+    conductor_temperature_c = 50.0
     expected = (
         solar_heating.solar_absorptivity
         * solar_heating.solar_irradiance
         * solar_heating.outer_diameter_m
     )
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -190,14 +190,14 @@ def test_solar_heating_value_scalar(solar_heating):
     ],
 )
 def test_solar_heating_value_array(solar_heating):
-    T = np.array([50.0, 60.0])
+    conductor_temperature_c = np.array([50.0, 60.0])
     expected = (
         solar_heating.solar_absorptivity
         * solar_heating.solar_irradiance
         * solar_heating.outer_diameter_m
     )
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 

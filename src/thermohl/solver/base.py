@@ -263,13 +263,13 @@ class Solver(ABC):
         self.precipitation_cooling.__init__(**self.args.__dict__)
         self.args.compress()
 
-    def balance(self, T: floatArrayLike) -> floatArrayLike:
+    def balance(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
         return (
-            self.joule_heating.value(T)
-            + self.solar_heating.value(T)
-            - self.convective_cooling.value(T)
-            - self.radiative_cooling.value(T)
-            - self.precipitation_cooling.value(T)
+            self.joule_heating.value(conductor_temperature_c)
+            + self.solar_heating.value(conductor_temperature_c)
+            - self.convective_cooling.value(conductor_temperature_c)
+            - self.radiative_cooling.value(conductor_temperature_c)
+            - self.precipitation_cooling.value(conductor_temperature_c)
         )
 
     @abstractmethod

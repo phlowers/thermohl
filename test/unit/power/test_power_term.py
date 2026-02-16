@@ -13,19 +13,19 @@ from thermohl.power import PowerTerm
 # Tests for PowerTerm
 def test_power_term_value_with_scalar():
     power_term = PowerTerm()
-    T = 25.0
+    conductor_temperature_c = 25.0
 
-    result = power_term.value(T)
+    result = power_term.value(conductor_temperature_c)
 
     assert result == 0.0
 
 
 def test_power_term_value_with_array():
     power_term = PowerTerm()
-    T = np.array([25.0, 30.0, 35.0])
+    conductor_temperature_c = np.array([25.0, 30.0, 35.0])
     expected = np.array([0.0, 0.0, 0.0])
 
-    result = power_term.value(T)
+    result = power_term.value(conductor_temperature_c)
 
     np.testing.assert_array_equal(result, expected)
 

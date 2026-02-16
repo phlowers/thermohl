@@ -245,12 +245,14 @@ def scenarios():
 def test_compare_power():
     """Compare computed values to hard-coded ones from ieee guide [find ref]."""
 
-    T = np.linspace(-50, +250, 999)
+    conductor_temperature_c = np.linspace(-50, +250, 999)
 
     ds = scenarios()
     n = len(ds)
-    ds = pd.concat(len(T) * (ds,)).reset_index(drop=True)
-    T = np.concatenate([n * (t,) for t in T])
+    ds = pd.concat(len(conductor_temperature_c) * (ds,)).reset_index(drop=True)
+    conductor_temperature_c = np.concatenate(
+        [n * (t,) for t in conductor_temperature_c]
+    )
 
     from thermohl.utils import df2dct
 
@@ -269,10 +271,18 @@ def test_compare_power():
     precipitation_rate_ms = rte.RadiativeCooling(**d1)
     ex = ExcelSheet(d2)
 
-    assert np.allclose(ex.joule_heating(T), pj.value(T))
+    assert np.allclose(
+        ex.joule_heating(conductor_temperature_c), pj.value(conductor_temperature_c)
+    )
     assert np.allclose(ex.solar_heating(), ps.value(0.0))
-    assert np.allclose(ex.convective_cooling(T), precipitation_cooling.value(T))
-    assert np.allclose(ex.radiative_cooling(T), precipitation_rate_ms.value(T))
+    assert np.allclose(
+        ex.convective_cooling(conductor_temperature_c),
+        precipitation_cooling.value(conductor_temperature_c),
+    )
+    assert np.allclose(
+        ex.radiative_cooling(conductor_temperature_c),
+        precipitation_rate_ms.value(conductor_temperature_c),
+    )
 
 
 def test_solar_heating():

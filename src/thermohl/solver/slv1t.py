@@ -45,22 +45,28 @@ class Solver1T(Solver_):
         """
 
         # solve with bisection
-        T, err = bisect_v(
+        conductor_temperature_c, err = bisect_v(
             lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
         )
 
         # format output
-        df = pd.DataFrame(data=T, columns=[Solver_.Names.temp])
+        df = pd.DataFrame(data=conductor_temperature_c, columns=[Solver_.Names.temp])
 
         if return_err:
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.joule_heating.value(T)
-            df[Solver_.Names.psol] = self.solar_heating.value(T)
-            df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
-            df[Solver_.Names.prad] = self.radiative_cooling.value(T)
-            df[Solver_.Names.ppre] = self.precipitation_cooling.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(conductor_temperature_c)
+            df[Solver_.Names.psol] = self.solar_heating.value(conductor_temperature_c)
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(
+                conductor_temperature_c
+            )
+            df[Solver_.Names.prad] = self.radiative_cooling.value(
+                conductor_temperature_c
+            )
+            df[Solver_.Names.ppre] = self.precipitation_cooling.value(
+                conductor_temperature_c
+            )
 
         return df
 
@@ -128,37 +134,46 @@ class Solver1T(Solver_):
         imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
 
         # init
-        T = np.zeros((time_size, args_size))
-        T[0, :] = T0
+        conductor_temperature_c = np.zeros((time_size, args_size))
+        conductor_temperature_c[0, :] = T0
 
         # main time loop
         for i in range(1, len(time)):
             for k, v in de.items():
                 self.args[k] = v[i, :]
             self.update()
-            T[i, :] = (
-                T[i - 1, :] + (time[i] - time[i - 1]) * self.balance(T[i - 1, :]) * imc
+            conductor_temperature_c[i, :] = (
+                conductor_temperature_c[i - 1, :]
+                + (time[i] - time[i - 1])
+                * self.balance(conductor_temperature_c[i - 1, :])
+                * imc
             )
 
         # save results
-        result = dict(time=time, T=T)
+        result = dict(time=time, conductor_temperature_c=conductor_temperature_c)
 
         # manage return dict 2 : powers
         if return_power:
             for power in Solver_.Names.powers():
-                result[power] = np.zeros_like(T)
+                result[power] = np.zeros_like(conductor_temperature_c)
             for i in range(time_size):
                 for key in de.keys():
                     self.args[key] = de[key][i, :]
                 self.update()
-                result[Solver_.Names.pjle][i, :] = self.joule_heating.value(T[i, :])
-                result[Solver_.Names.psol][i, :] = self.solar_heating.value(T[i, :])
-                result[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(
-                    T[i, :]
+                result[Solver_.Names.pjle][i, :] = self.joule_heating.value(
+                    conductor_temperature_c[i, :]
                 )
-                result[Solver_.Names.prad][i, :] = self.radiative_cooling.value(T[i, :])
+                result[Solver_.Names.psol][i, :] = self.solar_heating.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.pcnv][i, :] = self.convective_cooling.value(
+                    conductor_temperature_c[i, :]
+                )
+                result[Solver_.Names.prad][i, :] = self.radiative_cooling.value(
+                    conductor_temperature_c[i, :]
+                )
                 result[Solver_.Names.ppre][i, :] = self.precipitation_cooling.value(
-                    T[i, :]
+                    conductor_temperature_c[i, :]
                 )
 
         # squeeze return values if args_size is 1
@@ -172,7 +187,7 @@ class Solver1T(Solver_):
 
     def steady_intensity(
         self,
-        T: floatArrayLike = np.array([]),
+        max_conductor_temperature_c: floatArrayLike = np.array([]),
         Imin: float = DP.imin,
         Imax: float = DP.imax,
         tol: float = DP.tol,
@@ -186,7 +201,7 @@ class Solver1T(Solver_):
         exceeding the temperature given in argument.
 
         Args:
-            T (float | numpy.ndarray): Maximum temperature.
+            max_conductor_temperature_c (float | numpy.ndarray): Maximum temperature.
             Imin (float, optional): Lower bound for intensity. The default is 0.
             Imax (float, optional): Upper bound for intensity. The default is 9999.
             tol (float, optional): Tolerance for temperature error. The default is 1.0E-06.
@@ -204,7 +219,7 @@ class Solver1T(Solver_):
 
         # solve with bisection
         shape = (self.args.max_len(),)
-        T_ = T * np.ones(shape)
+        T_ = max_conductor_temperature_c * np.ones(shape)
         joule_heating = (
             self.convective_cooling.value(T_)
             + self.radiative_cooling.value(T_)
@@ -229,10 +244,20 @@ class Solver1T(Solver_):
             df[Solver_.Names.err] = err
 
         if return_power:
-            df[Solver_.Names.pjle] = self.joule_heating.value(T)
-            df[Solver_.Names.psol] = self.solar_heating.value(T)
-            df[Solver_.Names.pcnv] = self.convective_cooling.value(T)
-            df[Solver_.Names.prad] = self.radiative_cooling.value(T)
-            df[Solver_.Names.ppre] = self.precipitation_cooling.value(T)
+            df[Solver_.Names.pjle] = self.joule_heating.value(
+                max_conductor_temperature_c
+            )
+            df[Solver_.Names.psol] = self.solar_heating.value(
+                max_conductor_temperature_c
+            )
+            df[Solver_.Names.pcnv] = self.convective_cooling.value(
+                max_conductor_temperature_c
+            )
+            df[Solver_.Names.prad] = self.radiative_cooling.value(
+                max_conductor_temperature_c
+            )
+            df[Solver_.Names.ppre] = self.precipitation_cooling.value(
+                max_conductor_temperature_c
+            )
 
         return df

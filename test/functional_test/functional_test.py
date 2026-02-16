@@ -78,7 +78,7 @@ def test_steady_ampacity():
     for d in scenario("ampacity", "steady"):
         for _, e in d.items():
             s = rte(scn2dict(e), heateq="3tl")
-            r = s.steady_intensity(T=e["Tmax_cable"])
+            r = s.steady_intensity(max_conductor_temperature_c=e["Tmax_cable"])
 
             assert np.allclose(r["current_a"], e["I_max"], atol=0.05)
 

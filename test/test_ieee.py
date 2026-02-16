@@ -37,16 +37,24 @@ def test_compare_powers():
     dic["day"] = 10
     dic["hour"] = 11.0
 
-    T = 100.0
+    conductor_temperature_c = 100.0
 
-    assert np.isclose(ieee.ConvectiveCooling(**dic).value(T), 81.93, rtol=0.002)
-    assert np.isclose(ieee.RadiativeCooling(**dic).value(T), 39.1, rtol=0.001)
-    assert np.isclose(ieee.SolarHeating(**dic).value(T), 22.44, rtol=0.001)
+    assert np.isclose(
+        ieee.ConvectiveCooling(**dic).value(conductor_temperature_c), 81.93, rtol=0.002
+    )
+    assert np.isclose(
+        ieee.RadiativeCooling(**dic).value(conductor_temperature_c), 39.1, rtol=0.001
+    )
+    assert np.isclose(
+        ieee.SolarHeating(**dic).value(conductor_temperature_c), 22.44, rtol=0.001
+    )
     joule_heating = ieee.JouleHeating(**dic)
-    assert np.isclose(joule_heating._rdc(T), 9.390e-05, rtol=1.0e-09)
+    assert np.isclose(
+        joule_heating._rdc(conductor_temperature_c), 9.390e-05, rtol=1.0e-09
+    )
 
     # additional debug
-    ieee.SolarHeating(**dic).value(T)
+    ieee.SolarHeating(**dic).value(conductor_temperature_c)
 
     from thermohl import sun
 

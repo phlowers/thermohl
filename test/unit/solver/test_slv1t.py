@@ -87,9 +87,9 @@ def test_transient_temperature_default(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["conductor_temperature_c"]) == len(time)
 
 
 def test_transient_temperature_with_initial_temp(solver):
@@ -100,10 +100,10 @@ def test_transient_temperature_with_initial_temp(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
-    assert result["T"][0] == T0
+    assert len(result["conductor_temperature_c"]) == len(time)
+    assert result["conductor_temperature_c"][0] == T0
 
 
 def test_transient_temperature_with_error(solver):
@@ -113,9 +113,9 @@ def test_transient_temperature_with_error(solver):
 
     assert isinstance(result, dict)
     assert "time" in result
-    assert "T" in result
+    assert "conductor_temperature_c" in result
     assert len(result["time"]) == len(time)
-    assert len(result["T"]) == len(time)
+    assert len(result["conductor_temperature_c"]) == len(time)
     assert Solver1T.Names.pjle in result
     assert Solver1T.Names.psol in result
     assert Solver1T.Names.pcnv in result
@@ -124,9 +124,9 @@ def test_transient_temperature_with_error(solver):
 
 
 def test_steady_intensity_default(solver):
-    T = np.array([75])
+    conductor_temperature_c = np.array([75])
 
-    result = solver.steady_intensity(T)
+    result = solver.steady_intensity(conductor_temperature_c)
 
     assert isinstance(result, pd.DataFrame)
     assert Solver1T.Names.current_a in result.columns
@@ -138,9 +138,9 @@ def test_steady_intensity_default(solver):
 
 
 def test_steady_intensity_with_error(solver):
-    T = np.array([75])
+    conductor_temperature_c = np.array([75])
 
-    result = solver.steady_intensity(T, return_err=True)
+    result = solver.steady_intensity(conductor_temperature_c, return_err=True)
 
     assert isinstance(result, pd.DataFrame)
     assert Solver1T.Names.current_a in result.columns
@@ -148,9 +148,9 @@ def test_steady_intensity_with_error(solver):
 
 
 def test_steady_intensity_no_power(solver):
-    T = np.array([75])
+    conductor_temperature_c = np.array([75])
 
-    result = solver.steady_intensity(T, return_power=False)
+    result = solver.steady_intensity(conductor_temperature_c, return_power=False)
 
     assert isinstance(result, pd.DataFrame)
     assert Solver1T.Names.current_a in result.columns
@@ -162,13 +162,15 @@ def test_steady_intensity_no_power(solver):
 
 
 def test_steady_intensity_custom_params(solver):
-    T = np.array([75])
+    conductor_temperature_c = np.array([75])
     Imin = 5.0
     Imax = 100.0
     tol = 1e-5
     maxiter = 100
 
-    result = solver.steady_intensity(T, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter)
+    result = solver.steady_intensity(
+        conductor_temperature_c, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter
+    )
 
     assert isinstance(result, pd.DataFrame)
     assert Solver1T.Names.current_a in result.columns

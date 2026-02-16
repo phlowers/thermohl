@@ -173,9 +173,9 @@ def test_nu_natural_high_values(convective_cooling, expected_type):
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
 def test_value_single_value(convective_cooling, expected_type):
-    T = 75.0
+    conductor_temperature_c = 75.0
 
-    result = convective_cooling.value(T)
+    result = convective_cooling.value(conductor_temperature_c)
 
     assert isinstance(result, np.ndarray)
     assert result > 0
@@ -187,12 +187,12 @@ def test_value_single_value(convective_cooling, expected_type):
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
 def test_value_array_values(convective_cooling, expected_type):
-    T = np.array([75.0, 85.0, 95.0])
+    conductor_temperature_c = np.array([75.0, 85.0, 95.0])
 
-    result = convective_cooling.value(T)
+    result = convective_cooling.value(conductor_temperature_c)
 
     assert isinstance(result, np.ndarray)
-    assert result.shape == T.shape
+    assert result.shape == conductor_temperature_c.shape
     assert np.all(result > 0)
 
 
@@ -202,9 +202,9 @@ def test_value_array_values(convective_cooling, expected_type):
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
 def test_value_edge_case(convective_cooling, expected_type):
-    T = 25.0  # Same as ambient temperature
+    conductor_temperature_c = 25.0  # Same as ambient temperature
 
-    result = convective_cooling.value(T)
+    result = convective_cooling.value(conductor_temperature_c)
 
     assert isinstance(result, np.ndarray)
     assert result == 0.0
@@ -216,9 +216,9 @@ def test_value_edge_case(convective_cooling, expected_type):
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
 def test_value_high_values(convective_cooling, expected_type):
-    T = 1000.0
+    conductor_temperature_c = 1000.0
 
-    result = convective_cooling.value(T)
+    result = convective_cooling.value(conductor_temperature_c)
 
     assert isinstance(result, np.ndarray)
     assert result > 0

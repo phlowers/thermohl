@@ -37,19 +37,19 @@ joule_heating_instances = [
     ],
 )
 def test_joule_heating_value_scalar(joule_heating):
-    T = 25.0
+    conductor_temperature_c = 25.0
     expected = (
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
         * (
             1.0
             + joule_heating.temp_coeff_linear
-            * (T - joule_heating.reference_temperature_c)
+            * (conductor_temperature_c - joule_heating.reference_temperature_c)
         )
         * joule_heating.current_a**2
     )
 
-    result = joule_heating.value(T)
+    result = joule_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -63,19 +63,19 @@ def test_joule_heating_value_scalar(joule_heating):
     ],
 )
 def test_joule_heating_value_array(joule_heating):
-    T = np.array([25.0, 30.0, 35.0])
+    conductor_temperature_c = np.array([25.0, 30.0, 35.0])
     expected = (
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
         * (
             1.0
             + joule_heating.temp_coeff_linear
-            * (T - joule_heating.reference_temperature_c)
+            * (conductor_temperature_c - joule_heating.reference_temperature_c)
         )
         * joule_heating.current_a**2
     )
 
-    result = joule_heating.value(T)
+    result = joule_heating.value(conductor_temperature_c)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -86,7 +86,7 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
     temperature_coeff_linear = np.array([0.004, 0.004])
     linear_resistance_dc_20c_ohm_m = np.array([0.1, 0.1])
     reference_temperature_c = np.array([20.0, 20.0])
-    T = np.array([25.0, 30.0])
+    conductor_temperature_c = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
         joule_heating = JouleHeating(
             current_a,
@@ -95,7 +95,7 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
             linear_resistance_dc_20c_ohm_m,
             reference_temperature_c,
         )
-        joule_heating.value(T)
+        joule_heating.value(conductor_temperature_c)
 
 
 @pytest.mark.parametrize(

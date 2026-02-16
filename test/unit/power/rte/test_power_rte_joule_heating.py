@@ -48,10 +48,10 @@ joule_heating_instances = [
     ids=["JouleHeating with arrays", "JouleHeating with scalars"],
 )
 def test_rdc(joule_heating):
-    T = np.array([30.0])
+    conductor_temperature_c = np.array([30.0])
     expected_rdc = 0.021
 
-    result = joule_heating._rdc(T)
+    result = joule_heating._rdc(conductor_temperature_c)
 
     np.testing.assert_allclose(result, expected_rdc, rtol=1e-5)
 
@@ -62,9 +62,9 @@ def test_rdc(joule_heating):
     ids=["JouleHeating with arrays", "JouleHeating with scalars"],
 )
 def test_ks(joule_heating):
-    T = np.array([30.0])
+    conductor_temperature_c = np.array([30.0])
 
-    rdc = joule_heating._rdc(T)
+    rdc = joule_heating._rdc(conductor_temperature_c)
     expected_ks = 1.0
 
     result = joule_heating._ks(rdc)
@@ -97,9 +97,9 @@ def test_kem(joule_heating):
     ids=["JouleHeating with arrays", "JouleHeating with scalars"],
 )
 def test_joule_heating_value(joule_heating):
-    T = np.array([30.0])
+    conductor_temperature_c = np.array([30.0])
     expected_value = 2.1420
 
-    result = joule_heating.value(T)
+    result = joule_heating.value(conductor_temperature_c)
 
     np.testing.assert_allclose(result, expected_value, rtol=1e-5)
