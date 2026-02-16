@@ -67,7 +67,7 @@ def test_power_1d():
     n = 61
     for s in _solvers():
         d = s.args.__dict__.copy()
-        d["current_a"] = np.linspace(0.0, +999.0, n)
+        d["transit_a"] = np.linspace(0.0, +999.0, n)
         d["solar_absorptivity"] = np.linspace(0.5, 0.9, n)
         d["ambient_temperature_c"] = np.linspace(-10.0, +50.0, n)
         for p in [
@@ -110,7 +110,7 @@ def test_steady_1d_mix():
     n = 61
     for s in _solvers():
         s.args.ambient_temperature_c = np.linspace(-10, +50, n)
-        s.args.current_a = np.array([199.0])
+        s.args.transit_a = np.array([199.0])
         s.update()
         t = s.steady_temperature()
         a = _ampargs(s, t)

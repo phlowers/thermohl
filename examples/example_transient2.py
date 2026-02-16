@@ -24,11 +24,11 @@ if __name__ == "__main__":
     Im = 3000.0
     tau = 1000.0
     t = np.linspace(0.0, 7200.0, 721)
-    current_a = I0 * np.ones_like(tau) + (Im - I0) * (
+    transit_a = I0 * np.ones_like(tau) + (Im - I0) * (
         np.where(np.abs(1800 - t) <= tau, 1, 0)
         + np.where(np.abs(5400 - t) <= tau, 1, 0)
     )
-    current_a = np.column_stack(3 * (current_a,))
+    transit_a = np.column_stack(3 * (transit_a,))
 
     # Solver input and solver
     dct = dict(
@@ -41,12 +41,12 @@ if __name__ == "__main__":
         ambient_temperature_c=np.array([0.0, 15.0, 30.0]),
         wind_speed_ms=2.0,
         wind_angle_deg=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
-        current_a=np.nan,
+        transit_a=np.nan,
     )
 
-    # plot current_a over time
+    # plot transit_a over time
     plt.figure()
-    plt.plot(t, current_a[:, 0])
+    plt.plot(t, transit_a[:, 0])
     plt.grid(True)
     plt.xlabel("Time (s)")
     plt.ylabel("Transit (A)")
@@ -65,14 +65,14 @@ if __name__ == "__main__":
     plt.figure()
     for i, key in enumerate(slv):
         elm = slv[key]
-        elm.dc["current_a"] = current_a[:, 1]
+        elm.dc["transit_a"] = transit_a[:, 1]
         elm.dc["ambient_temperature_c"] = elm.dc["ambient_temperature_c"][1]
         df = elm.steady_temperature()
-        elm.dc["current_a"] = np.nan
+        elm.dc["transit_a"] = np.nan
         elm.dc["ambient_temperature_c"] = dct["ambient_temperature_c"]
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
-        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), current_a=current_a)
+        T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit_a=transit_a)
         for j in range(3):
             plt.plot(t, T2["T_surf"][:, j], "-", c=cl, label="%s - transient" % (key,))
         # plt.plot(t, T1, '--', c=cl, label='%s - steady' % (key,))

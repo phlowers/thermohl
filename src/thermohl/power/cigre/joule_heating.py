@@ -18,7 +18,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        current_a: floatArrayLike,
+        transit_a: floatArrayLike,
         magnetic_coeff: floatArrayLike,
         temperature_coeff_linear: floatArrayLike,
         linear_resistance_dc_20c_ohm_m: floatArrayLike,
@@ -30,14 +30,14 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            current_a (float | numpy.ndarray): Transit intensity (A).
+            transit_a (float | numpy.ndarray): Transit intensity (A).
             magnetic_coeff (float | numpy.ndarray): Coefficient for magnetic effects (—).
             temperature_coeff_linear (float | numpy.ndarray): Linear resistance augmentation with temperature (K⁻¹).
             linear_resistance_dc_20c_ohm_m (float | numpy.ndarray): Electric resistance per unit length (DC) at 20°C (Ω·m⁻¹).
             reference_temperature_c (float | numpy.ndarray, optional): Reference temperature (°C). The default is 20.
 
         """
-        self.current_a = current_a
+        self.transit_a = transit_a
         self.magnetic_coeff = magnetic_coeff
         self.temp_coeff_linear = temperature_coeff_linear
         self.dc_resistance_20c = linear_resistance_dc_20c_ohm_m
@@ -61,7 +61,7 @@ class JouleHeating(PowerTerm):
                 + self.temp_coeff_linear
                 * (conductor_temperature_c - self.reference_temperature_c)
             )
-            * self.current_a**2
+            * self.transit_a**2
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
@@ -80,6 +80,6 @@ class JouleHeating(PowerTerm):
             self.magnetic_coeff
             * self.dc_resistance_20c
             * self.temp_coeff_linear
-            * self.current_a**2
+            * self.transit_a**2
             * np.ones_like(conductor_temperature)
         )

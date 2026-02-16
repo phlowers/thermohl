@@ -33,7 +33,7 @@ def test_balance():
         ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
         wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wind_angle_deg=np.random.uniform(0.0, 90.0, N),
-        current_a=np.random.uniform(40.0, 4000.0, N),
+        transit_a=np.random.uniform(40.0, 4000.0, N),
         core_diameter_m=np.random.randint(2, size=N)
         * solver.default_values()["core_diameter_m"],
     )
@@ -90,7 +90,7 @@ def test_consistency():
             - df["P_precipitation"]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
-        s.args["current_a"] = df["current_a"].values
+        s.args["transit_a"] = df["transit_a"].values
         s.update()
         dg = s.steady_temperature(
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64

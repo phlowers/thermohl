@@ -112,7 +112,7 @@ class Solver1T(Solver_):
             month=month,
             day=day,
             hour=hour,
-            current_a=reshape(self.args.current_a, time_size, args_size),
+            transit_a=reshape(self.args.transit_a, time_size, args_size),
             ambient_temperature_c=reshape(
                 self.args.ambient_temperature_c, time_size, args_size
             ),
@@ -214,8 +214,8 @@ class Solver1T(Solver_):
 
         """
 
-        # save current_a in arg
-        current_a = self.args.current_a
+        # save transit_a in arg
+        transit_a = self.args.transit_a
 
         # solve with bisection
         shape = (self.args.max_len(),)
@@ -228,17 +228,17 @@ class Solver1T(Solver_):
         )
 
         def fun(i: floatArray) -> floatArrayLike:
-            self.args.current_a = i
+            self.args.transit_a = i
             self.joule_heating.__init__(**self.args.__dict__)
             return self.joule_heating.value(T_) - joule_heating
 
         A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
 
-        # restore previous current_a
-        self.args.current_a = current_a
+        # restore previous transit_a
+        self.args.transit_a = transit_a
 
         # format output
-        df = pd.DataFrame(data=A, columns=[Solver_.Names.current_a])
+        df = pd.DataFrame(data=A, columns=[Solver_.Names.transit_a])
 
         if return_err:
             df[Solver_.Names.err] = err

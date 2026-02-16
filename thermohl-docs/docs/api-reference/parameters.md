@@ -35,7 +35,7 @@ units, default values and in which set of power terms they are used.
 | wind_angle_deg        | 90            | degree     | yes           | yes          | yes          | yes         | wind angle (regarding north)                                 |
 | albedo        | 0.8           | N/A        | yes           | no           | no           | no          | albedo                                                       |
 | turbidity        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |
-| current_a   | 100           | A          | yes           | yes          | yes          | yes         | current_a intensity                                            |
+| transit_a   | 100           | A          | yes           | yes          | yes          | yes         | transit_a intensity                                            |
 | linear_mass_kgm         | 1.5           | kg.m⁻¹     | yes           | yes          | yes          | yes         | mass per unit length (only used in transient mode)           |
 | core_diameter_m         | 1.9E-02       | linear_mass_kgm          | no            | no           | yes          | yes         | core diameter                                                |
 | outer_diameter_m         | 3.0E-02       | linear_mass_kgm          | yes           | yes          | yes          | yes         | external (global) diameter                                   |

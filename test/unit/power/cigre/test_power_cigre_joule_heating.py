@@ -12,14 +12,14 @@ from thermohl.power.cigre import JouleHeating
 
 joule_heating_instances = [
     JouleHeating(
-        current_a=np.array([100.0, 150.0, 200.0]),
+        transit_a=np.array([100.0, 150.0, 200.0]),
         magnetic_coeff=np.array([1.0, 1.0, 1.0]),
         temperature_coeff_linear=np.array([0.004, 0.004, 0.004]),
         linear_resistance_dc_20c_ohm_m=np.array([0.1, 0.1, 0.1]),
         reference_temperature_c=np.array([20.0, 18.0, 22.0]),
     ),
     JouleHeating(
-        current_a=100.0,
+        transit_a=100.0,
         magnetic_coeff=1.0,
         temperature_coeff_linear=0.004,
         linear_resistance_dc_20c_ohm_m=0.1,
@@ -46,7 +46,7 @@ def test_joule_heating_value_scalar(joule_heating):
             + joule_heating.temp_coeff_linear
             * (conductor_temperature_c - joule_heating.reference_temperature_c)
         )
-        * joule_heating.current_a**2
+        * joule_heating.transit_a**2
     )
 
     result = joule_heating.value(conductor_temperature_c)
@@ -72,7 +72,7 @@ def test_joule_heating_value_array(joule_heating):
             + joule_heating.temp_coeff_linear
             * (conductor_temperature_c - joule_heating.reference_temperature_c)
         )
-        * joule_heating.current_a**2
+        * joule_heating.transit_a**2
     )
 
     result = joule_heating.value(conductor_temperature_c)
@@ -81,7 +81,7 @@ def test_joule_heating_value_array(joule_heating):
 
 
 def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
-    current_a = np.array([100.0, 150.0])
+    transit_a = np.array([100.0, 150.0])
     magnetic_coeff = np.array([1.0, 1.0, 1.0])
     temperature_coeff_linear = np.array([0.004, 0.004])
     linear_resistance_dc_20c_ohm_m = np.array([0.1, 0.1])
@@ -89,7 +89,7 @@ def test_joule_heating_value_mismatched_array_sizes_should_raise_error():
     conductor_temperature_c = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
         joule_heating = JouleHeating(
-            current_a,
+            transit_a,
             magnetic_coeff,
             temperature_coeff_linear,
             linear_resistance_dc_20c_ohm_m,
@@ -112,7 +112,7 @@ def test_joule_heating_derivative_scalar(joule_heating):
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
         * joule_heating.temp_coeff_linear
-        * joule_heating.current_a**2
+        * joule_heating.transit_a**2
     )
 
     result = joule_heating.derivative(conductor_temperature)
@@ -134,7 +134,7 @@ def test_joule_heating_derivative_array(joule_heating):
         joule_heating.magnetic_coeff
         * joule_heating.dc_resistance_20c
         * joule_heating.temp_coeff_linear
-        * joule_heating.current_a**2
+        * joule_heating.transit_a**2
     )
 
     result = joule_heating.derivative(conductor_temperature)
@@ -143,7 +143,7 @@ def test_joule_heating_derivative_array(joule_heating):
 
 
 def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
-    current_a = np.array([100.0, 150.0])
+    transit_a = np.array([100.0, 150.0])
     magnetic_coeff = np.array([1.0, 1.0, 1.0])
     temperature_coeff_linear = np.array([0.004, 0.004])
     linear_resistance_dc_20c_ohm_m = np.array([0.1, 0.1])
@@ -151,7 +151,7 @@ def test_joule_heating_derivative_mismatched_array_sizes_should_raise_error():
     conductor_temperature = np.array([25.0, 30.0])
     with pytest.raises(ValueError):
         joule_heating = JouleHeating(
-            current_a,
+            transit_a,
             magnetic_coeff,
             temperature_coeff_linear,
             linear_resistance_dc_20c_ohm_m,

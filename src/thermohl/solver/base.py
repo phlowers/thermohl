@@ -38,7 +38,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'relative_humidity', 'precipitation_rate_ms', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'current_a', 'm',
+    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'relative_humidity', 'precipitation_rate_ms', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'transit_a', 'm',
     #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'radial_thermal_conductivity_wmk', 'heat_capacity_jkgk', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
     #     'temp_high_c', 'temp_low_c'
     # ]
@@ -77,7 +77,7 @@ class Args:
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
 
-        self.current_a = 100.0  # current_a intensity (A)
+        self.transit_a = 100.0  # transit_a intensity (A)
 
         self.linear_mass_kgm = 1.5  # mass per unit length (kg.m**-1)
         self.core_diameter_m = 1.9e-02  # core diameter (m)
@@ -206,7 +206,7 @@ class Solver(ABC):
         avg = "avg"
         core = "core"
         time = "time"
-        current_a = "current_a"
+        transit_a = "transit_a"
         temp = "t"
         tsurf = "t_surf"
         tavg = "t_avg"

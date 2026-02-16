@@ -36,7 +36,7 @@ def test_balance():
         ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
         wind_speed_ms=np.random.uniform(0.0, 7.0, N),
         wind_angle_deg=np.random.uniform(0.0, 90.0, N),
-        current_a=np.random.uniform(40.0, 4000.0, N),
+        transit_a=np.random.uniform(40.0, 4000.0, N),
         core_diameter_m=np.random.randint(2, size=N)
         * solver.default_values()["core_diameter_m"],
     )
@@ -106,7 +106,7 @@ def test_consistency():
             )
             assert np.all(df["err"] < tol)
             # set args intensity to newly founds ampacities
-            s.args.current_a = df["current_a"].values
+            s.args.transit_a = df["transit_a"].values
             s.update()
             assert np.allclose(
                 s.balance(

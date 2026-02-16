@@ -18,7 +18,7 @@ class JouleHeating(PowerTerm):
 
     def __init__(
         self,
-        current_a: floatArrayLike,
+        transit_a: floatArrayLike,
         outer_diameter_m: floatArrayLike,
         core_diameter_m: floatArrayLike,
         outer_area_m2: floatArrayLike,
@@ -37,7 +37,7 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            current_a (float | numpy.ndarray): Transit intensity (A).
+            transit_a (float | numpy.ndarray): Transit intensity (A).
             outer_diameter_m (float | numpy.ndarray): External diameter (m).
             core_diameter_m (float | numpy.ndarray): Core diameter (m).
             outer_area_m2 (float | numpy.ndarray): External (total) cross-sectional area (m²).
@@ -51,7 +51,7 @@ class JouleHeating(PowerTerm):
             frequency_hz (float | numpy.ndarray, optional): Current frequency (Hz). The default is 50.
 
         """
-        self.current_a = current_a
+        self.transit_a = transit_a
         self.outer_diameter_m = outer_diameter_m
         self.core_diameter_m = core_diameter_m
         self.magnetic_coeff = self._kem(
@@ -130,7 +130,7 @@ class JouleHeating(PowerTerm):
             floatArrayLike: Computed magnetic coefficient (—).
         """
         scale = (
-            np.ones_like(self.current_a)
+            np.ones_like(self.transit_a)
             * np.ones_like(outer_area_m2)
             * np.ones_like(core_area_m2)
             * np.ones_like(magnetic_coeff)
@@ -139,7 +139,7 @@ class JouleHeating(PowerTerm):
         is_scalar = scale.shape == ()
         if is_scalar:
             scale = np.array([1.0])
-        current = self.current_a * scale
+        current = self.transit_a * scale
         core_area = core_area_m2 * scale
         outer_area = outer_area_m2 * scale
         has_core = core_area > 0.0
@@ -167,4 +167,4 @@ class JouleHeating(PowerTerm):
         dc_resistance = self._rdc(conductor_temperature_c)
         skin_effect_coeff = self._ks(dc_resistance)
         ac_resistance = self.magnetic_coeff * skin_effect_coeff * dc_resistance
-        return ac_resistance * self.current_a**2
+        return ac_resistance * self.transit_a**2

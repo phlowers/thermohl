@@ -58,7 +58,7 @@ def scn2dict(d: dict) -> dict:
         dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
     )
     if "iac" in d.keys():
-        dic["current_a"] = d["iac"]
+        dic["transit_a"] = d["iac"]
 
     return dic
 
@@ -80,7 +80,7 @@ def test_steady_ampacity():
             s = rte(scn2dict(e), heateq="3tl")
             r = s.steady_intensity(max_conductor_temperature_c=e["Tmax_cable"])
 
-            assert np.allclose(r["current_a"], e["I_max"], atol=0.05)
+            assert np.allclose(r["transit_a"], e["I_max"], atol=0.05)
 
 
 def test_transient_temperature():
@@ -97,12 +97,12 @@ def test_transient_temperature():
             s = rte(scn2dict(e), heateq="3tl")
 
             # initial steady state
-            s.args["current_a"] = e["I0_cable"]
+            s.args["transit_a"] = e["I0_cable"]
             s.update()
             ri = s.steady_temperature()
 
             # final steady state
-            s.args["current_a"] = e["iac"]
+            s.args["transit_a"] = e["iac"]
             s.update()
             rf = s.steady_temperature(
                 surface_temperature_guess_c=e["T_mean_final"],

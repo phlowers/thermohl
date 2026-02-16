@@ -15,7 +15,7 @@ from thermohl.solver.slv1t import Solver1T
 def solver():
     args = {
         "max_len": lambda: 1,
-        "current_a": np.array([0]),
+        "transit_a": np.array([0]),
         "ambient_temperature_c": np.array([25]),
         "wind_speed_ms": np.array([0]),
         "wind_angle_deg": np.array([0]),
@@ -129,7 +129,7 @@ def test_steady_intensity_default(solver):
     result = solver.steady_intensity(conductor_temperature_c)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.current_a in result.columns
+    assert Solver1T.Names.transit_a in result.columns
     assert Solver1T.Names.pjle in result.columns
     assert Solver1T.Names.psol in result.columns
     assert Solver1T.Names.pcnv in result.columns
@@ -143,7 +143,7 @@ def test_steady_intensity_with_error(solver):
     result = solver.steady_intensity(conductor_temperature_c, return_err=True)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.current_a in result.columns
+    assert Solver1T.Names.transit_a in result.columns
     assert Solver1T.Names.err in result.columns
 
 
@@ -153,7 +153,7 @@ def test_steady_intensity_no_power(solver):
     result = solver.steady_intensity(conductor_temperature_c, return_power=False)
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.current_a in result.columns
+    assert Solver1T.Names.transit_a in result.columns
     assert Solver1T.Names.pjle not in result.columns
     assert Solver1T.Names.psol not in result.columns
     assert Solver1T.Names.pcnv not in result.columns
@@ -173,4 +173,4 @@ def test_steady_intensity_custom_params(solver):
     )
 
     assert isinstance(result, pd.DataFrame)
-    assert Solver1T.Names.current_a in result.columns
+    assert Solver1T.Names.transit_a in result.columns

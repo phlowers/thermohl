@@ -102,9 +102,9 @@ class Solver3TL(Solver3T):
         core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
         def newtheader(
-            current_a: floatArray, tg: floatArray
+            transit_a: floatArray, tg: floatArray
         ) -> Tuple[floatArray, floatArray]:
-            self.args.current_a = current_a
+            self.args.transit_a = transit_a
             self.joule_heating.__init__(**self.args.__dict__)
             surface_temperature = np.ones_like(tg) * np.nan
             core_temperature = np.ones_like(tg) * np.nan
