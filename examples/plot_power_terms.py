@@ -104,7 +104,7 @@ def plot_solar_heating(dic):
 def plot_convective_cooling(dic):
     wind_speed_ms = np.linspace(0, 1, 5)
     wind_angle_deg = dic["azimuth"] - np.array([0, 45, 90])
-    Tc = np.linspace(0.0, 80.0, 41)
+    conductor_temperature_c = np.linspace(0.0, 80.0, 41)
     ambient_temperatures = np.linspace(-10, 40, 6)
 
     # olla not tested here since olla's convective cooling is the same as ieee's one
@@ -132,8 +132,8 @@ def plot_convective_cooling(dic):
                         1:-1
                     ]
                     ax[i, j].plot(
-                        Tc,
-                        d["model"].value(Tc),
+                        conductor_temperature_c,
+                        d["model"].value(conductor_temperature_c),
                         "-",
                         c=c[m],
                         label="T$_a$=%.0f C" % (ambient_temperature_c,),
@@ -153,7 +153,7 @@ def plot_convective_cooling(dic):
 
 
 def plot_radiative_cooling(dic):
-    Tc = np.linspace(0.0, 80.0, 41)
+    conductor_temperature_c = np.linspace(0.0, 80.0, 41)
     ambient_temperatures = np.linspace(-20, 50, 8)
     cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(ambient_temperatures) + 2)[1:-1])
 
@@ -169,17 +169,27 @@ def plot_radiative_cooling(dic):
 
         radiative_cooling = cigre.RadiativeCooling(**dic)
         plt.plot(
-            Tc,
-            radiative_cooling.value(Tc),
+            conductor_temperature_c,
+            radiative_cooling.value(conductor_temperature_c),
             ls="-",
             c=cl[i],
             label="T$_a$=%.0f C" % (ambient_temperature_c,),
         )
         radiative_cooling = ieee.RadiativeCooling(**dic)
-        plt.plot(Tc, radiative_cooling.value(Tc), ls="--", c=cl[i])
+        plt.plot(
+            conductor_temperature_c,
+            radiative_cooling.value(conductor_temperature_c),
+            ls="--",
+            c=cl[i],
+        )
 
         radiative_cooling = olla.RadiativeCooling(**dic)
-        plt.plot(Tc, radiative_cooling.value(Tc), ":", c=cl[i])
+        plt.plot(
+            conductor_temperature_c,
+            radiative_cooling.value(conductor_temperature_c),
+            ":",
+            c=cl[i],
+        )
 
     plt.grid(True)
     plt.xlabel("Conductor temperature (C)")
