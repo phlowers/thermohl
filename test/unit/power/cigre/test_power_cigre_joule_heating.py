@@ -40,7 +40,7 @@ def test_joule_heating_value_scalar(joule_heating):
     conductor_temperature_c = 25.0
     expected = (
         joule_heating.magnetic_coeff
-        * joule_heating.dc_resistance_20c
+        * joule_heating.linear_resistance_dc_20c_ohm_m
         * (
             1.0
             + joule_heating.temp_coeff_linear
@@ -66,7 +66,7 @@ def test_joule_heating_value_array(joule_heating):
     conductor_temperature_c = np.array([25.0, 30.0, 35.0])
     expected = (
         joule_heating.magnetic_coeff
-        * joule_heating.dc_resistance_20c
+        * joule_heating.linear_resistance_dc_20c_ohm_m
         * (
             1.0
             + joule_heating.temp_coeff_linear
@@ -110,7 +110,7 @@ def test_joule_heating_derivative_scalar(joule_heating):
     conductor_temperature = 25.0
     expected = (
         joule_heating.magnetic_coeff
-        * joule_heating.dc_resistance_20c
+        * joule_heating.linear_resistance_dc_20c_ohm_m
         * joule_heating.temp_coeff_linear
         * joule_heating.transit_a**2
     )
@@ -132,7 +132,7 @@ def test_joule_heating_derivative_array(joule_heating):
     conductor_temperature = np.array([25.0, 30.0, 35.0])
     expected = (
         joule_heating.magnetic_coeff
-        * joule_heating.dc_resistance_20c
+        * joule_heating.linear_resistance_dc_20c_ohm_m
         * joule_heating.temp_coeff_linear
         * joule_heating.transit_a**2
     )

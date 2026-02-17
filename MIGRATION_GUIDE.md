@@ -528,7 +528,7 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 | `transit` | `transit_a` | Transit_intensity | A |
 | `km` | `magnetic_coeff` | Coefficient for magnetic effects | dimensionless |
 | `kl` | `temperature_coeff_linear` | Linear resistance augmentation with temperature | $K^-1$ |
-| `RDC20` | `dc_resistance_20c` | Coefficient for magnetic effects | dimensionless |
+| `RDC20` | `linear_resistance_dc_20c_ohm_m` | Coefficient for magnetic effects | dimensionless |
 
 
 ## Transient Solver Method Changes

@@ -59,7 +59,7 @@ class JouleHeating(PowerTerm):
         )
         self.temp_coeff_linear = temperature_coeff_linear
         self.temp_coeff_quadratic = temperature_coeff_quadratic
-        self.dc_resistance_20c = linear_resistance_dc_20c_ohm_m
+        self.linear_resistance_dc_20c_ohm_m = linear_resistance_dc_20c_ohm_m
         self.reference_temperature_c = reference_temperature_c
         self.frequency_hz = frequency_hz
 
@@ -74,7 +74,7 @@ class JouleHeating(PowerTerm):
             float | numpy.ndarray: Resistance per unit length for direct current at the given temperature(s) (Ω·m⁻¹).
         """
         temperature_delta_c = conductor_temperature_c - self.reference_temperature_c
-        return self.dc_resistance_20c * (
+        return self.linear_resistance_dc_20c_ohm_m * (
             1.0
             + self.temp_coeff_linear * temperature_delta_c
             + self.temp_coeff_quadratic * temperature_delta_c**2

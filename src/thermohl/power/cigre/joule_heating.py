@@ -40,7 +40,7 @@ class JouleHeating(PowerTerm):
         self.transit_a = transit_a
         self.magnetic_coeff = magnetic_coeff
         self.temp_coeff_linear = temperature_coeff_linear
-        self.dc_resistance_20c = linear_resistance_dc_20c_ohm_m
+        self.linear_resistance_dc_20c_ohm_m = linear_resistance_dc_20c_ohm_m
         self.reference_temperature_c = reference_temperature_c
 
     def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
@@ -55,7 +55,7 @@ class JouleHeating(PowerTerm):
         """
         return (
             self.magnetic_coeff
-            * self.dc_resistance_20c
+            * self.linear_resistance_dc_20c_ohm_m
             * (
                 1.0
                 + self.temp_coeff_linear
@@ -78,7 +78,7 @@ class JouleHeating(PowerTerm):
         """
         return (
             self.magnetic_coeff
-            * self.dc_resistance_20c
+            * self.linear_resistance_dc_20c_ohm_m
             * self.temp_coeff_linear
             * self.transit_a**2
             * np.ones_like(conductor_temperature)
