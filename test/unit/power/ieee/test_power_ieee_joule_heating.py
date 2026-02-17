@@ -104,7 +104,7 @@ joule_heating_instances = [
 )
 def test_rdc_scalar_temperature(joule_heating):
     conductor_temperature_c = 50.0
-    expected = joule_heating.dc_resistance_low_c + joule_heating.temp_coeff_linear * (
+    expected = joule_heating.linear_resistance_temp_low_ohm_m + joule_heating.temp_coeff_linear * (
         conductor_temperature_c - joule_heating.temp_low_c
     )
 
@@ -124,7 +124,7 @@ def test_rdc_scalar_temperature(joule_heating):
 )
 def test_rdc_array_temperature(joule_heating):
     conductor_temperature_c = np.array([30.0, 40.0])
-    expected = joule_heating.dc_resistance_low_c + joule_heating.temp_coeff_linear * (
+    expected = joule_heating.linear_resistance_temp_low_ohm_m + joule_heating.temp_coeff_linear * (
         conductor_temperature_c - joule_heating.temp_low_c
     )
 
@@ -145,7 +145,7 @@ def test_rdc_array_temperature(joule_heating):
 def test_value_scalar_temperature(joule_heating):
     conductor_temperature_c = 50.0
     expected = (
-        joule_heating.dc_resistance_low_c
+        joule_heating.linear_resistance_temp_low_ohm_m
         + joule_heating.temp_coeff_linear
         * (conductor_temperature_c - joule_heating.temp_low_c)
     ) * joule_heating.transit_a**2
@@ -167,7 +167,7 @@ def test_value_scalar_temperature(joule_heating):
 def test_value_array_temperature(joule_heating):
     conductor_temperature_c = np.array([30.0, 40.0])
     expected = (
-        joule_heating.dc_resistance_low_c
+        joule_heating.linear_resistance_temp_low_ohm_m
         + joule_heating.temp_coeff_linear
         * (conductor_temperature_c - joule_heating.temp_low_c)
     ) * joule_heating.transit_a**2

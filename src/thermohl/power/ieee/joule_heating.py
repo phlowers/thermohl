@@ -50,8 +50,8 @@ class JouleHeating(PowerTerm):
         """
         self.temp_low_c = temp_low_c
         self.temp_high_c = temp_high_c
-        self.dc_resistance_low_c = linear_resistance_temp_low_ohm_m
-        self.dc_resistance_high_c = linear_resistance_temp_high_ohm_m
+        self.linear_resistance_temp_low_ohm_m = linear_resistance_temp_low_ohm_m
+        self.linear_resistance_temp_high_ohm_m = linear_resistance_temp_high_ohm_m
         self.transit_a = transit_a
         self.temp_coeff_linear = JouleHeating._c(
             temp_low_c,
@@ -61,7 +61,7 @@ class JouleHeating(PowerTerm):
         )
 
     def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
-        return self.dc_resistance_low_c + self.temp_coeff_linear * (
+        return self.linear_resistance_temp_low_ohm_m + self.temp_coeff_linear * (
             conductor_temperature_c - self.temp_low_c
         )
 
