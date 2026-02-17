@@ -502,6 +502,20 @@ def sensitivity(
     mode: str = "temperature",
 )
 ```
+### `src/thermohl/solver/slv3t.py` Function
+
+```python
+# Before
+def _profile_mom(ts: float, tc: float, r: floatArrayLike, re: float)
+
+# After
+def _profile_mom(
+    surface_temperature_c: float,
+    core_temperature_c: float,
+    radius: floatArrayLike,
+    outer_radius: float,
+)
+```
 
 ## Variable and Attributes Changes
 
@@ -509,7 +523,7 @@ Several attributes have been renamed, please adapt your code if you use them dir
 
 Please also not that the global variable `power_term._dT` has been renamed to `power_term_dT._TEMP_INCREMENT`.
 
-### Classes ConvectiveCooling and PowerTerm
+### Classes ConvectiveCooling
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
@@ -520,6 +534,9 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 | `R` | `roughness_ratio` | Cable roughness | dimensionless |
 | `g` | `gravity` | Gravitational acceleration | m/s² |
 | `da` | `attack_angle_rad` | Attack angle | m/s² |
+| `rho` | `air_density` | Air density | dimensionless |
+| `mu` | `dynamic_viscosity` | Dynamic viscosity |  |
+| `lambda_` | `thermal_conductivity` | Thermal conductivity |  |
 
 ### Classes JouleHeating
 
@@ -527,9 +544,58 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 |----------|----------|-------------|------|
 | `transit` | `transit_a` | Transit_intensity | A |
 | `km` | `magnetic_coeff` | Coefficient for magnetic effects | dimensionless |
-| `kl` | `temperature_coeff_linear` | Linear resistance augmentation with temperature | $K^-1$ |
-| `RDC20` | `linear_resistance_dc_20c_ohm_m` | Coefficient for magnetic effects | dimensionless |
+| `kl` | `temperature_coeff_linear` | Linear resistance augmentation with temperature | K-1 |
+| `kem` | `magnetic_coeff` | Coefficient for magnetic effects | |
+| `kq` | `temp_coeff_quadratic` | Quadratic resistance augmentation with temperature | K-2 |
+| `T20` | `reference_temperature_c` | Reference temperature | °C |
+| `TLow` | `temp_low_c` | Temperature for linear_resistance_temp_low_ohm_m measurement | °C |
+| `THigh` | `temp_high_c` | Temperature for linear_resistance_temp_high_ohm_m measurement | °C |
+| `RDC20` | `linear_resistance_dc_20c_ohm_m` | Coefficient for magnetic effects | ohm/m |
+| `RDCLow` | `linear_resistance_temp_low_ohm_m` | Electric resistance per unit length at temp_low_c | ohm/m |
+| `RDCHigh` | `linear_resistance_temp_high_ohm_m` | Electric resistance per unit length at temp_high_c | ohm/m |
+| `c` | `temp_coeff_linear` | Temperature coefficients | |
+| `D` | `outer_diameter_m` | Cable external diameter | m |
+| `d` | `core_diameter_m` | Cable core diameter | m |
+| `f` | `frequency_hz` | Current frequency | Hz |
 
+### Classes SolarHeating
+
+| Old Name | New Name | Description | Unit |
+|----------|----------|-------------|------|
+| `alpha` | `solar_absorptivity` | Solar absorption coefficient | |
+| `srad` | `solar_irradiance` | Solar irradiance | |
+| `D` | `outer_diameter_m` | Cable external diameter | m |
+
+### Classes RadiativeCooling
+
+| Old Name | New Name | Description | Unit |
+|----------|----------|-------------|------|
+| `Ta` | `ambient_temperature_c` or `ambient_temp_k` depending on implementation | Ambient_temperature | °C or K |
+| `D` | `outer_diameter_m` | Cable external diameter | m |
+| `epsilon` | `emissivity` | Emissivity | dimensionless |
+| `sigma` | `stefan_boltzmann` | Stefan Boltzmann constant | W/m²/K-4 |
+| `zerok` | `kelvin offset` | Kelvin offset | K |
+
+### Solver classes
+
+| Old Name | New Name | Description | Unit |
+|----------|----------|-------------|------|
+| `Names.transit` | `Names.transit_a` | Transit intensity | A |
+| `jh` | `joule_heating` | Joule heating | |
+| `sh` | `solar_heating` | Solar heating | |
+| `cc` | `convective_cooling` | Convective cooling | |
+| `rc` | `radiative_cooling` | Radiative cooling | |
+| `pc` | `precipitation_cooling` | Precipitation cooling | |
+| `mgc` | `morgan_coefficients` | Morgan coefficients | |
+
+### WrappedNormal classe
+
+| Old Name | New Name | Description |
+|----------|----------|-------------|
+| `lwrb` | `lower_bound` | Lower bound |
+| `uprb` | `upper_bound` | Upper bound |
+| `mu` | `mean_value` | Mean value |
+| `sigma` | `standard_deviation` | Standard deviation |
 
 ## Transient Solver Method Changes
 
