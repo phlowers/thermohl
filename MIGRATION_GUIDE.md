@@ -1,3 +1,12 @@
+<!--
+SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
+
+This Source Code Form is subject to the terms of the Mozilla Public
+License, v. 2.0. If a copy of the MPL was not distributed with this
+file, You can obtain one at http://mozilla.org/MPL/2.0/.
+SPDX-License-Identifier: MPL-2.0
+-->
+
 # Migration Guide: Variable Renaming
 
 This guide helps you migrate your code from the old version with short variable names, to the new version which introduces clearer, more descriptive variable names throughout the ThermOHL library. In this new version, variables are renamed to make the codebase more readable and maintainable. All abbreviated parameter names have been replaced with self-documenting names that include units where applicable.
