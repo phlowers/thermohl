@@ -9,6 +9,15 @@ from enum import Enum
 
 
 class SolverType(Enum):
+    """
+    All the solvers available in thermohl.
+
+    * cigre : Solver published by CIGRE
+    * ieee : Solver published by IEEE
+    * olla : Solver developed by RTE's R&D team
+    * rte : Solver developed by RTE
+    """
+
     SOLVER_CIGRE = "cigre"
     SOLVER_IEEE = "ieee"
     SOLVER_OLLA = "olla"
