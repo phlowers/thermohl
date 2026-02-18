@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from thermohl.sun import utc2solar_hour
+from thermohl.sun import utc2solar_hour, solar_altitude
 
 
 def test_scalar_input():
@@ -73,3 +73,13 @@ def test_realistic_cases():
     assert result[0] > expected_result
     assert result[1] > result[0]
     assert result[2] < expected_result
+
+
+def test_solar_altitude_below_horizon():
+    latitude = np.deg2rad(45)
+    month = 12
+    day = 21
+    hour = 0.0
+
+    solar_altitude_value = solar_altitude(latitude, month, day, hour)
+    assert np.isclose(solar_altitude_value, 0.0)
