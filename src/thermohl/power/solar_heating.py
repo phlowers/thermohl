@@ -85,6 +85,7 @@ class _SRad:
         solar_irradiance = (
             altitude_factor * clearness_factor * np.sin(computed_incidence_angle)
         )
+        solar_irradiance = np.where(solar_altitude_rad >= 0.0, solar_irradiance, 0.0)
         return np.where(solar_irradiance > 0.0, solar_irradiance, 0.0)
 
 
