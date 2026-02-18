@@ -158,6 +158,12 @@ def bisect_v(
     lower_bounds = lower_bound * np.ones(output_shape)
     upper_bounds = upper_bound * np.ones(output_shape)
 
+    lower_bounds = np.where(func(lower_bounds) < 0, lower_bounds, np.nan)
+    upper_bounds = np.where(func(upper_bounds) > 0, upper_bounds, np.nan)
+
+    if np.all(np.isnan(lower_bounds)) or np.all(np.isnan(upper_bounds)):
+        return np.full(output_shape, np.nan), np.full(output_shape, np.nan)
+
     abs_error = np.abs(upper_bound - lower_bound)
     iteration_count = 1
     while np.nanmax(abs_error) > tolerance and iteration_count <= max_iterations:

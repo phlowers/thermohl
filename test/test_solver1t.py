@@ -8,6 +8,8 @@
 import numpy as np
 
 from thermohl import solver
+from thermohl.solver.base import _DEFPARAM as DP
+
 
 _nprs = 123456
 
@@ -96,3 +98,22 @@ def test_consistency():
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
         assert np.allclose(dg["t"].values, 100.0)
+
+
+def test_steady_intensity_hot_weather():
+    ambient_temperature = np.array([30.0, 35.0, 40.0, 45.0, 50.0])
+
+    solver_1t = solver.ieee(
+        dic={
+            "ambient_temperature_c": ambient_temperature,
+        },
+        heateq="1t",
+    )
+    ampacity = solver_1t.steady_intensity(
+        max_conductor_temperature_c=45,
+        Imin=np.ones_like(ambient_temperature) * DP.imin,
+        Imax=np.ones_like(ambient_temperature) * DP.imax,
+    )
+
+    assert not np.isnan(ampacity["transit_a"][0])
+    assert np.isnan(ampacity["transit_a"][1:]).all()
