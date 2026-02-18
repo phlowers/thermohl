@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import pytest
 import numpy as np
 
 from thermohl import solver
@@ -12,6 +13,8 @@ from thermohl.solver import SolverType
 from thermohl.solver.enums.heat_equation_type import HeatEquationType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.solver.enums.power_type import PowerType
+from thermohl.solver.base import _DEFPARAM as DP
+
 
 _nprs = 123456
 
@@ -111,3 +114,23 @@ def test_consistency():
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
         assert np.allclose(dg[VariableType.TEMPERATURE].values, 100.0)
+
+
+def test_steady_intensity_hot_weather():
+    ambient_temperature = np.array([30.0, 35.0, 40.0, 45.0, 50.0])
+
+    solver_1t = solver.ieee(
+        dic={
+            "ambient_temperature": ambient_temperature,
+        },
+        heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
+    )
+
+    # Here some ambient temperatures are above the maximum conductor temperature,
+    # so there's no solution - the solver should raise a ValueError
+    with pytest.raises(ValueError):
+        solver_1t.steady_intensity(
+            max_conductor_temperature=45,
+            Imin=np.ones_like(ambient_temperature) * DP.imin,
+            Imax=np.ones_like(ambient_temperature) * DP.imax,
+        )
