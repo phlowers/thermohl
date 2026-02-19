@@ -1,4 +1,4 @@
-<!--
+from thermohl.solver import HeatEquationTypefrom thermohl.solver import SolverType<!--
 SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -80,8 +80,9 @@ surface temperature (°C) of a conductor in steady-state regime along with the c
 
 ```python
 from thermohl import solver
+from thermohl.solver.enums.heat_equation_type import HeatEquationType
 
-slvr = solver.ieee(dic=None, heateq='1t')
+slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
 temp = slvr.steady_temperature() 
 ```
 
@@ -103,8 +104,9 @@ distinct ampacities (and the lower the ambient temperature, the higher the ampac
 ```python
 import numpy as np
 from thermohl import solver
+from thermohl.solver.enums.heat_equation_type import HeatEquationType
 
-slvr = solver.ieee(dict(Ta=np.array([0., 15., 30.])), heateq='1t')
+slvr = solver.ieee(dict(Ta=np.array([0., 15., 30.])), heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
 Tmax = 80.
 imax = slvr.steady_intensity(Tmax)
 ```

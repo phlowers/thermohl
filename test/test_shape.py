@@ -9,21 +9,33 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
+from thermohl.solver import HeatEquationType, SolverType
+from thermohl.solver.enums.cable_location import CableLocation
+from thermohl.solver.enums.temperature_location import TemperatureLocation
+from thermohl.solver.enums.variable_type import VariableType
 
 
 def _solvers():
     li = []
-    for ht in ["1t", "3t"]:
-        for m in ["rte", "cigre", "ieee", "olla"]:
-            li.append(solver._factory(dic=None, heateq=ht, model=m))
+    for heat_equation in [
+        HeatEquationType.WITH_ONE_TEMPERATURE,
+        HeatEquationType.WITH_THREE_TEMPERATURES,
+    ]:
+        for m in [
+            SolverType.SOLVER_RTE,
+            SolverType.SOLVER_CIGRE,
+            SolverType.SOLVER_IEEE,
+            SolverType.SOLVER_OLLA,
+        ]:
+            li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
 
 
 def _ampargs(s: solver.Solver, t: pd.DataFrame):
     if isinstance(s, solver.Solver1T):
-        a = dict(T=t[solver.Solver.Names.temp].values)
+        a = dict(T=t[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
-        a = dict(T=t[solver.Solver.Names.tsurf].values, target=solver.Solver.Names.surf)
+        a = dict(T=t[TemperatureLocation.SURFACE].values, target=CableLocation.SURFACE)
     else:
         raise NotImplementedError
     return a
@@ -31,12 +43,12 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
 
 def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[solver.Solver.Names.temp].values)
+        a = dict(time=t, T0=ds[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            Ts0=ds[solver.Solver.Names.tsurf].values,
-            Tc0=ds[solver.Solver.Names.tcore].values,
+            Ts0=ds[TemperatureLocation.SURFACE].values,
+            Tc0=ds[TemperatureLocation.CORE].values,
         )
     else:
         raise NotImplementedError
@@ -58,7 +70,7 @@ def test_power_1d():
     n = 61
     for s in _solvers():
         d = s.args.__dict__.copy()
-        d["transit"] = np.linspace(0.0, +999.0, n)
+        d[VariableType.TRANSIT.value] = np.linspace(0.0, +999.0, n)
         d["alpha"] = np.linspace(0.5, 0.9, n)
         d["Ta"] = np.linspace(-10.0, +50.0, n)
         for p in [s.jh, s.sh, s.cc, s.rc, s.pc]:
@@ -112,13 +124,13 @@ def test_transient_0():
         a = _traargs(s, ds, t)
 
         r = s.transient_temperature(**a)
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t),)
 
         r = s.transient_temperature(**{**a, "return_power": True})
 
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t),)
 
@@ -135,11 +147,11 @@ def test_transient_1():
         a = _traargs(s, ds, t)
 
         r = s.transient_temperature(**a)
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t), n)
 
         r = s.transient_temperature(**{**a, "return_power": True})
-        assert len(r.pop("time")) == len(t)
+        assert len(r.pop(VariableType.TIME)) == len(t)
         for k in r.keys():
             assert r[k].shape == (len(t), n)
