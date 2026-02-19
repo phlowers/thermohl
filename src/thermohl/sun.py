@@ -146,11 +146,14 @@ def solar_altitude(
     computed_hour_angle = hour_angle(
         solar_hour, solar_minute=solar_minute, solar_second=solar_second
     )
-    return np.arcsin(
-        np.cos(latitude)
-        * np.cos(computed_solar_declination)
-        * np.cos(computed_hour_angle)
-        + np.sin(latitude) * np.sin(computed_solar_declination)
+    return np.maximum(
+        0.0,
+        np.arcsin(
+            np.cos(latitude)
+            * np.cos(computed_solar_declination)
+            * np.cos(computed_hour_angle)
+            + np.sin(latitude) * np.sin(computed_solar_declination)
+        ),
     )
 
 

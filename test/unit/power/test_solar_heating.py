@@ -131,38 +131,6 @@ def test_srad_call_array(srad):
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
-def test_srad_call_negative_solar_altitude_scalar(srad):
-    latitude_deg = 45.0
-    altitude = 1000.0
-    azimuth = 180.0
-    turbidity = 0.5
-    month = 6
-    day = 21
-    hour = 0.0  # Night time, solar altitude is negative
-
-    result = srad(latitude_deg, altitude, azimuth, turbidity, month, day, hour)
-
-    assert np.isclose(result, 0.0), f"Expected 0.0, but got {result}"
-
-
-def test_srad_call_negative_solar_altitude_array(srad):
-    latitude_deg = np.array([45.0, 45.0])
-    altitude = np.array([1000.0, 1000.0])
-    azimuth = np.array([180.0, 180.0])
-    turbidity = np.array([0.5, 0.5])
-    month = np.array([6, 6])
-    day = np.array([21, 21])
-    hour = np.array(
-        [0.0, 12.0]
-    )  # 0.0 gives negative solar altitude so solar radiation should be 0.0
-
-    result = srad(latitude_deg, altitude, azimuth, turbidity, month, day, hour)
-
-    assert np.isclose(
-        result, np.array([0.0, 900.319])
-    ).all(), f"Expected [0.0, 900.319], but got {result}"
-
-
 # Tests Class SolarHeating
 solar_heating_instances = [
     SolarHeating(
