@@ -70,8 +70,8 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp_c)
-        temperature_delta = conductor_temperature - self.ambient_temp_c
+        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp)
+        temperature_delta = conductor_temperature - self.ambient_temp
         # very slight difference with air.IEEE.volumic_mass() in coefficient before altitude**2
         air_density = (
             1.293 - 1.525e-04 * self.altitude + 6.38e-09 * self.altitude**2

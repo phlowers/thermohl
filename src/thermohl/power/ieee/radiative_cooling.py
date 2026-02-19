@@ -33,7 +33,7 @@ class RadiativeCooling(PowerTerm):
             emissivity (float | numpy.ndarray): Emissivity (—).
 
         """
-        self.ambient_temp_c = ambient_temperature
+        self.ambient_temp = ambient_temperature
         self.outer_diameter = outer_diameter
         self.emissivity = emissivity
 
@@ -53,7 +53,7 @@ class RadiativeCooling(PowerTerm):
             * self.outer_diameter
             * (
                 ((conductor_temperature + 273.0) / 100.0) ** 4
-                - ((self.ambient_temp_c + 273.0) / 100.0) ** 4
+                - ((self.ambient_temp + 273.0) / 100.0) ** 4
             )
         )
 

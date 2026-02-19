@@ -87,7 +87,7 @@ def test_transient_temperature():
     atol = 0.5
 
     # this is hard-coded, maybe it should be put in the yaml file ...
-    time_constant_s = 600.0
+    time_constant = 600.0
     dt = 10.0
     minute = 60
 
@@ -105,8 +105,8 @@ def test_transient_temperature():
             s.args["transit"] = e["iac"]
             s.update()
             rf = s.steady_temperature(
-                surface_temperature_guess_c=e["T_mean_final"],
-                core_temperature_guess_c=e["T_mean_final"],
+                surface_temperature_guess=e["T_mean_final"],
+                core_temperature_guess=e["T_mean_final"],
             )
 
             # time
@@ -115,9 +115,9 @@ def test_transient_temperature():
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
                 time=time,
-                surface_temperature_0_c=ri["t_surf"],
-                core_temperature_0_c=ri["t_core"],
-                time_constant_s=time_constant_s,
+                surface_temperature_0=ri["t_surf"],
+                core_temperature_0=ri["t_core"],
+                time_constant=time_constant,
             )
 
             # check final temp

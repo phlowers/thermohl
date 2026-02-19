@@ -38,8 +38,8 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             time=t,
-            surface_temperature_0_c=ds[solver.Solver.Names.tsurf].values,
-            core_temperature_0_c=ds[solver.Solver.Names.tcore].values,
+            surface_temperature_0=ds[solver.Solver.Names.tsurf].values,
+            core_temperature_0=ds[solver.Solver.Names.tcore].values,
         )
     else:
         raise NotImplementedError

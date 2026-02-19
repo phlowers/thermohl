@@ -30,7 +30,7 @@ class ConvectiveCoolingBase(PowerTerm):
         **kwargs: Any,
     ):
         self.altitude = altitude
-        self.ambient_temp_c = ambient_temperature
+        self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
         self.attack_angle = np.arcsin(
             np.sin(np.deg2rad(np.abs(azimuth - wind_angle) % 180.0))
@@ -110,8 +110,8 @@ class ConvectiveCoolingBase(PowerTerm):
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp_c)
-        temperature_delta = conductor_temperature - self.ambient_temp_c
+        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp)
+        temperature_delta = conductor_temperature - self.ambient_temp
         air_density = self.air_density(film_temperature, self.altitude)
         return np.maximum(
             self._value_forced(film_temperature, temperature_delta, air_density),

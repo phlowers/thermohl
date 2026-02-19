@@ -52,7 +52,7 @@ def test_radiative_cooling_value_temperature_scalar(radiative_cooling):
         * radiative_cooling.outer_diameter
         * (
             ((temp + 273.0) / 100.0) ** 4
-            - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
+            - ((radiative_cooling.ambient_temp + 273.0) / 100.0) ** 4
         )
     )
 
@@ -77,7 +77,7 @@ def test_radiative_cooling_value_temperature_array(radiative_cooling):
         * radiative_cooling.outer_diameter
         * (
             ((temp + 273.0) / 100.0) ** 4
-            - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
+            - ((radiative_cooling.ambient_temp + 273.0) / 100.0) ** 4
         )
     )
 

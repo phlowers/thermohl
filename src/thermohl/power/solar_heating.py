@@ -73,17 +73,17 @@ class _SRad:
         hour: floatArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        solar_altitude_rad = sun.solar_altitude(latitude, month, day, hour)
-        solar_azimuth_rad = sun.solar_azimuth(latitude, month, day, hour)
-        incidence_angle_rad = np.arccos(
-            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azimuth)
+        computed_solar_altitude = sun.solar_altitude(latitude, month, day, hour)
+        computed_solar_azimuth = sun.solar_azimuth(latitude, month, day, hour)
+        computed_incidence_angle = np.arccos(
+            np.cos(computed_solar_altitude) * np.cos(computed_solar_azimuth - azimuth)
         )
         altitude_factor = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
         clearness_factor = self.atmosphere_turbidity(
-            np.rad2deg(solar_altitude_rad), turbidity
+            np.rad2deg(computed_solar_altitude), turbidity
         )
         solar_irradiance = (
-            altitude_factor * clearness_factor * np.sin(incidence_angle_rad)
+            altitude_factor * clearness_factor * np.sin(computed_incidence_angle)
         )
         return np.where(solar_irradiance > 0.0, solar_irradiance, 0.0)
 

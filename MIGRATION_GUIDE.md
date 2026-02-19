@@ -521,7 +521,18 @@ def _profile_mom(
 
 Several attributes have been renamed, please adapt your code if you use them directly. The former and new names are listed in the tables below.
 
-Please also not that the global variable `power_term._dT` has been renamed to `power_term_dT._TEMP_INCREMENT`.
+### Global Variables Change
+
+Following global variables have been renamed:
+
+| Old Name | New Name |
+-----------|-----------
+| `power_term._dT` | `power_term_dT._TEMP_INCREMENT` |
+| `_T0` | `_STD_TEMP_K` |
+| `_p0` | `_STD_PRESSURE_PA` |
+| `_kb` | `_BOLTZMANN_CONSTANT` |
+| `_Na` | `_AVOGADRO_NUMBER` |
+| `_R` | `_GAS_CONSTANT` |
 
 ### Classes ConvectiveCooling
 

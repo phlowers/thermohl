@@ -18,8 +18,8 @@ from thermohl.power.power_term import PowerTerm
 class RadiativeCoolingBase(PowerTerm):
     """Generic power term for radiative cooling."""
 
-    def _celsius2kelvin(self, temp_c: floatArrayLike) -> floatArrayLike:
-        return temp_c + self.kelvin_offset
+    def _celsius2kelvin(self, temperature: floatArrayLike) -> floatArrayLike:
+        return temperature + self.kelvin_offset
 
     def __init__(
         self,

@@ -240,8 +240,8 @@ class Solver3T(Solver_):
 
     def steady_temperature(
         self,
-        surface_temperature_guess_c: Optional[floatArrayLike] = None,
-        core_temperature_guess_c: Optional[floatArrayLike] = None,
+        surface_temperature_guess: Optional[floatArrayLike] = None,
+        core_temperature_guess: Optional[floatArrayLike] = None,
         tol: float = DP.tol,
         maxiter: int = DP.maxiter,
         return_err: bool = False,
@@ -251,8 +251,8 @@ class Solver3T(Solver_):
         Compute the steady-state temperature distribution.
 
         Args:
-            surface_temperature_guess_c (float | numpy.ndarray | None): Initial guess for the surface temperature. If None, ambient temperature is used.
-            core_temperature_guess_c (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
+            surface_temperature_guess (float | numpy.ndarray | None): Initial guess for the surface temperature. If None, ambient temperature is used.
+            core_temperature_guess (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
             tol (float): Tolerance for the quasi-Newton solver.
             maxiter (int): Maximum number of iterations for the quasi-Newton solver.
             return_err (bool): If True, the error of the solution is included in the returned DataFrame.
@@ -264,18 +264,18 @@ class Solver3T(Solver_):
 
         # if no guess provided, use ambient temp
         shape = (self.args.max_len(),)
-        surface_temperature_guess_c = (
-            surface_temperature_guess_c
-            if surface_temperature_guess_c is not None
+        surface_temperature_guess = (
+            surface_temperature_guess
+            if surface_temperature_guess is not None
             else 1.0 * self.args.ambient_temperature
         )
-        core_temperature_guess_c = (
-            core_temperature_guess_c
-            if core_temperature_guess_c is not None
+        core_temperature_guess = (
+            core_temperature_guess
+            if core_temperature_guess is not None
             else 1.5 * np.abs(self.args.ambient_temperature)
         )
-        surface_temperature_guess_ = surface_temperature_guess_c * np.ones(shape)
-        core_temperature_guess_ = core_temperature_guess_c * np.ones(shape)
+        surface_temperature_guess_ = surface_temperature_guess * np.ones(shape)
+        core_temperature_guess_ = core_temperature_guess * np.ones(shape)
 
         # solve system
         x, y, iterations, err = quasi_newton_2d(
@@ -370,8 +370,8 @@ class Solver3T(Solver_):
     def transient_temperature(
         self,
         time: floatArray = np.array([]),
-        surface_temperature_0_c: Optional[floatArrayLike] = None,
-        core_temperature_0_c: Optional[floatArrayLike] = None,
+        surface_temperature_0: Optional[floatArrayLike] = None,
+        core_temperature_0: Optional[floatArrayLike] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -379,8 +379,8 @@ class Solver3T(Solver_):
 
         Args:
             time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
-            surface_temperature_0_c (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
-            core_temperature_0_c (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            surface_temperature_0 (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
+            core_temperature_0 (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
@@ -394,15 +394,15 @@ class Solver3T(Solver_):
             raise ValueError()
 
         # get initial temperature
-        surface_temperature_0_c = (
-            surface_temperature_0_c
-            if surface_temperature_0_c is not None
+        surface_temperature_0 = (
+            surface_temperature_0
+            if surface_temperature_0 is not None
             else self.args.ambient_temperature
         )
-        core_temperature_0_c = (
-            core_temperature_0_c
-            if core_temperature_0_c is not None
-            else 1.0 + surface_temperature_0_c
+        core_temperature_0 = (
+            core_temperature_0
+            if core_temperature_0 is not None
+            else 1.0 + surface_temperature_0
         )
 
         # get month, day and hours
@@ -435,8 +435,8 @@ class Solver3T(Solver_):
         surface_temperature = np.zeros((N, n))
         ambient_temperature = np.zeros((N, n))
         core_temperature = np.zeros((N, n))
-        surface_temperature[0, :] = surface_temperature_0_c
-        core_temperature[0, :] = core_temperature_0_c
+        surface_temperature[0, :] = surface_temperature_0
+        core_temperature[0, :] = core_temperature_0
         ambient_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )

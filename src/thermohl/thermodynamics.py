@@ -21,25 +21,25 @@ _GAS_CONSTANT = _BOLTZMANN_CONSTANT * _AVOGADRO_NUMBER
 
 class Air:
     @staticmethod
-    def heat_capacity(temp_k: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
+    def heat_capacity(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """In J.kg**-1.K**-1"""
-        return np.interp(temp_k, [240.0, 600.0], [1.006, 1.051])
+        return np.interp(temperature, [240.0, 600.0], [1.006, 1.051])
 
 
 class Water:
     @staticmethod
-    def boiling_point(pressure_pa: floatArrayLike = _STD_PRESSURE_PA) -> floatArrayLike:
+    def boiling_point(pressure: floatArrayLike = _STD_PRESSURE_PA) -> floatArrayLike:
         """Using Clausius–Clapeyron equation; in K."""
         # convert H from J.kg**-1 to J.mol**-1 using molar mass
-        latent_heat_molar = Water.heat_of_vaporization() * 0.018015
-        boiling_temp_k = 1.0 / (
+        latent_heat = Water.heat_of_vaporization() * 0.018015
+        boiling_temp = 1.0 / (
             1 / 373.15
-            - _GAS_CONSTANT * np.log(pressure_pa / _STD_PRESSURE_PA) / latent_heat_molar
+            - _GAS_CONSTANT * np.log(pressure / _STD_PRESSURE_PA) / latent_heat
         )
-        return boiling_temp_k
+        return boiling_temp
 
     @staticmethod
-    def heat_capacity(temp_k: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
+    def heat_capacity(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """From NIST webbook; in J.kg**-1.K**-1.
         See https://webbook.nist.gov/cgi/cbook.cgi?Name=Water&Units=SI.
         """
@@ -48,7 +48,7 @@ class Water:
         coeff_c = -3196.413
         coeff_d = +2474.455
         coeff_e = 3.855326
-        temp_kilo = temp_k / 1000.0
+        temp_kilo = temperature / 1000.0
         return (
             coeff_a
             + coeff_b * temp_kilo
@@ -65,15 +65,17 @@ class Water:
         return 2.257e05
 
     @staticmethod
-    def vapor_pressure(temp_k: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
+    def vapor_pressure(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """Using Buck equation; in Pa."""
-        temp_c = temp_k - 273.15
-        return 611.21 * np.exp((18.678 - temp_c / 234.5) * (temp_c / (257.14 + temp_c)))
+        temperature = temperature - 273.15
+        return 611.21 * np.exp(
+            (18.678 - temperature / 234.5) * (temperature / (257.14 + temperature))
+        )
 
     @staticmethod
-    def volumic_mass(temp_c: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
+    def volumic_mass(temperature: floatArrayLike = _STD_TEMP_K) -> floatArrayLike:
         """In kg.m**-3."""
-        temp_points_c = np.array(
+        temp_points = np.array(
             [
                 0.0,
                 1.0,
@@ -187,7 +189,7 @@ class Water:
                 958.35,
             ]
         )
-        return np.interp(temp_c, temp_points_c, density_points)
+        return np.interp(temperature, temp_points, density_points)
 
 
 class Ice:

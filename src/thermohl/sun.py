@@ -142,13 +142,15 @@ def solar_altitude(
         Solar altitude in radians.
 
     """
-    solar_declination_rad = solar_declination(month_index, day_of_month)
-    hour_angle_rad = hour_angle(
+    computed_solar_declination = solar_declination(month_index, day_of_month)
+    computed_hour_angle = hour_angle(
         solar_hour, solar_minute=solar_minute, solar_second=solar_second
     )
     return np.arcsin(
-        np.cos(latitude) * np.cos(solar_declination_rad) * np.cos(hour_angle_rad)
-        + np.sin(latitude) * np.sin(solar_declination_rad)
+        np.cos(latitude)
+        * np.cos(computed_solar_declination)
+        * np.cos(computed_hour_angle)
+        + np.sin(latitude) * np.sin(computed_solar_declination)
     )
 
 
@@ -186,17 +188,17 @@ def solar_azimuth(
         Solar azimuth in radians.
 
     """
-    solar_declination_rad = solar_declination(month_index, day_of_month)
-    hour_angle_rad = hour_angle(
+    computed_solar_declination = solar_declination(month_index, day_of_month)
+    computed_hour_angle = hour_angle(
         solar_hour, solar_minute=solar_minute, solar_second=solar_second
     )
-    azimuth_ratio = np.sin(hour_angle_rad) / (
-        np.sin(latitude) * np.cos(hour_angle_rad)
-        - np.cos(latitude) * np.tan(solar_declination_rad)
+    azimuth_ratio = np.sin(computed_hour_angle) / (
+        np.sin(latitude) * np.cos(computed_hour_angle)
+        - np.cos(latitude) * np.tan(computed_solar_declination)
     )
     azimuth_offset_rad = np.where(
         azimuth_ratio >= 0.0,
-        np.where(hour_angle_rad < 0.0, 0.0, np.pi),
-        np.where(hour_angle_rad < 0.0, np.pi, 2.0 * np.pi),
+        np.where(computed_hour_angle < 0.0, 0.0, np.pi),
+        np.where(computed_hour_angle < 0.0, np.pi, 2.0 * np.pi),
     )
     return azimuth_offset_rad + np.arctan(azimuth_ratio)

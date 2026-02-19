@@ -45,11 +45,11 @@ class ConvectiveCooling(PowerTerm):
 
         """
         self.altitude = altitude
-        self.ambient_temp_c = ambient_temperature
+        self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
         self.outer_diameter = outer_diameter
         self.roughness_ratio = roughness_ratio
-        self.gravity_ms2 = g
+        self.gravity = g
         self.attack_angle = np.arcsin(
             np.sin(np.deg2rad(np.abs(azimuth - wind_angle) % 180.0))
         )
@@ -143,7 +143,7 @@ class ConvectiveCooling(PowerTerm):
         grashof = (
             self.outer_diameter**3
             * np.abs(temperature_delta)
-            * self.gravity_ms2
+            * self.gravity
             / ((film_temperature + 273.15) * kinematic_viscosity**2)
         )
         gr_prandtl = grashof * Air.prandtl(film_temperature)
@@ -170,8 +170,8 @@ class ConvectiveCooling(PowerTerm):
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp_c)
-        temperature_delta = conductor_temperature - self.ambient_temp_c
+        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp)
+        temperature_delta = conductor_temperature - self.ambient_temp
         kinematic_viscosity = Air.kinematic_viscosity(film_temperature)
         # nu[nu < 1.0E-06] = 1.0E-06
         thermal_conductivity = Air.thermal_conductivity(film_temperature)
@@ -183,6 +183,6 @@ class ConvectiveCooling(PowerTerm):
         return (
             np.pi
             * thermal_conductivity
-            * (conductor_temperature - self.ambient_temp_c)
+            * (conductor_temperature - self.ambient_temp)
             * np.maximum(nusselt_forced, nusselt_natural)
         )

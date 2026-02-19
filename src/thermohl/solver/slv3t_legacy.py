@@ -131,9 +131,9 @@ class Solver3TL(Solver3T):
     def transient_temperature_legacy(
         self,
         time: floatArray = np.array([]),
-        surface_temperature_0_c: Optional[floatArrayLike] = None,
-        core_temperature_0_c: Optional[floatArrayLike] = None,
-        time_constant_s: float = 600.0,
+        surface_temperature_0: Optional[floatArrayLike] = None,
+        core_temperature_0: Optional[floatArrayLike] = None,
+        time_constant: float = 600.0,
         return_power: bool = False,
     ) -> Dict[str, Any]:
         """
@@ -142,11 +142,11 @@ class Solver3TL(Solver3T):
         Args:
             time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
-            surface_temperature_0_c (float): Initial surface temperature. If set to None, the ambient temperature from
+            surface_temperature_0 (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
-            core_temperature_0_c (float): Initial core temperature. If set to None, the ambient temperature from
+            core_temperature_0 (float): Initial core temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
-            time_constant_s (float): A time-constant to add some inertia. The default is 600.
+            time_constant (float): A time-constant to add some inertia. The default is 600.
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
@@ -162,15 +162,15 @@ class Solver3TL(Solver3T):
             raise ValueError()
 
         # get initial temperature
-        surface_temperature_0_c = (
-            surface_temperature_0_c
-            if surface_temperature_0_c is not None
+        surface_temperature_0 = (
+            surface_temperature_0
+            if surface_temperature_0 is not None
             else self.args.ambient_temperature
         )
-        core_temperature_0_c = (
-            core_temperature_0_c
-            if core_temperature_0_c is not None
-            else 1.0 + surface_temperature_0_c
+        core_temperature_0 = (
+            core_temperature_0
+            if core_temperature_0 is not None
+            else 1.0 + surface_temperature_0
         )
 
         # shortcuts for time-loop
@@ -182,8 +182,8 @@ class Solver3TL(Solver3T):
         core_temperature = np.zeros((time_size, input_size))
         temperature_difference_c = np.zeros((time_size, input_size))
 
-        surface_temperature[0, :] = surface_temperature_0_c
-        core_temperature[0, :] = core_temperature_0_c
+        surface_temperature[0, :] = surface_temperature_0
+        core_temperature[0, :] = core_temperature_0
         ambient_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
@@ -200,10 +200,10 @@ class Solver3TL(Solver3T):
                 ambient_temperature[i - 1, :] + time_difference * imc * balance
             )
             temperature_difference_c[i, :] = (
-                1.0 - time_difference / time_constant_s
+                1.0 - time_difference / time_constant
             ) * temperature_difference_c[i - 1, :] + (
                 time_difference
-                / time_constant_s
+                / time_constant
                 * self.morgan_coefficients[0]
                 * self.joule_heating.value(ambient_temperature[i, :])
             )
