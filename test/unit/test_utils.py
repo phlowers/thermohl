@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
+import pytest
 
 from thermohl.utils import bisect_v, quasi_newton_2d
 
@@ -60,7 +61,7 @@ def test_bisect_vector():
 
 
 def test_bisect_array():
-    c = np.arange(-1, 26).reshape(3, 3, 3)
+    c = np.arange(1, 28).reshape(3, 3, 3)
 
     def f(x):
         return x**2 - c
@@ -70,31 +71,35 @@ def test_bisect_array():
         f, lower_bound=0, upper_bound=30, output_shape=c.shape, tolerance=tol
     )
 
-    # The first two elements of c are negative, so there's no root.
-    # The corresponding results and errors should be NaN.
-    assert np.isnan(x0[0][0][0])
-    assert np.isnan(x0[0][0][1])
-
-    assert np.isnan(err[0][0][0])
-    assert np.isnan(err[0][0][1])
-
-    np.testing.assert_allclose(x0[0][0][2:], np.sqrt(c[0][0][2:]), atol=tol)
-    np.testing.assert_allclose(x0[0][1:], np.sqrt(c[0][1:]), atol=tol)
-    np.testing.assert_allclose(x0[1:], np.sqrt(c[1:]), atol=tol)
+    np.testing.assert_allclose(x0, np.sqrt(c), atol=tol)
 
 
 def test_bisect_no_convergence():
     def f(x):
         return x**2 + 1  # No root
 
-    x0, err = bisect_v(
-        f,
-        lower_bound=-50,
-        upper_bound=50,
-        output_shape=(1,),
-    )
-    assert np.isnan(x0).all()
-    assert np.isnan(err).all()
+    with pytest.raises(ValueError):
+        bisect_v(
+            f,
+            lower_bound=-50,
+            upper_bound=50,
+            output_shape=(1,),
+        )
+
+
+def test_bisect_no_convergence_array():
+    c = np.arange(-1, 1)
+
+    def f(x):
+        return x**2 + c  # No root for c > 0
+
+    with pytest.raises(ValueError):
+        bisect_v(
+            f,
+            lower_bound=-50,
+            upper_bound=50,
+            output_shape=(1,),
+        )
 
 
 #

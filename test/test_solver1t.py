@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import pytest
 import numpy as np
 
 from thermohl import solver
@@ -105,15 +106,16 @@ def test_steady_intensity_hot_weather():
 
     solver_1t = solver.ieee(
         dic={
-            "ambient_temperature_c": ambient_temperature,
+            "ambient_temperature": ambient_temperature,
         },
         heateq="1t",
     )
-    ampacity = solver_1t.steady_intensity(
-        max_conductor_temperature_c=45,
-        Imin=np.ones_like(ambient_temperature) * DP.imin,
-        Imax=np.ones_like(ambient_temperature) * DP.imax,
-    )
 
-    assert not np.isnan(ampacity["transit_a"][0])
-    assert np.isnan(ampacity["transit_a"][1:]).all()
+    # Here some ambient temperatures are above the maximum conductor temperature,
+    # so there's no solution - the solver should raise a ValueError
+    with pytest.raises(ValueError):
+        solver_1t.steady_intensity(
+            max_conductor_temperature=45,
+            Imin=np.ones_like(ambient_temperature) * DP.imin,
+            Imax=np.ones_like(ambient_temperature) * DP.imax,
+        )
