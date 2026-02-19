@@ -44,9 +44,7 @@ class Solver3TL(Solver3T):
         UNIFORM_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 13
         BIMETALLIC_CONDUCTOR_COEFFICIENT: Final[float] = 1 / 21
 
-        core_diameter_array = self.args.core_diameter_m * np.ones(
-            (self.args.max_len(),)
-        )
+        core_diameter_array = self.args.core_diameter * np.ones((self.args.max_len(),))
         indices_non_zero_diameter = np.nonzero(core_diameter_array > 0.0)[0]
         heat_flux_coefficients = UNIFORM_CONDUCTOR_COEFFICIENT * np.ones_like(
             core_diameter_array
@@ -56,7 +54,7 @@ class Solver3TL(Solver3T):
         )
         return heat_flux_coefficients, indices_non_zero_diameter
 
-    def average(self, surface_temperature_c, core_temperature_c):
+    def average(self, surface_temperature, core_temperature):
         """
         Compute average temperature given surface and core temperature.
 
@@ -64,28 +62,28 @@ class Solver3TL(Solver3T):
         conductors.
 
         Args:
-            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
-            core_temperature_c (numpy.ndarray): Array of core temperatures.
+            surface_temperature (numpy.ndarray): Array of surface temperatures.
+            core_temperature (numpy.ndarray): Array of core temperatures.
         """
-        return 0.5 * (surface_temperature_c + core_temperature_c)
+        return 0.5 * (surface_temperature + core_temperature)
 
     def morgan(
-        self, surface_temperature_c: floatArray, core_temperature_c: floatArray
+        self, surface_temperature: floatArray, core_temperature: floatArray
     ) -> floatArray:
         """
         Computes the Morgan function for given temperature arrays.
 
         Args:
-            surface_temperature_c (numpy.ndarray): Array of surface temperatures.
-            core_temperature_c (numpy.ndarray): Array of core temperatures.
+            surface_temperature (numpy.ndarray): Array of surface temperatures.
+            core_temperature (numpy.ndarray): Array of core temperatures.
 
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
         morgan_coefficient = self.morgan_coefficients[0]
         return (
-            core_temperature_c - surface_temperature_c
-        ) - morgan_coefficient * self.joule(surface_temperature_c, core_temperature_c)
+            core_temperature - surface_temperature
+        ) - morgan_coefficient * self.joule(surface_temperature, core_temperature)
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: strListLike
@@ -94,7 +92,7 @@ class Solver3TL(Solver3T):
 
         max_len = self.args.max_len()
         Tmax = T * np.ones(max_len)
-        target_ = self._check_target(target, self.args.core_diameter_m, max_len)
+        target_ = self._check_target(target, self.args.core_diameter, max_len)
 
         # pre-compute indexes
         surface_indices = np.nonzero(target_ == Solver_.Names.surf)[0]
@@ -102,9 +100,9 @@ class Solver3TL(Solver3T):
         core_indices = np.nonzero(target_ == Solver_.Names.core)[0]
 
         def newtheader(
-            transit_a: floatArray, tg: floatArray
+            transit: floatArray, tg: floatArray
         ) -> Tuple[floatArray, floatArray]:
-            self.args.transit_a = transit_a
+            self.args.transit = transit
             self.joule_heating.__init__(**self.args.__dict__)
             surface_temperature = np.ones_like(tg) * np.nan
             core_temperature = np.ones_like(tg) * np.nan
@@ -132,7 +130,7 @@ class Solver3TL(Solver3T):
 
     def transient_temperature_legacy(
         self,
-        time_s: floatArray = np.array([]),
+        time: floatArray = np.array([]),
         surface_temperature_0_c: Optional[floatArrayLike] = None,
         core_temperature_0_c: Optional[floatArrayLike] = None,
         time_constant_s: float = 600.0,
@@ -142,7 +140,7 @@ class Solver3TL(Solver3T):
         Compute transient-state temperature with legacy method.
 
         Args:
-            time_s (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
+            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0_c (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
@@ -157,9 +155,9 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (input_size for input dict entries, time_size for time_s)
+        # get sizes (input_size for input dict entries, time_size for time)
         input_size = self.args.max_len()
-        time_size = len(time_s)
+        time_size = len(time)
         if time_size < 2:
             raise ValueError()
 
@@ -167,7 +165,7 @@ class Solver3TL(Solver3T):
         surface_temperature_0_c = (
             surface_temperature_0_c
             if surface_temperature_0_c is not None
-            else self.args.ambient_temperature_c
+            else self.args.ambient_temperature
         )
         core_temperature_0_c = (
             core_temperature_0_c
@@ -176,30 +174,30 @@ class Solver3TL(Solver3T):
         )
 
         # shortcuts for time-loop
-        imc = 1.0 / (self.args.linear_mass_kgm * self.args.heat_capacity_jkgk)
+        imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
-        surface_temperature_c = np.zeros((time_size, input_size))
-        ambient_temperature_c = np.zeros((time_size, input_size))
-        core_temperature_c = np.zeros((time_size, input_size))
+        surface_temperature = np.zeros((time_size, input_size))
+        ambient_temperature = np.zeros((time_size, input_size))
+        core_temperature = np.zeros((time_size, input_size))
         temperature_difference_c = np.zeros((time_size, input_size))
 
-        surface_temperature_c[0, :] = surface_temperature_0_c
-        core_temperature_c[0, :] = core_temperature_0_c
-        ambient_temperature_c[0, :] = self.average(
-            surface_temperature_c[0, :], core_temperature_c[0, :]
+        surface_temperature[0, :] = surface_temperature_0_c
+        core_temperature[0, :] = core_temperature_0_c
+        ambient_temperature[0, :] = self.average(
+            surface_temperature[0, :], core_temperature[0, :]
         )
         temperature_difference_c[0, :] = (
-            core_temperature_c[0, :] - surface_temperature_c[0, :]
+            core_temperature[0, :] - surface_temperature[0, :]
         )
 
-        for i in range(1, len(time_s)):
+        for i in range(1, len(time)):
             balance = self.balance(
-                surface_temperature_c[i - 1, :], core_temperature_c[i - 1, :]
+                surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
-            time_difference = time_s[i] - time_s[i - 1]
-            ambient_temperature_c[i, :] = (
-                ambient_temperature_c[i - 1, :] + time_difference * imc * balance
+            time_difference = time[i] - time[i - 1]
+            ambient_temperature[i, :] = (
+                ambient_temperature[i - 1, :] + time_difference * imc * balance
             )
             temperature_difference_c[i, :] = (
                 1.0 - time_difference / time_constant_s
@@ -207,20 +205,20 @@ class Solver3TL(Solver3T):
                 time_difference
                 / time_constant_s
                 * self.morgan_coefficients[0]
-                * self.joule_heating.value(ambient_temperature_c[i, :])
+                * self.joule_heating.value(ambient_temperature[i, :])
             )
-            core_temperature_c[i, :] = (
-                ambient_temperature_c[i, :] + 0.5 * temperature_difference_c[i, :]
+            core_temperature[i, :] = (
+                ambient_temperature[i, :] + 0.5 * temperature_difference_c[i, :]
             )
-            surface_temperature_c[i, :] = (
-                ambient_temperature_c[i, :] - 0.5 * temperature_difference_c[i, :]
+            surface_temperature[i, :] = (
+                ambient_temperature[i, :] - 0.5 * temperature_difference_c[i, :]
             )
 
         return self._transient_temperature_results(
-            time_s,
-            surface_temperature_c,
-            ambient_temperature_c,
-            core_temperature_c,
+            time,
+            surface_temperature,
+            ambient_temperature,
+            core_temperature,
             return_power,
             input_size,
         )

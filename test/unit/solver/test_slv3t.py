@@ -225,8 +225,8 @@ def test_profile_bim_avg_coeffs_multiple_values():
 # Tests Solver3T
 def test_morgan_coefficients_basic():
     solver = Solver3T()
-    solver.args.outer_diameter_m = np.array([1.0])
-    solver.args.core_diameter_m = np.array([0.5])
+    solver.args.outer_diameter = np.array([1.0])
+    solver.args.core_diameter = np.array([0.5])
     solver.update()
 
     expected_c = np.array([0.268951])
@@ -244,8 +244,8 @@ def test_morgan_coefficients_basic():
 
 def test_morgan_coefficients_multiple_values():
     solver = Solver3T()
-    solver.args.outer_diameter_m = np.array([1.0, 2.5])
-    solver.args.core_diameter_m = np.array([0.5, 1.0])
+    solver.args.outer_diameter = np.array([1.0, 2.5])
+    solver.args.core_diameter = np.array([0.5, 1.0])
     solver.update()
 
     expected_c = np.array([0.268951, 0.325468])
@@ -263,8 +263,8 @@ def test_morgan_coefficients_multiple_values():
 
 def test_morgan_coefficients_edge_case_zero_d():
     solver = Solver3T()
-    solver.args.outer_diameter_m = np.array([1.0])
-    solver.args.core_diameter_m = np.array([0.0])
+    solver.args.outer_diameter = np.array([1.0])
+    solver.args.core_diameter = np.array([0.0])
     solver.update()
 
     expected_c = np.array([0.5])
@@ -282,8 +282,8 @@ def test_morgan_coefficients_edge_case_zero_d():
 
 def test_morgan_coefficients_edge_case_equal_D_and_d():
     solver = Solver3T()
-    solver.args.outer_diameter_m = np.array([1.0])
-    solver.args.core_diameter_m = np.array([1.0])
+    solver.args.outer_diameter = np.array([1.0])
+    solver.args.core_diameter = np.array([1.0])
     solver.update()
 
     expected_c = np.array([nan])
@@ -301,8 +301,8 @@ def test_morgan_coefficients_edge_case_equal_D_and_d():
 
 def test_morgan_coefficients_large_values():
     solver = Solver3T()
-    solver.args.outer_diameter_m = np.array([1e6])
-    solver.args.core_diameter_m = np.array([1e5])
+    solver.args.outer_diameter = np.array([1e6])
+    solver.args.core_diameter = np.array([1e5])
     solver.update()
 
     expected_c = np.array([0.476742])
@@ -373,7 +373,7 @@ def test_morgan_basic():
     solver.joule_heating.value = MagicMock(return_value=np.array([100.0]))
     solver.joule = MagicMock(return_value=np.array([100.0]))
     solver.args = MagicMock()
-    solver.args.radial_thermal_conductivity_wmk = 1.0
+    solver.args.radial_thermal_conductivity = 1.0
 
     ts = np.array([300])
     tc = np.array([400])

@@ -12,222 +12,222 @@ from thermohl.power.cigre import Air
 
 
 def test_volumic_mass_scalar():
-    air_temperature_c = 25.0
+    air_temperature = 25.0
     altitude = 1000.0
     expected = 1.2925 * np.exp(-1.16e-04 * altitude)
 
-    result = Air.volumic_mass(air_temperature_c, altitude)
+    result = Air.volumic_mass(air_temperature, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_volumic_mass_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
+    air_temperature = np.array([15.0, 20.0, 25.0])
     altitude = np.array([0.0, 500.0, 1000.0])
     expected = 1.2925 * np.exp(-1.16e-04 * altitude)
 
-    result = Air.volumic_mass(air_temperature_c, altitude)
+    result = Air.volumic_mass(air_temperature, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_volumic_mass_default_altitude():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = 1.2925 * np.ones_like(air_temperature_c)
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = 1.2925 * np.ones_like(air_temperature)
 
-    result = Air.volumic_mass(air_temperature_c)
+    result = Air.volumic_mass(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_volumic_mass_mismatched_array_sizes():
-    air_temperature_c = np.array([15.0, 20.0])
+    air_temperature = np.array([15.0, 20.0])
     altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.volumic_mass(air_temperature_c, altitude)
+        Air.volumic_mass(air_temperature, altitude)
 
 
 def test_relative_density_scalar():
-    air_temperature_c = 25.0
+    air_temperature = 25.0
     altitude = 1000.0
     expected = np.exp(-1.16e-04 * altitude)
 
-    result = Air.relative_density(air_temperature_c, altitude)
+    result = Air.relative_density(air_temperature, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_relative_density_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
+    air_temperature = np.array([15.0, 20.0, 25.0])
     altitude = np.array([0.0, 500.0, 1000.0])
     expected = np.exp(-1.16e-04 * altitude)
 
-    result = Air.relative_density(air_temperature_c, altitude)
+    result = Air.relative_density(air_temperature, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_relative_density_default_altitude():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = np.ones_like(air_temperature_c)
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = np.ones_like(air_temperature)
 
-    result = Air.relative_density(air_temperature_c)
+    result = Air.relative_density(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_relative_density_mismatched_array_sizes():
-    air_temperature_c = np.array([15.0, 20.0])
+    air_temperature = np.array([15.0, 20.0])
     altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.relative_density(air_temperature_c, altitude)
+        Air.relative_density(air_temperature, altitude)
 
 
 def test_kinematic_viscosity_scalar():
-    air_temperature_c = 25.0
-    expected = 1.32e-05 + 9.5e-08 * air_temperature_c
+    air_temperature = 25.0
+    expected = 1.32e-05 + 9.5e-08 * air_temperature
 
-    result = Air.kinematic_viscosity(air_temperature_c)
+    result = Air.kinematic_viscosity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_kinematic_viscosity_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = 1.32e-05 + 9.5e-08 * air_temperature_c
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = 1.32e-05 + 9.5e-08 * air_temperature
 
-    result = Air.kinematic_viscosity(air_temperature_c)
+    result = Air.kinematic_viscosity(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_kinematic_viscosity_negative_temperature():
-    air_temperature_c = -10.0
-    expected = 1.32e-05 + 9.5e-08 * air_temperature_c
+    air_temperature = -10.0
+    expected = 1.32e-05 + 9.5e-08 * air_temperature
 
-    result = Air.kinematic_viscosity(air_temperature_c)
+    result = Air.kinematic_viscosity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_kinematic_viscosity_zero_temperature():
-    air_temperature_c = 0.0
+    air_temperature = 0.0
     expected = 1.32e-05
 
-    result = Air.kinematic_viscosity(air_temperature_c)
+    result = Air.kinematic_viscosity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_dynamic_viscosity_scalar():
-    air_temperature_c = 25.0
+    air_temperature = 25.0
     altitude = 1000.0
-    expected = Air.kinematic_viscosity(air_temperature_c) * Air.volumic_mass(
-        air_temperature_c, altitude
+    expected = Air.kinematic_viscosity(air_temperature) * Air.volumic_mass(
+        air_temperature, altitude
     )
 
-    result = Air.dynamic_viscosity(air_temperature_c, altitude)
+    result = Air.dynamic_viscosity(air_temperature, altitude)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_dynamic_viscosity_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
+    air_temperature = np.array([15.0, 20.0, 25.0])
     altitude = np.array([0.0, 500.0, 1000.0])
-    expected = Air.kinematic_viscosity(air_temperature_c) * Air.volumic_mass(
-        air_temperature_c, altitude
+    expected = Air.kinematic_viscosity(air_temperature) * Air.volumic_mass(
+        air_temperature, altitude
     )
 
-    result = Air.dynamic_viscosity(air_temperature_c, altitude)
+    result = Air.dynamic_viscosity(air_temperature, altitude)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_dynamic_viscosity_default_altitude():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = Air.kinematic_viscosity(air_temperature_c) * Air.volumic_mass(
-        air_temperature_c
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = Air.kinematic_viscosity(air_temperature) * Air.volumic_mass(
+        air_temperature
     )
 
-    result = Air.dynamic_viscosity(air_temperature_c)
+    result = Air.dynamic_viscosity(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_dynamic_viscosity_mismatched_array_sizes():
-    air_temperature_c = np.array([15.0, 20.0])
+    air_temperature = np.array([15.0, 20.0])
     altitude = np.array([0.0, 500.0, 1000.0])
     with pytest.raises(ValueError):
-        Air.dynamic_viscosity(air_temperature_c, altitude)
+        Air.dynamic_viscosity(air_temperature, altitude)
 
 
 def test_thermal_conductivity_scalar():
-    air_temperature_c = 25.0
-    expected = 2.42e-02 + 7.2e-05 * air_temperature_c
+    air_temperature = 25.0
+    expected = 2.42e-02 + 7.2e-05 * air_temperature
 
-    result = Air.thermal_conductivity(air_temperature_c)
+    result = Air.thermal_conductivity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_thermal_conductivity_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = 2.42e-02 + 7.2e-05 * air_temperature_c
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = 2.42e-02 + 7.2e-05 * air_temperature
 
-    result = Air.thermal_conductivity(air_temperature_c)
+    result = Air.thermal_conductivity(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_thermal_conductivity_negative_temperature():
-    air_temperature_c = -10.0
-    expected = 2.42e-02 + 7.2e-05 * air_temperature_c
+    air_temperature = -10.0
+    expected = 2.42e-02 + 7.2e-05 * air_temperature
 
-    result = Air.thermal_conductivity(air_temperature_c)
+    result = Air.thermal_conductivity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_thermal_conductivity_zero_temperature():
-    air_temperature_c = 0.0
+    air_temperature = 0.0
     expected = 2.42e-02
 
-    result = Air.thermal_conductivity(air_temperature_c)
+    result = Air.thermal_conductivity(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_prandtl_scalar():
-    air_temperature_c = 25.0
-    expected = 0.715 - 2.5e-04 * air_temperature_c
+    air_temperature = 25.0
+    expected = 0.715 - 2.5e-04 * air_temperature
 
-    result = Air.prandtl(air_temperature_c)
+    result = Air.prandtl(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_prandtl_array():
-    air_temperature_c = np.array([15.0, 20.0, 25.0])
-    expected = 0.715 - 2.5e-04 * air_temperature_c
+    air_temperature = np.array([15.0, 20.0, 25.0])
+    expected = 0.715 - 2.5e-04 * air_temperature
 
-    result = Air.prandtl(air_temperature_c)
+    result = Air.prandtl(air_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_prandtl_negative_temperature():
-    air_temperature_c = -10.0
-    expected = 0.715 - 2.5e-04 * air_temperature_c
+    air_temperature = -10.0
+    expected = 0.715 - 2.5e-04 * air_temperature
 
-    result = Air.prandtl(air_temperature_c)
+    result = Air.prandtl(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_prandtl_zero_temperature():
-    air_temperature_c = 0.0
+    air_temperature = 0.0
     expected = 0.715
 
-    result = Air.prandtl(air_temperature_c)
+    result = Air.prandtl(air_temperature)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"

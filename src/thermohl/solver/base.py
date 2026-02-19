@@ -38,9 +38,9 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude_deg', 'longitude_deg', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature_c', 'ambient_pressure_pa', 'relative_humidity', 'precipitation_rate_ms', 'wind_speed_ms', 'wind_angle_deg', 'albedo', 'turbidity', 'transit_a', 'm',
-    #     'core_diameter_m', 'outer_diameter_m', 'core_area_m2', 'outer_area_m2', 'roughness_ratio', 'radial_thermal_conductivity_wmk', 'heat_capacity_jkgk', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c_ohm_m', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high_ohm_m', 'linear_resistance_temp_low_ohm_m',
-    #     'temp_high_c', 'temp_low_c'
+    #     'latitude', 'longitude', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_angle', 'albedo', 'turbidity', 'transit', 'm',
+    #     'core_diameter', 'outer_diameter', 'core_area', 'outer_area', 'roughness_ratio', 'radial_thermal_conductivity', 'heat_capacity', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high', 'linear_resistance_temp_low',
+    #     'temp_high', 'temp_low'
     # ]
 
     def __init__(self, input_dict: Optional[dict[str, Any]] = None):
@@ -57,9 +57,9 @@ class Args:
     def _set_default_values(self) -> None:
         """Set default values."""
 
-        self.measured_solar_irradiance_w_m2 = np.nan  # solar irradiance
-        self.latitude_deg = 45.0  # latitude (deg)
-        self.longitude_deg = 0.0  # longitude (deg)
+        self.measured_solar_irradiance = np.nan  # solar irradiance
+        self.latitude = 45.0  # latitude (deg)
+        self.longitude = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
         self.azimuth = 0.0  # azimuth (deg)
 
@@ -67,33 +67,33 @@ class Args:
         self.day = 21  # day of the month
         self.hour = 12  # hour of the day (in [0, 23] range)
 
-        self.ambient_temperature_c = 15.0  # ambient temperature (C)
-        self.ambient_pressure_pa = 1.0e05  # ambient pressure (Pa)
+        self.ambient_temperature = 15.0  # ambient temperature (C)
+        self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
-        self.precipitation_rate_ms = 0.0  # rain precipitation rate (m.s**-1)
-        self.wind_speed_ms = 0.0  # wind speed (m.s**-1)
-        self.wind_angle_deg = 90.0  # wind angle (deg, regarding north)
+        self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
+        self.wind_speed = 0.0  # wind speed (m.s**-1)
+        self.wind_angle = 90.0  # wind angle (deg, regarding north)
         self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
 
-        self.transit_a = 100.0  # transit_a intensity (A)
+        self.transit = 100.0  # transit intensity (A)
 
-        self.linear_mass_kgm = 1.5  # mass per unit length (kg.m**-1)
-        self.core_diameter_m = 1.9e-02  # core diameter (m)
-        self.outer_diameter_m = 3.0e-02  # external (global) diameter (m)
-        self.core_area_m2 = 2.84e-04  # core section (m**2)
-        self.outer_area_m2 = 7.07e-04  # external (global) section (m**2)
+        self.linear_mass = 1.5  # mass per unit length (kg.m**-1)
+        self.core_diameter = 1.9e-02  # core diameter (m)
+        self.outer_diameter = 3.0e-02  # external (global) diameter (m)
+        self.core_area = 2.84e-04  # core section (m**2)
+        self.outer_area = 7.07e-04  # external (global) section (m**2)
         self.roughness_ratio = 4.0e-02  # roughness (1)
-        self.radial_thermal_conductivity_wmk = (
+        self.radial_thermal_conductivity = (
             1.0  # radial thermal conductivity (W.m**-1.K**-1)
         )
-        self.heat_capacity_jkgk = 500.0  # specific heat capacity (J.kg**-1.K**-1)
+        self.heat_capacity = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 
         self.solar_absorptivity = 0.5  # solar absorption (1)
         self.emissivity = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        self.linear_resistance_dc_20c_ohm_m = 2.5e-05
+        self.linear_resistance_dc_20c = 2.5e-05
 
         self.magnetic_coeff = 1.006  # coefficient for magnetic effects (1)
         self.magnetic_coeff_per_a = 0.016  # coefficient for magnetic effects (A**-1)
@@ -101,15 +101,15 @@ class Args:
         self.temperature_coeff_linear = 3.8e-03
         # quadratic resistance augmentation with temperature (K**-2)
         self.temperature_coeff_quadratic = 8.0e-07
-        # electric resistance per unit length (DC) at temp_high_c (Ohm.m**-1)
-        self.linear_resistance_temp_high_ohm_m = 3.05e-05
-        # electric resistance per unit length (DC) at temp_low_c (Ohm.m**-1)
-        self.linear_resistance_temp_low_ohm_m = 2.66e-05
-        self.temp_high_c = (
-            60.0  # temperature for linear_resistance_temp_high_ohm_m measurement (°C)
+        # electric resistance per unit length (DC) at temp_high (Ohm.m**-1)
+        self.linear_resistance_temp_high = 3.05e-05
+        # electric resistance per unit length (DC) at temp_low (Ohm.m**-1)
+        self.linear_resistance_temp_low = 2.66e-05
+        self.temp_high = (
+            60.0  # temperature for linear_resistance_temp_high measurement (°C)
         )
-        self.temp_low_c = (
-            20.0  # temperature for linear_resistance_temp_low_ohm_m measurement (°C)
+        self.temp_low = (
+            20.0  # temperature for linear_resistance_temp_low measurement (°C)
         )
 
     def keys(self) -> KeysView[str]:
@@ -206,7 +206,7 @@ class Solver(ABC):
         avg = "avg"
         core = "core"
         time = "time"
-        transit_a = "transit_a"
+        transit = "transit"
         temp = "t"
         tsurf = "t_surf"
         tavg = "t_avg"
@@ -263,13 +263,13 @@ class Solver(ABC):
         self.precipitation_cooling.__init__(**self.args.__dict__)
         self.args.compress()
 
-    def balance(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def balance(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         return (
-            self.joule_heating.value(conductor_temperature_c)
-            + self.solar_heating.value(conductor_temperature_c)
-            - self.convective_cooling.value(conductor_temperature_c)
-            - self.radiative_cooling.value(conductor_temperature_c)
-            - self.precipitation_cooling.value(conductor_temperature_c)
+            self.joule_heating.value(conductor_temperature)
+            + self.solar_heating.value(conductor_temperature)
+            - self.convective_cooling.value(conductor_temperature)
+            - self.radiative_cooling.value(conductor_temperature)
+            - self.precipitation_cooling.value(conductor_temperature)
         )
 
     @abstractmethod

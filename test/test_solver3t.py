@@ -27,18 +27,18 @@ def test_balance():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        latitude_deg=np.random.uniform(42.0, 51.0, N),
+        latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
-        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
-        wind_angle_deg=np.random.uniform(0.0, 90.0, N),
-        transit_a=np.random.uniform(40.0, 4000.0, N),
-        core_diameter_m=np.random.randint(2, size=N)
-        * solver.default_values()["core_diameter_m"],
+        ambient_temperature=np.random.uniform(0.0, 30.0, N),
+        wind_speed=np.random.uniform(0.0, 7.0, N),
+        wind_angle=np.random.uniform(0.0, 90.0, N),
+        transit=np.random.uniform(40.0, 4000.0, N),
+        core_diameter=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter"],
     )
 
     for s in _solvers(dic):
@@ -61,14 +61,14 @@ def test_balance():
         assert np.all(df["err"] < tol)
         assert np.allclose(
             s.balance(
-                surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                surface_temperature=df["t_surf"], core_temperature=df["t_core"]
             ).values,
             0.0,
             atol=tol,
         )
         assert np.allclose(
             s.morgan(
-                surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                surface_temperature=df["t_surf"], core_temperature=df["t_core"]
             ).values,
             0.0,
             atol=tol,
@@ -80,24 +80,24 @@ def test_consistency():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        latitude_deg=np.random.uniform(42.0, 51.0, N),
+        latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        ambient_temperature_c=np.random.uniform(0.0, 30.0, N),
-        wind_speed_ms=np.random.uniform(0.0, 7.0, N),
-        wind_angle_deg=np.random.uniform(0.0, 90.0, N),
-        core_diameter_m=np.random.randint(2, size=N)
-        * solver.default_values()["core_diameter_m"],
+        ambient_temperature=np.random.uniform(0.0, 30.0, N),
+        wind_speed=np.random.uniform(0.0, 7.0, N),
+        wind_angle=np.random.uniform(0.0, 90.0, N),
+        core_diameter=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter"],
     )
 
     for s in _solvers(dic):
         for t in ["surf", "avg", "core"]:
             # solve intensity with different targets
             df = s.steady_intensity(
-                max_conductor_temperature_c=100.0,
+                max_conductor_temperature=100.0,
                 target=t,
                 return_err=True,
                 return_power=True,
@@ -106,18 +106,18 @@ def test_consistency():
             )
             assert np.all(df["err"] < tol)
             # set args intensity to newly founds ampacities
-            s.args.transit_a = df["transit_a"].values
+            s.args.transit = df["transit"].values
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                    surface_temperature=df["t_surf"], core_temperature=df["t_core"]
                 ).values,
                 0.0,
                 atol=tol,
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature_c=df["t_surf"], core_temperature_c=df["t_core"]
+                    surface_temperature=df["t_surf"], core_temperature=df["t_core"]
                 ).values,
                 0.0,
                 atol=tol,

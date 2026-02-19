@@ -20,7 +20,7 @@ def utc2solar_hour(
     utc_hour: floatArrayLike,
     utc_minute: floatArrayLike = 0.0,
     utc_second: floatArrayLike = 0.0,
-    longitude_rad: floatArrayLike = 0.0,
+    longitude: floatArrayLike = 0.0,
 ) -> floatArrayLike:
     """convert utc hour to solar hour adding the longitude contribution
 
@@ -34,7 +34,7 @@ def utc2solar_hour(
         Minutes on the clock. The default is 0.
     utc_second : float or numpy.ndarray, optional
         Seconds on the clock. The default is 0.
-    longitude_rad : float or numpy.ndarray, optional
+    longitude : float or numpy.ndarray, optional
         Longitude (in rad). The default is 0.
 
     Returns
@@ -48,7 +48,7 @@ def utc2solar_hour(
         utc_hour % 24
         + utc_minute / 60.0
         + utc_second / 3600.0
-        + np.rad2deg(longitude_rad) / 15.0
+        + np.rad2deg(longitude) / 15.0
     )
     return solar_hour
 
@@ -109,7 +109,7 @@ def solar_declination(
 
 
 def solar_altitude(
-    latitude_rad: floatArrayLike,
+    latitude: floatArrayLike,
     month_index: intArrayLike,
     day_of_month: intArrayLike,
     solar_hour: floatArrayLike,
@@ -122,7 +122,7 @@ def solar_altitude(
 
     Parameters
     ----------
-    latitude_rad : float or numpy.ndarray
+    latitude : float or numpy.ndarray
         latitude in radians.
     month_index : int or numpy.ndarray
         Month number (must be between 1 and 12)
@@ -147,13 +147,13 @@ def solar_altitude(
         solar_hour, solar_minute=solar_minute, solar_second=solar_second
     )
     return np.arcsin(
-        np.cos(latitude_rad) * np.cos(solar_declination_rad) * np.cos(hour_angle_rad)
-        + np.sin(latitude_rad) * np.sin(solar_declination_rad)
+        np.cos(latitude) * np.cos(solar_declination_rad) * np.cos(hour_angle_rad)
+        + np.sin(latitude) * np.sin(solar_declination_rad)
     )
 
 
 def solar_azimuth(
-    latitude_rad: floatArrayLike,
+    latitude: floatArrayLike,
     month_index: intArrayLike,
     day_of_month: intArrayLike,
     solar_hour: floatArrayLike,
@@ -166,7 +166,7 @@ def solar_azimuth(
 
     Parameters
     ----------
-    latitude_rad : float or numpy.ndarray
+    latitude : float or numpy.ndarray
         latitude in radians.
     month_index : int or numpy.ndarray
         Month number (must be between 1 and 12)
@@ -191,8 +191,8 @@ def solar_azimuth(
         solar_hour, solar_minute=solar_minute, solar_second=solar_second
     )
     azimuth_ratio = np.sin(hour_angle_rad) / (
-        np.sin(latitude_rad) * np.cos(hour_angle_rad)
-        - np.cos(latitude_rad) * np.tan(solar_declination_rad)
+        np.sin(latitude) * np.cos(hour_angle_rad)
+        - np.cos(latitude) * np.tan(solar_declination_rad)
     )
     azimuth_offset_rad = np.where(
         azimuth_ratio >= 0.0,

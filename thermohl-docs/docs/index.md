@@ -13,7 +13,7 @@ SPDX-License-Identifier: MPL-2.0
 
 Temperature estimation of overhead line conductors is an important topic for 
 TSOs for technical, economic, and safety-related reasons (DLR/ampacity, sag 
-management ...). It depends on several factors, mainly transit_a, weather and the
+management ...). It depends on several factors, mainly transit, weather and the
 conductor properties. ThermOHL is a python package to compute temperature and/or 
 ampacity in overhead line conductors.
 

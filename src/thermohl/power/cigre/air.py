@@ -15,25 +15,25 @@ class Air:
 
     @staticmethod
     def volumic_mass(
-        air_temperature_c: floatArrayLike, altitude: floatArrayLike = 0.0
+        air_temperature: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         r"""Compute air volumic mass.
 
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius).
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius).
             altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
-        return 1.2925 * Air.relative_density(air_temperature_c, altitude)
+        return 1.2925 * Air.relative_density(air_temperature, altitude)
 
     @staticmethod
     def relative_density(
-        air_temperature_c: floatArrayLike, altitude: floatArrayLike = 0.0
+        air_temperature: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         """Compute relative density, ie density ratio regarding density at zero altitude.
 
@@ -44,63 +44,63 @@ class Air:
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius).
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius).
             altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Relative density of air.
 
         """
-        return np.exp(-1.16e-04 * altitude) * np.ones_like(air_temperature_c)
+        return np.exp(-1.16e-04 * altitude) * np.ones_like(air_temperature)
 
     @staticmethod
-    def kinematic_viscosity(air_temperature_c: floatArrayLike) -> floatArrayLike:
+    def kinematic_viscosity(air_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute air kinematic viscosity.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius)
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius)
 
         Returns:
             float | numpy.ndarray: Kinematic viscosity in m²·s⁻¹.
 
         """
-        return 1.32e-05 + 9.5e-08 * air_temperature_c
+        return 1.32e-05 + 9.5e-08 * air_temperature
 
     @staticmethod
     def dynamic_viscosity(
-        air_temperature_c: floatArrayLike, altitude: floatArrayLike = 0.0
+        air_temperature: floatArrayLike, altitude: floatArrayLike = 0.0
     ) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius)
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius)
             altitude (float | numpy.ndarray, optional): Altitude above sea-level. The default is 0.
 
         Returns:
             float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
-        return Air.kinematic_viscosity(air_temperature_c) * Air.volumic_mass(
-            air_temperature_c, altitude
+        return Air.kinematic_viscosity(air_temperature) * Air.volumic_mass(
+            air_temperature, altitude
         )
 
     @staticmethod
-    def thermal_conductivity(air_temperature_c: floatArrayLike) -> floatArrayLike:
+    def thermal_conductivity(air_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute air thermal conductivity.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius)
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius)
 
         Returns:
             float | numpy.ndarray: Thermal conductivity in W·m⁻¹·K⁻¹.
 
         """
-        return 2.42e-02 + 7.2e-05 * air_temperature_c
+        return 2.42e-02 + 7.2e-05 * air_temperature
 
     @staticmethod
-    def prandtl(air_temperature_c: floatArrayLike) -> floatArrayLike:
+    def prandtl(air_temperature: floatArrayLike) -> floatArrayLike:
         """Compute Prandtl number.
 
         The Prandtl number (Pr) is a dimensionless number, named after the German
@@ -108,10 +108,10 @@ class Air:
         thermal diffusivity.
 
         Args:
-            air_temperature_c (float | numpy.ndarray): Air temperature (in Celsius)
+            air_temperature (float | numpy.ndarray): Air temperature (in Celsius)
 
         Returns:
             float | numpy.ndarray: Prandtl number (—)
 
         """
-        return 0.715 - 2.5e-04 * air_temperature_c
+        return 0.715 - 2.5e-04 * air_temperature

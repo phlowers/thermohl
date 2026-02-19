@@ -16,13 +16,13 @@ class SolarHeating(ieee.SolarHeating):
 
     def __init__(
         self,
-        latitude_deg: floatArrayLike,
+        latitude: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
@@ -34,13 +34,13 @@ class SolarHeating(ieee.SolarHeating):
         should have the same size.
 
         Args:
-            latitude_deg (float | numpy.ndarray): Latitude.
+            latitude (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
             azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            outer_diameter_m (float | numpy.ndarray): external diameter.
+            outer_diameter (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
             precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
 
@@ -48,14 +48,14 @@ class SolarHeating(ieee.SolarHeating):
         if "turbidity" in kwargs.keys():
             kwargs.pop("turbidity")
         super().__init__(
-            latitude_deg=latitude_deg,
+            latitude=latitude,
             altitude=altitude,
             azimuth=azimuth,
             turbidity=0.0,
             month=month,
             day=day,
             hour=hour,
-            outer_diameter_m=outer_diameter_m,
+            outer_diameter=outer_diameter,
             solar_absorptivity=solar_absorptivity,
             precomputed_solar_radiation=precomputed_solar_radiation,
             **kwargs,

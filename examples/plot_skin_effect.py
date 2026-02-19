@@ -15,7 +15,7 @@ from thermohl.power import olla
 
 def plot_skin_effect():
     x = np.linspace(1.0, 50.0, 50)
-    outer_diameter_m = 1.0
+    outer_diameter = 1.0
     R = 60 / x**2 / 1609.34  # Rdc from x and mile to meter conversion
     ra = np.array(
         [
@@ -37,19 +37,19 @@ def plot_skin_effect():
             0.92,
         ]
     )
-    dl = ra * outer_diameter_m
+    dl = ra * outer_diameter
     cl = cm.Spectral(np.linspace(0, 1, len(dl)))
 
     di = solver.default_values()
 
     plt.figure()
-    for i, core_diameter_m in enumerate(dl):
+    for i, core_diameter in enumerate(dl):
         di.update(
             [
-                ("outer_diameter_m", outer_diameter_m),
-                ("core_diameter_m", core_diameter_m),
-                ("linear_resistance_dc_20c_ohm_m", R),
-                ("frequency_hz", 50.0),
+                ("outer_diameter", outer_diameter),
+                ("core_diameter", core_diameter),
+                ("linear_resistance_dc_20c", R),
+                ("frequency", 50.0),
             ]
         )
         joule_heating = olla.JouleHeating(**di)
@@ -58,7 +58,7 @@ def plot_skin_effect():
             joule_heating._ks(R),
             "-",
             c=cl[i],
-            label="with $r_{in}/r_{out}$=%.2f" % (core_diameter_m,),
+            label="with $r_{in}/r_{out}$=%.2f" % (core_diameter,),
         )
     plt.grid(True)
     plt.legend()

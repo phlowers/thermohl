@@ -18,22 +18,22 @@ class JouleHeating(PowerTerm):
 
     @staticmethod
     def _c(
-        temp_low_c: floatArrayLike,
-        temp_high_c: floatArrayLike,
-        linear_resistance_temp_low_ohm_m: floatArrayLike,
-        linear_resistance_temp_high_ohm_m: floatArrayLike,
+        temp_low: floatArrayLike,
+        temp_high: floatArrayLike,
+        linear_resistance_temp_low: floatArrayLike,
+        linear_resistance_temp_high: floatArrayLike,
     ) -> floatArrayLike:
-        return (
-            linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
-        ) / (temp_high_c - temp_low_c)
+        return (linear_resistance_temp_high - linear_resistance_temp_low) / (
+            temp_high - temp_low
+        )
 
     def __init__(
         self,
-        transit_a: floatArrayLike,
-        temp_low_c: floatArrayLike,
-        temp_high_c: floatArrayLike,
-        linear_resistance_temp_low_ohm_m: floatArrayLike,
-        linear_resistance_temp_high_ohm_m: floatArrayLike,
+        transit: floatArrayLike,
+        temp_low: floatArrayLike,
+        temp_high: floatArrayLike,
+        linear_resistance_temp_low: floatArrayLike,
+        linear_resistance_temp_high: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -41,41 +41,41 @@ class JouleHeating(PowerTerm):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            transit_a (float | numpy.ndarray): Transit intensity (A).
-            temp_low_c (float | numpy.ndarray): Temperature for linear_resistance_temp_low_ohm_m measurement (°C).
-            temp_high_c (float | numpy.ndarray): Temperature for linear_resistance_temp_high_ohm_m measurement (°C).
-            linear_resistance_temp_low_ohm_m (float | numpy.ndarray): Electric resistance per unit length at temp_low_c (Ω·m⁻¹).
-            linear_resistance_temp_high_ohm_m (float | numpy.ndarray): Electric resistance per unit length at temp_high_c (Ω·m⁻¹).
+            transit (float | numpy.ndarray): Transit intensity (A).
+            temp_low (float | numpy.ndarray): Temperature for linear_resistance_temp_low measurement (°C).
+            temp_high (float | numpy.ndarray): Temperature for linear_resistance_temp_high measurement (°C).
+            linear_resistance_temp_low (float | numpy.ndarray): Electric resistance per unit length at temp_low (Ω·m⁻¹).
+            linear_resistance_temp_high (float | numpy.ndarray): Electric resistance per unit length at temp_high (Ω·m⁻¹).
 
         """
-        self.temp_low_c = temp_low_c
-        self.temp_high_c = temp_high_c
-        self.linear_resistance_temp_low_ohm_m = linear_resistance_temp_low_ohm_m
-        self.linear_resistance_temp_high_ohm_m = linear_resistance_temp_high_ohm_m
-        self.transit_a = transit_a
+        self.temp_low = temp_low
+        self.temp_high = temp_high
+        self.linear_resistance_temp_low = linear_resistance_temp_low
+        self.linear_resistance_temp_high = linear_resistance_temp_high
+        self.transit = transit
         self.temp_coeff_linear = JouleHeating._c(
-            temp_low_c,
-            temp_high_c,
-            linear_resistance_temp_low_ohm_m,
-            linear_resistance_temp_high_ohm_m,
+            temp_low,
+            temp_high,
+            linear_resistance_temp_low,
+            linear_resistance_temp_high,
         )
 
-    def _rdc(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
-        return self.linear_resistance_temp_low_ohm_m + self.temp_coeff_linear * (
-            conductor_temperature_c - self.temp_low_c
+    def _rdc(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
+        return self.linear_resistance_temp_low + self.temp_coeff_linear * (
+            conductor_temperature - self.temp_low
         )
 
-    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self._rdc(conductor_temperature_c) * self.transit_a**2
+        return self._rdc(conductor_temperature) * self.transit**2
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
@@ -91,6 +91,6 @@ class JouleHeating(PowerTerm):
         """
         return (
             self.temp_coeff_linear
-            * self.transit_a**2
+            * self.transit**2
             * np.ones_like(conductor_temperature)
         )

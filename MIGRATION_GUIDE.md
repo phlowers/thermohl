@@ -24,8 +24,8 @@ This guide helps you migrate your code from the old version with short variable 
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `lat` | `latitude_deg` | Latitude | degrees |
-| `lon` | `longitude_deg` or `longitude_rad` depending on context | Longitude | degrees or rad |
+| `lat` | `latitude` | Latitude | degrees |
+| `lon` | `longitude` or `longitude` depending on context | Longitude | degrees or rad |
 | `alt` | `altitude` | Altitude | meters |
 | `azm` | `azimuth` | Azimuth angle | degrees |
 
@@ -41,8 +41,8 @@ params = {
 
 # After
 params = {
-    'latitude_deg': 45.0,
-    'longitude_deg': 2.5,
+    'latitude': 45.0,
+    'longitude': 2.5,
     'altitude': 100.0,
     'azimuth': 90.0
 }
@@ -52,12 +52,12 @@ params = {
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `Ta` | `ambient_temperature_c` | Ambient temperature | °C |
-| `Pa` | `ambient_pressure_pa` | Ambient pressure | Pa |
+| `Ta` | `ambient_temperature` | Ambient temperature | °C |
+| `Pa` | `ambient_pressure` | Ambient pressure | Pa |
 | `rh` | `relative_humidity` | Relative humidity | dimensionless [0-1] |
-| `pr` | `precipitation_rate_ms` | Precipitation rate | m/s |
-| `ws` | `wind_speed_ms` | Wind speed | m/s |
-| `wa` | `wind_angle_deg` | Wind angle | degrees |
+| `pr` | `precipitation_rate` | Precipitation rate | m/s |
+| `ws` | `wind_speed` | Wind speed | m/s |
+| `wa` | `wind_angle` | Wind angle | degrees |
 | `al` | `albedo` | Albedo | dimensionless |
 | `tb` and `trb` | `turbidity` | Turbidity coefficient | dimensionless [0-1] |
 
@@ -76,11 +76,11 @@ weather = {
 
 # After
 weather = {
-    'ambient_temperature_c': 20.0,
-    'ambient_pressure_pa': 1.0e5,
+    'ambient_temperature': 20.0,
+    'ambient_pressure': 1.0e5,
     'relative_humidity': 0.8,
-    'wind_speed_ms': 2.0,
-    'wind_angle_deg': 45.0,
+    'wind_speed': 2.0,
+    'wind_angle': 45.0,
     'albedo': 0.8,
     'turbidity': 0.1
 }
@@ -90,14 +90,14 @@ weather = {
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `m` | `linear_mass_kgm` | Mass per unit length | kg/m |
-| `d` | `core_diameter_m` | Core diameter | m |
-| `D` | `outer_diameter_m` | Outer/external diameter | m |
-| `a` | `core_area_m2` | Core cross-sectional area | m² |
-| `A` | `outer_area_m2` | Outer cross-sectional area | m² |
+| `m` | `linear_mass` | Mass per unit length | kg/m |
+| `d` | `core_diameter` | Core diameter | m |
+| `D` | `outer_diameter` | Outer/external diameter | m |
+| `a` | `core_area` | Core cross-sectional area | m² |
+| `A` | `outer_area` | Outer cross-sectional area | m² |
 | `R` | `roughness_ratio` | Surface roughness | dimensionless |
-| `l` | `radial_thermal_conductivity_wmk` | Radial thermal conductivity | W/(m·K) |
-| `c` | `heat_capacity_jkgk` | Specific heat capacity | J/(kg·K) |
+| `l` | `radial_thermal_conductivity` | Radial thermal conductivity | W/(m·K) |
+| `c` | `heat_capacity` | Specific heat capacity | J/(kg·K) |
 
 **Example:**
 ```python
@@ -115,14 +115,14 @@ cable = {
 
 # After
 cable = {
-    'linear_mass_kgm': 1.5,
-    'core_diameter_m': 1.9e-2,
-    'outer_diameter_m': 3.0e-2,
-    'core_area_m2': 2.84e-4,
-    'outer_area_m2': 7.07e-4,
+    'linear_mass': 1.5,
+    'core_diameter': 1.9e-2,
+    'outer_diameter': 3.0e-2,
+    'core_area': 2.84e-4,
+    'outer_area': 7.07e-4,
     'roughness_ratio': 4.0e-2,
-    'radial_thermal_conductivity_wmk': 1.0,
-    'heat_capacity_jkgk': 500.0
+    'radial_thermal_conductivity': 1.0,
+    'heat_capacity': 500.0
 }
 ```
 
@@ -133,9 +133,9 @@ cable = {
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | dimensionless |
 | `epsilon` | `emissivity` | Emissivity | dimensionless |
 | `srad` | `precomputed_solar_radiation` | Direct solar radiation (precomputed) | W/m² |
-| `Qs` | `measured_solar_irradiance_w_m2` | Measured solar irradiance | W/m² |
+| `Qs` | `measured_solar_irradiance` | Measured solar irradiance | W/m² |
 | `sigma` | `stefan_boltzmann_constant` | Stefan-Boltzmann constant | W/m²/$K^4$ |
-| `x` | `solar_altitude_deg` | Solar altitude | degrees |
+| `x` | `solar_altitude` | Solar altitude | degrees |
 
 **Example:**
 ```python
@@ -158,17 +158,17 @@ optical = {
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `transit` | `transit_a` | Transit current intensity | A |
-| `RDC20` | `linear_resistance_dc_20c_ohm_m` | DC resistance per unit length at 20°C | Ω/m |
+| `transit` | `transit` | Transit current intensity | A |
+| `RDC20` | `linear_resistance_dc_20c` | DC resistance per unit length at 20°C | Ω/m |
 | `km` | `magnetic_coeff` | Magnetic effects coefficient | dimensionless |
 | `ki` | `magnetic_coeff_per_a` | Magnetic effects coefficient (per ampere) | A⁻¹ |
 | `kl` | `temperature_coeff_linear` | Linear temperature coefficient | K⁻¹ |
 | `kq` | `temperature_coeff_quadratic` | Quadratic temperature coefficient | K⁻² |
-| `RDCHigh` | `linear_resistance_temp_high_ohm_m` | DC resistance at high temperature | Ω/m |
-| `RDCLow` | `linear_resistance_temp_low_ohm_m` | DC resistance at low temperature | Ω/m |
-| `THigh` | `temp_high_c` | High reference temperature | °C |
-| `TLow` | `temp_low_c` | Low reference temperature | °C |
-| `T20` | `reference_temperature_c` | Reference temperature, default is 20 °C | °C |
+| `RDCHigh` | `linear_resistance_temp_high` | DC resistance at high temperature | Ω/m |
+| `RDCLow` | `linear_resistance_temp_low` | DC resistance at low temperature | Ω/m |
+| `THigh` | `temp_high` | High reference temperature | °C |
+| `TLow` | `temp_low` | Low reference temperature | °C |
+| `T20` | `reference_temperature` | Reference temperature, default is 20 °C | °C |
 
 **Example:**
 ```python
@@ -188,16 +188,16 @@ electrical = {
 
 # After
 electrical = {
-    'transit_a': 1000.0,
-    'linear_resistance_dc_20c_ohm_m': 2.5e-5,
+    'transit': 1000.0,
+    'linear_resistance_dc_20c': 2.5e-5,
     'magnetic_coeff': 1.006,
     'magnetic_coeff_per_a': 0.016,
     'temperature_coeff_linear': 3.8e-3,
     'temperature_coeff_quadratic': 8.0e-7,
-    'linear_resistance_temp_high_ohm_m': 3.05e-5,
-    'linear_resistance_temp_low_ohm_m': 2.66e-5,
-    'temp_high_c': 60.0,
-    'temp_low_c': 20.0
+    'linear_resistance_temp_high': 3.05e-5,
+    'linear_resistance_temp_low': 2.66e-5,
+    'temp_high': 60.0,
+    'temp_low': 20.0
 }
 ```
 
@@ -205,24 +205,15 @@ electrical = {
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `Tc` | `conductor_temperature_c` or `air_temperature_c` depending on context | Conductor temperature or air temperature | °C |
-| `Tf` | `film_temperature_c` | Air film temperature | °C |
-| `Td` | `temperature_delta_c` | Air film temperature | °C |
-| `T` | `conductor_temperature_c` or `max_conductor_temperature_c` depending on context | Conductor temperature or maximum conductor temperature | °C |
-| `ts` | `surface_temperature_c` | Conductor surface temperature | °C |
-| `tc` | `core_temperature_c` | Conductor core temperature | °C |
+| `Tc` | `conductor_temperature` or `air_temperature` depending on context | Conductor temperature or air temperature | °C |
+| `Tf` | `film_temperature` | Air film temperature | °C |
+| `Td` | `temperature_delta` | Air film temperature | °C |
+| `T` | `conductor_temperature` or `max_conductor_temperature` depending on context | Conductor temperature or maximum conductor temperature | °C |
+| `ts` | `surface_temperature` | Conductor surface temperature | °C |
+| `tc` | `core_temperature` | Conductor core temperature | °C |
 | `dT` | `temperature_increment` | Temperature increment | °C |
 | `nu` | `kinematic_viscosity` | Air film temperature | dimensionless |
-| `time` | `time_s` | Time | s |
-
-**Example:**
-```python
-# Before
-
-
-# After
-
-```
+| `time` | `time` | Time | s |
 
 ## Function Parameter Changes
 
@@ -308,7 +299,7 @@ def utc2solar_hour(
     utc_hour: floatArrayLike,
     utc_minute: floatArrayLike = 0.0,
     utc_second: floatArrayLike = 0.0,
-    longitude_rad: floatArrayLike = 0.0,
+    longitude: floatArrayLike = 0.0,
 )
 def hour_angle(
     solar_hour: floatArrayLike,
@@ -319,7 +310,7 @@ def solar_declination(
     month_index: intArrayLike, day_of_month: intArrayLike
 )
 def solar_altitude(
-    latitude_rad: floatArrayLike,
+    latitude: floatArrayLike,
     month_index: intArrayLike,
     day_of_month: intArrayLike,
     solar_hour: floatArrayLike,
@@ -327,7 +318,7 @@ def solar_altitude(
     solar_second: floatArrayLike = 0.0,
 )
 def solar_azimuth(
-    latitude_rad: floatArrayLike,
+    latitude: floatArrayLike,
     month_index: intArrayLike,
     day_of_month: intArrayLike,
     solar_hour: floatArrayLike,
@@ -519,8 +510,8 @@ def _profile_mom(ts: float, tc: float, r: floatArrayLike, re: float)
 
 # After
 def _profile_mom(
-    surface_temperature_c: float,
-    core_temperature_c: float,
+    surface_temperature: float,
+    core_temperature: float,
     radius: floatArrayLike,
     outer_radius: float,
 )
@@ -536,13 +527,13 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `alt` | `altitude_m` | Altitude | meters |
-| `Ta` | `ambient_temperature_c` | Ambient temperature | °C |
-| `ws` | `wind_speed_ms` | Wind speed | m/s |
-| `D` | `outer_diameter_m` | Cable external diameter | m |
+| `alt` | `altitude` | Altitude | meters |
+| `Ta` | `ambient_temperature` | Ambient temperature | °C |
+| `ws` | `wind_speed` | Wind speed | m/s |
+| `D` | `outer_diameter` | Cable external diameter | m |
 | `R` | `roughness_ratio` | Cable roughness | dimensionless |
 | `g` | `gravity` | Gravitational acceleration | m/s² |
-| `da` | `attack_angle_rad` | Attack angle | m/s² |
+| `da` | `attack_angle` | Attack angle | m/s² |
 | `rho` | `air_density` | Air density | dimensionless |
 | `mu` | `dynamic_viscosity` | Dynamic viscosity |  |
 | `lambda_` | `thermal_conductivity` | Thermal conductivity |  |
@@ -551,21 +542,21 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `transit` | `transit_a` | Transit_intensity | A |
+| `transit` | `transit` | Transit_intensity | A |
 | `km` | `magnetic_coeff` | Coefficient for magnetic effects | dimensionless |
 | `kl` | `temperature_coeff_linear` | Linear resistance augmentation with temperature | K-1 |
 | `kem` | `magnetic_coeff` | Coefficient for magnetic effects | |
 | `kq` | `temp_coeff_quadratic` | Quadratic resistance augmentation with temperature | K-2 |
-| `T20` | `reference_temperature_c` | Reference temperature | °C |
-| `TLow` | `temp_low_c` | Temperature for linear_resistance_temp_low_ohm_m measurement | °C |
-| `THigh` | `temp_high_c` | Temperature for linear_resistance_temp_high_ohm_m measurement | °C |
-| `RDC20` | `linear_resistance_dc_20c_ohm_m` | Coefficient for magnetic effects | ohm/m |
-| `RDCLow` | `linear_resistance_temp_low_ohm_m` | Electric resistance per unit length at temp_low_c | ohm/m |
-| `RDCHigh` | `linear_resistance_temp_high_ohm_m` | Electric resistance per unit length at temp_high_c | ohm/m |
+| `T20` | `reference_temperature` | Reference temperature | °C |
+| `TLow` | `temp_low` | Temperature for linear_resistance_temp_low measurement | °C |
+| `THigh` | `temp_high` | Temperature for linear_resistance_temp_high measurement | °C |
+| `RDC20` | `linear_resistance_dc_20c` | Coefficient for magnetic effects | ohm/m |
+| `RDCLow` | `linear_resistance_temp_low` | Electric resistance per unit length at temp_low | ohm/m |
+| `RDCHigh` | `linear_resistance_temp_high` | Electric resistance per unit length at temp_high | ohm/m |
 | `c` | `temp_coeff_linear` | Temperature coefficients | |
-| `D` | `outer_diameter_m` | Cable external diameter | m |
-| `d` | `core_diameter_m` | Cable core diameter | m |
-| `f` | `frequency_hz` | Current frequency | Hz |
+| `D` | `outer_diameter` | Cable external diameter | m |
+| `d` | `core_diameter` | Cable core diameter | m |
+| `f` | `frequency` | Current frequency | Hz |
 
 ### Classes SolarHeating
 
@@ -573,23 +564,23 @@ Please also not that the global variable `power_term._dT` has been renamed to `p
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | |
 | `srad` | `solar_irradiance` | Solar irradiance | |
-| `D` | `outer_diameter_m` | Cable external diameter | m |
+| `D` | `outer_diameter` | Cable external diameter | m |
 
 ### Classes RadiativeCooling
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `Ta` | `ambient_temperature_c` or `ambient_temp_k` depending on implementation | Ambient_temperature | °C or K |
-| `D` | `outer_diameter_m` | Cable external diameter | m |
+| `Ta` | `ambient_temperature` or `ambient_temperature` depending on implementation | Ambient_temperature | °C or K |
+| `D` | `outer_diameter` | Cable external diameter | m |
 | `epsilon` | `emissivity` | Emissivity | dimensionless |
 | `sigma` | `stefan_boltzmann` | Stefan Boltzmann constant | W/m²/K-4 |
-| `zerok` | `kelvin offset` | Kelvin offset | K |
+| `zerok` | `kelvin_offset` | Kelvin offset | K |
 
 ### Solver classes
 
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
-| `Names.transit` | `Names.transit_a` | Transit intensity | A |
+| `Names.transit` | `Names.transit` | Transit intensity | A |
 | `jh` | `joule_heating` | Joule heating | |
 | `sh` | `solar_heating` | Solar heating | |
 | `cc` | `convective_cooling` | Convective cooling | |
@@ -615,7 +606,7 @@ When calling transient temperature methods, update the parameter name:
 result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
 
 # After
-result = solver.transient_temperature(t, T0=initial_temp, transit_a=current_array)
+result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
 ```
 
 ## Complete Migration Example
@@ -666,23 +657,23 @@ from thermohl.solver import slv1t
 
 # Define parameters
 params = dict(
-    latitude_deg=45.0,
-    longitude_deg=2.5,
+    latitude=45.0,
+    longitude=2.5,
     altitude=100.0,
     azimuth=90.0,
     month=3,
     day=21,
     hour=12,
-    ambient_temperature_c=20.0,
-    ambient_pressure_pa=1.0e5,
-    wind_speed_ms=2.0,
-    wind_angle_deg=45.0,
-    transit_a=1500.0,
-    linear_mass_kgm=1.5,
-    outer_diameter_m=3.0e-2,
+    ambient_temperature=20.0,
+    ambient_pressure=1.0e5,
+    wind_speed=2.0,
+    wind_angle=45.0,
+    transit=1500.0,
+    linear_mass=1.5,
+    outer_diameter=3.0e-2,
     solar_absorptivity=0.5,
     emissivity=0.5,
-    linear_resistance_dc_20c_ohm_m=2.5e-5
+    linear_resistance_dc_20c=2.5e-5
 )
 
 # Create solver
@@ -694,7 +685,7 @@ df = solver.steady_temperature()
 # Transient analysis
 t = np.linspace(0, 3600, 361)
 transit_profile = 1000.0 + 500.0 * np.sin(2 * np.pi * t / 3600)
-result = solver.transient_temperature(t, T0=25.0, transit_a=transit_profile)
+result = solver.transient_temperature(t, T0=25.0, transit=transit_profile)
 ```
 
 ## YAML Configuration Files
@@ -717,13 +708,13 @@ Ta:
   relative_std: false
 
 # After
-latitude_deg:
+latitude:
   dist: 'truncnorm'
   min: 35.
   max: 55.
   std: 4.4E-04
   relative_std: false
-ambient_temperature_c:
+ambient_temperature:
   dist: 'truncnorm'
   min: -40.
   max: +50.
@@ -738,7 +729,7 @@ ambient_temperature_c:
 1. All dictionaries passed to solver constructors
 2. All keyword arguments when calling functions
 3. All YAML configuration files
-4. All references to `transit` in transient solver method calls → `transit_a`
+4. All references to `transit` in transient solver method calls → `transit`
 5. All references to `srad` for solar radiation → `precomputed_solar_radiation`
 
 ## Validation Checklist
@@ -748,7 +739,7 @@ After migration, verify that:
 - All parameter dictionaries use new names
 - All solver instantiations work correctly
 - All steady-state calculations produce expected results
-- All transient calculations use `transit_a` parameter
+- All transient calculations use `transit` parameter
 - All custom YAML files are updated
 - All tests pass
 - Documentation references are updated

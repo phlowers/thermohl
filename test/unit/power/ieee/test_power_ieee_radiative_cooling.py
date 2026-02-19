@@ -14,16 +14,16 @@ from thermohl import solver
 
 def set_default_values_scalar():
     dic = solver.default_values()
-    dic["ambient_temperature_c"] = 40.0
-    dic["outer_diameter_m"] = 28.14 * 1.0e-03
+    dic["ambient_temperature"] = 40.0
+    dic["outer_diameter"] = 28.14 * 1.0e-03
     dic["emissivity"] = 0.8
     return dic
 
 
 def set_default_values_array():
     dic = solver.default_values()
-    dic["ambient_temperature_c"] = np.array([25.0, 40.0])
-    dic["outer_diameter_m"] = np.array([24.83 * 1.0e-03, 28.14 * 1.0e-03])
+    dic["ambient_temperature"] = np.array([25.0, 40.0])
+    dic["outer_diameter"] = np.array([24.83 * 1.0e-03, 28.14 * 1.0e-03])
     dic["emissivity"] = np.array([0.9, 0.8])
     return dic
 
@@ -49,7 +49,7 @@ def test_radiative_cooling_value_temperature_scalar(radiative_cooling):
     expected_result = (
         17.8
         * radiative_cooling.emissivity
-        * radiative_cooling.outer_diameter_m
+        * radiative_cooling.outer_diameter
         * (
             ((temp + 273.0) / 100.0) ** 4
             - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
@@ -74,7 +74,7 @@ def test_radiative_cooling_value_temperature_array(radiative_cooling):
     expected_result = (
         17.8
         * radiative_cooling.emissivity
-        * radiative_cooling.outer_diameter_m
+        * radiative_cooling.outer_diameter
         * (
             ((temp + 273.0) / 100.0) ** 4
             - ((radiative_cooling.ambient_temp_c + 273.0) / 100.0) ** 4
@@ -102,7 +102,7 @@ def test_radiative_cooling_derivative_temperature_scalar(radiative_cooling):
         4.0
         * 1.78e-07
         * radiative_cooling.emissivity
-        * radiative_cooling.outer_diameter_m
+        * radiative_cooling.outer_diameter
         * temp**3
     )
 
@@ -125,7 +125,7 @@ def test_radiative_cooling_derivative_temperature_array(radiative_cooling):
         4.0
         * 1.78e-07
         * radiative_cooling.emissivity
-        * radiative_cooling.outer_diameter_m
+        * radiative_cooling.outer_diameter
         * temp**3
     )
 

@@ -37,15 +37,15 @@ def scn2dict(d: dict) -> dict:
 
     dic = cable_data(d["cable"])
 
-    dic["latitude_deg"] = d["latitude"]
-    dic["longitude_deg"] = d["longitude"]
+    dic["latitude"] = d["latitude"]
+    dic["longitude"] = d["longitude"]
     dic["altitude"] = d["altitude"]
     dic["azimuth"] = 90.0
-    dic["ambient_temperature_c"] = d["weather_temperature"]
-    dic["wind_speed_ms"] = d["wind_speed"]
+    dic["ambient_temperature"] = d["weather_temperature"]
+    dic["wind_speed"] = d["wind_speed"]
     # in scenario file, wind angles are given regarding span, where in thermohl
     # they are supposed to be regarding north, hence this conversion formula
-    dic["wind_angle_deg"] = np.rad2deg(
+    dic["wind_angle"] = np.rad2deg(
         np.arcsin(np.sin(np.deg2rad(np.abs(dic["azimuth"] - d["wind_angle"]) % 180.0)))
     )
     dic["solar_absorptivity"] = 0.9
@@ -58,7 +58,7 @@ def scn2dict(d: dict) -> dict:
         dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
     )
     if "iac" in d.keys():
-        dic["transit_a"] = d["iac"]
+        dic["transit"] = d["iac"]
 
     return dic
 
@@ -78,9 +78,9 @@ def test_steady_ampacity():
     for d in scenario("ampacity", "steady"):
         for _, e in d.items():
             s = rte(scn2dict(e), heateq="3tl")
-            r = s.steady_intensity(max_conductor_temperature_c=e["Tmax_cable"])
+            r = s.steady_intensity(max_conductor_temperature=e["Tmax_cable"])
 
-            assert np.allclose(r["transit_a"], e["I_max"], atol=0.05)
+            assert np.allclose(r["transit"], e["I_max"], atol=0.05)
 
 
 def test_transient_temperature():
@@ -97,12 +97,12 @@ def test_transient_temperature():
             s = rte(scn2dict(e), heateq="3tl")
 
             # initial steady state
-            s.args["transit_a"] = e["I0_cable"]
+            s.args["transit"] = e["I0_cable"]
             s.update()
             ri = s.steady_temperature()
 
             # final steady state
-            s.args["transit_a"] = e["iac"]
+            s.args["transit"] = e["iac"]
             s.update()
             rf = s.steady_temperature(
                 surface_temperature_guess_c=e["T_mean_final"],
@@ -110,11 +110,11 @@ def test_transient_temperature():
             )
 
             # time
-            time_s = np.arange(0.0, 1800.0, dt)
+            time = np.arange(0.0, 1800.0, dt)
 
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
-                time_s=time_s,
+                time=time,
                 surface_temperature_0_c=ri["t_surf"],
                 core_temperature_0_c=ri["t_core"],
                 time_constant_s=time_constant_s,

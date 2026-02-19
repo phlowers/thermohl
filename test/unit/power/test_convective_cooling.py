@@ -14,21 +14,21 @@ from thermohl.power.ieee import ConvectiveCooling
 
 def set_default_values_scalar():
     dic = solver.default_values()
-    dic["wind_speed_ms"] = 0.61
-    dic["wind_angle_deg"] = 0.0
+    dic["wind_speed"] = 0.61
+    dic["wind_angle"] = 0.0
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
-    dic["ambient_temperature_c"] = 40.0
-    dic["temp_high_c"] = 75.0
-    dic["temp_low_c"] = 25.0
-    dic["linear_resistance_temp_high_ohm_m"] = 8.688e-05
-    dic["linear_resistance_temp_low_ohm_m"] = 7.283e-05
+    dic["ambient_temperature"] = 40.0
+    dic["temp_high"] = 75.0
+    dic["temp_low"] = 25.0
+    dic["linear_resistance_temp_high"] = 8.688e-05
+    dic["linear_resistance_temp_low"] = 7.283e-05
     dic["azimuth"] = 90.0
-    dic["latitude_deg"] = 30.0
+    dic["latitude"] = 30.0
     dic["turbidity"] = 0.0
     dic["altitude"] = 0.0
-    dic["outer_diameter_m"] = 28.14 * 1.0e-03
-    dic["core_diameter_m"] = 10.4 * 1.0e-03
+    dic["outer_diameter"] = 28.14 * 1.0e-03
+    dic["core_diameter"] = 10.4 * 1.0e-03
     dic["month"] = 6
     dic["day"] = 10
     dic["hour"] = 11.0
@@ -37,21 +37,21 @@ def set_default_values_scalar():
 
 def set_default_values_array():
     dic = solver.default_values()
-    dic["wind_speed_ms"] = np.array([0.61, 0.83])
-    dic["wind_angle_deg"] = np.array([0.0, 42.1])
+    dic["wind_speed"] = np.array([0.61, 0.83])
+    dic["wind_angle"] = np.array([0.0, 42.1])
     dic["emissivity"] = np.array([0.8, 0.9])
     dic["solar_absorptivity"] = np.array([0.8, 0.9])
-    dic["ambient_temperature_c"] = np.array([40.0, 32])
-    dic["temp_high_c"] = np.array([75.0, 70.0])
-    dic["temp_low_c"] = np.array([25.0, 20])
-    dic["linear_resistance_temp_high_ohm_m"] = np.array([8.688e-05, 8.688e-05])
-    dic["linear_resistance_temp_low_ohm_m"] = np.array([7.283e-05, 7.283e-05])
+    dic["ambient_temperature"] = np.array([40.0, 32])
+    dic["temp_high"] = np.array([75.0, 70.0])
+    dic["temp_low"] = np.array([25.0, 20])
+    dic["linear_resistance_temp_high"] = np.array([8.688e-05, 8.688e-05])
+    dic["linear_resistance_temp_low"] = np.array([7.283e-05, 7.283e-05])
     dic["azimuth"] = np.array([90.0, 90.0])
-    dic["latitude_deg"] = np.array([30.0, 30.0])
+    dic["latitude"] = np.array([30.0, 30.0])
     dic["turbidity"] = np.array([0.0, 0.0])
     dic["altitude"] = np.array([0.0, 0.0])
-    dic["outer_diameter_m"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
-    dic["core_diameter_m"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
+    dic["outer_diameter"] = np.array([28.14 * 1.0e-03, 28.14 * 1.0e-03])
+    dic["core_diameter"] = np.array([10.4 * 1.0e-03, 10.4 * 1.0e-03])
     dic["month"] = np.array([6, 3])
     dic["day"] = np.array([10, 13])
     dic["hour"] = np.array([11.0, 8.0])
@@ -125,7 +125,7 @@ def test_value_natural_scalar(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.outer_diameter_m**0.75
+        * convective_cooling.outer_diameter**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -150,7 +150,7 @@ def test_value_natural_array(convective_cooling, expected):
     expected_result = (
         3.645
         * np.sqrt(vm)
-        * convective_cooling.outer_diameter_m**0.75
+        * convective_cooling.outer_diameter**0.75
         * np.sign(Td)
         * np.abs(Td) ** 1.25
     )
@@ -167,24 +167,24 @@ def test_value_natural_array(convective_cooling, expected):
 )
 def test_convective_cooling_value_scalar(convective_cooling, expected):
     """Test the value method of ConvectiveCooling."""
-    conductor_temperature_c = 100.0
+    conductor_temperature = 100.0
 
-    result = convective_cooling.value(conductor_temperature_c)
+    result = convective_cooling.value(conductor_temperature)
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-            conductor_temperature_c - convective_cooling.ambient_temp_c,
+            0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+            conductor_temperature - convective_cooling.ambient_temp_c,
             convective_cooling.air_density(
-                0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-                convective_cooling.altitude_m,
+                0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude,
             ),
         ),
         convective_cooling._value_natural(
-            conductor_temperature_c - convective_cooling.ambient_temp_c,
+            conductor_temperature - convective_cooling.ambient_temp_c,
             convective_cooling.air_density(
-                0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-                convective_cooling.altitude_m,
+                0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude,
             ),
         ),
     )
@@ -201,24 +201,24 @@ def test_convective_cooling_value_scalar(convective_cooling, expected):
 )
 def test_convective_cooling_value_array(convective_cooling, expected):
     """Test the value method of ConvectiveCooling."""
-    conductor_temperature_c = np.array([60.3, 100.0])
+    conductor_temperature = np.array([60.3, 100.0])
 
-    result = convective_cooling.value(conductor_temperature_c)
+    result = convective_cooling.value(conductor_temperature)
 
     expected_result = np.maximum(
         convective_cooling._value_forced(
-            0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-            conductor_temperature_c - convective_cooling.ambient_temp_c,
+            0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+            conductor_temperature - convective_cooling.ambient_temp_c,
             convective_cooling.air_density(
-                0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-                convective_cooling.altitude_m,
+                0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude,
             ),
         ),
         convective_cooling._value_natural(
-            conductor_temperature_c - convective_cooling.ambient_temp_c,
+            conductor_temperature - convective_cooling.ambient_temp_c,
             convective_cooling.air_density(
-                0.5 * (conductor_temperature_c + convective_cooling.ambient_temp_c),
-                convective_cooling.altitude_m,
+                0.5 * (conductor_temperature + convective_cooling.ambient_temp_c),
+                convective_cooling.altitude,
             ),
         ),
     )

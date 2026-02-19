@@ -12,57 +12,57 @@ from thermohl.power.ieee import JouleHeating
 
 
 def test_c_scalar():
-    temp_low_c = 20.0
-    temp_high_c = 80.0
-    linear_resistance_temp_low_ohm_m = 0.1
-    linear_resistance_temp_high_ohm_m = 0.2
-    expected = (
-        linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
-    ) / (temp_high_c - temp_low_c)
+    temp_low = 20.0
+    temp_high = 80.0
+    linear_resistance_temp_low = 0.1
+    linear_resistance_temp_high = 0.2
+    expected = (linear_resistance_temp_high - linear_resistance_temp_low) / (
+        temp_high - temp_low
+    )
 
     result = JouleHeating._c(
-        temp_low_c,
-        temp_high_c,
-        linear_resistance_temp_low_ohm_m,
-        linear_resistance_temp_high_ohm_m,
+        temp_low,
+        temp_high,
+        linear_resistance_temp_low,
+        linear_resistance_temp_high,
     )
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_c_array():
-    temp_low_c = np.array([20.0, 30.0])
-    temp_high_c = np.array([80.0, 90.0])
-    linear_resistance_temp_low_ohm_m = np.array([0.1, 0.15])
-    linear_resistance_temp_high_ohm_m = np.array([0.2, 0.25])
-    expected = (
-        linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
-    ) / (temp_high_c - temp_low_c)
+    temp_low = np.array([20.0, 30.0])
+    temp_high = np.array([80.0, 90.0])
+    linear_resistance_temp_low = np.array([0.1, 0.15])
+    linear_resistance_temp_high = np.array([0.2, 0.25])
+    expected = (linear_resistance_temp_high - linear_resistance_temp_low) / (
+        temp_high - temp_low
+    )
 
     result = JouleHeating._c(
-        temp_low_c,
-        temp_high_c,
-        linear_resistance_temp_low_ohm_m,
-        linear_resistance_temp_high_ohm_m,
+        temp_low,
+        temp_high,
+        linear_resistance_temp_low,
+        linear_resistance_temp_high,
     )
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_c_mixed():
-    temp_low_c = 20.0
-    temp_high_c = np.array([80.0, 90.0])
-    linear_resistance_temp_low_ohm_m = 0.1
-    linear_resistance_temp_high_ohm_m = np.array([0.2, 0.25])
-    expected = (
-        linear_resistance_temp_high_ohm_m - linear_resistance_temp_low_ohm_m
-    ) / (temp_high_c - temp_low_c)
+    temp_low = 20.0
+    temp_high = np.array([80.0, 90.0])
+    linear_resistance_temp_low = 0.1
+    linear_resistance_temp_high = np.array([0.2, 0.25])
+    expected = (linear_resistance_temp_high - linear_resistance_temp_low) / (
+        temp_high - temp_low
+    )
 
     result = JouleHeating._c(
-        temp_low_c,
-        temp_high_c,
-        linear_resistance_temp_low_ohm_m,
-        linear_resistance_temp_high_ohm_m,
+        temp_low,
+        temp_high,
+        linear_resistance_temp_low,
+        linear_resistance_temp_high,
     )
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
@@ -70,25 +70,25 @@ def test_c_mixed():
 
 joule_heating_instances = [
     JouleHeating(
-        transit_a=np.array([100.0]),
-        temp_low_c=np.array([20.0, 25.0]),
-        temp_high_c=np.array([80.0, 85.0]),
-        linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
-        linear_resistance_temp_high_ohm_m=np.array([0.2, 0.25]),
+        transit=np.array([100.0]),
+        temp_low=np.array([20.0, 25.0]),
+        temp_high=np.array([80.0, 85.0]),
+        linear_resistance_temp_low=np.array([0.1, 0.15]),
+        linear_resistance_temp_high=np.array([0.2, 0.25]),
     ),
     JouleHeating(
-        transit_a=100.0,
-        temp_low_c=20.0,
-        temp_high_c=80.0,
-        linear_resistance_temp_low_ohm_m=0.1,
-        linear_resistance_temp_high_ohm_m=0.2,
+        transit=100.0,
+        temp_low=20.0,
+        temp_high=80.0,
+        linear_resistance_temp_low=0.1,
+        linear_resistance_temp_high=0.2,
     ),
     JouleHeating(
-        transit_a=100.0,
-        temp_low_c=np.array([20.0, 25.0]),
-        temp_high_c=np.array([80.0, 85.0]),
-        linear_resistance_temp_low_ohm_m=np.array([0.1, 0.15]),
-        linear_resistance_temp_high_ohm_m=np.array([0.2, 0.25]),
+        transit=100.0,
+        temp_low=np.array([20.0, 25.0]),
+        temp_high=np.array([80.0, 85.0]),
+        linear_resistance_temp_low=np.array([0.1, 0.15]),
+        linear_resistance_temp_high=np.array([0.2, 0.25]),
     ),
 ]
 
@@ -103,14 +103,14 @@ joule_heating_instances = [
     ],
 )
 def test_rdc_scalar_temperature(joule_heating):
-    conductor_temperature_c = 50.0
+    conductor_temperature = 50.0
     expected = (
-        joule_heating.linear_resistance_temp_low_ohm_m
+        joule_heating.linear_resistance_temp_low
         + joule_heating.temp_coeff_linear
-        * (conductor_temperature_c - joule_heating.temp_low_c)
+        * (conductor_temperature - joule_heating.temp_low)
     )
 
-    result = joule_heating._rdc(conductor_temperature_c)
+    result = joule_heating._rdc(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -125,14 +125,14 @@ def test_rdc_scalar_temperature(joule_heating):
     ],
 )
 def test_rdc_array_temperature(joule_heating):
-    conductor_temperature_c = np.array([30.0, 40.0])
+    conductor_temperature = np.array([30.0, 40.0])
     expected = (
-        joule_heating.linear_resistance_temp_low_ohm_m
+        joule_heating.linear_resistance_temp_low
         + joule_heating.temp_coeff_linear
-        * (conductor_temperature_c - joule_heating.temp_low_c)
+        * (conductor_temperature - joule_heating.temp_low)
     )
 
-    result = joule_heating._rdc(conductor_temperature_c)
+    result = joule_heating._rdc(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -147,14 +147,14 @@ def test_rdc_array_temperature(joule_heating):
     ],
 )
 def test_value_scalar_temperature(joule_heating):
-    conductor_temperature_c = 50.0
+    conductor_temperature = 50.0
     expected = (
-        joule_heating.linear_resistance_temp_low_ohm_m
+        joule_heating.linear_resistance_temp_low
         + joule_heating.temp_coeff_linear
-        * (conductor_temperature_c - joule_heating.temp_low_c)
-    ) * joule_heating.transit_a**2
+        * (conductor_temperature - joule_heating.temp_low)
+    ) * joule_heating.transit**2
 
-    result = joule_heating.value(conductor_temperature_c)
+    result = joule_heating.value(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -169,35 +169,35 @@ def test_value_scalar_temperature(joule_heating):
     ],
 )
 def test_value_array_temperature(joule_heating):
-    conductor_temperature_c = np.array([30.0, 40.0])
+    conductor_temperature = np.array([30.0, 40.0])
     expected = (
-        joule_heating.linear_resistance_temp_low_ohm_m
+        joule_heating.linear_resistance_temp_low
         + joule_heating.temp_coeff_linear
-        * (conductor_temperature_c - joule_heating.temp_low_c)
-    ) * joule_heating.transit_a**2
+        * (conductor_temperature - joule_heating.temp_low)
+    ) * joule_heating.transit**2
 
-    result = joule_heating.value(conductor_temperature_c)
+    result = joule_heating.value(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_value_array_temperature_different_shape_should_throw_error():
-    transit_a = 100.0
-    temp_low_c = np.array([20.0, 25.0])
-    temp_high_c = np.array([80.0, 85.0])
-    linear_resistance_temp_low_ohm_m = np.array([0.1, 0.15])
-    linear_resistance_temp_high_ohm_m = np.array([0.2, 0.25])
+    transit = 100.0
+    temp_low = np.array([20.0, 25.0])
+    temp_high = np.array([80.0, 85.0])
+    linear_resistance_temp_low = np.array([0.1, 0.15])
+    linear_resistance_temp_high = np.array([0.2, 0.25])
     joule_heating = JouleHeating(
-        transit_a,
-        temp_low_c,
-        temp_high_c,
-        linear_resistance_temp_low_ohm_m,
-        linear_resistance_temp_high_ohm_m,
+        transit,
+        temp_low,
+        temp_high,
+        linear_resistance_temp_low,
+        linear_resistance_temp_high,
     )
-    conductor_temperature_c = np.array([30.0, 40.0, 50.0])
+    conductor_temperature = np.array([30.0, 40.0, 50.0])
 
     with pytest.raises(ValueError):
-        joule_heating.value(conductor_temperature_c)
+        joule_heating.value(conductor_temperature)
 
 
 @pytest.mark.parametrize(
@@ -211,7 +211,7 @@ def test_value_array_temperature_different_shape_should_throw_error():
 )
 def test_derivative_scalar_temperature(joule_heating):
     conductor_temperature = 50.0
-    expected = joule_heating.temp_coeff_linear * joule_heating.transit_a**2
+    expected = joule_heating.temp_coeff_linear * joule_heating.transit**2
 
     result = joule_heating.derivative(conductor_temperature)
 
@@ -231,7 +231,7 @@ def test_derivative_array_temperature(joule_heating):
     conductor_temperature = np.array([30.0, 40.0])
     expected = (
         joule_heating.temp_coeff_linear
-        * joule_heating.transit_a**2
+        * joule_heating.transit**2
         * np.ones_like(conductor_temperature)
     )
 

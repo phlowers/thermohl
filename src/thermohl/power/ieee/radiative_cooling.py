@@ -20,28 +20,28 @@ class RadiativeCooling(PowerTerm):
 
     def __init__(
         self,
-        ambient_temperature_c: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        ambient_temperature: floatArrayLike,
+        outer_diameter: floatArrayLike,
         emissivity: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
 
         Args:
-            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
+            outer_diameter (float | numpy.ndarray): External diameter (m).
             emissivity (float | numpy.ndarray): Emissivity (—).
 
         """
-        self.ambient_temp_c = ambient_temperature_c
-        self.outer_diameter_m = outer_diameter_m
+        self.ambient_temp_c = ambient_temperature
+        self.outer_diameter = outer_diameter
         self.emissivity = emissivity
 
-    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Args:
-            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -50,9 +50,9 @@ class RadiativeCooling(PowerTerm):
         return (
             17.8
             * self.emissivity
-            * self.outer_diameter_m
+            * self.outer_diameter
             * (
-                ((conductor_temperature_c + 273.0) / 100.0) ** 4
+                ((conductor_temperature + 273.0) / 100.0) ** 4
                 - ((self.ambient_temp_c + 273.0) / 100.0) ** 4
             )
         )
@@ -71,6 +71,6 @@ class RadiativeCooling(PowerTerm):
             4.0
             * 1.78e-07
             * self.emissivity
-            * self.outer_diameter_m
+            * self.outer_diameter
             * conductor_temperature**3
         )

@@ -28,7 +28,7 @@ class _SRad:
 
     def atmosphere_turbidity(
         self,
-        solar_altitude_deg: floatArrayLike,
+        solar_altitude: floatArrayLike,
         turbidity: Optional[floatArrayLike] = 0.0,
     ) -> floatArrayLike:
         """Compute coefficient for atmosphere turbidity.
@@ -38,7 +38,7 @@ class _SRad:
         determined by the turbidity factor.
 
         Args:
-            solar_altitude_deg (float | numpy.ndarray): Solar altitude in degrees.
+            solar_altitude (float | numpy.ndarray): Solar altitude in degrees.
             turbidity (float | numpy.ndarray): Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
 
         Returns:
@@ -53,18 +53,18 @@ class _SRad:
         coeff_1 = clean_weight * self.clean[1] + turbidity * self.indus[1]
         coeff_0 = clean_weight * self.clean[0] + turbidity * self.indus[0]
         return (
-            coeff_6 * solar_altitude_deg**6
-            + coeff_5 * solar_altitude_deg**5
-            + coeff_4 * solar_altitude_deg**4
-            + coeff_3 * solar_altitude_deg**3
-            + coeff_2 * solar_altitude_deg**2
-            + coeff_1 * solar_altitude_deg**1
+            coeff_6 * solar_altitude**6
+            + coeff_5 * solar_altitude**5
+            + coeff_4 * solar_altitude**4
+            + coeff_3 * solar_altitude**3
+            + coeff_2 * solar_altitude**2
+            + coeff_1 * solar_altitude**1
             + coeff_0
         )
 
     def __call__(
         self,
-        latitude_deg: floatArrayLike,
+        latitude: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         turbidity: floatArrayLike,
@@ -73,8 +73,8 @@ class _SRad:
         hour: floatArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        solar_altitude_rad = sun.solar_altitude(latitude_deg, month, day, hour)
-        solar_azimuth_rad = sun.solar_azimuth(latitude_deg, month, day, hour)
+        solar_altitude_rad = sun.solar_altitude(latitude, month, day, hour)
+        solar_azimuth_rad = sun.solar_azimuth(latitude, month, day, hour)
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azimuth)
         )
@@ -93,14 +93,14 @@ class SolarHeatingBase(PowerTerm):
 
     def __init__(
         self,
-        latitude_deg: floatArrayLike,
+        latitude: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         turbidity: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
         precomputed_solar_radiation: Optional[floatArrayLike] = None,
@@ -109,7 +109,7 @@ class SolarHeatingBase(PowerTerm):
         self.solar_absorptivity = solar_absorptivity
         if precomputed_solar_radiation is None:
             self.solar_irradiance = est(
-                np.deg2rad(latitude_deg),
+                np.deg2rad(latitude),
                 altitude,
                 np.deg2rad(azimuth),
                 turbidity,
@@ -119,13 +119,13 @@ class SolarHeatingBase(PowerTerm):
             )
         else:
             self.solar_irradiance = np.maximum(precomputed_solar_radiation, 0.0)
-        self.outer_diameter_m = outer_diameter_m
+        self.outer_diameter = outer_diameter
 
-    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
         Args:
-            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -134,8 +134,8 @@ class SolarHeatingBase(PowerTerm):
         return (
             self.solar_absorptivity
             * self.solar_irradiance
-            * self.outer_diameter_m
-            * np.ones_like(conductor_temperature_c)
+            * self.outer_diameter
+            * np.ones_like(conductor_temperature)
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:

@@ -25,10 +25,10 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         self,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
-        ambient_temperature_c: floatArrayLike,
-        wind_speed_ms: floatArrayLike,
-        wind_angle_deg: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        ambient_temperature: floatArrayLike,
+        wind_speed: floatArrayLike,
+        wind_angle: floatArrayLike,
+        outer_diameter: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -38,30 +38,30 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         Args:
             altitude (float | numpy.ndarray): Altitude (m).
             azimuth (float | numpy.ndarray): Azimuth (deg).
-            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
-            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
+            wind_speed (float | numpy.ndarray): Wind speed (m·s⁻¹).
+            wind_angle (float | numpy.ndarray): Wind angle regarding north (deg).
+            outer_diameter (float | numpy.ndarray): External diameter (m).
 
         """
         super().__init__(
             altitude,
             azimuth,
-            ambient_temperature_c,
-            wind_speed_ms,
-            wind_angle_deg,
-            outer_diameter_m,
+            ambient_temperature,
+            wind_speed,
+            wind_angle,
+            outer_diameter,
             Air.volumic_mass,
             Air.dynamic_viscosity,
             Air.thermal_conductivity,
         )
 
-    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute convective cooling.
 
         Parameters
         ----------
-        conductor_temperature_c : float or np.ndarray
+        conductor_temperature : float or np.ndarray
             Conductor temperature.
 
         Returns
@@ -70,13 +70,13 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             Power term value (W.m\ :sup:`-1`\ ).
 
         """
-        film_temperature_c = 0.5 * (conductor_temperature_c + self.ambient_temp_c)
-        temperature_delta_c = conductor_temperature_c - self.ambient_temp_c
+        film_temperature = 0.5 * (conductor_temperature + self.ambient_temp_c)
+        temperature_delta = conductor_temperature - self.ambient_temp_c
         # very slight difference with air.IEEE.volumic_mass() in coefficient before altitude**2
         air_density = (
-            1.293 - 1.525e-04 * self.altitude_m + 6.38e-09 * self.altitude_m**2
-        ) / (1 + 0.00367 * film_temperature_c)
+            1.293 - 1.525e-04 * self.altitude + 6.38e-09 * self.altitude**2
+        ) / (1 + 0.00367 * film_temperature)
         return np.maximum(
-            self._value_forced(film_temperature_c, temperature_delta_c, air_density),
-            self._value_natural(temperature_delta_c, air_density),
+            self._value_forced(film_temperature, temperature_delta, air_density),
+            self._value_natural(temperature_delta, air_density),
         )

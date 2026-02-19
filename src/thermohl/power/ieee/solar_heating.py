@@ -15,14 +15,14 @@ from thermohl.power import _SRad, SolarHeatingBase
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
-        latitude_deg: floatArrayLike,
+        latitude: floatArrayLike,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
         turbidity: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
@@ -32,14 +32,14 @@ class SolarHeating(SolarHeatingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            latitude_deg (float | numpy.ndarray): Latitude.
+            latitude (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
             azimuth (float | numpy.ndarray): Azimuth.
             turbidity (float | numpy.ndarray): Air pollution from 0 (clean) to 1 (polluted).
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            outer_diameter_m (float | numpy.ndarray): external diameter.
+            outer_diameter (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
             precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
         """
@@ -64,14 +64,14 @@ class SolarHeating(SolarHeatingBase):
             ],
         )
         super().__init__(
-            latitude_deg,
+            latitude,
             altitude,
             azimuth,
             turbidity,
             month,
             day,
             hour,
-            outer_diameter_m,
+            outer_diameter,
             solar_absorptivity,
             est,
             precomputed_solar_radiation,

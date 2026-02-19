@@ -23,8 +23,8 @@ class RadiativeCoolingBase(PowerTerm):
 
     def __init__(
         self,
-        ambient_temperature_c: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        ambient_temperature: floatArrayLike,
+        outer_diameter: floatArrayLike,
         emissivity: floatArrayLike,
         stefan_boltzmann_constant: float = 5.67e-08,
         zerok: float = 273.15,
@@ -33,24 +33,24 @@ class RadiativeCoolingBase(PowerTerm):
         r"""Init with args.
 
         Args:
-            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
+            outer_diameter (float | numpy.ndarray): External diameter (m).
             emissivity (float | numpy.ndarray): Emissivity (—).
             stefan_boltzmann_constant (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
             zerok (float, optional): Offset to convert Celsius to Kelvin (K). The default is 273.15.
 
         """
         self.kelvin_offset = zerok
-        self.ambient_temp_k = self._celsius2kelvin(ambient_temperature_c)
-        self.outer_diameter_m = outer_diameter_m
+        self.ambient_temperature = self._celsius2kelvin(ambient_temperature)
+        self.outer_diameter = outer_diameter
         self.emissivity = emissivity
         self.stefan_boltzmann = stefan_boltzmann_constant
 
-    def value(self, conductor_temperature_c: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute radiative cooling using the Stefan-Boltzmann law.
 
         Args:
-            conductor_temperature_c (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
@@ -60,10 +60,10 @@ class RadiativeCoolingBase(PowerTerm):
             np.pi
             * self.stefan_boltzmann
             * self.emissivity
-            * self.outer_diameter_m
+            * self.outer_diameter
             * (
-                self._celsius2kelvin(conductor_temperature_c) ** 4
-                - self.ambient_temp_k**4
+                self._celsius2kelvin(conductor_temperature) ** 4
+                - self.ambient_temperature**4
             )
         )
 
@@ -82,6 +82,6 @@ class RadiativeCoolingBase(PowerTerm):
             * np.pi
             * self.stefan_boltzmann
             * self.emissivity
-            * self.outer_diameter_m
+            * self.outer_diameter
             * conductor_temperature**3
         )

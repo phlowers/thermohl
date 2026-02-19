@@ -26,7 +26,7 @@ solar_radiation = _SRad(clean=CLEAN_AIR_COEFFICIENTS, indus=POLLUTED_AIR_COEFFIC
 
 
 def solar_irradiance(
-    latitude_deg: floatArrayLike,
+    latitude: floatArrayLike,
     month: intArrayLike,
     day: intArrayLike,
     hour: floatArrayLike,
@@ -36,7 +36,7 @@ def solar_irradiance(
     Difference with IEEE version are neither turbidity or altitude influence.
 
     Args:
-        latitude_deg (float | numpy.ndarray): Latitude in radians.
+        latitude (float | numpy.ndarray): Latitude in radians.
         month (int | numpy.ndarray): Month (1-12).
         day (int | numpy.ndarray): Day of the month.
         hour (float | numpy.ndarray): Hour of the day (0-24).
@@ -44,7 +44,7 @@ def solar_irradiance(
     Returns:
         float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
     """
-    solar_altitude_rad = sun.solar_altitude(latitude_deg, month, day, hour)
+    solar_altitude_rad = sun.solar_altitude(latitude, month, day, hour)
     clearness_factor = solar_radiation.atmosphere_turbidity(
         np.rad2deg(solar_altitude_rad)
     )
@@ -54,14 +54,14 @@ def solar_irradiance(
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
-        latitude_deg: floatArrayLike,
+        latitude: floatArrayLike,
         azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        measured_solar_irradiance_w_m2: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Build with args.
@@ -69,29 +69,25 @@ class SolarHeating(SolarHeatingBase):
         If more than one input are numpy arrays, they should have the same size.
 
         Args:
-            latitude_deg (float | numpy.ndarray): Latitude.
+            latitude (float | numpy.ndarray): Latitude.
             azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            outer_diameter_m (float | numpy.ndarray): external diameter.
+            outer_diameter (float | numpy.ndarray): external diameter.
             solar_absorptivity (numpy.ndarray): Solar absorption coefficient.
-            measured_solar_irradiance_w_m2 (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
+            measured_solar_irradiance (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
         self.solar_absorptivity = solar_absorptivity
-        if np.isnan(measured_solar_irradiance_w_m2).all():
-            measured_solar_irradiance_w_m2 = solar_irradiance(
-                np.deg2rad(latitude_deg), month, day, hour
+        if np.isnan(measured_solar_irradiance).all():
+            measured_solar_irradiance = solar_irradiance(
+                np.deg2rad(latitude), month, day, hour
             )
-        solar_altitude_rad = sun.solar_altitude(
-            np.deg2rad(latitude_deg), month, day, hour
-        )
-        solar_azimuth_rad = sun.solar_azimuth(
-            np.deg2rad(latitude_deg), month, day, hour
-        )
+        solar_altitude_rad = sun.solar_altitude(np.deg2rad(latitude), month, day, hour)
+        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), month, day, hour)
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - np.deg2rad(azimuth))
         )
-        irradiance = measured_solar_irradiance_w_m2 * np.sin(incidence_angle_rad)
+        irradiance = measured_solar_irradiance * np.sin(incidence_angle_rad)
         self.solar_irradiance = np.maximum(irradiance, 0.0)
-        self.outer_diameter_m = outer_diameter_m
+        self.outer_diameter = outer_diameter

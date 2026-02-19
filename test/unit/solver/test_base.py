@@ -14,8 +14,8 @@ from thermohl.solver.base import Args, reshape, _set_dates
 # Tests class Args
 def test_max_len_with_mixed_types():
     dic = {
-        "latitude_deg": np.array([45.0, 46.0]),
-        "longitude_deg": 10.0,
+        "latitude": np.array([45.0, 46.0]),
+        "longitude": 10.0,
         "altitude": np.array([20.0, 25.0, 30.0]),
     }
     args = Args(dic)
@@ -27,8 +27,8 @@ def test_max_len_with_mixed_types():
 
 def test_max_len_with_ndarray():
     dic = {
-        "latitude_deg": np.array([45.0, 46.0]),
-        "longitude_deg": np.array([10.0, 11.0]),
+        "latitude": np.array([45.0, 46.0]),
+        "longitude": np.array([10.0, 11.0]),
     }
     args = Args(dic)
 
@@ -38,7 +38,7 @@ def test_max_len_with_ndarray():
 
 
 def test_max_len_with_scalar():
-    dic = {"latitude_deg": 45.0, "longitude_deg": 10.0}
+    dic = {"latitude": 45.0, "longitude": 10.0}
     args = Args(dic)
 
     result = args.max_len()
@@ -56,8 +56,8 @@ def test_max_len_with_empty_dict():
 
 def test_max_len_with_varied_lengths():
     dic = {
-        "latitude_deg": np.array([45.0, 46.0]),
-        "longitude_deg": np.array([10.0]),
+        "latitude": np.array([45.0, 46.0]),
+        "longitude": np.array([10.0]),
         "altitude": np.array([20.0, 25.0, 30.0]),
     }
     args = Args(dic)
@@ -68,51 +68,51 @@ def test_max_len_with_varied_lengths():
 
 
 def test_extend_to_max_len_with_nd_array():
-    dic = {"latitude_deg": np.array([45.0, 46.0]), "longitude_deg": 10.0}
+    dic = {"latitude": np.array([45.0, 46.0]), "longitude": 10.0}
     args = Args(dic)
 
     args.extend_to_max_len()
 
-    assert isinstance(args.latitude_deg, ndarray)
-    assert isinstance(args.longitude_deg, ndarray)
-    assert len(args.latitude_deg) == 2
-    assert len(args.longitude_deg) == 2
-    np.testing.assert_array_equal(args.latitude_deg, np.array([45.0, 46.0]))
-    np.testing.assert_array_equal(args.longitude_deg, np.array([10.0, 10.0]))
+    assert isinstance(args.latitude, ndarray)
+    assert isinstance(args.longitude, ndarray)
+    assert len(args.latitude) == 2
+    assert len(args.longitude) == 2
+    np.testing.assert_array_equal(args.latitude, np.array([45.0, 46.0]))
+    np.testing.assert_array_equal(args.longitude, np.array([10.0, 10.0]))
 
 
 def test_extend_to_max_len_with_scalar():
-    dic = {"latitude_deg": 45.0, "longitude_deg": 10.0}
+    dic = {"latitude": 45.0, "longitude": 10.0}
     args = Args(dic)
 
     args.extend_to_max_len()
 
-    assert isinstance(args.latitude_deg, ndarray)
-    assert isinstance(args.longitude_deg, ndarray)
-    assert len(args.latitude_deg) == 1
-    assert len(args.longitude_deg) == 1
-    np.testing.assert_array_equal(args.latitude_deg, np.array([45.0]))
-    np.testing.assert_array_equal(args.longitude_deg, np.array([10.0]))
+    assert isinstance(args.latitude, ndarray)
+    assert isinstance(args.longitude, ndarray)
+    assert len(args.latitude) == 1
+    assert len(args.longitude) == 1
+    np.testing.assert_array_equal(args.latitude, np.array([45.0]))
+    np.testing.assert_array_equal(args.longitude, np.array([10.0]))
 
 
 def test_extend_to_max_len_with_mixed_types():
     dic = {
-        "latitude_deg": np.array([45.0, 46.0]),
-        "longitude_deg": 10.0,
+        "latitude": np.array([45.0, 46.0]),
+        "longitude": 10.0,
         "altitude": np.array([20.0]),
     }
     args = Args(dic)
 
     args.extend_to_max_len()
 
-    assert isinstance(args.latitude_deg, ndarray)
-    assert isinstance(args.longitude_deg, ndarray)
+    assert isinstance(args.latitude, ndarray)
+    assert isinstance(args.longitude, ndarray)
     assert isinstance(args.altitude, ndarray)
-    assert len(args.latitude_deg) == 2
-    assert len(args.longitude_deg) == 2
+    assert len(args.latitude) == 2
+    assert len(args.longitude) == 2
     assert len(args.altitude) == 2
-    np.testing.assert_array_equal(args.latitude_deg, np.array([45.0, 46.0]))
-    np.testing.assert_array_equal(args.longitude_deg, np.array([10.0, 10.0]))
+    np.testing.assert_array_equal(args.latitude, np.array([45.0, 46.0]))
+    np.testing.assert_array_equal(args.longitude, np.array([10.0, 10.0]))
     np.testing.assert_array_equal(args.altitude, np.array([20.0, 20.0]))
 
 
@@ -129,49 +129,49 @@ def test_extend_to_max_len_with_empty_dict():
 
 def test_compress_with_unique_values():
     dic = {
-        "latitude_deg": np.array([45.0, 45.0]),
-        "longitude_deg": np.array([10.0, 10.0]),
+        "latitude": np.array([45.0, 45.0]),
+        "longitude": np.array([10.0, 10.0]),
     }
     args = Args(dic)
 
     args.compress()
 
-    assert isinstance(args.latitude_deg, float)
-    assert args.latitude_deg == 45.0
-    assert isinstance(args.longitude_deg, float)
-    assert args.longitude_deg == 10.0
+    assert isinstance(args.latitude, float)
+    assert args.latitude == 45.0
+    assert isinstance(args.longitude, float)
+    assert args.longitude == 10.0
 
 
 def test_compress_with_non_unique_values():
     dic = {
-        "latitude_deg": np.array([45.0, 46.0]),
-        "longitude_deg": np.array([10.0, 11.0]),
+        "latitude": np.array([45.0, 46.0]),
+        "longitude": np.array([10.0, 11.0]),
     }
     args = Args(dic)
 
     args.compress()
 
-    assert isinstance(args.latitude_deg, ndarray)
-    assert isinstance(args.longitude_deg, ndarray)
-    np.testing.assert_array_equal(args.latitude_deg, np.array([45.0, 46.0]))
-    np.testing.assert_array_equal(args.longitude_deg, np.array([10.0, 11.0]))
+    assert isinstance(args.latitude, ndarray)
+    assert isinstance(args.longitude, ndarray)
+    np.testing.assert_array_equal(args.latitude, np.array([45.0, 46.0]))
+    np.testing.assert_array_equal(args.longitude, np.array([10.0, 11.0]))
 
 
 def test_compress_with_mixed_values():
     dic = {
-        "latitude_deg": np.array([45.0, 45.0]),
-        "longitude_deg": np.array([10.0, 11.0]),
+        "latitude": np.array([45.0, 45.0]),
+        "longitude": np.array([10.0, 11.0]),
         "altitude": 20.0,
     }
     args = Args(dic)
 
     args.compress()
 
-    assert isinstance(args.latitude_deg, float)
-    assert args.latitude_deg == 45.0
-    assert isinstance(args.longitude_deg, ndarray)
+    assert isinstance(args.latitude, float)
+    assert args.latitude == 45.0
+    assert isinstance(args.longitude, ndarray)
     assert isinstance(args.altitude, float)
-    np.testing.assert_array_equal(args.longitude_deg, np.array([10.0, 11.0]))
+    np.testing.assert_array_equal(args.longitude, np.array([10.0, 11.0]))
     assert args.altitude == 20.0
 
 

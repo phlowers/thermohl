@@ -5,13 +5,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-latitude_deg:
+latitude:
   dist: 'truncnorm'
   min: 35.
   max: 55.
   std: 4.4E-04
   relative_std: false
-longitude_deg:
+longitude:
   dist: null
   min: -4.9
   max: +8.3
@@ -40,13 +40,13 @@ hour:
   max: 24.
   std: 0.25
   relative_std: false
-ambient_temperature_c:
+ambient_temperature:
   dist: 'truncnorm'
   min: -40.
   max: +50.
   std: 2.
   relative_std: false
-ambient_pressure_pa:
+ambient_pressure:
   dist: 'truncnorm'
   min: 0.870E+05
   max: 1.050E+05
@@ -58,19 +58,19 @@ relative_humidity:
   max: 1.
   std: 0.05
   relative_std: false
-precipitation_rate_ms:
+precipitation_rate:
   dist: 'truncnorm'
   min: 0.
   max: 0.05
   std: 7.0E-08
   relative_std: false
-wind_speed_ms:
+wind_speed:
   dist: 'truncnorm'
   min: 0.
   max: 100.
   std: 0.1
   relative_std: true
-wind_angle_deg:
+wind_angle:
   dist: 'vonmises'
   std: 10.
   relative_std: false
@@ -84,37 +84,37 @@ turbidity:
   dist: null
   min: 0.
   max: 1.
-transit_a:
+transit:
   dist: 'truncnorm'
   min: 0.
   max: 4999.
   std: 0.03
   relative_std: true
-linear_mass_kgm:
+linear_mass:
   dist: 'truncnorm'
   min: 0.1
   max: 5.0
   std: 0.05
   relative_std: true
-core_diameter_m:
+core_diameter:
   dist: 'truncnorm'
   min: 0.
   max: 0.05
   std: 0.008
   relative_std: true
-outer_diameter_m:
+outer_diameter:
   dist: 'truncnorm'
   min: 0.005
   max: 0.1
   std: 0.008
   relative_std: true
-core_area_m2:
+core_area:
   dist: 'truncnorm'
   min: 0.
   max: 5.0E-04
   std: 2.5E-04
   relative_std: true
-outer_area_m2:
+outer_area:
   dist: 'truncnorm'
   min: 2.0E-05
   max: 2.0E-03
@@ -126,13 +126,13 @@ roughness_ratio:
   max: 0.20
   std: 0.
   relative_std: false
-radial_thermal_conductivity_wmk:
+radial_thermal_conductivity:
   dist: 'truncnorm'
   min: 0.7
   max: 1.5
   std: 0.1
   relative_std: false
-heat_capacity_jkgk:
+heat_capacity:
   dist: 'truncnorm'
   min: 500.
   max: 1000.
@@ -148,7 +148,7 @@ emissivity:
   dist: null
   min: 0.13
   max: 0.83
-linear_resistance_dc_20c_ohm_m:
+linear_resistance_dc_20c:
   dist: 'truncnorm'
   min: 1.0E-05
   max: 1.0E-03
@@ -162,11 +162,11 @@ temperature_coeff_linear:
   dist: null
 temperature_coeff_quadratic:
   dist: null
-linear_resistance_temp_high_ohm_m:
+linear_resistance_temp_high:
   dist: null
-linear_resistance_temp_low_ohm_m:
+linear_resistance_temp_low:
   dist: null
-temp_high_c:
+temp_high:
   dist: null
-temp_low_c:
+temp_low:
   dist: null

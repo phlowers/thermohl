@@ -20,10 +20,10 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         self,
         altitude: floatArrayLike,
         azimuth: floatArrayLike,
-        ambient_temperature_c: floatArrayLike,
-        wind_speed_ms: floatArrayLike,
-        wind_angle_deg: floatArrayLike,
-        outer_diameter_m: floatArrayLike,
+        ambient_temperature: floatArrayLike,
+        wind_speed: floatArrayLike,
+        wind_angle: floatArrayLike,
+        outer_diameter: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -33,19 +33,19 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         Args:
             altitude (float | numpy.ndarray): Altitude (m).
             azimuth (float | numpy.ndarray): Azimuth (deg).
-            ambient_temperature_c (float | numpy.ndarray): Ambient temperature (°C).
-            wind_speed_ms (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wind_angle_deg (float | numpy.ndarray): Wind angle regarding north (deg).
-            outer_diameter_m (float | numpy.ndarray): External diameter (m).
+            ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
+            wind_speed (float | numpy.ndarray): Wind speed (m·s⁻¹).
+            wind_angle (float | numpy.ndarray): Wind angle regarding north (deg).
+            outer_diameter (float | numpy.ndarray): External diameter (m).
 
         """
         super().__init__(
             altitude,
             azimuth,
-            ambient_temperature_c,
-            wind_speed_ms,
-            wind_angle_deg,
-            outer_diameter_m,
+            ambient_temperature,
+            wind_speed,
+            wind_angle,
+            outer_diameter,
             Air.volumic_mass,
             Air.dynamic_viscosity,
             Air.thermal_conductivity,

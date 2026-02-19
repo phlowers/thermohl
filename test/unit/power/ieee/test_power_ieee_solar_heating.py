@@ -11,118 +11,118 @@ from thermohl.power.ieee import SolarHeating
 
 
 def test_solar_heating_init_scalar():
-    latitude_deg = 45.0
+    latitude = 45.0
     altitude = 1000.0
     azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
-    outer_diameter_m = 0.01
+    outer_diameter = 0.01
     solar_absorptivity = 0.9
     srad = 800.0
 
     solar_heating = SolarHeating(
-        latitude_deg,
+        latitude,
         altitude,
         azimuth,
         turbidity,
         month,
         day,
         hour,
-        outer_diameter_m,
+        outer_diameter,
         solar_absorptivity,
         srad,
     )
 
     assert solar_heating.solar_absorptivity == solar_absorptivity
     assert np.isclose(solar_heating.solar_irradiance, srad)
-    assert np.isclose(solar_heating.outer_diameter_m, outer_diameter_m)
+    assert np.isclose(solar_heating.outer_diameter, outer_diameter)
 
 
 def test_solar_heating_init_array():
-    latitude_deg = np.array([45.0, 50.0])
+    latitude = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
     azimuth = np.array([180.0, 190.0])
     turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
-    outer_diameter_m = np.array([0.01, 0.02])
+    outer_diameter = np.array([0.01, 0.02])
     solar_absorptivity = np.array([0.9, 0.8])
     srad = np.array([800.0, 900.0])
 
     solar_heating = SolarHeating(
-        latitude_deg,
+        latitude,
         altitude,
         azimuth,
         turbidity,
         month,
         day,
         hour,
-        outer_diameter_m,
+        outer_diameter,
         solar_absorptivity,
         srad,
     )
 
     assert np.allclose(solar_heating.solar_absorptivity, solar_absorptivity)
     assert np.allclose(solar_heating.solar_irradiance, srad)
-    assert np.allclose(solar_heating.outer_diameter_m, outer_diameter_m)
+    assert np.allclose(solar_heating.outer_diameter, outer_diameter)
 
 
 def test_solar_heating_init_mixed():
-    latitude_deg = 45.0
+    latitude = 45.0
     altitude = 1000.0
     azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
-    outer_diameter_m = 0.01
+    outer_diameter = 0.01
     solar_absorptivity = 0.9
     srad = np.array([800.0, 900.0])
 
     solar_heating = SolarHeating(
-        latitude_deg,
+        latitude,
         altitude,
         azimuth,
         turbidity,
         month,
         day,
         hour,
-        outer_diameter_m,
+        outer_diameter,
         solar_absorptivity,
         srad,
     )
 
     assert solar_heating.solar_absorptivity == solar_absorptivity
     assert np.allclose(solar_heating.solar_irradiance, srad)
-    assert np.isclose(solar_heating.outer_diameter_m, outer_diameter_m)
+    assert np.isclose(solar_heating.outer_diameter, outer_diameter)
 
 
 def test_solar_heating_init_no_srad():
-    latitude_deg = 45.0
+    latitude = 45.0
     altitude = 1000.0
     azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
-    outer_diameter_m = 0.01
+    outer_diameter = 0.01
     solar_absorptivity = 0.9
 
     solar_heating = SolarHeating(
-        latitude_deg,
+        latitude,
         altitude,
         azimuth,
         turbidity,
         month,
         day,
         hour,
-        outer_diameter_m,
+        outer_diameter,
         solar_absorptivity,
     )
 
     assert solar_heating.solar_absorptivity == solar_absorptivity
     assert solar_heating.solar_irradiance is not None
-    assert np.isclose(solar_heating.outer_diameter_m, outer_diameter_m)
+    assert np.isclose(solar_heating.outer_diameter, outer_diameter)
