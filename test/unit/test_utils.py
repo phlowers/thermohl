@@ -6,6 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
+import pytest
 
 from thermohl.utils import bisect_v, quasi_newton_2d
 
@@ -60,7 +61,7 @@ def test_bisect_vector():
 
 
 def test_bisect_array():
-    c = np.arange(27).reshape(3, 3, 3)
+    c = np.arange(1, 28).reshape(3, 3, 3)
 
     def f(x):
         return x**2 - c
@@ -69,7 +70,36 @@ def test_bisect_array():
     x0, err = bisect_v(
         f, lower_bound=0, upper_bound=30, output_shape=c.shape, tolerance=tol
     )
+
     np.testing.assert_allclose(x0, np.sqrt(c), atol=tol)
+
+
+def test_bisect_no_convergence():
+    def f(x):
+        return x**2 + 1  # No root
+
+    with pytest.raises(ValueError):
+        bisect_v(
+            f,
+            lower_bound=-50,
+            upper_bound=50,
+            output_shape=(1,),
+        )
+
+
+def test_bisect_no_convergence_array():
+    c = np.arange(-1, 1)
+
+    def f(x):
+        return x**2 + c  # No root for c > 0
+
+    with pytest.raises(ValueError):
+        bisect_v(
+            f,
+            lower_bound=-50,
+            upper_bound=50,
+            output_shape=(1,),
+        )
 
 
 #

@@ -121,7 +121,7 @@ def bisect_v(
     print_error: bool = False,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Bisection method to find a zero of a continuous function [a, b] -> R,
-    such that f(a) < 0 < f(b).
+    such that f(a) <= 0 <= f(b).
 
     The method is vectorized, in the sense that it can in a single call find
     the zeros of several independent real-valued functions with the same input
@@ -157,6 +157,15 @@ def bisect_v(
     """
     lower_bounds = lower_bound * np.ones(output_shape)
     upper_bounds = upper_bound * np.ones(output_shape)
+
+    # If the condition f(a) <= 0 <= f(b) is not satisfied,
+    # there's no guaranty there is a unique solution, so the bisection method can't be applied
+    # and we raise an error
+    if np.any(func(lower_bounds) > 0) or np.any(func(upper_bounds) < 0):
+        raise ValueError(
+            "Can't use bisection method: function applied to lower bound should be strictly negative"
+            " and function applied to upper bound should be strictly positive."
+        )
 
     abs_error = np.abs(upper_bound - lower_bound)
     iteration_count = 1
