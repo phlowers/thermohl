@@ -19,14 +19,14 @@ def solver():
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT: np.array([0]),
-        "Ta": np.array([25]),
-        "ws": np.array([0]),
-        "wa": np.array([0]),
-        "Pa": np.array([101325]),
-        "rh": np.array([50]),
-        "pr": np.array([0]),
-        "m": 1.0,
-        "c": 1.0,
+        "ambient_temperature": np.array([25]),
+        "wind_speed": np.array([0]),
+        "wind_angle": np.array([0]),
+        "ambient_pressure": np.array([101325]),
+        "relative_humidity": np.array([50]),
+        "precipitation_rate": np.array([0]),
+        "linear_mass": 1.0,
+        "heat_capacity": 1.0,
         "month": 1,
         "day": 1,
         "hour": 0,
@@ -127,9 +127,9 @@ def test_transient_temperature_with_error(solver):
 
 
 def test_steady_intensity_default(solver):
-    T = np.array([75])
+    conductor_temperature = np.array([75])
 
-    result = solver.steady_intensity(T)
+    result = solver.steady_intensity(conductor_temperature)
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
@@ -141,9 +141,9 @@ def test_steady_intensity_default(solver):
 
 
 def test_steady_intensity_with_error(solver):
-    T = np.array([75])
+    conductor_temperature = np.array([75])
 
-    result = solver.steady_intensity(T, return_err=True)
+    result = solver.steady_intensity(conductor_temperature, return_err=True)
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
@@ -151,9 +151,9 @@ def test_steady_intensity_with_error(solver):
 
 
 def test_steady_intensity_no_power(solver):
-    T = np.array([75])
+    conductor_temperature = np.array([75])
 
-    result = solver.steady_intensity(T, return_power=False)
+    result = solver.steady_intensity(conductor_temperature, return_power=False)
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
@@ -165,13 +165,15 @@ def test_steady_intensity_no_power(solver):
 
 
 def test_steady_intensity_custom_params(solver):
-    T = np.array([75])
+    conductor_temperature = np.array([75])
     Imin = 5.0
     Imax = 100.0
     tol = 1e-5
     maxiter = 100
 
-    result = solver.steady_intensity(T, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter)
+    result = solver.steady_intensity(
+        conductor_temperature, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter
+    )
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns

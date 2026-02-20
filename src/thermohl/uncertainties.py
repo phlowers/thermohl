@@ -45,37 +45,39 @@ def default_uncertainties() -> dict:
     return utils.add_default_uncertainties({}, warning=False)
 
 
-def cummean(x: np.ndarray) -> np.ndarray:
+def cummean(values: np.ndarray) -> np.ndarray:
     """Cumulative mean."""
-    return np.cumsum(x) / (1 + np.array(range(len(x))))
+    return np.cumsum(values) / (1 + np.array(range(len(values))))
 
 
-def cumstd(x: np.ndarray) -> np.ndarray:
+def cumstd(values: np.ndarray) -> np.ndarray:
     """Cumulative std."""
-    return np.sqrt(cummean(x**2) - cummean(x) ** 2)
+    return np.sqrt(cummean(values**2) - cummean(values) ** 2)
 
 
 @depends_on_optional("scipy")
-def _get_dist(du: dict, mean: float) -> frozen_dist:
+def _get_dist(uncertainty_spec: dict, mean_value: float) -> frozen_dist:
     """Get distribution
-    -- based on parameters in dict du and with mean mean"""
-    mu = mean
+    -- based on parameters in dict uncertainty_spec and with mean mean_value"""
+    mean = mean_value
     # set std
-    sigma = du["std"]
-    if du["relative_std"]:
-        sigma *= mean
+    standard_deviation = uncertainty_spec["std"]
+    if uncertainty_spec["relative_std"]:
+        standard_deviation *= mean
     # if std is 0., return uniform
-    if sigma == 0.0:
+    if standard_deviation == 0.0:
         return scipy.stats.uniform(mean, mean)
 
     # select ditribution
-    if du["dist"] == "truncnorm":
-        a, b = du["min"], du["max"]
-        dist = distributions.truncnorm(a, b, mu, sigma)
-    elif du["dist"] == "vonmises":
-        dist = distributions.vonmises(np.deg2rad(mu), np.deg2rad(sigma))
-    elif du["dist"] == "wrapnorm":
-        dist = distributions.wrapnorm(np.deg2rad(mu), np.deg2rad(sigma))
+    if uncertainty_spec["dist"] == "truncnorm":
+        lower_bound, upper_bound = uncertainty_spec["min"], uncertainty_spec["max"]
+        dist = distributions.truncnorm(
+            lower_bound, upper_bound, mean, standard_deviation
+        )
+    elif uncertainty_spec["dist"] == "vonmises":
+        dist = distributions.vonmises(np.deg2rad(mean), np.deg2rad(standard_deviation))
+    elif uncertainty_spec["dist"] == "wrapnorm":
+        dist = distributions.wrapnorm(np.deg2rad(mean), np.deg2rad(standard_deviation))
     else:
         raise ValueError("Dist keyword not supported")
 
@@ -84,17 +86,21 @@ def _get_dist(du: dict, mean: float) -> frozen_dist:
 
 @depends_on_optional("scipy")
 def _generate_samples(
-    dc: dict, i: int, du: dict, ns: int, check: bool = False
+    input_params: dict,
+    index: int,
+    uncertainty_spec: dict,
+    num_samples: int,
+    include_check: bool = False,
 ) -> Union[dict, Tuple[dict, pd.DataFrame]]:
     """
     Generate random samples for all input parameters affected with a probability distribution.
     """
 
     # sample dict
-    ds = {}
+    samples_dict = {}
     # check dataframe
-    if check:
-        cl = [
+    if include_check:
+        columns = [
             "key",
             "dist",
             "mean",
@@ -107,67 +113,77 @@ def _generate_samples(
             "s_max",
             "circular",
         ]
-        dk = pd.DataFrame(columns=cl, data=np.zeros((len(dc), len(cl))) * np.nan)
-        dk.loc[:, "circular"] = False
+        check_table = pd.DataFrame(
+            columns=columns, data=np.zeros((len(input_params), len(columns))) * np.nan
+        )
+        check_table.loc[:, "circular"] = False
 
     # loop on dict
-    for j, k in enumerate(dc):
-        if k not in du.keys():
+    for row_index, key in enumerate(input_params):
+        if key not in uncertainty_spec.keys():
             continue
-        dist = du[k]["dist"]
-        mean = dc[k][i]
-        if dist is None or np.isnan(mean):
-            sample = mean * np.ones((ns,), dtype=type(mean))
+        dist = uncertainty_spec[key]["dist"]
+        mean_value = input_params[key][index]
+        if dist is None or np.isnan(mean_value):
+            sample = mean_value * np.ones((num_samples,), dtype=type(mean_value))
         else:
-            sample = _get_dist(du[k], mean).rvs(ns)
+            sample = _get_dist(uncertainty_spec[key], mean_value).rvs(num_samples)
             if dist == "vonmises" or dist == "wrapnorm":
                 sample = np.rad2deg(sample) % 360.0
-        ds[k] = sample
+        samples_dict[key] = sample
 
-        if check:
-            dk.loc[j, "key"] = k
-            dk.loc[j, "dist"] = dist
-            dk.loc[j, "mean"] = mean
-            if "std" in du[k].keys():
-                dk.loc[j, "std"] = du[k]["std"]
-                if du[k]["relative_std"]:
-                    dk.loc[j, "std"] *= mean
-            if "min" in du[k].keys():
-                dk.loc[j, "min"] = du[k]["min"]
-            if "max" in du[k].keys():
-                dk.loc[j, "max"] = du[k]["max"]
+        if include_check:
+            check_table.loc[row_index, "key"] = key
+            check_table.loc[row_index, "dist"] = dist
+            check_table.loc[row_index, "mean"] = mean_value
+            if "std" in uncertainty_spec[key].keys():
+                check_table.loc[row_index, "std"] = uncertainty_spec[key]["std"]
+                if uncertainty_spec[key]["relative_std"]:
+                    check_table.loc[row_index, "std"] *= mean_value
+            if "min" in uncertainty_spec[key].keys():
+                check_table.loc[row_index, "min"] = uncertainty_spec[key]["min"]
+            if "max" in uncertainty_spec[key].keys():
+                check_table.loc[row_index, "max"] = uncertainty_spec[key]["max"]
             if dist in ["vonmises", "wrapnorm"]:
-                dk.loc[j, "s_mean"] = scipy.stats.circmean(sample, high=360.0, low=0.0)
-                dk.loc[j, "s_std"] = scipy.stats.circstd(sample, high=360.0, low=0.0)
-                dk.loc[j, "circular"] = True
+                check_table.loc[row_index, "s_mean"] = scipy.stats.circmean(
+                    sample, high=360.0, low=0.0
+                )
+                check_table.loc[row_index, "s_std"] = scipy.stats.circstd(
+                    sample, high=360.0, low=0.0
+                )
+                check_table.loc[row_index, "circular"] = True
             else:
-                dk.loc[j, "s_mean"] = sample.mean()
-                dk.loc[j, "s_std"] = sample.std()
-            dk.loc[j, "s_min"] = sample.min()
-            dk.loc[j, "s_max"] = sample.max()
+                check_table.loc[row_index, "s_mean"] = sample.mean()
+                check_table.loc[row_index, "s_std"] = sample.std()
+            check_table.loc[row_index, "s_min"] = sample.min()
+            check_table.loc[row_index, "s_max"] = sample.max()
 
-    if check:
-        return ds, dk
+    if include_check:
+        return samples_dict, check_table
 
-    return ds
+    return samples_dict
 
 
 def _rdict(
     mode: str,
     target: CableLocation,
-    return_surf: bool,
-    return_core: bool,
-    return_avg: bool,
+    include_surface: bool,
+    include_core: bool,
+    include_average: bool,
 ) -> dict:
     """Code factorization"""
     if mode == "temperature":
-        rdc = dict(return_core=return_core, return_avg=return_avg, return_power=False)
+        rdc = dict(
+            return_core=include_core,
+            return_avg=include_average,
+            return_power=False,
+        )
     elif mode == "intensity":
         rdc = dict(
             target=target,
-            return_core=return_core,
-            return_avg=return_avg,
-            return_surf=return_surf,
+            return_core=include_core,
+            return_avg=include_average,
+            return_surf=include_surface,
             return_power=False,
         )
     else:
@@ -175,81 +191,90 @@ def _rdict(
     return rdc
 
 
-def _compute(mode: str, s: solver.Solver, tmx: Union[float, np.ndarray], rdc: dict):
+def _compute(
+    mode: str,
+    solver_instance: solver.Solver,
+    target_temp: Union[float, np.ndarray],
+    return_config: dict,
+):
     """Code factorization"""
     if mode == "temperature":
-        r = s.steady_temperature(**rdc)
+        result = solver_instance.steady_temperature(**return_config)
     elif mode == "intensity":
-        r = s.steady_intensity(tmx, **rdc)
+        result = solver_instance.steady_intensity(target_temp, **return_config)
     else:
         raise ValueError()
-    return r
+    return result
 
 
 def _steady_uncertainties(
-    s: solver.Solver,
-    tmax: Union[float, np.ndarray],
-    target: CableLocation,
-    u: dict,
-    ns: int,
-    return_surf: bool,
-    return_core: bool,
-    return_avg: bool,
+    solver_instance: solver.Solver,
+    target_max_temp: Union[float, np.ndarray],
+    target_label: CableLocation,
+    uncertainties: dict,
+    num_samples: int,
+    include_surface: bool,
+    include_core: bool,
+    include_average: bool,
     return_raw: bool,
     mode: str = "temperature",
 ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, list]]:
     """Code factorization"""
     # return dict
-    rdc = _rdict(mode, target, return_surf, return_core, return_avg)
+    return_config = _rdict(
+        mode, target_label, include_surface, include_core, include_average
+    )
 
     # save solver dict
-    dsave = s.dc
+    saved_args = solver_instance.dc
 
     #  all to max_len size
-    n = utils.dict_max_len(s.dc)
-    dc = utils.extend_to_max_len(s.dc, n)
-    Tmax = tmax * np.ones(
-        n,
+    num_entries = utils.dict_max_len(solver_instance.dc)
+    input_params = utils.extend_to_max_len(solver_instance.dc, num_entries)
+    max_temp_vector = target_max_temp * np.ones(
+        num_entries,
     )
 
     # add missing uncertainties parameters
-    du = utils.add_default_uncertainties(u)
+    uncertainty_spec = utils.add_default_uncertainties(uncertainties)
 
     # init outputs
-    rl = []
-    s.dc = solver.default_values()
-    tmp = _compute(mode, s, 99.0, rdc)
-    cl = []
-    for c in tmp.columns:
-        cl.append(c + "_mean")
-        cl.append(c + "_std")
-    dr = pd.DataFrame(data=np.zeros((n, len(cl))), columns=cl)
+    raw_results = []
+    solver_instance.dc = solver.default_values()
+    sample_result = _compute(mode, solver_instance, 99.0, return_config)
+    columns = []
+    for column_name in sample_result.columns:
+        columns.append(column_name + "_mean")
+        columns.append(column_name + "_std")
+    stats_df = pd.DataFrame(data=np.zeros((num_entries, len(columns))), columns=columns)
 
     # for each entry, generate sample then compute
-    for i in range(n):
-        s.dc = _generate_samples(dc, i, du, ns, check=False)
-        r = _compute(mode, s, Tmax[i], rdc)
+    for index in range(num_entries):
+        solver_instance.dc = _generate_samples(
+            input_params, index, uncertainty_spec, num_samples, include_check=False
+        )
+        result = _compute(mode, solver_instance, max_temp_vector[index], return_config)
         if return_raw:
-            rl.append(r)
-        mu = r.mean()
-        sg = r.std()
-        for c in r.columns:
-            dr.loc[i, c + "_mean"] = mu[c]
-            dr.loc[i, c + "_std"] = sg[c]
+            raw_results.append(result)
+        mean_values = result.mean()
+        std_values = result.std()
+        for column_name in result.columns:
+            stats_df.loc[index, column_name + "_mean"] = mean_values[column_name]
+            stats_df.loc[index, column_name + "_std"] = std_values[column_name]
 
     # restore solver dict
-    s.dc = dsave
+    solver_instance.dc = saved_args
 
     if return_raw:
-        return dr, rl
+        return stats_df, raw_results
     else:
-        return dr
+        return stats_df
 
 
 def temperature(
-    s: solver.Solver,
-    u: dict = {},
-    ns: int = 4999,
+    solver_instance: solver.Solver,
+    uncertainties: dict = {},
+    num_samples: int = 4999,
     return_core: bool = False,
     return_avg: bool = False,
     return_raw: bool = False,
@@ -258,11 +283,11 @@ def temperature(
     Perform Monte Carlo simulation using the steady temperature solver.
     """
     return _steady_uncertainties(
-        s,
+        solver_instance,
         np.nan,
         None,
-        u,
-        ns,
+        uncertainties,
+        num_samples,
         None,
         return_core,
         return_avg,
@@ -272,11 +297,11 @@ def temperature(
 
 
 def intensity(
-    s: solver.Solver,
-    tmax: Union[float, np.ndarray],
-    target: CableLocation = CableLocation.SURFACE,
-    u: dict = {},
-    ns: int = 4999,
+    solver_instance: solver.Solver,
+    target_max_temp: Union[float, np.ndarray],
+    target_label: CableLocation = CableLocation.SURFACE,
+    uncertainties: dict = {},
+    num_samples: int = 4999,
     return_core: bool = False,
     return_avg: bool = False,
     return_surf: bool = False,
@@ -286,11 +311,11 @@ def intensity(
     Perform Monte Carlo simulation using the steady intensity solver.
     """
     return _steady_uncertainties(
-        s,
-        tmax,
-        target,
-        u,
-        ns,
+        solver_instance,
+        target_max_temp,
+        target_label,
+        uncertainties,
+        num_samples,
         return_surf,
         return_core,
         return_avg,
@@ -300,205 +325,230 @@ def intensity(
 
 
 def _diff_method(
-    s: solver.Solver,
-    tmax: Union[float, np.ndarray],
-    target: str,
-    u: dict,
-    q: float = 0.95,
+    solver_instance: solver.Solver,
+    target_max_temp: Union[float, np.ndarray],
+    target_label: str,
+    uncertainties: dict,
+    quantile: float = 0.95,
     return_surf: bool = False,
     return_core: bool = False,
     return_avg: bool = False,
-    ep: float = 1.0e-06,
+    perturbation_step: float = 1.0e-06,
     mode: str = "temperature",
 ) -> pd.DataFrame:
     """."""
     # return dict
-    rdc = _rdict(
+    return_config = _rdict(
         mode,
-        target,
-        return_surf=return_surf,
-        return_core=return_core,
-        return_avg=return_avg,
+        target_label,
+        include_surface=return_surf,
+        include_core=return_core,
+        include_average=return_avg,
     )
 
     # save solver dict
-    dsave = s.dc
+    saved_args = solver_instance.dc
 
     #  all to max_len size
-    n = utils.dict_max_len(s.dc)
-    dc = utils.extend_to_max_len(s.dc, n)
+    num_entries = utils.dict_max_len(solver_instance.dc)
+    input_params = utils.extend_to_max_len(solver_instance.dc, num_entries)
 
     # add missing uncertainties parameters
-    du = utils.add_default_uncertainties(u)
+    uncertainty_spec = utils.add_default_uncertainties(uncertainties)
 
-    y0 = _compute(mode, s, tmax, rdc)
-    dr = y0 * 0.0
-    for k in dc:
-        if k not in du.keys() or du[k]["dist"] is None:
+    baseline = _compute(mode, solver_instance, target_max_temp, return_config)
+    delta_results = baseline * 0.0
+    for key in input_params:
+        if key not in uncertainty_spec.keys() or uncertainty_spec[key]["dist"] is None:
             continue
-        if np.all(np.isnan(dc[k])):
+        if np.all(np.isnan(input_params[key])):
             continue
 
-        mu = dc[k]
-        dx = np.zeros_like(mu)
-        for i in range(n):
-            if np.isnan(mu[i]):
-                dx[i] = 0.0
+        mean_values = input_params[key]
+        delta_param = np.zeros_like(mean_values)
+        for index in range(num_entries):
+            if np.isnan(mean_values[index]):
+                delta_param[index] = 0.0
             else:
-                dist = _get_dist(du[k], mu[i])
+                dist = _get_dist(uncertainty_spec[key], mean_values[index])
                 try:
-                    dx[i] = 0.5 * np.diff(dist.ppf([0.5 * (1 - q), 0.5 * (1 + q)]))[0]
+                    delta_param[index] = (
+                        0.5
+                        * np.diff(
+                            dist.ppf([0.5 * (1 - quantile), 0.5 * (1 + quantile)])
+                        )[0]
+                    )
                 except ValueError:
-                    dx[i] = 0.0
-                if np.isnan(dx[i]):
-                    dx[i] = 0.0
-        s.dc[k] = mu + ep
-        yp = _compute(mode, s, tmax, rdc)
-        s.dc[k] = mu
-        dy = np.abs(yp - y0) / ep
-        for c in dy.columns:
-            dy.loc[:, c] *= dx
-        dr += dy
-        if np.any(dy.isna()):
-            print("Nans with key %s" % (k,))
+                    delta_param[index] = 0.0
+                if np.isnan(delta_param[index]):
+                    delta_param[index] = 0.0
+        solver_instance.dc[key] = mean_values + perturbation_step
+        perturbed = _compute(mode, solver_instance, target_max_temp, return_config)
+        solver_instance.dc[key] = mean_values
+        delta_output = np.abs(perturbed - baseline) / perturbation_step
+        for column_name in delta_output.columns:
+            delta_output.loc[:, column_name] *= delta_param
+        delta_results += delta_output
+        if np.any(delta_output.isna()):
+            print("Nans with key %s" % (key,))
 
-    dq = pd.DataFrame()
-    for c in y0.columns:
-        dq.loc[:, c] = y0.loc[:, c]
-        dq.loc[:, c + "_delta"] = dr.loc[:, c]
+    results = pd.DataFrame()
+    for column_name in baseline.columns:
+        results.loc[:, column_name] = baseline.loc[:, column_name]
+        results.loc[:, column_name + "_delta"] = delta_results.loc[:, column_name]
 
     # restore solver dict
-    s.dc = dsave
+    solver_instance.dc = saved_args
 
-    return dq
+    return results
 
 
 def temperature_diff(
-    s: solver.Solver,
-    u: dict,
-    q: float = 0.95,
+    solver_instance: solver.Solver,
+    uncertainties: dict,
+    quantile: float = 0.95,
     return_core: bool = False,
     return_avg: bool = False,
-    ep: float = 1.0e-06,
+    perturbation_step: float = 1.0e-06,
 ) -> pd.DataFrame:
     """."""
     return _diff_method(
-        s,
+        solver_instance,
         np.nan,
         None,
-        u,
-        q=q,
+        uncertainties,
+        quantile=quantile,
         return_core=return_core,
         return_avg=return_avg,
-        ep=ep,
+        perturbation_step=perturbation_step,
         mode="temperature",
     )
 
 
 def intensity_diff(
-    s: solver.Solver,
-    tmax: Union[float, np.ndarray],
-    target: str,
-    u: dict,
-    q: float = 0.95,
+    solver_instance: solver.Solver,
+    target_max_temp: Union[float, np.ndarray],
+    target_label: str,
+    uncertainties: dict,
+    quantile: float = 0.95,
+    return_surf: bool = False,
     return_core: bool = False,
     return_avg: bool = False,
-    return_surf: bool = False,
-    ep: float = 1.0e-06,
-):
+    perturbation_step: float = 1.0e-06,
+) -> pd.DataFrame:
     """."""
     return _diff_method(
-        s,
-        tmax,
-        target,
-        u,
-        q=q,
+        solver_instance,
+        target_max_temp,
+        target_label,
+        uncertainties,
+        quantile=quantile,
         return_core=return_core,
         return_avg=return_avg,
         return_surf=return_surf,
-        ep=ep,
+        perturbation_step=perturbation_step,
         mode="intensity",
     )
 
 
 def sensitivity(
-    s: solver.Solver,
-    tmax: Union[float, np.ndarray],
-    u: dict,
-    ns: int,
-    target: str,
-    return_surf: bool,
-    return_core: bool,
-    return_avg: bool,
+    solver_instance: solver.Solver,
+    target_max_temp: Union[float, np.ndarray],
+    uncertainties: dict,
+    num_samples: int,
+    target_label: str,
+    include_surface: bool,
+    include_core: bool,
+    include_average: bool,
     mode: str = "temperature",
 ) -> Tuple[list[pd.DataFrame], list[pd.DataFrame]]:
     """
     Perform a sensitivity analysis with Sobol indices (first order and total indices) using the Monte Carlo method.
     """
     # return dict
-    rdc = _rdict(mode, target, return_surf, return_core, return_avg)
+    return_config = _rdict(
+        mode, target_label, include_surface, include_core, include_average
+    )
 
     # save solver dict
-    dsave = s.dc
+    saved_args = solver_instance.dc
 
     #  all to max_len size
-    n = utils.dict_max_len(s.dc)
-    dc = utils.extend_to_max_len(s.dc, n)
-    Tmax = tmax * np.ones(
-        n,
+    num_entries = utils.dict_max_len(solver_instance.dc)
+    input_params = utils.extend_to_max_len(solver_instance.dc, num_entries)
+    max_temp_vector = target_max_temp * np.ones(
+        num_entries,
     )
 
     # add missing uncertainties parameters
-    du = utils.add_default_uncertainties(u)
+    uncertainty_spec = utils.add_default_uncertainties(uncertainties)
 
     # init outputs
-    d1l = []
-    dtl = []
+    first_order_list = []
+    total_order_list = []
 
     # for each entry, compute
-    for i in range(n):
+    for index in range(num_entries):
         # first sample
-        smp = _generate_samples(dc, i, du, ns, check=False)
-        s.dc = smp
-        dp = _compute(mode, s, Tmax[i], rdc)
+        samples_a = _generate_samples(
+            input_params, index, uncertainty_spec, num_samples, include_check=False
+        )
+        solver_instance.dc = samples_a
+        result_a = _compute(
+            mode, solver_instance, max_temp_vector[index], return_config
+        )
 
         # second sample
-        smq = _generate_samples(dc, i, du, ns, check=False)
-        s.dc = smq
-        dq = _compute(mode, s, Tmax[i], rdc)
+        samples_b = _generate_samples(
+            input_params, index, uncertainty_spec, num_samples, include_check=False
+        )
+        solver_instance.dc = samples_b
+        result_b = _compute(
+            mode, solver_instance, max_temp_vector[index], return_config
+        )
 
-        pqs = ((dp - dq) ** 2).sum()
+        pqs = ((result_a - result_b) ** 2).sum()
 
         #
-        d1 = pd.DataFrame(
-            columns=["var"] + dp.columns.tolist(),
-            data=np.zeros((len(du), 1 + len(dp.columns))),
+        first_order = pd.DataFrame(
+            columns=["var"] + result_a.columns.tolist(),
+            data=np.zeros((len(uncertainty_spec), 1 + len(result_a.columns))),
         )
-        d1.loc[:, "var"] = du.keys()
-        dt = pd.DataFrame(
-            columns=["var"] + dp.columns.tolist(),
-            data=np.zeros((len(du), 1 + len(dp.columns))),
+        first_order.loc[:, "var"] = uncertainty_spec.keys()
+        total_order = pd.DataFrame(
+            columns=["var"] + result_a.columns.tolist(),
+            data=np.zeros((len(uncertainty_spec), 1 + len(result_a.columns))),
         )
-        dt.loc[:, "var"] = du.keys()
+        total_order.loc[:, "var"] = uncertainty_spec.keys()
 
         # mix samples, run and compute 1st and total indexes
-        for j, k in enumerate(du):
-            s.dc = smp.copy()
-            s.dc[k] = smq[k]
-            dpj = _compute(mode, s, Tmax[i], rdc)
+        for row_index, key in enumerate(uncertainty_spec):
+            solver_instance.dc = samples_a.copy()
+            solver_instance.dc[key] = samples_b[key]
+            result_a_mix = _compute(
+                mode, solver_instance, max_temp_vector[index], return_config
+            )
 
-            s.dc = smq.copy()
-            s.dc[k] = smp[k]
-            dqj = _compute(mode, s, Tmax[i], rdc)
+            solver_instance.dc = samples_b.copy()
+            solver_instance.dc[key] = samples_a[key]
+            result_b_mix = _compute(
+                mode, solver_instance, max_temp_vector[index], return_config
+            )
 
-            denom = pqs + ((dpj - dqj) ** 2).sum()
-            d1.iloc[j, 1:] = 2.0 * ((dqj - dq) * (dp - dpj)).sum() / denom
-            dt.iloc[j, 1:] = ((dq - dqj) ** 2 + (dp - dpj) ** 2).sum() / denom
+            denom = pqs + ((result_a_mix - result_b_mix) ** 2).sum()
+            first_order.iloc[row_index, 1:] = (
+                2.0
+                * ((result_b_mix - result_b) * (result_a - result_a_mix)).sum()
+                / denom
+            )
+            total_order.iloc[row_index, 1:] = (
+                (result_b - result_b_mix) ** 2 + (result_a - result_a_mix) ** 2
+            ).sum() / denom
 
-        d1l.append(d1)
-        dtl.append(dt)
+        first_order_list.append(first_order)
+        total_order_list.append(total_order)
 
     # restore solver dict
-    s.dc = dsave
+    solver_instance.dc = saved_args
 
-    return d1l, dtl
+    return first_order_list, total_order_list

@@ -47,22 +47,28 @@ class Solver1T(Solver_):
         """
 
         # solve with bisection
-        T, err = bisect_v(
+        conductor_temperature, err = bisect_v(
             lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
         )
 
         # format output
-        df = pd.DataFrame(data=T, columns=[VariableType.TEMPERATURE])
+        df = pd.DataFrame(
+            data=conductor_temperature, columns=[VariableType.TEMPERATURE]
+        )
 
         if return_err:
             df[VariableType.ERROR] = err
 
         if return_power:
-            df[PowerType.JOULE] = self.jh.value(T)
-            df[PowerType.SOLAR] = self.sh.value(T)
-            df[PowerType.CONVECTION] = self.cc.value(T)
-            df[PowerType.RADIATION] = self.rc.value(T)
-            df[PowerType.RAIN] = self.pc.value(T)
+            df[PowerType.JOULE] = self.joule_heating.value(conductor_temperature)
+            df[PowerType.SOLAR] = self.solar_heating.value(conductor_temperature)
+            df[PowerType.CONVECTION] = self.convective_cooling.value(
+                conductor_temperature
+            )
+            df[PowerType.RADIATION] = self.radiative_cooling.value(
+                conductor_temperature
+            )
+            df[PowerType.RAIN] = self.precipitation_cooling.value(conductor_temperature)
 
         return df
 
@@ -84,87 +90,107 @@ class Solver1T(Solver_):
             Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
         """
 
-        # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
-        if N < 2:
+        # get sizes
+        args_size = self.args.max_len()
+        time_size = len(time)
+        if time_size < 2:
             raise ValueError("The length of the time array must be at least 2.")
 
         # get initial temperature
         if T0 is None:
             T0 = (
-                self.args.Ta
-                if isinstance(self.args.Ta, numbers.Number)
-                else self.args.Ta[0]
+                self.args.ambient_temperature
+                if isinstance(self.args.ambient_temperature, numbers.Number)
+                else self.args.ambient_temperature[0]
             )
 
         # get month, day and hours
         month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
+            self.args.month, self.args.day, self.args.hour, time, args_size
         )
 
-        # Two dicts, one (dc) with static quantities (with all elements of size n), the other (de)
-        # with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
+        # A dict with time-changing quantities (with all elements of size time_size * args_size)
         de = dict(
             month=month,
             day=day,
             hour=hour,
-            transit=reshape(self.args.transit, N, n),
-            Ta=reshape(self.args.Ta, N, n),
-            wa=reshape(self.args.wa, N, n),
-            ws=reshape(self.args.ws, N, n),
-            Pa=reshape(self.args.Pa, N, n),
-            rh=reshape(self.args.rh, N, n),
-            pr=reshape(self.args.pr, N, n),
+            transit=reshape(self.args.transit, time_size, args_size),
+            ambient_temperature=reshape(
+                self.args.ambient_temperature, time_size, args_size
+            ),
+            wind_angle=reshape(self.args.wind_angle, time_size, args_size),
+            wind_speed=reshape(self.args.wind_speed, time_size, args_size),
+            ambient_pressure=reshape(self.args.ambient_pressure, time_size, args_size),
+            relative_humidity=reshape(
+                self.args.relative_humidity, time_size, args_size
+            ),
+            precipitation_rate=reshape(
+                self.args.precipitation_rate, time_size, args_size
+            ),
         )
         del (month, day, hour)
 
         # shortcuts for time-loop
-        imc = 1.0 / (self.args.m * self.args.c)
+        imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
-        T = np.zeros((N, n))
-        T[0, :] = T0
+        conductor_temperature = np.zeros((time_size, args_size))
+        conductor_temperature[0, :] = T0
 
         # main time loop
         for i in range(1, len(time)):
             for k, v in de.items():
                 self.args[k] = v[i, :]
             self.update()
-            T[i, :] = (
-                T[i - 1, :] + (time[i] - time[i - 1]) * self.balance(T[i - 1, :]) * imc
+            conductor_temperature[i, :] = (
+                conductor_temperature[i - 1, :]
+                + (time[i] - time[i - 1])
+                * self.balance(conductor_temperature[i - 1, :])
+                * imc
             )
 
         # save results
-        dr = {VariableType.TIME: time, VariableType.TEMPERATURE: T}
+        result = {
+            VariableType.TIME: time,
+            VariableType.TEMPERATURE: conductor_temperature,
+        }
 
         # manage return dict 2: powers
         if return_power:
-            for c in Solver_.powers():
-                dr[c] = np.zeros_like(T)
-            for i in range(N):
-                for k in de.keys():
-                    self.args[k] = de[k][i, :]
+            for power in Solver_.powers():
+                result[power] = np.zeros_like(conductor_temperature)
+            for i in range(time_size):
+                for key in de.keys():
+                    self.args[key] = de[key][i, :]
                 self.update()
-                dr[PowerType.JOULE][i, :] = self.jh.value(T[i, :])
-                dr[PowerType.SOLAR][i, :] = self.sh.value(T[i, :])
-                dr[PowerType.CONVECTION][i, :] = self.cc.value(T[i, :])
-                dr[PowerType.RADIATION][i, :] = self.rc.value(T[i, :])
-                dr[PowerType.RAIN][i, :] = self.pc.value(T[i, :])
+                result[PowerType.JOULE][i, :] = self.joule_heating.value(
+                    conductor_temperature[i, :]
+                )
+                result[PowerType.SOLAR][i, :] = self.solar_heating.value(
+                    conductor_temperature[i, :]
+                )
+                result[PowerType.CONVECTION][i, :] = self.convective_cooling.value(
+                    conductor_temperature[i, :]
+                )
+                result[PowerType.RADIATION][i, :] = self.radiative_cooling.value(
+                    conductor_temperature[i, :]
+                )
+                result[PowerType.RAIN][i, :] = self.precipitation_cooling.value(
+                    conductor_temperature[i, :]
+                )
 
-        # squeeze return values if n is 1
-        if n == 1:
-            keys = list(dr.keys())
+        # squeeze return values if args_size is 1
+        if args_size == 1:
+            keys = list(result.keys())
             keys.remove(VariableType.TIME)
-            for k in keys:
-                dr[k] = dr[k][:, 0]
+            for key in keys:
+                result[key] = result[key][:, 0]
 
-        return dr
+        return result
 
     def steady_intensity(
         self,
-        T: floatArrayLike = np.array([]),
+        max_conductor_temperature: floatArrayLike = np.array([]),
         Imin: float = DP.imin,
         Imax: float = DP.imax,
         tol: float = DP.tol,
@@ -178,7 +204,7 @@ class Solver1T(Solver_):
         exceeding the temperature given in argument.
 
         Args:
-            T (float | numpy.ndarray): Maximum temperature.
+            max_conductor_temperature (float | numpy.ndarray): Maximum temperature.
             Imin (float, optional): Lower bound for intensity. The default is 0.
             Imax (float, optional): Upper bound for intensity. The default is 9999.
             tol (float, optional): Tolerance for temperature error. The default is 1.0E-06.
@@ -196,18 +222,18 @@ class Solver1T(Solver_):
 
         # solve with bisection
         shape = (self.args.max_len(),)
-        T_ = T * np.ones(shape)
-        jh = (
-            self.cc.value(T_)
-            + self.rc.value(T_)
-            + self.pc.value(T_)
-            - self.sh.value(T_)
+        T_ = max_conductor_temperature * np.ones(shape)
+        joule_heating = (
+            self.convective_cooling.value(T_)
+            + self.radiative_cooling.value(T_)
+            + self.precipitation_cooling.value(T_)
+            - self.solar_heating.value(T_)
         )
 
         def fun(i: floatArray) -> floatArrayLike:
             self.args.transit = i
-            self.jh.__init__(**self.args.__dict__)
-            return self.jh.value(T_) - jh
+            self.joule_heating.__init__(**self.args.__dict__)
+            return self.joule_heating.value(T_) - joule_heating
 
         A, err = bisect_v(fun, Imin, Imax, shape, tol, maxiter)
 
@@ -221,10 +247,16 @@ class Solver1T(Solver_):
             df[VariableType.ERROR] = err
 
         if return_power:
-            df[PowerType.JOULE] = self.jh.value(T)
-            df[PowerType.SOLAR] = self.sh.value(T)
-            df[PowerType.CONVECTION] = self.cc.value(T)
-            df[PowerType.RADIATION] = self.rc.value(T)
-            df[PowerType.RAIN] = self.pc.value(T)
+            df[PowerType.JOULE] = self.joule_heating.value(max_conductor_temperature)
+            df[PowerType.SOLAR] = self.solar_heating.value(max_conductor_temperature)
+            df[PowerType.CONVECTION] = self.convective_cooling.value(
+                max_conductor_temperature
+            )
+            df[PowerType.RADIATION] = self.radiative_cooling.value(
+                max_conductor_temperature
+            )
+            df[PowerType.RAIN] = self.precipitation_cooling.value(
+                max_conductor_temperature
+            )
 
         return df

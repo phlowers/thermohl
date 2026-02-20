@@ -12,7 +12,7 @@ import numpy as np
 
 from thermohl import floatArrayLike
 
-_dT = 1.0e-03
+_TEMP_INCREMENT = 1.0e-03
 
 
 class PowerTerm(ABC):
@@ -21,23 +21,29 @@ class PowerTerm(ABC):
     def __init__(self, **kwargs: Any):
         pass
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute power term value in function of temperature.
 
         Usually this function should be overridden in children classes; if it is
         not the case it will just return zero.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return np.zeros_like(T) if not np.isscalar(T) else 0.0
+        return (
+            np.zeros_like(conductor_temperature)
+            if not np.isscalar(conductor_temperature)
+            else 0.0
+        )
 
     def derivative(
-        self, conductor_temperature: floatArrayLike, dT: float = _dT
+        self,
+        conductor_temperature: floatArrayLike,
+        temperature_increment: float = _TEMP_INCREMENT,
     ) -> floatArrayLike:
         r"""Compute power term derivative regarding temperature in function of temperature.
 
@@ -47,13 +53,13 @@ class PowerTerm(ABC):
 
         Args:
             conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
-            dT (float, optional): Temperature increment. The default is 1.0E-03.
+            temperature_increment (float, optional): Temperature increment. The default is 1.0E-03.
 
         Returns:
             float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
         return (
-            self.value(conductor_temperature + dT)
-            - self.value(conductor_temperature - dT)
-        ) / (2.0 * dT)
+            self.value(conductor_temperature + temperature_increment)
+            - self.value(conductor_temperature - temperature_increment)
+        ) / (2.0 * temperature_increment)

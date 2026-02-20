@@ -18,20 +18,22 @@ class JouleHeating(PowerTerm):
 
     @staticmethod
     def _c(
-        TLow: floatArrayLike,
-        THigh: floatArrayLike,
-        RDCLow: floatArrayLike,
-        RDCHigh: floatArrayLike,
+        temp_low: floatArrayLike,
+        temp_high: floatArrayLike,
+        linear_resistance_temp_low: floatArrayLike,
+        linear_resistance_temp_high: floatArrayLike,
     ) -> floatArrayLike:
-        return (RDCHigh - RDCLow) / (THigh - TLow)
+        return (linear_resistance_temp_high - linear_resistance_temp_low) / (
+            temp_high - temp_low
+        )
 
     def __init__(
         self,
         transit: floatArrayLike,
-        TLow: floatArrayLike,
-        THigh: floatArrayLike,
-        RDCLow: floatArrayLike,
-        RDCHigh: floatArrayLike,
+        temp_low: floatArrayLike,
+        temp_high: floatArrayLike,
+        linear_resistance_temp_low: floatArrayLike,
+        linear_resistance_temp_high: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -40,33 +42,40 @@ class JouleHeating(PowerTerm):
 
         Args:
             transit (float | numpy.ndarray): Transit intensity (A).
-            TLow (float | numpy.ndarray): Temperature for RDCLow measurement (°C).
-            THigh (float | numpy.ndarray): Temperature for RDCHigh measurement (°C).
-            RDCLow (float | numpy.ndarray): Electric resistance per unit length at TLow (Ω·m⁻¹).
-            RDCHigh (float | numpy.ndarray): Electric resistance per unit length at THigh (Ω·m⁻¹).
+            temp_low (float | numpy.ndarray): Temperature for linear_resistance_temp_low measurement (°C).
+            temp_high (float | numpy.ndarray): Temperature for linear_resistance_temp_high measurement (°C).
+            linear_resistance_temp_low (float | numpy.ndarray): Electric resistance per unit length at temp_low (Ω·m⁻¹).
+            linear_resistance_temp_high (float | numpy.ndarray): Electric resistance per unit length at temp_high (Ω·m⁻¹).
 
         """
-        self.TLow = TLow
-        self.THigh = THigh
-        self.RDCLow = RDCLow
-        self.RDCHigh = RDCHigh
+        self.temp_low = temp_low
+        self.temp_high = temp_high
+        self.linear_resistance_temp_low = linear_resistance_temp_low
+        self.linear_resistance_temp_high = linear_resistance_temp_high
         self.transit = transit
-        self.c = JouleHeating._c(TLow, THigh, RDCLow, RDCHigh)
+        self.temp_coeff_linear = JouleHeating._c(
+            temp_low,
+            temp_high,
+            linear_resistance_temp_low,
+            linear_resistance_temp_high,
+        )
 
-    def _rdc(self, T: floatArrayLike) -> floatArrayLike:
-        return self.RDCLow + self.c * (T - self.TLow)
+    def _rdc(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
+        return self.linear_resistance_temp_low + self.temp_coeff_linear * (
+            conductor_temperature - self.temp_low
+        )
 
-    def value(self, T: floatArrayLike) -> floatArrayLike:
+    def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating.
 
         Args:
-            T (float | numpy.ndarray): Conductor temperature (°C).
+            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
 
         Returns:
             float | numpy.ndarray: Power term value (W·m⁻¹).
 
         """
-        return self._rdc(T) * self.transit**2
+        return self._rdc(conductor_temperature) * self.transit**2
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute joule heating derivative.
@@ -80,4 +89,8 @@ class JouleHeating(PowerTerm):
             float | numpy.ndarray: Power term derivative (W·m⁻¹·K⁻¹).
 
         """
-        return self.c * self.transit**2 * np.ones_like(conductor_temperature)
+        return (
+            self.temp_coeff_linear
+            * self.transit**2
+            * np.ones_like(conductor_temperature)
+        )

@@ -34,15 +34,15 @@ if __name__ == "__main__":
 
     # Solver input and solver
     dct = dict(
-        lat=45.0,
-        alt=100.0,
-        azm=90.0,
+        latitude=45.0,
+        altitude=100.0,
+        azimuth=90.0,
         month=3,
         day=21,
         hour=0,
-        Ta=np.array([0.0, 15.0, 30.0]),
-        ws=2.0,
-        wa=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
+        ambient_temperature=np.array([0.0, 15.0, 30.0]),
+        wind_speed=2.0,
+        wind_angle=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
         transit=np.nan,
     )
 
@@ -73,10 +73,10 @@ if __name__ == "__main__":
     for i, key in enumerate(slv):
         elm = slv[key]
         elm.dc[VariableType.TRANSIT] = transit[:, 1]
-        elm.dc["Ta"] = elm.dc["Ta"][1]
+        elm.dc["ambient_temperature"] = elm.dc["ambient_temperature"][1]
         df = elm.steady_temperature()
         elm.dc[VariableType.TRANSIT] = np.nan
-        elm.dc["Ta"] = dct["Ta"]
+        elm.dc["ambient_temperature"] = dct["ambient_temperature"]
         cl = "C%d" % (i % 10,)
         T1 = df["T_surf"].values
         T2 = elm.transient_temperature(t, T0=np.array(T1[0]), transit=transit)

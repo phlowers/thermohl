@@ -39,73 +39,79 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'lat', 'lon', 'alt', 'azm', 'month', 'day', 'hour', 'Ta', 'Pa', 'rh', 'pr', 'ws', 'wa', 'al', 'tb', 'transit', 'm',
-    #     'd', 'D', 'a', 'A', 'R', 'l', 'c', 'alpha', 'epsilon', 'RDC20', 'km', 'ki', 'kl', 'kq', 'RDCHigh', 'RDCLow',
-    #     'THigh', 'TLow'
+    #     'latitude', 'longitude', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_angle', 'albedo', 'turbidity', 'transit', 'm',
+    #     'core_diameter', 'outer_diameter', 'core_area', 'outer_area', 'roughness_ratio', 'radial_thermal_conductivity', 'heat_capacity', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high', 'linear_resistance_temp_low',
+    #     'temp_high', 'temp_low'
     # ]
 
-    def __init__(self, dic: Optional[dict[str, Any]] = None):
+    def __init__(self, input_dict: Optional[dict[str, Any]] = None):
         # add default values
         self._set_default_values()
         # use values from input dict
-        if dic is None:
-            dic = {}
+        if input_dict is None:
+            input_dict = {}
         keys = self.keys()
-        for k in dic:
-            if k in keys and dic[k] is not None:
-                self[k] = dic[k]
+        for key in input_dict:
+            if key in keys and input_dict[key] is not None:
+                self[key] = input_dict[key]
 
     def _set_default_values(self) -> None:
         """Set default values."""
 
-        self.Qs = np.nan  # solar irradiance
-        self.lat = 45.0  # latitude (deg)
-        self.lon = 0.0  # longitude (deg)
-        self.alt = 0.0  # altitude (m)
-        self.azm = 0.0  # azimuth (deg)
+        self.measured_solar_irradiance = np.nan  # solar irradiance
+        self.latitude = 45.0  # latitude (deg)
+        self.longitude = 0.0  # longitude (deg)
+        self.altitude = 0.0  # altitude (m)
+        self.azimuth = 0.0  # azimuth (deg)
 
         self.month = 3  # month number (1=Jan, 2=Feb, ...)
         self.day = 21  # day of the month
         self.hour = 12  # hour of the day (in [0, 23] range)
 
-        self.Ta = 15.0  # ambient temperature (C)
-        self.Pa = 1.0e05  # ambient pressure (Pa)
-        self.rh = 0.8  # relative humidity (none, in [0, 1])
-        self.pr = 0.0  # rain precipitation rate (m.s**-1)
-        self.ws = 0.0  # wind speed (m.s**-1)
-        self.wa = 90.0  # wind angle (deg, regarding north)
-        self.al = 0.8  # albedo (1)
+        self.ambient_temperature = 15.0  # ambient temperature (C)
+        self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
+        self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
+        self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
+        self.wind_speed = 0.0  # wind speed (m.s**-1)
+        self.wind_angle = 90.0  # wind angle (deg, regarding north)
+        self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
-        self.tb = 0.1
+        self.turbidity = 0.1
 
         self.transit = 100.0  # transit intensity (A)
 
-        self.m = 1.5  # mass per unit length (kg.m**-1)
-        self.d = 1.9e-02  # core diameter (m)
-        self.D = 3.0e-02  # external (global) diameter (m)
-        self.a = 2.84e-04  # core section (m**2)
-        self.A = 7.07e-04  # external (global) section (m**2)
-        self.R = 4.0e-02  # roughness (1)
-        self.l = 1.0  # radial thermal conductivity (W.m**-1.K**-1)
-        self.c = 500.0  # specific heat capacity (J.kg**-1.K**-1)
+        self.linear_mass = 1.5  # mass per unit length (kg.m**-1)
+        self.core_diameter = 1.9e-02  # core diameter (m)
+        self.outer_diameter = 3.0e-02  # external (global) diameter (m)
+        self.core_area = 2.84e-04  # core section (m**2)
+        self.outer_area = 7.07e-04  # external (global) section (m**2)
+        self.roughness_ratio = 4.0e-02  # roughness (1)
+        self.radial_thermal_conductivity = (
+            1.0  # radial thermal conductivity (W.m**-1.K**-1)
+        )
+        self.heat_capacity = 500.0  # specific heat capacity (J.kg**-1.K**-1)
 
-        self.alpha = 0.5  # solar absorption (1)
-        self.epsilon = 0.5  # emissivity (1)
+        self.solar_absorptivity = 0.5  # solar absorption (1)
+        self.emissivity = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
-        self.RDC20 = 2.5e-05
+        self.linear_resistance_dc_20c = 2.5e-05
 
-        self.km = 1.006  # coefficient for magnetic effects (1)
-        self.ki = 0.016  # coefficient for magnetic effects (A**-1)
+        self.magnetic_coeff = 1.006  # coefficient for magnetic effects (1)
+        self.magnetic_coeff_per_a = 0.016  # coefficient for magnetic effects (A**-1)
         # linear resistance augmentation with temperature (K**-1)
-        self.kl = 3.8e-03
+        self.temperature_coeff_linear = 3.8e-03
         # quadratic resistance augmentation with temperature (K**-2)
-        self.kq = 8.0e-07
-        # electric resistance per unit length (DC) at THigh (Ohm.m**-1)
-        self.RDCHigh = 3.05e-05
-        # electric resistance per unit length (DC) at TLow (Ohm.m**-1)
-        self.RDCLow = 2.66e-05
-        self.THigh = 60.0  # temperature for RDCHigh measurement (°C)
-        self.TLow = 20.0  # temperature for RDCLow measurement (°C)
+        self.temperature_coeff_quadratic = 8.0e-07
+        # electric resistance per unit length (DC) at temp_high (Ohm.m**-1)
+        self.linear_resistance_temp_high = 3.05e-05
+        # electric resistance per unit length (DC) at temp_low (Ohm.m**-1)
+        self.linear_resistance_temp_low = 2.66e-05
+        self.temp_high = (
+            60.0  # temperature for linear_resistance_temp_high measurement (°C)
+        )
+        self.temp_low = (
+            20.0  # temperature for linear_resistance_temp_low measurement (°C)
+        )
 
     def keys(self) -> KeysView[str]:
         """Get list of members as dict keys."""
@@ -129,13 +135,13 @@ class Args:
             int: The maximum length of the values in the dictionary. If the dictionary is empty
             or all values are of types that do not have a length, the method returns 1.
         """
-        n = 1
+        result = 1
         for k in self.keys():
             try:
-                n = max(n, len(self[k]))
+                result = max(result, len(self[k]))
             except TypeError:
                 pass
-        return n
+        return result
 
     def extend_to_max_len(self) -> None:
         """
@@ -152,18 +158,18 @@ class Args:
         Returns:
             None
         """
-        n = self.max_len()
+        max_len = self.max_len()
         for k in self.keys():
             if isinstance(self[k], np.ndarray):
                 t = self[k].dtype
-                c = len(self[k]) == n
+                c = len(self[k]) == max_len
             else:
                 t = type(self[k])
                 c = False
             if c:
                 self[k] = self[k][:]
             else:
-                self[k] = self[k] * np.ones((n,), dtype=t)
+                self[k] = self[k] * np.ones((max_len,), dtype=t)
 
     def compress(self) -> None:
         """
@@ -173,11 +179,11 @@ class Args:
         Returns:
             None
         """
-        for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                u = np.unique(self[k])
+        for key in self.keys():
+            if isinstance(self[key], np.ndarray):
+                u = np.unique(self[key])
                 if len(u) == 1:
-                    self[k] = u[0]
+                    self[key] = u[0]
 
 
 class Solver(ABC):
@@ -215,29 +221,29 @@ class Solver(ABC):
         """
         self.args = Args(dic)
         self.args.extend_to_max_len()
-        self.jh = joule(**self.args.__dict__)
-        self.sh = solar(**self.args.__dict__)
-        self.cc = convective(**self.args.__dict__)
-        self.rc = radiative(**self.args.__dict__)
-        self.pc = precipitation(**self.args.__dict__)
+        self.joule_heating = joule(**self.args.__dict__)
+        self.solar_heating = solar(**self.args.__dict__)
+        self.convective_cooling = convective(**self.args.__dict__)
+        self.radiative_cooling = radiative(**self.args.__dict__)
+        self.precipitation_cooling = precipitation(**self.args.__dict__)
         self.args.compress()
 
     def update(self) -> None:
         self.args.extend_to_max_len()
-        self.jh.__init__(**self.args.__dict__)
-        self.sh.__init__(**self.args.__dict__)
-        self.cc.__init__(**self.args.__dict__)
-        self.rc.__init__(**self.args.__dict__)
-        self.pc.__init__(**self.args.__dict__)
+        self.joule_heating.__init__(**self.args.__dict__)
+        self.solar_heating.__init__(**self.args.__dict__)
+        self.convective_cooling.__init__(**self.args.__dict__)
+        self.radiative_cooling.__init__(**self.args.__dict__)
+        self.precipitation_cooling.__init__(**self.args.__dict__)
         self.args.compress()
 
-    def balance(self, T: floatArrayLike) -> floatArrayLike:
+    def balance(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         return (
-            self.jh.value(T)
-            + self.sh.value(T)
-            - self.cc.value(T)
-            - self.rc.value(T)
-            - self.pc.value(T)
+            self.joule_heating.value(conductor_temperature)
+            + self.solar_heating.value(conductor_temperature)
+            - self.convective_cooling.value(conductor_temperature)
+            - self.radiative_cooling.value(conductor_temperature)
+            - self.precipitation_cooling.value(conductor_temperature)
         )
 
     @staticmethod
@@ -303,15 +309,15 @@ def _set_dates(
     day: floatArrayLike,
     hour: floatArrayLike,
     time: floatArray,
-    n: int,
+    input_size: int,
 ) -> Tuple[intArray, intArray, floatArray]:
     """
     Set months, days and hours as 2D arrays.
 
     This function is used in transient temperature computations. Inputs month,
-    day and hour are floats or 1D arrays of size n; input t is a time vector of
-    size N with evaluation times in seconds. It sets arrays months, days and
-    hours, of size (N, n) such that
+    day and hour are floats or 1D arrays of size input_size; input t is a time vector of
+    size time_size with evaluation times in seconds. It sets arrays months, days and
+    hours, of size (time_size, input_size) such that
         months[i, j] = datetime(month[j], day[j], hour[j]) + t[i] .
 
     Args:
@@ -319,38 +325,41 @@ def _set_dates(
         day (floatArrayLike): Array of floats or float representing the days.
         hour (floatArrayLike): Array of floats or float representing the hours.
         time (floatArray): Array of floats representing the time vector in seconds.
-        n (int): Size of the input arrays month, day, and hour.
+        input_size (int): Size of the input arrays month, day, and hour.
 
     Returns:
     Tuple[intArray, intArray, floatArray]:
-        - months (intArray): 2D array of shape (N, n) with month values.
-        - days (intArray): 2D array of shape (N, n) with day values.
-        - hours (floatArray): 2D array of shape (N, n) with hour values.
+        - months (intArray): 2D array of shape (time_size, input_size) with month values.
+        - days (intArray): 2D array of shape (time_size, input_size) with day values.
+        - hours (floatArray): 2D array of shape (time_size, input_size) with hour values.
     """
-    oi = np.ones((n,), dtype=int)
-    of = np.ones((n,), dtype=float)
-    month2 = month * oi
-    day2 = day * oi
-    hour2 = hour * of
+    ones_int = np.ones((input_size,), dtype=int)
+    ones_float = np.ones((input_size,), dtype=float)
+    month2 = month * ones_int
+    day2 = day * ones_int
+    hour2 = hour * ones_float
 
-    N = len(time)
-    months = np.zeros((N, n), dtype=int)
-    days = np.zeros((N, n), dtype=int)
-    hours = np.zeros((N, n), dtype=float)
+    time_size = len(time)
+    months = np.zeros((time_size, input_size), dtype=int)
+    days = np.zeros((time_size, input_size), dtype=int)
+    hours = np.zeros((time_size, input_size), dtype=float)
 
-    td = np.array(
+    time_delta = np.array(
         [datetime.timedelta()]
         + [
             datetime.timedelta(seconds=float(time[i] - time[i - 1]))
-            for i in range(1, N)
+            for i in range(1, time_size)
         ]
     )
 
-    for j in range(n):
-        hj = int(np.floor(hour2[j]))
-        dj = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hj)))
-        t0 = datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hj) + dj
-        ts = pd.Series(t0 + td)
+    for j in range(input_size):
+        hour_j = int(np.floor(hour2[j]))
+        time_delta_j = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hour_j)))
+        t0 = (
+            datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hour_j)
+            + time_delta_j
+        )
+        ts = pd.Series(t0 + time_delta)
         months[:, j] = ts.dt.month
         days[:, j] = ts.dt.day
         hours[:, j] = (

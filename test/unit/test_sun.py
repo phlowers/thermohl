@@ -14,9 +14,9 @@ def test_scalar_input():
     hour = 12
     minute = 30
     second = 45
-    lon = np.deg2rad(45)  # 45 degrees east
+    longitude = np.deg2rad(45)  # 45 degrees east
 
-    result = utc2solar_hour(hour, minute, second, lon)
+    result = utc2solar_hour(hour, minute, second, longitude)
     expected_result = 12 + 30 / 60.0 + 45 / 3600.0 + 45 / 15.0
     assert np.isclose(result, expected_result)
 
@@ -44,18 +44,18 @@ def test_edge_cases():
     hour = 23
     minute = 59
     second = 59
-    lon = np.deg2rad(180)  # 180 degrees east
+    longitude = np.deg2rad(180)  # 180 degrees east
 
-    result = utc2solar_hour(hour, minute, second, lon)
+    result = utc2solar_hour(hour, minute, second, longitude)
     expected_result = 23 + 59 / 60.0 + 59 / 3600.0 + 180 / 15.0
     assert np.isclose(result, expected_result)
 
     hour = 0
     minute = 0
     second = 0
-    lon = np.deg2rad(-180)  # 180 degrees west
+    longitude = np.deg2rad(-180)  # 180 degrees west
 
-    result = utc2solar_hour(hour, minute, second, lon)
+    result = utc2solar_hour(hour, minute, second, longitude)
     expected_result = 0 + 0 / 60.0 + 0 / 3600.0 - 180 / 15.0
     assert np.isclose(result, expected_result)
 
@@ -65,9 +65,9 @@ def test_realistic_cases():
     hour = 23 * np.ones(3)
     minute = 59 * np.ones(3)
     second = 59 * np.ones(3)
-    lon = np.deg2rad(np.array([2.33472, 7.75, -4.48]))  # Paris, Strasbourg, Brest
+    longitude = np.deg2rad(np.array([2.33472, 7.75, -4.48]))  # Paris, Strasbourg, Brest
 
-    result = utc2solar_hour(hour, minute, second, lon)
+    result = utc2solar_hour(hour, minute, second, longitude)
     expected_result = 23 + 59 / 60.0 + 59 / 3600.0
 
     assert result[0] > expected_result

@@ -14,20 +14,25 @@ from thermohl.power import RadiativeCoolingBase
 class RadiativeCooling(RadiativeCoolingBase):
     def __init__(
         self,
-        Ta: floatArrayLike,
-        D: floatArrayLike,
-        epsilon: floatArrayLike,
-        sigma: float = 5.67e-08,
+        ambient_temperature: floatArrayLike,
+        outer_diameter: floatArrayLike,
+        emissivity: floatArrayLike,
+        stefan_boltzmann_constant: float = 5.67e-08,
         **kwargs: Any,
     ):
         r"""Init with args.
 
         Args:
-            Ta (float | numpy.ndarray): Ambient temperature (°C).
-            D (float | numpy.ndarray): External diameter (m).
-            epsilon (float | numpy.ndarray): Emissivity (—).
-            sigma (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
+            ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
+            outer_diameter (float | numpy.ndarray): External diameter (m).
+            emissivity (float | numpy.ndarray): Emissivity (—).
+            stefan_boltzmann_constant (float, optional): Stefan–Boltzmann constant (W·m⁻²·K⁻⁴). The default is 5.67e-08.
         """
         super().__init__(
-            Ta=Ta, D=D, epsilon=epsilon, sigma=sigma, zerok=273.0, **kwargs
+            ambient_temperature=ambient_temperature,
+            outer_diameter=outer_diameter,
+            emissivity=emissivity,
+            stefan_boltzmann_constant=stefan_boltzmann_constant,
+            zerok=273.0,
+            **kwargs,
         )

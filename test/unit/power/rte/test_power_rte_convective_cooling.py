@@ -13,22 +13,22 @@ from thermohl.power.rte import ConvectiveCooling
 
 conv_cool_instances = [
     ConvectiveCooling(
-        alt=np.array([100.0]),
-        azm=np.array([2]),
-        Ta=np.array([25.0]),
-        ws=np.array([10.0]),
-        wa=np.array([11.0]),
-        D=np.array([0.01]),
-        alpha=np.array([0.5]),
+        altitude=np.array([100.0]),
+        azimuth=np.array([2]),
+        ambient_temperature=np.array([25.0]),
+        wind_speed=np.array([10.0]),
+        wind_angle=np.array([11.0]),
+        outer_diameter=np.array([0.01]),
+        solar_absorptivity=np.array([0.5]),
     ),
     ConvectiveCooling(
-        alt=100.0,
-        azm=2,
-        Ta=25.0,
-        ws=10.0,
-        wa=11.0,
-        D=0.01,
-        alpha=0.5,
+        altitude=100.0,
+        azimuth=2,
+        ambient_temperature=25.0,
+        wind_speed=10.0,
+        wind_angle=11.0,
+        outer_diameter=0.01,
+        solar_absorptivity=0.5,
     ),
 ]
 

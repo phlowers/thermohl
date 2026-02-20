@@ -37,80 +37,96 @@ def srad():
     return _SRad(clean, indus)
 
 
-def test_srad_catm_scalar(srad):
-    x = 30.0
-    trb = 0.5
-    omt = 1.0 - trb
-    A = omt * srad.clean[6] + trb * srad.indus[6]
-    B = omt * srad.clean[5] + trb * srad.indus[5]
-    C = omt * srad.clean[4] + trb * srad.indus[4]
-    D = omt * srad.clean[3] + trb * srad.indus[3]
-    E = omt * srad.clean[2] + trb * srad.indus[2]
-    F = omt * srad.clean[1] + trb * srad.indus[1]
-    G = omt * srad.clean[0] + trb * srad.indus[0]
-    expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+def test_srad_atmosphere_turbidity_scalar(srad):
+    solar_altitude = 30.0
+    turbidity = 0.5
+    omt = 1.0 - turbidity
+    A = omt * srad.clean[6] + turbidity * srad.indus[6]
+    B = omt * srad.clean[5] + turbidity * srad.indus[5]
+    C = omt * srad.clean[4] + turbidity * srad.indus[4]
+    outer_diameter = omt * srad.clean[3] + turbidity * srad.indus[3]
+    E = omt * srad.clean[2] + turbidity * srad.indus[2]
+    F = omt * srad.clean[1] + turbidity * srad.indus[1]
+    G = omt * srad.clean[0] + turbidity * srad.indus[0]
+    expected = (
+        A * solar_altitude**6
+        + B * solar_altitude**5
+        + C * solar_altitude**4
+        + outer_diameter * solar_altitude**3
+        + E * solar_altitude**2
+        + F * solar_altitude**1
+        + G
+    )
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_turbidity(solar_altitude, turbidity)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
-def test_srad_catm_array(srad):
-    x = np.array([30.0, 40.0])
-    trb = np.array([0.5, 0.7])
-    omt = 1.0 - trb
-    A = omt * srad.clean[6] + trb * srad.indus[6]
-    B = omt * srad.clean[5] + trb * srad.indus[5]
-    C = omt * srad.clean[4] + trb * srad.indus[4]
-    D = omt * srad.clean[3] + trb * srad.indus[3]
-    E = omt * srad.clean[2] + trb * srad.indus[2]
-    F = omt * srad.clean[1] + trb * srad.indus[1]
-    G = omt * srad.clean[0] + trb * srad.indus[0]
-    expected = A * x**6 + B * x**5 + C * x**4 + D * x**3 + E * x**2 + F * x**1 + G
+def test_srad_atmosphere_turbidity_array(srad):
+    solar_altitude = np.array([30.0, 40.0])
+    turbidity = np.array([0.5, 0.7])
+    omt = 1.0 - turbidity
+    A = omt * srad.clean[6] + turbidity * srad.indus[6]
+    B = omt * srad.clean[5] + turbidity * srad.indus[5]
+    C = omt * srad.clean[4] + turbidity * srad.indus[4]
+    outer_diameter = omt * srad.clean[3] + turbidity * srad.indus[3]
+    E = omt * srad.clean[2] + turbidity * srad.indus[2]
+    F = omt * srad.clean[1] + turbidity * srad.indus[1]
+    G = omt * srad.clean[0] + turbidity * srad.indus[0]
+    expected = (
+        A * solar_altitude**6
+        + B * solar_altitude**5
+        + C * solar_altitude**4
+        + outer_diameter * solar_altitude**3
+        + E * solar_altitude**2
+        + F * solar_altitude**1
+        + G
+    )
 
-    result = srad.catm(x, trb)
+    result = srad.atmosphere_turbidity(solar_altitude, turbidity)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_call_scalar(srad):
-    lat = 45.0
-    alt = 1000.0
-    azm = 180.0
-    trb = 0.5
+    latitude = 45.0
+    altitude = 1000.0
+    azimuth = 180.0
+    turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
-    sa = sun.solar_altitude(lat, month, day, hour)
-    sz = sun.solar_azimuth(lat, month, day, hour)
-    th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-    K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    sa = sun.solar_altitude(latitude, month, day, hour)
+    sz = sun.solar_azimuth(latitude, month, day, hour)
+    th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
+    K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, alt, azm, trb, month, day, hour)
+    result = srad(latitude, altitude, azimuth, turbidity, month, day, hour)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_srad_call_array(srad):
-    lat = np.array([45.0, 50.0])
-    alt = np.array([1000.0, 2000.0])
-    azm = np.array([180.0, 190.0])
-    trb = np.array([0.5, 0.7])
+    latitude = np.array([45.0, 50.0])
+    altitude = np.array([1000.0, 2000.0])
+    azimuth = np.array([180.0, 190.0])
+    turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
-    sa = sun.solar_altitude(lat, month, day, hour)
-    sz = sun.solar_azimuth(lat, month, day, hour)
-    th = np.arccos(np.cos(sa) * np.cos(sz - azm))
-    K = 1.0 + 1.148e-04 * alt - 1.108e-08 * alt**2
-    Q = srad.catm(np.rad2deg(sa), trb)
+    sa = sun.solar_altitude(latitude, month, day, hour)
+    sz = sun.solar_azimuth(latitude, month, day, hour)
+    th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
+    K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
+    Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(lat, alt, azm, trb, month, day, hour)
+    result = srad(latitude, altitude, azimuth, turbidity, month, day, hour)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -118,27 +134,27 @@ def test_srad_call_array(srad):
 # Tests Class SolarHeating
 solar_heating_instances = [
     SolarHeating(
-        lat=np.array([45.0, 50.0]),
-        alt=np.array([1000.0, 2000.0]),
-        azm=np.array([180.0, 190.0]),
-        tb=np.array([0.5, 0.7]),
+        latitude=np.array([45.0, 50.0]),
+        altitude=np.array([1000.0, 2000.0]),
+        azimuth=np.array([180.0, 190.0]),
+        turbidity=np.array([0.5, 0.7]),
         month=np.array([6, 7]),
         day=np.array([21, 22]),
         hour=np.array([12.0, 13.0]),
-        D=np.array([0.01, 0.02]),
-        alpha=np.array([0.9, 0.8]),
+        outer_diameter=np.array([0.01, 0.02]),
+        solar_absorptivity=np.array([0.9, 0.8]),
         srad=np.array([800.0, 900.0]),
     ),
     SolarHeating(
-        lat=45.0,
-        alt=1000.0,
-        azm=180.0,
-        tb=0.5,
+        latitude=45.0,
+        altitude=1000.0,
+        azimuth=180.0,
+        turbidity=0.5,
         month=6,
         day=21,
         hour=12.0,
-        D=0.01,
-        alpha=0.9,
+        outer_diameter=0.01,
+        solar_absorptivity=0.9,
         srad=800.0,
     ),
 ]
@@ -153,10 +169,14 @@ solar_heating_instances = [
     ],
 )
 def test_solar_heating_value_scalar(solar_heating):
-    T = 50.0
-    expected = solar_heating.alpha * solar_heating.srad * solar_heating.D
+    conductor_temperature = 50.0
+    expected = (
+        solar_heating.solar_absorptivity
+        * solar_heating.solar_irradiance
+        * solar_heating.outer_diameter
+    )
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -170,10 +190,14 @@ def test_solar_heating_value_scalar(solar_heating):
     ],
 )
 def test_solar_heating_value_array(solar_heating):
-    T = np.array([50.0, 60.0])
-    expected = solar_heating.alpha * solar_heating.srad * solar_heating.D
+    conductor_temperature = np.array([50.0, 60.0])
+    expected = (
+        solar_heating.solar_absorptivity
+        * solar_heating.solar_irradiance
+        * solar_heating.outer_diameter
+    )
 
-    result = solar_heating.value(T)
+    result = solar_heating.value(conductor_temperature)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
