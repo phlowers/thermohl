@@ -97,6 +97,7 @@ ignore_errors = true
 [tool.ruff]
 extend-exclude = [
     "src/thermohl/_version.py",
+    "thermohl-docs/docs/examples/*.ipynb",
 ]
 
 [tool.ruff.format]
