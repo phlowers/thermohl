@@ -14,6 +14,7 @@ from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
 from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
 from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
+from thermohl.solver.enums.cable_type import CableType, CableTypeListLike
 from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.temperature_location import TemperatureLocation
 from thermohl.solver.enums.variable_type import VariableType
@@ -504,7 +505,9 @@ class Solver3T(Solver_):
             target_ = np.array([target for _ in range(max_len)])
         else:
             if len(target) != max_len:
-                raise ValueError()
+                raise ValueError(
+                    f"Length of target ({len(target)}) doesn't match max_len {max_len}."
+                )
             for t in target:
                 if t not in [
                     CableLocation.SURFACE,
@@ -556,10 +559,37 @@ class Solver3T(Solver_):
 
         return Tmax, newtheader
 
+    def _infer_target_from_cable_type(
+        self,
+        cable_type: CableTypeListLike,
+        target: CableLocationListLike,
+    ) -> CableLocationListLike:
+        if target is not None and cable_type is not None:
+            print(
+                "WARNING: Both target and cable_type are provided. Ignoring given target and using cable_type to determine target instead."
+            )
+
+        if cable_type is None:
+            return target
+        else:
+            if isinstance(cable_type, CableType):
+                if cable_type == CableType.HOMOGENEOUS:
+                    return CableLocation.AVERAGE
+                elif cable_type == CableType.BIMETALLIC:
+                    return CableLocation.CORE
+            else:
+                return [
+                    CableLocation.AVERAGE
+                    if ct == CableType.HOMOGENEOUS
+                    else CableLocation.CORE
+                    for ct in cable_type
+                ]
+
     def steady_intensity(
         self,
         max_conductor_temperature: floatArrayLike = np.array([]),
         target: CableLocationListLike = None,
+        cable_type: CableTypeListLike = None,
         tol: float = DP.tol,
         maxiter: int = DP.maxiter,
         return_err: bool = False,
@@ -572,6 +602,7 @@ class Solver3T(Solver_):
         Args:
             max_conductor_temperature (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
             target (CableLocation | list[CableLocation]): Target specification for the solver. Default is None.
+            cable_type (CableType | list[CableType]): Cable type specification for the solver. Default is None. If provided, it overrides the target specification.
             tol (float): Tolerance for the solver. Default is DP.tol.
             maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.
             return_err (bool): If True, return the error in the output DataFrame. Default is False.
@@ -581,6 +612,7 @@ class Solver3T(Solver_):
         Returns:
             pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
+        target = self._infer_target_from_cable_type(cable_type, target)
 
         Tmax, newtheader = self._steady_intensity_header(
             max_conductor_temperature, target

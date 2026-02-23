@@ -32,6 +32,9 @@ from thermohl import solver
 from thermohl import utils
 
 
+# TODO
+
+
 def default_uncertainties() -> dict:
     """
     Get default parameters for uncertainties.
@@ -299,7 +302,7 @@ def temperature(
 def intensity(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: CableLocation = CableLocation.SURFACE,
+    target_label: CableLocation = CableLocation.SURFACE,  # TODO
     uncertainties: dict = {},
     num_samples: int = 4999,
     return_core: bool = False,
@@ -428,7 +431,7 @@ def temperature_diff(
 def intensity_diff(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: str,
+    target_label: str,  # TODO
     uncertainties: dict,
     quantile: float = 0.95,
     return_surf: bool = False,
@@ -456,7 +459,7 @@ def sensitivity(
     target_max_temp: Union[float, np.ndarray],
     uncertainties: dict,
     num_samples: int,
-    target_label: str,
+    target_label: str,  # TODO
     include_surface: bool,
     include_core: bool,
     include_average: bool,
