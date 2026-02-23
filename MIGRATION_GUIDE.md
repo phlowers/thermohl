@@ -206,6 +206,8 @@ electrical = {
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
 | `Tc` | `conductor_temperature` or `air_temperature` depending on context | Conductor temperature or air temperature | °C |
+| `Ts0` | `surface_temperature_0` | Initial conductor surface temperature | °C |
+| `Tc0` | `core_temperature_0` | Initial core temperature | °C |
 | `Tf` | `film_temperature` | Air film temperature | °C |
 | `Td` | `temperature_delta` | Air film temperature | °C |
 | `T` | `conductor_temperature` or `max_conductor_temperature` depending on context | Conductor temperature or maximum conductor temperature | °C |
