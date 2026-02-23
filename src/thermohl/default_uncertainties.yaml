@@ -5,23 +5,23 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-lat:
+latitude:
   dist: 'truncnorm'
   min: 35.
   max: 55.
   std: 4.4E-04
   relative_std: false
-lon:
+longitude:
   dist: null
   min: -4.9
   max: +8.3
-alt:
+altitude:
   dist: 'truncnorm'
   min: 0.
   max: 3000.
   std: 10.
   relative_std: false
-azm:
+azimuth:
   dist: 'wrapnorm'
   std: 10.
   relative_std: false
@@ -40,47 +40,47 @@ hour:
   max: 24.
   std: 0.25
   relative_std: false
-Ta:
+ambient_temperature:
   dist: 'truncnorm'
   min: -40.
   max: +50.
   std: 2.
   relative_std: false
-Pa:
+ambient_pressure:
   dist: 'truncnorm'
   min: 0.870E+05
   max: 1.050E+05
   std: 0.05
   relative_std: True
-rh:
+relative_humidity:
   dist: 'truncnorm'
   min: 0.
   max: 1.
   std: 0.05
   relative_std: false
-pr:
+precipitation_rate:
   dist: 'truncnorm'
   min: 0.
   max: 0.05
   std: 7.0E-08
   relative_std: false
-ws:
+wind_speed:
   dist: 'truncnorm'
   min: 0.
   max: 100.
   std: 0.1
   relative_std: true
-wa:
+wind_angle:
   dist: 'vonmises'
   std: 10.
   relative_std: false
-al:
+albedo:
   dist: 'truncnorm'
   min: 0.
   max: 1.
   std: 0.
   relative_std: false
-tb:
+turbidity:
   dist: null
   min: 0.
   max: 1.
@@ -90,83 +90,83 @@ transit:
   max: 4999.
   std: 0.03
   relative_std: true
-m:
+linear_mass:
   dist: 'truncnorm'
   min: 0.1
   max: 5.0
   std: 0.05
   relative_std: true
-d:
+core_diameter:
   dist: 'truncnorm'
   min: 0.
   max: 0.05
   std: 0.008
   relative_std: true
-D:
+outer_diameter:
   dist: 'truncnorm'
   min: 0.005
   max: 0.1
   std: 0.008
   relative_std: true
-a:
+core_area:
   dist: 'truncnorm'
   min: 0.
   max: 5.0E-04
   std: 2.5E-04
   relative_std: true
-A:
+outer_area:
   dist: 'truncnorm'
   min: 2.0E-05
   max: 2.0E-03
   std: 2.5E-04
   relative_std: true
-R:
+roughness_ratio:
   dist: 'truncnorm'
   min: 0.02
   max: 0.20
   std: 0.
   relative_std: false
-l:
+radial_thermal_conductivity:
   dist: 'truncnorm'
   min: 0.7
   max: 1.5
   std: 0.1
   relative_std: false
-c:
+heat_capacity:
   dist: 'truncnorm'
   min: 500.
   max: 1000.
   std: 0.
   relative_std: false
-alpha:
+solar_absorptivity:
   dist: 'truncnorm'
   min: 0.23
   max: 0.93
   std: 0.01
   relative_std: false
-epsilon:
+emissivity:
   dist: null
   min: 0.13
   max: 0.83
-RDC20:
+linear_resistance_dc_20c:
   dist: 'truncnorm'
   min: 1.0E-05
   max: 1.0E-03
   std: 0.03
   relative_std: true
-km:
+magnetic_coeff:
   dist: null
-ki:
+magnetic_coeff_per_a:
   dist: null
-kl:
+temperature_coeff_linear:
   dist: null
-kq:
+temperature_coeff_quadratic:
   dist: null
-RDCHigh:
+linear_resistance_temp_high:
   dist: null
-RDCLow:
+linear_resistance_temp_low:
   dist: null
-THigh:
+temp_high:
   dist: null
-TLow:
+temp_low:
   dist: null

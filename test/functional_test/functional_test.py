@@ -39,19 +39,19 @@ def scn2dict(d: dict) -> dict:
 
     dic = cable_data(d["cable"])
 
-    dic["lat"] = d["latitude"]
-    dic["lon"] = d["longitude"]
-    dic["alt"] = d["altitude"]
-    dic["azm"] = 90.0
-    dic["Ta"] = d["weather_temperature"]
-    dic["ws"] = d["wind_speed"]
+    dic["latitude"] = d["latitude"]
+    dic["longitude"] = d["longitude"]
+    dic["altitude"] = d["altitude"]
+    dic["azimuth"] = 90.0
+    dic["ambient_temperature"] = d["weather_temperature"]
+    dic["wind_speed"] = d["wind_speed"]
     # in scenario file, wind angles are given regarding span, where in thermohl
     # they are supposed to be regarding north, hence this conversion formula
-    dic["wa"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(dic["azm"] - d["wind_angle"]) % 180.0)))
+    dic["wind_angle"] = np.rad2deg(
+        np.arcsin(np.sin(np.deg2rad(np.abs(dic["azimuth"] - d["wind_angle"]) % 180.0)))
     )
-    dic["alpha"] = 0.9
-    dic["epsilon"] = 0.8
+    dic["solar_absorptivity"] = 0.9
+    dic["emissivity"] = 0.8
 
     dt = datetime.datetime.fromisoformat(d["date"])
     dic["month"] = dt.month
@@ -86,7 +86,7 @@ def test_steady_ampacity():
                 scn2dict(e),
                 heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
             )
-            r = s.steady_intensity(T=e["Tmax_cable"])
+            r = s.steady_intensity(max_conductor_temperature=e["Tmax_cable"])
 
             assert np.allclose(r[VariableType.TRANSIT], e["I_max"], atol=0.05)
 
@@ -95,7 +95,7 @@ def test_transient_temperature():
     atol = 0.5
 
     # this is hard-coded, maybe it should be put in the yaml file ...
-    tau = 600.0
+    time_constant = 600.0
     dt = 10.0
     minute = 60
 
@@ -115,7 +115,10 @@ def test_transient_temperature():
             # final steady state
             s.args[VariableType.TRANSIT.value] = e["iac"]
             s.update()
-            rf = s.steady_temperature(Tsg=e["T_mean_final"], Tcg=e["T_mean_final"])
+            rf = s.steady_temperature(
+                surface_temperature_guess=e["T_mean_final"],
+                core_temperature_guess=e["T_mean_final"],
+            )
 
             # time
             time = np.arange(0.0, 1800.0, dt)
@@ -123,9 +126,9 @@ def test_transient_temperature():
             # transient temperature (linearized)
             rl = s.transient_temperature_legacy(
                 time=time,
-                Ts0=ri[TemperatureLocation.SURFACE],
-                Tc0=ri[TemperatureLocation.CORE],
-                tau=tau,
+                surface_temperature_0=ri[TemperatureLocation.SURFACE],
+                core_temperature_0=ri[TemperatureLocation.CORE],
+                time_constant=time_constant,
             )
 
             # check final temp

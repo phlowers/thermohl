@@ -35,17 +35,18 @@ def test_balance():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
-        alt=np.random.uniform(0.0, 1600.0, N),
-        azm=np.random.uniform(0.0, 360.0, N),
+        latitude=np.random.uniform(42.0, 51.0, N),
+        altitude=np.random.uniform(0.0, 1600.0, N),
+        azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        Ta=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
-        wa=np.random.uniform(0.0, 90.0, N),
+        ambient_temperature=np.random.uniform(0.0, 30.0, N),
+        wind_speed=np.random.uniform(0.0, 7.0, N),
+        wind_angle=np.random.uniform(0.0, 90.0, N),
         transit=np.random.uniform(40.0, 4000.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        core_diameter=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter"],
     )
 
     for s in _solvers(dic):
@@ -75,21 +76,26 @@ def test_consistency():
     np.random.seed(_nprs)
     N = 9999
     dic = dict(
-        lat=np.random.uniform(42.0, 51.0, N),
-        alt=np.random.uniform(0.0, 1600.0, N),
-        azm=np.random.uniform(0.0, 360.0, N),
+        latitude=np.random.uniform(42.0, 51.0, N),
+        altitude=np.random.uniform(0.0, 1600.0, N),
+        azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
-        Ta=np.random.uniform(0.0, 30.0, N),
-        ws=np.random.uniform(0.0, 7.0, N),
-        wa=np.random.uniform(0.0, 90.0, N),
-        d=np.random.randint(2, size=N) * solver.default_values()["d"],
+        ambient_temperature=np.random.uniform(0.0, 30.0, N),
+        wind_speed=np.random.uniform(0.0, 7.0, N),
+        wind_angle=np.random.uniform(0.0, 90.0, N),
+        core_diameter=np.random.randint(2, size=N)
+        * solver.default_values()["core_diameter"],
     )
 
     for s in _solvers(dic):
         df = s.steady_intensity(
-            T=100.0, return_err=True, return_power=True, tol=1.0e-09, maxiter=64
+            max_conductor_temperature=100.0,
+            return_err=True,
+            return_power=True,
+            tol=1.0e-09,
+            maxiter=64,
         )
         bl = (
             df[PowerType.JOULE]

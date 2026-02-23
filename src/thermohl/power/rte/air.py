@@ -12,43 +12,49 @@ class Air:
     """Air quantities."""
 
     @staticmethod
-    def volumic_mass(Tc: floatArrayLike, alt: floatArrayLike = 0.0) -> floatArrayLike:
+    def volumic_mass(
+        air_temperature: floatArrayLike, altitude: floatArrayLike = 0.0
+    ) -> floatArrayLike:
         r"""Compute air volumic mass.
 
         If both inputs are numpy arrays, they should have the same size.
 
         Args:
-            Tc (float | numpy.ndarray): Air temperature (°C).
-            alt (float | numpy.ndarray, optional): Altitude above sea level (m). The default is 0.
+            air_temperature (float | numpy.ndarray): Air temperature (°C).
+            altitude (float | numpy.ndarray, optional): Altitude above sea level (m). The default is 0.
 
         Returns:
             float | numpy.ndarray: Volumic mass in kg·m⁻³.
 
         """
-        return (1.293 - 1.525e-04 * alt + 6.379e-09 * alt**2) / (1.0 + 0.00367 * Tc)
+        return (1.293 - 1.525e-04 * altitude + 6.379e-09 * altitude**2) / (
+            1.0 + 0.00367 * air_temperature
+        )
 
     @staticmethod
-    def dynamic_viscosity(Tc: floatArrayLike) -> floatArrayLike:
+    def dynamic_viscosity(air_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute air dynamic viscosity.
 
         Args:
-            Tc (float | numpy.ndarray): Air temperature (°C)
+            air_temperature (float | numpy.ndarray): Air temperature (°C)
 
         Returns:
             float | numpy.ndarray: Dynamic viscosity in kg·m⁻¹·s⁻¹.
 
         """
-        return (1.458e-06 * (Tc + 273.0) ** 1.5) / (Tc + 383.4)
+        return (1.458e-06 * (air_temperature + 273.0) ** 1.5) / (
+            air_temperature + 383.4
+        )
 
     @staticmethod
-    def thermal_conductivity(Tc: floatArrayLike) -> floatArrayLike:
+    def thermal_conductivity(air_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute air thermal conductivity.
 
         Args:
-            Tc (float | numpy.ndarray): Air temperature (°C)
+            air_temperature (float | numpy.ndarray): Air temperature (°C)
 
         Returns:
             float | numpy.ndarray: Thermal conductivity in W·m⁻¹·K⁻¹.
 
         """
-        return 2.424e-02 + 7.477e-05 * Tc - 4.407e-09 * Tc**2
+        return 2.424e-02 + 7.477e-05 * air_temperature - 4.407e-09 * air_temperature**2

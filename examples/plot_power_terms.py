@@ -102,10 +102,10 @@ def plot_solar_heating(dic):
 
 
 def plot_convective_cooling(dic):
-    ws = np.linspace(0, 1, 5)
-    wa = dic["azm"] - np.array([0, 45, 90])
-    Tc = np.linspace(0.0, 80.0, 41)
-    Ta = np.linspace(-10, 40, 6)
+    wind_speed = np.linspace(0, 1, 5)
+    wind_angle = dic["azimuth"] - np.array([0, 45, 90])
+    conductor_temperature = np.linspace(0.0, 80.0, 41)
+    ambient_temperatures = np.linspace(-10, 40, 6)
 
     # olla not tested here since olla's convective cooling is the same as ieee's one
     mdl = [
@@ -115,27 +115,35 @@ def plot_convective_cooling(dic):
         dict(label="olla", cm=cm.winter, model=olla.ConvectiveCooling(**dic)),
     ]
 
-    fig, ax = plt.subplots(nrows=len(ws), ncols=len(wa))
-    for i, u in enumerate(ws):
-        for j, a in enumerate(wa):
-            for m, ta in enumerate(Ta):
-                dic.update([("ws", u), ("wa", a), ("Ta", ta)])
+    fig, ax = plt.subplots(nrows=len(wind_speed), ncols=len(wind_angle))
+    for i, u in enumerate(wind_speed):
+        for j, a in enumerate(wind_angle):
+            for m, ambient_temperature in enumerate(ambient_temperatures):
+                dic.update(
+                    [
+                        ("wind_speed", u),
+                        ("wind_angle", a),
+                        ("ambient_temperature", ambient_temperature),
+                    ]
+                )
                 for k, d in enumerate(mdl):
                     d["model"].__init__(**dic)
-                    c = d["cm"](np.linspace(0.0, 1.0, len(Ta) + 2))[1:-1]
+                    c = d["cm"](np.linspace(0.0, 1.0, len(ambient_temperatures) + 2))[
+                        1:-1
+                    ]
                     ax[i, j].plot(
-                        Tc,
-                        d["model"].value(Tc),
+                        conductor_temperature,
+                        d["model"].value(conductor_temperature),
                         "-",
                         c=c[m],
-                        label="T$_a$=%.0f C" % (ta,),
+                        label="T$_a$=%.0f C" % (ambient_temperature,),
                     )
                 ax[i, j].set_title("At u=%.1f and $\phi$=%.0f" % (u, a))
                 ax[i, j].grid(True)
                 ax[i, j].set_ylim([-50, 100])
-    for i in range(len(ws)):
+    for i in range(len(wind_speed)):
         ax[i, 0].set_ylabel("Convective Cooling per unit length (Wm**-1)")
-    for j in range(len(wa)):
+    for j in range(len(wind_angle)):
         ax[-1, j].set_xlabel("Conductor temperature (C)")
     ax[0, -1].legend()
 
@@ -145,9 +153,9 @@ def plot_convective_cooling(dic):
 
 
 def plot_radiative_cooling(dic):
-    Tc = np.linspace(0.0, 80.0, 41)
-    Ta = np.linspace(-20, 50, 8)
-    cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(Ta) + 2)[1:-1])
+    conductor_temperature = np.linspace(0.0, 80.0, 41)
+    ambient_temperatures = np.linspace(-20, 50, 8)
+    cl = cm.Spectral_r(np.linspace(0.0, 1.0, len(ambient_temperatures) + 2)[1:-1])
 
     # rte is not displayed since it is the same as ieee
 
@@ -156,17 +164,32 @@ def plot_radiative_cooling(dic):
     plt.plot(np.nan, np.nan, ls="--", c="gray", label="ieee")
     plt.plot(np.nan, np.nan, ls=":", c="gray", label="olla")
 
-    for i, ta in enumerate(Ta):
-        dic["Ta"] = ta
+    for i, ambient_temperature in enumerate(ambient_temperatures):
+        dic["ambient_temperature"] = ambient_temperature
 
-        rc = cigre.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ls="-", c=cl[i], label="T$_a$=%.0f C" % (ta,))
+        radiative_cooling = cigre.RadiativeCooling(**dic)
+        plt.plot(
+            conductor_temperature,
+            radiative_cooling.value(conductor_temperature),
+            ls="-",
+            c=cl[i],
+            label="T$_a$=%.0f C" % (ambient_temperature,),
+        )
+        radiative_cooling = ieee.RadiativeCooling(**dic)
+        plt.plot(
+            conductor_temperature,
+            radiative_cooling.value(conductor_temperature),
+            ls="--",
+            c=cl[i],
+        )
 
-        rc = ieee.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ls="--", c=cl[i])
-
-        rc = olla.RadiativeCooling(**dic)
-        plt.plot(Tc, rc.value(Tc), ":", c=cl[i])
+        radiative_cooling = olla.RadiativeCooling(**dic)
+        plt.plot(
+            conductor_temperature,
+            radiative_cooling.value(conductor_temperature),
+            ":",
+            c=cl[i],
+        )
 
     plt.grid(True)
     plt.xlabel("Conductor temperature (C)")
@@ -188,9 +211,9 @@ if __name__ == "__main__":
     plt.close("all")
 
     dic = solver.default_values()
-    dic["lat"] = 45.0
-    dic["tb"] = 0.33
-    dic["al"] = 0.85
+    dic["latitude"] = 45.0
+    dic["turbidity"] = 0.33
+    dic["albedo"] = 0.85
 
     plot_joule_heating(dic)
     plot_solar_heating(dic)

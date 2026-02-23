@@ -106,7 +106,7 @@ import numpy as np
 from thermohl import solver
 from thermohl.solver.enums.heat_equation_type import HeatEquationType
 
-slvr = solver.ieee(dict(Ta=np.array([0., 15., 30.])), heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
+slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
 Tmax = 80.
 imax = slvr.steady_intensity(Tmax)
 ```

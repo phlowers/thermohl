@@ -16,15 +16,15 @@ class SolarHeating(ieee.SolarHeating):
 
     def __init__(
         self,
-        lat: floatArrayLike,
-        alt: floatArrayLike,
-        azm: floatArrayLike,
+        latitude: floatArrayLike,
+        altitude: floatArrayLike,
+        azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
-        D: floatArrayLike,
-        alpha: floatArrayLike,
-        srad: Optional[floatArrayLike] = None,
+        outer_diameter: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
+        precomputed_solar_radiation: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -34,29 +34,29 @@ class SolarHeating(ieee.SolarHeating):
         should have the same size.
 
         Args:
-            lat (float | numpy.ndarray): Latitude.
-            alt (float | numpy.ndarray): Altitude.
-            azm (float | numpy.ndarray): Azimuth.
+            latitude (float | numpy.ndarray): Latitude.
+            altitude (float | numpy.ndarray): Altitude.
+            azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            D (float | numpy.ndarray): external diameter.
-            alpha (float | numpy.ndarray): Solar absorption coefficient.
-            srad (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            outer_diameter (float | numpy.ndarray): external diameter.
+            solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
+            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
 
         """
-        if "tb" in kwargs.keys():
-            kwargs.pop("tb")
+        if "turbidity" in kwargs.keys():
+            kwargs.pop("turbidity")
         super().__init__(
-            lat=lat,
-            alt=alt,
-            azm=azm,
-            tb=0.0,
+            latitude=latitude,
+            altitude=altitude,
+            azimuth=azimuth,
+            turbidity=0.0,
             month=month,
             day=day,
             hour=hour,
-            D=D,
-            alpha=alpha,
-            srad=srad,
+            outer_diameter=outer_diameter,
+            solar_absorptivity=solar_absorptivity,
+            precomputed_solar_radiation=precomputed_solar_radiation,
             **kwargs,
         )
