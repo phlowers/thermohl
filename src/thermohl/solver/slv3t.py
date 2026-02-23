@@ -294,7 +294,7 @@ class Solver3T(Solver_):
         )
         if np.max(err) > tol or iterations == maxiter:
             print(
-                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:core_diameter} iterations"
+                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:d} iterations"
             )
 
         # format output
@@ -616,7 +616,7 @@ class Solver3T(Solver_):
         )
         if np.max(err) > tol or iterations == maxiter:
             print(
-                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:core_diameter} iterations"
+                f"rstat_analytic max err is {np.max(err):.3E} in {iterations:d} iterations"
             )
 
         # format output
