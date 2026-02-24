@@ -61,8 +61,6 @@ class Args:
         # weather and mesurement
         self.measured_solar_irradiance = np.nan  # solar irradiance
         self.ambient_temperature = 15.0  # ambient temperature (C)
-        self.wind_speed = 0.0  # wind speed (m.s**-1)
-        self.wind_angle = 90.0  # wind angle (deg, regarding north)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
         self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)

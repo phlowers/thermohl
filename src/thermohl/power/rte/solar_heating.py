@@ -5,6 +5,8 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 from typing import Optional, Any, Iterable
+from math import pi
+from typing import Optional, Any, Tuple
 
 import numpy as np
 
@@ -15,37 +17,80 @@ from thermohl import (
 )
 from thermohl.power import SolarHeatingBase, _SRad
 
-CLEAN_AIR_COEFFICIENTS = [
-    -42.0,
-    +63.8,
-    -1.922,
-    0.03469,
-    -3.61e-04,
-    +1.943e-06,
-    -4.08e-09,
-]
-POLLUTED_AIR_COEFFICIENTS = [0, 0, 0, 0, 0, 0, 0]
 
-solar_radiation = _SRad(clean=CLEAN_AIR_COEFFICIENTS, indus=POLLUTED_AIR_COEFFICIENTS)
-
-
-def solar_irradiance(
-    solar_altitude_rad: floatArrayLike,
+def compute_solar_irradiance(
+    global_radiation: floatArrayLike,
+    solar_altitude: floatArrayLike,
+    incidence: floatArrayLike,
+    nebulosity: floatArrayLike,
+    albedo: floatArrayLike,
 ) -> floatArrayLike:
     """Compute solar radiation.
     Difference with IEEE version are neither turbidity or altitude influence.
+    Args:
+        solar_altitude (float | numpy.ndarray): solar altitude in radians.
+    Returns:
+        float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
 
     :param solar_altitude_rad: solar altitude in radians.
     :return: Solar radiation value. Negative values are set to zero.
     """
 
-    clearness_factor = solar_radiation.atmosphere_turbidity(
-        np.rad2deg(solar_altitude_rad)
+    def compute_diffuse_radiation() -> floatArrayLike:
+        return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
+
+    def compute_beam_radiation() -> floatArrayLike:
+        return (global_radiation - diffuse_radiation) / np.sin(solar_altitude)
+
+    diffuse_radiation = compute_diffuse_radiation()
+    beam_radiation = compute_beam_radiation()
+    solar_irradiance = beam_radiation * (
+        np.sin(incidence) + pi / 2 * albedo * np.sin(solar_altitude)
+    ) + diffuse_radiation * pi / 2 * (1 + albedo)
+
+    return np.where(solar_altitude > 0.0, solar_irradiance, 0.0)
+
+
+def compute_data_from_provided(
+    provided_global_radiation: floatArrayLike,
+    provided_nebulosity: floatArrayLike,
+    solar_altitude: floatArrayLike,
+) -> Tuple[floatArrayLike, floatArrayLike]:
+    """
+    Returns a value of nebulosity and a value of global_radiation.
+    If the global radiation is provided, the nebulosity is computed from it.
+    Otherwise, the global radiation is computed from the provided nebulosity (default value of 0).
+    """
+
+    def compute_nebulosity():
+        intermediate = np.min(
+            1, provided_global_radiation / (910 * np.sin(solar_altitude) - 30)
+        )
+        nebulosity = 8 * (4 / 3 * (1 - intermediate)) ** (1 / 3.4)
+        return np.round(np.min(8, nebulosity))
+
+    def compute_global_radiation():
+        intermediate = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
+        global_radiation = (910 * np.sin(solar_altitude) - 30) * intermediate
+        return np.max(0, global_radiation)
+
+    nebulosity = np.where(
+        np.isnan(provided_global_radiation),
+        provided_nebulosity,
+        compute_nebulosity(),
     )
-    return np.where(solar_altitude_rad > 0.0, clearness_factor, 0.0)
+
+    global_radiation = np.where(
+        np.isnan(provided_global_radiation),
+        compute_global_radiation(),
+        provided_global_radiation,
+    )
+
+    return nebulosity, global_radiation
 
 
 class SolarHeating(SolarHeatingBase):
+
     def __init__(
         self,
         latitude: floatArrayLike,
@@ -54,6 +99,8 @@ class SolarHeating(SolarHeatingBase):
         datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
+        albedo: floatArrayLike,
+        nebulosity: floatArrayLike,
         measured_solar_irradiance: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
@@ -68,21 +115,29 @@ class SolarHeating(SolarHeatingBase):
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
         :param measured_solar_irradiance: Optional measured solar irradiance (W/m2).
         """
-        self.solar_absorptivity = solar_absorptivity
-        solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
         date = (
             [d.date() for d in datetime_utc]
             if isinstance(datetime_utc, Iterable)
             else datetime_utc.date()
         )
-        solar_altitude_rad = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
-        if np.isnan(measured_solar_irradiance).all():
-            measured_solar_irradiance = solar_irradiance(solar_altitude_rad)
-        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
-        incidence_angle_rad = np.arccos(
-            np.cos(solar_altitude_rad)
-            * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
+        solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+        solar_altitude = sun.solar_altitude(
+            np.deg2rad(latitude), date, solar_hour
         )
-        irradiance = measured_solar_irradiance * np.sin(incidence_angle_rad)
-        self.solar_irradiance = np.maximum(irradiance, 0.0)
+        nebulosity, global_radiation = compute_data_from_provided(
+            measured_solar_irradiance, nebulosity, solar_altitude
+        )
+        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
+        incidence = np.cos(solar_altitude) * np.cos(
+            solar_azimuth_rad - np.deg2rad(cable_azimuth)
+        )
+
+        self.solar_absorptivity = solar_absorptivity
         self.outer_diameter = outer_diameter
+        self.solar_irradiance = compute_solar_irradiance(
+            global_radiation,
+            solar_altitude,
+            incidence,
+            nebulosity,
+            albedo,
+        )
