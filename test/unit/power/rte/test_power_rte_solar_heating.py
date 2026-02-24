@@ -11,36 +11,19 @@ from thermohl.power.rte.solar_heating import solar_irradiance
 
 def test_solar_irradiance_positive_altitude():
     """Test solar irradiance with positive solar altitude."""
-    latitude = np.deg2rad(45.0)  # Latitude in radians
-    month = 6  # June
-    day = 21  # Summer solstice
-    hour = 12.0  # Noon
-
-    result = solar_irradiance(latitude, month, day, hour)
-
+    result = solar_irradiance(np.deg2rad(45))
     assert result > 0.0
 
 
 def test_solar_irradiance_negative_altitude():
     """Test solar irradiance with negative solar altitude."""
-    latitude = np.deg2rad(45.0)  # Latitude in radians
-    month = 12  # December
-    day = 21  # Winter solstice
-    hour = 0.0  # Midnight
-
-    result = solar_irradiance(latitude, month, day, hour)
-
+    result = solar_irradiance(np.deg2rad(-5))
     assert result == 0.0
 
 
 def test_solar_irradiance_array_input():
     """Test solar irradiance with array inputs."""
-    latitude = np.array([np.deg2rad(45.0), np.deg2rad(55.0)])
-    month = np.array([6, 12])
-    day = np.array([21, 21])
-    hour = np.array([12.0, 0.0])
-
-    result = solar_irradiance(latitude, month, day, hour)
+    result = solar_irradiance(np.deg2rad([8, -1]))
 
     assert result.shape == (2,)
     assert result[0] > 0.0  # Positive solar altitude
