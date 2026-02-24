@@ -11,8 +11,8 @@ These positions usually depend on the point latitude and the time. The sun
 position is then used to estimate the solar radiation in CIGRE and IEEE
 models.
 """
-from math import pi
 
+from math import pi
 import numpy as np
 from thermohl import floatArrayLike, intArrayLike
 
