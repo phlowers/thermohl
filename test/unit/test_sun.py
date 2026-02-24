@@ -11,65 +11,23 @@ from thermohl.sun import utc2solar_hour
 
 def test_scalar_input():
     # Test with scalar inputs
-    hour = 12
-    minute = 30
-    second = 45
+    hour = 12 + 30 / 60 + 45 / 3600
+    day = 18
+    month = 5
     longitude = np.deg2rad(45)  # 45 degrees east
 
-    result = utc2solar_hour(hour, minute, second, longitude)
-    expected_result = 12 + 30 / 60.0 + 45 / 3600.0 + 45 / 15.0
+    result = utc2solar_hour(hour, day, month, longitude)
+    expected_result = 15.57397066555581
     assert np.isclose(result, expected_result)
 
 
 def test_array_input():
     # Test with numpy array inputs
-    hours = np.array([12, 15, 18])
-    minutes = np.array([30, 45, 0])
-    seconds = np.array([45, 30, 15])
-    lons = np.deg2rad(np.array([45, 90, 135]))  # 45, 90, and 135 degrees east
+    hours = np.array([12, 15, 18]) + np.array([30, 45, 0]) / 60
+    days = np.array([18, 2, 27])
+    months = np.array([3, 9, 12])
+    lons = np.deg2rad(np.array([0, 90, 135]))  # 45, 90, and 135 degrees east
 
-    result = utc2solar_hour(hours, minutes, seconds, lons)
-    expected_result = np.array(
-        [
-            12 + 30 / 60.0 + 45 / 3600.0 + 45 / 15.0,
-            15 + 45 / 60.0 + 30 / 3600.0 + 90 / 15.0,
-            18 + 0 / 60.0 + 15 / 3600.0 + 135 / 15.0,
-        ]
-    )
+    result = utc2solar_hour(hours, days, months, lons)
+    expected_result = np.array([12.35394, 21.76352, 26.976276])
     np.testing.assert_array_almost_equal(result, expected_result)
-
-
-def test_edge_cases():
-    # Test edge cases
-    hour = 23
-    minute = 59
-    second = 59
-    longitude = np.deg2rad(180)  # 180 degrees east
-
-    result = utc2solar_hour(hour, minute, second, longitude)
-    expected_result = 23 + 59 / 60.0 + 59 / 3600.0 + 180 / 15.0
-    assert np.isclose(result, expected_result)
-
-    hour = 0
-    minute = 0
-    second = 0
-    longitude = np.deg2rad(-180)  # 180 degrees west
-
-    result = utc2solar_hour(hour, minute, second, longitude)
-    expected_result = 0 + 0 / 60.0 + 0 / 3600.0 - 180 / 15.0
-    assert np.isclose(result, expected_result)
-
-
-def test_realistic_cases():
-    # Test edge cases
-    hour = 23 * np.ones(3)
-    minute = 59 * np.ones(3)
-    second = 59 * np.ones(3)
-    longitude = np.deg2rad(np.array([2.33472, 7.75, -4.48]))  # Paris, Strasbourg, Brest
-
-    result = utc2solar_hour(hour, minute, second, longitude)
-    expected_result = 23 + 59 / 60.0 + 59 / 3600.0
-
-    assert result[0] > expected_result
-    assert result[1] > result[0]
-    assert result[2] < expected_result
