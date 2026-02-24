@@ -62,6 +62,7 @@ class SolarHeating(SolarHeatingBase):
 
         Args:
             latitude (float | numpy.ndarray): Latitude.
+            longitude (float | numpy.ndarray): Longitude (must be between -180 and +180 degrees).
             azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
