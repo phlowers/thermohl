@@ -92,20 +92,20 @@ def test_srad_atmosphere_turbidity_array(srad):
 def test_srad_call_scalar(srad):
     latitude = 45.0
     altitude = 1000.0
-    azimuth = 180.0
+    cable_azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
     hour = 12.0
     sa = sun.solar_altitude(latitude, month, day, hour)
     sz = sun.solar_azimuth(latitude, month, day, hour)
-    th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
+    th = np.arccos(np.cos(sa) * np.cos(sz - cable_azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(latitude, altitude, azimuth, turbidity, month, day, hour)
+    result = srad(latitude, altitude, cable_azimuth, turbidity, month, day, hour)
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -113,20 +113,20 @@ def test_srad_call_scalar(srad):
 def test_srad_call_array(srad):
     latitude = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
-    azimuth = np.array([180.0, 190.0])
+    cable_azimuth = np.array([180.0, 190.0])
     turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
     hour = np.array([12.0, 13.0])
     sa = sun.solar_altitude(latitude, month, day, hour)
     sz = sun.solar_azimuth(latitude, month, day, hour)
-    th = np.arccos(np.cos(sa) * np.cos(sz - azimuth))
+    th = np.arccos(np.cos(sa) * np.cos(sz - cable_azimuth))
     K = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
     Q = srad.atmosphere_turbidity(np.rad2deg(sa), turbidity)
     expected = K * Q * np.sin(th)
     expected = np.where(expected > 0.0, expected, 0.0)
 
-    result = srad(latitude, altitude, azimuth, turbidity, month, day, hour)
+    result = srad(latitude, altitude, cable_azimuth, turbidity, month, day, hour)
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
@@ -136,7 +136,7 @@ solar_heating_instances = [
     SolarHeating(
         latitude=np.array([45.0, 50.0]),
         altitude=np.array([1000.0, 2000.0]),
-        azimuth=np.array([180.0, 190.0]),
+        cable_azimuth=np.array([180.0, 190.0]),
         turbidity=np.array([0.5, 0.7]),
         month=np.array([6, 7]),
         day=np.array([21, 22]),
@@ -148,7 +148,7 @@ solar_heating_instances = [
     SolarHeating(
         latitude=45.0,
         altitude=1000.0,
-        azimuth=180.0,
+        cable_azimuth=180.0,
         turbidity=0.5,
         month=6,
         day=21,

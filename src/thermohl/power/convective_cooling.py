@@ -13,28 +13,56 @@ from thermohl import floatArrayLike
 from thermohl.power import PowerTerm
 
 
+def compute_wind_attack_angle(
+    cable_azimuth: floatArrayLike, wind_azimuth: floatArrayLike
+) -> floatArrayLike:
+    """
+    Compute wind attack angle.
+
+    Args:
+        cable_azimuth (float | numpy.ndarray): Cable azimuth (deg).
+        wind_azimuth (float | numpy.ndarray): Wind azimuth regarding north (deg).
+
+    Returns:
+        float | numpy.ndarray: Wind attack angle (rad).
+    """
+    return np.arcsin(np.sin(np.deg2rad(np.abs(cable_azimuth - wind_azimuth) % 180.0)))
+
+
 class ConvectiveCoolingBase(PowerTerm):
     """Convective cooling term."""
 
     def __init__(
         self,
         altitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         ambient_temperature: floatArrayLike,
         wind_speed: floatArrayLike,
-        wind_angle: floatArrayLike,
         outer_diameter: floatArrayLike,
         air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         dynamic_viscosity: Callable[[floatArrayLike], floatArrayLike],
         thermal_conductivity: Callable[[floatArrayLike], floatArrayLike],
+        wind_azimuth: floatArrayLike = None,
+        wind_attack_angle: floatArrayLike = None,
         **kwargs: Any,
     ):
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-        self.attack_angle = np.arcsin(
-            np.sin(np.deg2rad(np.abs(azimuth - wind_angle) % 180.0))
-        )
+
+        if wind_attack_angle is None and wind_azimuth is None:
+            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
+        if wind_attack_angle is not None and wind_azimuth is not None:
+            print(
+                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            )
+        if wind_attack_angle is not None:
+            self.wind_attack_angle = wind_attack_angle
+        else:
+            self.wind_attack_angle = compute_wind_attack_angle(
+                cable_azimuth, wind_azimuth
+            )
+
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
@@ -66,9 +94,9 @@ class ConvectiveCoolingBase(PowerTerm):
         )
         direction_factor = (
             1.194
-            - np.cos(self.attack_angle)
-            + 0.194 * np.cos(2.0 * self.attack_angle)
-            + 0.368 * np.sin(2.0 * self.attack_angle)
+            - np.cos(self.wind_attack_angle)
+            + 0.194 * np.cos(2.0 * self.wind_attack_angle)
+            + 0.368 * np.sin(2.0 * self.wind_attack_angle)
         )
         return (
             direction_factor

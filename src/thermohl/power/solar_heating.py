@@ -66,7 +66,7 @@ class _SRad:
         self,
         latitude: floatArrayLike,
         altitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -76,7 +76,8 @@ class _SRad:
         computed_solar_altitude = sun.solar_altitude(latitude, month, day, hour)
         computed_solar_azimuth = sun.solar_azimuth(latitude, month, day, hour)
         computed_incidence_angle = np.arccos(
-            np.cos(computed_solar_altitude) * np.cos(computed_solar_azimuth - azimuth)
+            np.cos(computed_solar_altitude)
+            * np.cos(computed_solar_azimuth - cable_azimuth)
         )
         altitude_factor = 1.0 + 1.148e-04 * altitude - 1.108e-08 * altitude**2
         clearness_factor = self.atmosphere_turbidity(
@@ -95,7 +96,7 @@ class SolarHeatingBase(PowerTerm):
         self,
         latitude: floatArrayLike,
         altitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -111,7 +112,7 @@ class SolarHeatingBase(PowerTerm):
             self.solar_irradiance = est(
                 np.deg2rad(latitude),
                 altitude,
-                np.deg2rad(azimuth),
+                np.deg2rad(cable_azimuth),
                 turbidity,
                 month,
                 day,

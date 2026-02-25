@@ -35,13 +35,13 @@ if __name__ == "__main__":
     dct = dict(
         latitude=45.0,
         altitude=100.0,
-        azimuth=90.0,
+        cable_azimuth=90.0,
         month=3,
         day=21,
         hour=0,
         ambient_temperature=20.0,
         wind_speed=2.0,
-        wind_angle=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
+        wind_azimuth=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
         transit=np.nan,
     )
 

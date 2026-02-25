@@ -39,7 +39,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude', 'longitude', 'altitude', 'azimuth', 'month', 'day', 'hour', 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_angle', 'albedo', 'turbidity', 'transit', 'm',
+    #     'latitude', 'longitude', 'altitude', 'cable_azimuth', 'month', 'day', 'hour', 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_azimuth', 'albedo', 'turbidity', 'transit', 'm',
     #     'core_diameter', 'outer_diameter', 'core_area', 'outer_area', 'roughness_ratio', 'radial_thermal_conductivity', 'heat_capacity', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high', 'linear_resistance_temp_low',
     #     'temp_high', 'temp_low'
     # ]
@@ -62,7 +62,7 @@ class Args:
         self.latitude = 45.0  # latitude (deg)
         self.longitude = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
-        self.azimuth = 0.0  # azimuth (deg)
+        self.cable_azimuth = 0.0  # cable_azimuth (deg)
 
         self.month = 3  # month number (1=Jan, 2=Feb, ...)
         self.day = 21  # day of the month
@@ -73,7 +73,7 @@ class Args:
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
         self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
         self.wind_speed = 0.0  # wind speed (m.s**-1)
-        self.wind_angle = 90.0  # wind angle (deg, regarding north)
+        self.wind_azimuth = 90.0  # wind_azimuth (deg, regarding north)
         self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1

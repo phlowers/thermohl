@@ -54,13 +54,13 @@ if __name__ == "__main__":
     dct = dict(
         latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
-        azimuth=np.random.uniform(0.0, 360.0, N),
+        cable_azimuth=np.random.uniform(0.0, 360.0, N),
         month=np.random.randint(1, 13, N),
         day=np.random.randint(1, 31, N),
         hour=np.random.randint(0, 24, N),
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
-        wind_angle=np.random.uniform(0.0, 90.0, N),
+        wind_azimuth=np.random.uniform(0.0, 90.0, N),
         transit=np.random.uniform(20.0, 2000.0, N),
     )
 

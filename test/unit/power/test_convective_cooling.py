@@ -15,7 +15,7 @@ from thermohl.power.ieee import ConvectiveCooling
 def set_default_values_scalar():
     dic = solver.default_values()
     dic["wind_speed"] = 0.61
-    dic["wind_angle"] = 0.0
+    dic["wind_azimuth"] = 0.0
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature"] = 40.0
@@ -23,7 +23,7 @@ def set_default_values_scalar():
     dic["temp_low"] = 25.0
     dic["linear_resistance_temp_high"] = 8.688e-05
     dic["linear_resistance_temp_low"] = 7.283e-05
-    dic["azimuth"] = 90.0
+    dic["cable_azimuth"] = 90.0
     dic["latitude"] = 30.0
     dic["turbidity"] = 0.0
     dic["altitude"] = 0.0
@@ -38,7 +38,7 @@ def set_default_values_scalar():
 def set_default_values_array():
     dic = solver.default_values()
     dic["wind_speed"] = np.array([0.61, 0.83])
-    dic["wind_angle"] = np.array([0.0, 42.1])
+    dic["wind_azimuth"] = np.array([0.0, 42.1])
     dic["emissivity"] = np.array([0.8, 0.9])
     dic["solar_absorptivity"] = np.array([0.8, 0.9])
     dic["ambient_temperature"] = np.array([40.0, 32])
@@ -46,7 +46,7 @@ def set_default_values_array():
     dic["temp_low"] = np.array([25.0, 20])
     dic["linear_resistance_temp_high"] = np.array([8.688e-05, 8.688e-05])
     dic["linear_resistance_temp_low"] = np.array([7.283e-05, 7.283e-05])
-    dic["azimuth"] = np.array([90.0, 90.0])
+    dic["cable_azimuth"] = np.array([90.0, 90.0])
     dic["latitude"] = np.array([30.0, 30.0])
     dic["turbidity"] = np.array([0.0, 0.0])
     dic["altitude"] = np.array([0.0, 0.0])
