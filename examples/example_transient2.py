@@ -42,7 +42,7 @@ if __name__ == "__main__":
         hour=0,
         ambient_temperature=np.array([0.0, 15.0, 30.0]),
         wind_speed=2.0,
-        wind_angle=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
+        wind_azimuth=10,  # . * (1 + 0.5 * np.random.randn(len(t))),
         transit=np.nan,
     )
 

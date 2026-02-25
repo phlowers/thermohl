@@ -48,7 +48,7 @@ def test_balance():
         hour=np.random.randint(0, 24, N),
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
-        wind_angle=np.random.uniform(0.0, 90.0, N),
+        wind_azimuth=np.random.uniform(0.0, 90.0, N),
         transit=np.random.uniform(40.0, 4000.0, N),
         core_diameter=np.random.randint(2, size=N)
         * solver.default_values()["core_diameter"],
@@ -107,7 +107,7 @@ def test_consistency():
         hour=np.random.randint(0, 24, N),
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
-        wind_angle=np.random.uniform(0.0, 90.0, N),
+        wind_azimuth=np.random.uniform(0.0, 90.0, N),
         core_diameter=np.random.randint(2, size=N)
         * solver.default_values()["core_diameter"],
     )

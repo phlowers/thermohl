@@ -98,12 +98,12 @@ class ExcelSheet:
             / dynamic_viscosity
         )
         F = np.maximum(1.01 + 1.35 * Re**0.52, 0.754 * Re**0.6)
-        wind_angle = np.deg2rad(self.args["wind_angle"])
+        wind_azimuth = np.deg2rad(self.args["wind_azimuth"])
         K = (
             1.194
-            - np.cos(wind_angle)
-            + 0.194 * np.cos(2 * wind_angle)
-            + 0.368 * np.sin(2 * wind_angle)
+            - np.cos(wind_azimuth)
+            + 0.194 * np.cos(2 * wind_azimuth)
+            + 0.368 * np.sin(2 * wind_azimuth)
         )
         PCn = (
             3.645
@@ -202,7 +202,7 @@ def scenarios():
             20.0,
         ],
         wind_speed=[3.0, 3.0, 3.0, 0.0, 0.0, 3.0, 0.6, 0.6, 0.6, 0.6],
-        wind_angle=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
+        wind_azimuth=[90.0, 90.0, 90.0, 45.0, 45.0, 90.0, 90.0, 90.0, 90.0, 90.0],
         measured_solar_irradiance=[
             np.nan,
             np.nan,
@@ -256,9 +256,9 @@ def test_compare_power():
     from thermohl.utils import df2dct
 
     d1 = df2dct(ds)
-    ds["wind_angle"] = np.rad2deg(
+    ds["wind_azimuth"] = np.rad2deg(
         np.arcsin(
-            np.sin(np.deg2rad(np.abs(ds["cable_azimuth"] - ds["wind_angle"]) % 180.0))
+            np.sin(np.deg2rad(np.abs(ds["cable_azimuth"] - ds["wind_azimuth"]) % 180.0))
         )
     )
     d2 = df2dct(ds)

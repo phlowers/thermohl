@@ -15,7 +15,7 @@ from thermohl.power.ieee import ConvectiveCooling
 def set_default_values_scalar():
     dic = solver.default_values()
     dic["wind_speed"] = 0.61
-    dic["wind_angle"] = 0.0
+    dic["wind_azimuth"] = 0.0
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature"] = 40.0
@@ -38,7 +38,7 @@ def set_default_values_scalar():
 def set_default_values_array():
     dic = solver.default_values()
     dic["wind_speed"] = np.array([0.61, 0.83])
-    dic["wind_angle"] = np.array([0.0, 42.1])
+    dic["wind_azimuth"] = np.array([0.0, 42.1])
     dic["emissivity"] = np.array([0.8, 0.9])
     dic["solar_absorptivity"] = np.array([0.8, 0.9])
     dic["ambient_temperature"] = np.array([40.0, 32])

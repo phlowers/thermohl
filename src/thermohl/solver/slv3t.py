@@ -427,7 +427,7 @@ class Solver3T(Solver_):
             hour=hour,
             transit=reshape(self.args.transit, N, n),
             ambient_temperature=reshape(self.args.ambient_temperature, N, n),
-            wind_angle=reshape(self.args.wind_angle, N, n),
+            wind_azimuth=reshape(self.args.wind_azimuth, N, n),
             wind_speed=reshape(self.args.wind_speed, N, n),
             ambient_pressure=reshape(self.args.ambient_pressure, N, n),
             relative_humidity=reshape(self.args.relative_humidity, N, n),

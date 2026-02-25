@@ -19,7 +19,7 @@ def test_solver3t_legacy():
         "cpo_nbr_cable": array([1]),
         "cable_azimuth": array([90.0]),
         "wind_speed": array([0]),
-        "wind_angle": array([45.0]),
+        "wind_azimuth": array([45.0]),
         "altitude": array([100]),
         "ambient_temperature": array([20]),
         "transit": array([1500.0]),
