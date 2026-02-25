@@ -14,7 +14,9 @@ from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 
-from thermohl.solver.enums.cable_location import CableLocation
+from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
+from thermohl.solver.enums.cable_type import CableTypeListLike
+
 from thermohl.utils import depends_on_optional
 
 try:
@@ -30,9 +32,6 @@ except ImportError:
 from thermohl import distributions
 from thermohl import solver
 from thermohl import utils
-
-
-# TODO
 
 
 def default_uncertainties() -> dict:
@@ -302,7 +301,8 @@ def temperature(
 def intensity(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: CableLocation = CableLocation.SURFACE,  # TODO
+    target_label: CableLocation = CableLocation.SURFACE,
+    cable_type: CableTypeListLike = None,
     uncertainties: dict = {},
     num_samples: int = 4999,
     return_core: bool = False,
@@ -313,6 +313,7 @@ def intensity(
     """
     Perform Monte Carlo simulation using the steady intensity solver.
     """
+    target_label = solver.infer_target_label(target_label, cable_type)
     return _steady_uncertainties(
         solver_instance,
         target_max_temp,
@@ -431,8 +432,9 @@ def temperature_diff(
 def intensity_diff(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: str,  # TODO
     uncertainties: dict,
+    target_label: str = None,
+    cable_type: CableTypeListLike = None,
     quantile: float = 0.95,
     return_surf: bool = False,
     return_core: bool = False,
@@ -440,6 +442,7 @@ def intensity_diff(
     perturbation_step: float = 1.0e-06,
 ) -> pd.DataFrame:
     """."""
+    target_label = solver.infer_target_label(target_label, cable_type)
     return _diff_method(
         solver_instance,
         target_max_temp,
@@ -459,15 +462,17 @@ def sensitivity(
     target_max_temp: Union[float, np.ndarray],
     uncertainties: dict,
     num_samples: int,
-    target_label: str,  # TODO
     include_surface: bool,
     include_core: bool,
     include_average: bool,
+    target_label: CableLocationListLike = None,
+    cable_type: CableTypeListLike = None,
     mode: str = "temperature",
 ) -> Tuple[list[pd.DataFrame], list[pd.DataFrame]]:
     """
     Perform a sensitivity analysis with Sobol indices (first order and total indices) using the Monte Carlo method.
     """
+    target_label = solver.infer_target_label(target_label, cable_type)
     # return dict
     return_config = _rdict(
         mode, target_label, include_surface, include_core, include_average

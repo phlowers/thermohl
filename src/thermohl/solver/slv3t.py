@@ -76,6 +76,36 @@ def _profile_bim_avg(
     return core_temperature - (a / b) * (core_temperature - surface_temperature)
 
 
+def _infer_target_from_cable_type(
+    cable_type: CableTypeListLike,
+    target: CableLocationListLike,
+) -> CableLocationListLike:
+    """Infer target cable location from cable type: HOMOGENEOUS -> AVERAGE, BIMETALLIC -> CORE.
+
+    If both target and cable_type are provided, target is ignored."""
+
+    if target is not None and cable_type is not None:
+        print(
+            "WARNING: Both target and cable_type are provided. Ignoring given target and using cable_type to determine target instead."
+        )
+
+    if cable_type is None:
+        return target
+    else:
+        if isinstance(cable_type, CableType):
+            if cable_type == CableType.HOMOGENEOUS:
+                return CableLocation.AVERAGE
+            elif cable_type == CableType.BIMETALLIC:
+                return CableLocation.CORE
+        else:
+            return [
+                CableLocation.AVERAGE
+                if ct == CableType.HOMOGENEOUS
+                else CableLocation.CORE
+                for ct in cable_type
+            ]
+
+
 class Solver3T(Solver_):
     def __init__(
         self,
@@ -559,32 +589,6 @@ class Solver3T(Solver_):
 
         return Tmax, newtheader
 
-    def _infer_target_from_cable_type(
-        self,
-        cable_type: CableTypeListLike,
-        target: CableLocationListLike,
-    ) -> CableLocationListLike:
-        if target is not None and cable_type is not None:
-            print(
-                "WARNING: Both target and cable_type are provided. Ignoring given target and using cable_type to determine target instead."
-            )
-
-        if cable_type is None:
-            return target
-        else:
-            if isinstance(cable_type, CableType):
-                if cable_type == CableType.HOMOGENEOUS:
-                    return CableLocation.AVERAGE
-                elif cable_type == CableType.BIMETALLIC:
-                    return CableLocation.CORE
-            else:
-                return [
-                    CableLocation.AVERAGE
-                    if ct == CableType.HOMOGENEOUS
-                    else CableLocation.CORE
-                    for ct in cable_type
-                ]
-
     def steady_intensity(
         self,
         max_conductor_temperature: floatArrayLike = np.array([]),
@@ -612,7 +616,7 @@ class Solver3T(Solver_):
         Returns:
             pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
         """
-        target = self._infer_target_from_cable_type(cable_type, target)
+        target = _infer_target_from_cable_type(cable_type, target)
 
         Tmax, newtheader = self._steady_intensity_header(
             max_conductor_temperature, target
