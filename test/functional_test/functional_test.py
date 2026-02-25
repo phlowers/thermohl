@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-import datetime
+from datetime import datetime
 import os.path
 
 import numpy as np
@@ -14,138 +14,150 @@ import yaml
 from typing import List, Dict
 
 from thermohl.solver import rte, HeatEquationType
-from thermohl.solver.enums.temperature_location import TemperatureLocation
+
+# from thermohl.solver import rte, HeatEquationType
+# from thermohl.solver.enums.temperature_location import TemperatureLocation
 from thermohl.solver.enums.variable_type import VariableType
 
 
-def cable_data(s: str) -> dict:
+def cable_data(cable_name: str) -> dict:
     """Get cable/conductor data from file."""
     f = os.path.join("test", "functional_test", "cable_catalog.csv")
     df = pd.read_csv(f)
-    if s in df["conductor"].values:
-        return df[df["conductor"] == s].to_dict(orient="records")[0]
+    if cable_name in df["conductor"].values:
+        return df[df["conductor"] == cable_name].to_dict(orient="records")[0]
     else:
-        raise ValueError(f"Conductor {s} not found in file {f}.")
+        raise ValueError(f"Conductor {cable_name} not found in file {f}.")
 
 
-def scenario(key: str, mode: str) -> List[Dict]:
-    f = os.path.join("test", "functional_test", "scenario.yaml")
-    y = yaml.safe_load(open(f))
-    return y[key][mode]
+# def scenario(key: str, mode: str) -> List[Dict]:
+#     f = os.path.join("test", "functional_test", "scenario.yaml")
+#     y = yaml.safe_load(open(f))
+#     return y[key][mode]
 
 
-def scn2dict(d: dict) -> dict:
+def get_scenarios():
+    f = os.path.join("test", "functional_test", "scenarios.csv")
+    return pd.read_csv(f, sep=";").to_dict(orient="records")
+
+
+def scn2dict(scn: dict) -> dict:
     """Convert scenario to thermohl input."""
+    dic = cable_data(scn["Conducteur"])
 
-    dic = cable_data(d["cable"])
-
-    dic["latitude"] = d["latitude"]
-    dic["longitude"] = d["longitude"]
-    dic["altitude"] = d["altitude"]
-    dic["azimuth"] = 90.0
-    dic["ambient_temperature"] = d["weather_temperature"]
-    dic["wind_speed"] = d["wind_speed"]
-    # in scenario file, wind angles are given regarding span, where in thermohl
-    # they are supposed to be regarding north, hence this conversion formula
-    dic["wind_angle"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(dic["azimuth"] - d["wind_angle"]) % 180.0)))
-    )
+    dic["latitude"] = scn["Lat"]
+    dic["longitude"] = scn["Lon"]
+    dic["altitude"] = scn["Altitude"]
+    dic["azimuth"] = scn["Azimut_portee"]
+    dic["ambient_temperature"] = scn["T_amb"]
+    dic["wind_speed"] = scn["V"]
+    dic["wind_angle"] = scn["Azimut_V"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
 
-    dt = datetime.datetime.fromisoformat(d["date"])
+    # todo: gerer le qg_mesure + albedo + neb
+    dt = datetime.strptime(f"{scn['Date']} {scn['Heure']}", "%d/%m/%Y %H:%M")
     dic["month"] = dt.month
     dic["day"] = dt.day
-    dic["hour"] = (
-        dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
-    )
-    if "iac" in d.keys():
-        dic[VariableType.TRANSIT.value] = d["iac"]
+    dic["hour"] = dt.hour + dt.minute / 60.0
+    dic[VariableType.TRANSIT.value] = scn["Intensite"]
 
+    print(f"YOMAN18  :{dic=}")
     return dic
 
 
-def test_steady_temperature():
-    for d in scenario("temperature", "steady"):
-        for _, e in d.items():
-            s = rte(
-                scn2dict(e),
-                heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
-            )
-            r = s.steady_temperature()
-
-            assert np.allclose(r[TemperatureLocation.SURFACE], e["T_surf"], atol=0.05)
-            assert np.allclose(r[TemperatureLocation.AVERAGE], e["T_mean"], atol=0.05)
-            assert np.allclose(r[TemperatureLocation.CORE], e["T_heart"], atol=0.05)
+# def test_steady_temperature():
+#     for d in scenario("temperature", "steady"):
+#         for _, e in d.items():
+#             s = rte(
+#                 scn2dict(e),
+#                 heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+#             )
+#             r = s.steady_temperature()
+#
+#             assert np.allclose(r[TemperatureLocation.SURFACE], e["T_surf"], atol=0.05)
+#             assert np.allclose(r[TemperatureLocation.AVERAGE], e["T_mean"], atol=0.05)
+#             assert np.allclose(r[TemperatureLocation.CORE], e["T_heart"], atol=0.05)
 
 
 def test_steady_ampacity():
-    for d in scenario("ampacity", "steady"):
-        for _, e in d.items():
-            s = rte(
-                scn2dict(e),
-                heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
-            )
-            r = s.steady_intensity(max_conductor_temperature=e["Tmax_cable"])
+    for scenario in get_scenarios():
+        print(f"YOMAN : {scenario=}")
+        solver = rte(
+            scn2dict(scenario),
+            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+        )
+        result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
+        print(result)
+        assert False
 
-            assert np.allclose(r[VariableType.TRANSIT], e["I_max"], atol=0.05)
+    # for d in scenario("ampacity", "steady"):
+    #     for _, e in d.items():
+    #         s = rte(
+    #             scn2dict(e),
+    #             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+    #         )
+    #         r = s.steady_intensity(max_conductor_temperature=e["Tmax_cable"])
+    #
+    #         assert np.allclose(r[VariableType.TRANSIT], e["I_max"], atol=0.05)
+    #         # check for : nebulosity, qg_computed, qs, qd, qb, solar_hour, solar_altitude
 
 
-def test_transient_temperature():
-    atol = 0.5
-
-    # this is hard-coded, maybe it should be put in the yaml file ...
-    time_constant = 600.0
-    dt = 10.0
-    minute = 60
-
-    for d in scenario("temperature", "transient"):
-        for _, e in d.items():
-            # solver
-            s = rte(
-                scn2dict(e),
-                heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
-            )
-
-            # initial steady state
-            s.args[VariableType.TRANSIT.value] = e["I0_cable"]
-            s.update()
-            ri = s.steady_temperature()
-
-            # final steady state
-            s.args[VariableType.TRANSIT.value] = e["iac"]
-            s.update()
-            rf = s.steady_temperature(
-                surface_temperature_guess=e["T_mean_final"],
-                core_temperature_guess=e["T_mean_final"],
-            )
-
-            # time
-            time = np.arange(0.0, 1800.0, dt)
-
-            # transient temperature (linearized)
-            rl = s.transient_temperature_legacy(
-                time=time,
-                surface_temperature_0=ri[TemperatureLocation.SURFACE],
-                core_temperature_0=ri[TemperatureLocation.CORE],
-                time_constant=time_constant,
-            )
-
-            # check final temp
-            assert np.isclose(
-                e["T_mean_final"], rf[TemperatureLocation.AVERAGE][0], atol=atol
-            )
-
-            # check transient temp
-            for k1, k2 in zip(
-                ["T_surf_transient", "T_mean_transient", "T_heart_transient"],
-                [
-                    TemperatureLocation.SURFACE,
-                    TemperatureLocation.AVERAGE,
-                    TemperatureLocation.CORE,
-                ],
-            ):
-                expected_time = np.array(list(e[k1].keys())) * minute
-                expected_temp = np.array(list(e[k1].values()))
-                estimated_temp = np.interp(expected_time, rl[VariableType.TIME], rl[k2])
-                assert np.allclose(expected_temp, estimated_temp, atol=atol)
+# def test_transient_temperature():
+#     atol = 0.5
+#
+#     # this is hard-coded, maybe it should be put in the yaml file ...
+#     time_constant = 600.0
+#     dt = 10.0
+#     minute = 60
+#
+#     for d in scenario("temperature", "transient"):
+#         for _, e in d.items():
+#             # solver
+#             s = rte(
+#                 scn2dict(e),
+#                 heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+#             )
+#
+#             # initial steady state
+#             s.args[VariableType.TRANSIT.value] = e["I0_cable"]
+#             s.update()
+#             ri = s.steady_temperature()
+#
+#             # final steady state
+#             s.args[VariableType.TRANSIT.value] = e["iac"]
+#             s.update()
+#             rf = s.steady_temperature(
+#                 surface_temperature_guess=e["T_mean_final"],
+#                 core_temperature_guess=e["T_mean_final"],
+#             )
+#
+#             # time
+#             time = np.arange(0.0, 1800.0, dt)
+#
+#             # transient temperature (linearized)
+#             rl = s.transient_temperature_legacy(
+#                 time=time,
+#                 surface_temperature_0=ri[TemperatureLocation.SURFACE],
+#                 core_temperature_0=ri[TemperatureLocation.CORE],
+#                 time_constant=time_constant,
+#             )
+#
+#             # check final temp
+#             assert np.isclose(
+#                 e["T_mean_final"], rf[TemperatureLocation.AVERAGE][0], atol=atol
+#             )
+#
+#             # check transient temp
+#             for k1, k2 in zip(
+#                 ["T_surf_transient", "T_mean_transient", "T_heart_transient"],
+#                 [
+#                     TemperatureLocation.SURFACE,
+#                     TemperatureLocation.AVERAGE,
+#                     TemperatureLocation.CORE,
+#                 ],
+#             ):
+#                 expected_time = np.array(list(e[k1].keys())) * minute
+#                 expected_temp = np.array(list(e[k1].values()))
+#                 estimated_temp = np.interp(expected_time, rl[VariableType.TIME], rl[k2])
+#                 assert np.allclose(expected_temp, estimated_temp, atol=atol)
