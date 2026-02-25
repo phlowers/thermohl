@@ -91,19 +91,17 @@ def _infer_target_from_cable_type(
 
     if cable_type is None:
         return target
+
+    if isinstance(cable_type, CableType):
+        if cable_type == CableType.HOMOGENEOUS:
+            return CableLocation.AVERAGE
+        elif cable_type == CableType.BIMETALLIC:
+            return CableLocation.CORE
     else:
-        if isinstance(cable_type, CableType):
-            if cable_type == CableType.HOMOGENEOUS:
-                return CableLocation.AVERAGE
-            elif cable_type == CableType.BIMETALLIC:
-                return CableLocation.CORE
-        else:
-            return [
-                CableLocation.AVERAGE
-                if ct == CableType.HOMOGENEOUS
-                else CableLocation.CORE
-                for ct in cable_type
-            ]
+        return [
+            CableLocation.AVERAGE if ct == CableType.HOMOGENEOUS else CableLocation.CORE
+            for ct in cable_type
+        ]
 
 
 class Solver3T(Solver_):
