@@ -54,29 +54,33 @@ def compute_data_from_provided(
     Otherwise, the global radiation is computed from the provided nebulosity (default value of 0).
     """
 
-    def compute_nebulosity():
-        intermediate = np.min(
-            1, provided_global_radiation / (910 * np.sin(solar_altitude) - 30)
+    def compute_nebulosity(provided_global_radiation, solar_altitude):
+        intermediate = np.minimum(
+            1, provided_global_radiation[~mask] / (910 * np.sin(solar_altitude) - 30)
         )
         nebulosity = 8 * (4 / 3 * (1 - intermediate)) ** (1 / 3.4)
-        return np.round(np.min(8, nebulosity))
+        return np.round(np.minimum(8, nebulosity))
 
-    def compute_global_radiation():
+    def compute_global_radiation(provided_nebulosity, solar_altitude):
         intermediate = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
         global_radiation = (910 * np.sin(solar_altitude) - 30) * intermediate
-        return np.max(0, global_radiation)
+        return np.maximum(0, global_radiation)
 
-    nebulosity = np.where(
-        np.isnan(provided_global_radiation),
-        provided_nebulosity,
-        compute_nebulosity(),
-    )
+    mask = np.isnan(provided_global_radiation)
 
-    global_radiation = np.where(
-        np.isnan(provided_global_radiation),
-        compute_global_radiation(),
-        provided_global_radiation,
-    )
+    nebulosity = np.empty_like(provided_global_radiation)
+    nebulosity[mask] = provided_nebulosity[mask]
+    if np.any(~mask):
+        nebulosity[~mask] = compute_nebulosity(
+            provided_global_radiation[~mask], solar_altitude[~mask]
+        )
+
+    global_radiation = np.empty_like(provided_global_radiation)
+    global_radiation[~mask] = provided_global_radiation[~mask]
+    if np.any(mask):
+        global_radiation[mask] = compute_global_radiation(
+            provided_nebulosity[mask], solar_altitude[mask]
+        )
 
     return nebulosity, global_radiation
 
