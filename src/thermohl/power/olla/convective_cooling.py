@@ -21,8 +21,9 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         cable_azimuth: floatArrayLike,
         ambient_temperature: floatArrayLike,
         wind_speed: floatArrayLike,
-        wind_azimuth: floatArrayLike,
         outer_diameter: floatArrayLike,
+        wind_azimuth: floatArrayLike = None,
+        wind_attack_angle: floatArrayLike = None,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -43,10 +44,11 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             cable_azimuth,
             ambient_temperature,
             wind_speed,
-            wind_azimuth,
             outer_diameter,
             Air.volumic_mass,
             Air.dynamic_viscosity,
             Air.thermal_conductivity,
+            wind_azimuth,
+            wind_attack_angle,
             **kwargs,
         )

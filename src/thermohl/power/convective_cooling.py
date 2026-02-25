@@ -38,17 +38,31 @@ class ConvectiveCoolingBase(PowerTerm):
         cable_azimuth: floatArrayLike,
         ambient_temperature: floatArrayLike,
         wind_speed: floatArrayLike,
-        wind_azimuth: floatArrayLike,
         outer_diameter: floatArrayLike,
         air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         dynamic_viscosity: Callable[[floatArrayLike], floatArrayLike],
         thermal_conductivity: Callable[[floatArrayLike], floatArrayLike],
+        wind_azimuth: floatArrayLike = None,
+        wind_attack_angle: floatArrayLike = None,
         **kwargs: Any,
     ):
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-        self.wind_attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+
+        if wind_attack_angle is None and wind_azimuth is None:
+            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
+        if wind_attack_angle is not None and wind_azimuth is not None:
+            print(
+                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            )
+        if wind_attack_angle is not None:
+            self.wind_attack_angle = wind_attack_angle
+        else:
+            self.wind_attack_angle = compute_wind_attack_angle(
+                cable_azimuth, wind_azimuth
+            )
+
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density

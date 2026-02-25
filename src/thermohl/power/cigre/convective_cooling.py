@@ -24,9 +24,10 @@ class ConvectiveCooling(PowerTerm):
         cable_azimuth: floatArrayLike,
         ambient_temperature: floatArrayLike,
         wind_speed: floatArrayLike,
-        wind_azimuth: floatArrayLike,
         outer_diameter: floatArrayLike,
         roughness_ratio: floatArrayLike,
+        wind_azimuth: floatArrayLike = None,
+        wind_attack_angle: floatArrayLike = None,
         g: float = 9.81,
         **kwargs: Any,
     ):
@@ -51,7 +52,19 @@ class ConvectiveCooling(PowerTerm):
         self.outer_diameter = outer_diameter
         self.roughness_ratio = roughness_ratio
         self.gravity = g
-        self.wind_attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+
+        if wind_attack_angle is None and wind_azimuth is None:
+            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
+        if wind_attack_angle is not None and wind_azimuth is not None:
+            print(
+                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            )
+        if wind_attack_angle is not None:
+            self.wind_attack_angle = wind_attack_angle
+        else:
+            self.wind_attack_angle = compute_wind_attack_angle(
+                cable_azimuth, wind_azimuth
+            )
 
     def _nu_forced(
         self, film_temperature: floatArrayLike, kinematic_viscosity: floatArrayLike
