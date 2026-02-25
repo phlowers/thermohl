@@ -11,6 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike
 from thermohl.power import PowerTerm
+from thermohl.power.convective_cooling import compute_wind_attack_angle
 from thermohl.power.cigre import Air
 
 
@@ -50,9 +51,7 @@ class ConvectiveCooling(PowerTerm):
         self.outer_diameter = outer_diameter
         self.roughness_ratio = roughness_ratio
         self.gravity = g
-        self.attack_angle = np.arcsin(
-            np.sin(np.deg2rad(np.abs(cable_azimuth - wind_azimuth) % 180.0))
-        )
+        self.attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
 
     def _nu_forced(
         self, film_temperature: floatArrayLike, kinematic_viscosity: floatArrayLike

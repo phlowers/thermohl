@@ -13,6 +13,22 @@ from thermohl import floatArrayLike
 from thermohl.power import PowerTerm
 
 
+def compute_wind_attack_angle(
+    cable_azimuth: floatArrayLike, wind_azimuth: floatArrayLike
+) -> floatArrayLike:
+    """
+    Compute wind attack angle.
+
+    Args:
+        cable_azimuth (float | numpy.ndarray): Cable azimuth (deg).
+        wind_azimuth (float | numpy.ndarray): Wind azimuth regarding north (deg).
+
+    Returns:
+        float | numpy.ndarray: Wind attack angle (rad).
+    """
+    return np.arcsin(np.sin(np.deg2rad(np.abs(cable_azimuth - wind_azimuth) % 180.0)))
+
+
 class ConvectiveCoolingBase(PowerTerm):
     """Convective cooling term."""
 
@@ -32,9 +48,7 @@ class ConvectiveCoolingBase(PowerTerm):
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-        self.attack_angle = np.arcsin(
-            np.sin(np.deg2rad(np.abs(cable_azimuth - wind_azimuth) % 180.0))
-        )
+        self.attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
