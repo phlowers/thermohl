@@ -14,7 +14,7 @@ from thermohl.power.rte import ConvectiveCooling
 conv_cool_instances = [
     ConvectiveCooling(
         altitude=np.array([100.0]),
-        azimuth=np.array([2]),
+        cable_azimuth=np.array([2]),
         ambient_temperature=np.array([25.0]),
         wind_speed=np.array([10.0]),
         wind_angle=np.array([11.0]),
@@ -23,7 +23,7 @@ conv_cool_instances = [
     ),
     ConvectiveCooling(
         altitude=100.0,
-        azimuth=2,
+        cable_azimuth=2,
         ambient_temperature=25.0,
         wind_speed=10.0,
         wind_angle=11.0,

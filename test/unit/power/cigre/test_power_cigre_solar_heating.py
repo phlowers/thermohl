@@ -13,62 +13,68 @@ from thermohl.power.cigre import SolarHeating
 
 def test_solar_radiation_scalar():
     latitude = 45.0
-    azimuth = 180.0
+    cable_azimuth = 180.0
     albedo = 0.2
     month = 6
     day = 21
     hour = 12.0
     expected = 1309.2
 
-    result = SolarHeating._solar_radiation(latitude, azimuth, albedo, month, day, hour)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, month, day, hour
+    )
 
     assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_array():
     latitude = np.array([45.0, 50.0, 55.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2, 0.2])
     month = np.array([6, 6, 6])
     day = np.array([21, 21, 21])
     hour = np.array([12.0, 12.0, 12.0])
     expected = np.array([1309.2, 1267.965, 0.0])
 
-    result = SolarHeating._solar_radiation(latitude, azimuth, albedo, month, day, hour)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, month, day, hour
+    )
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_default_albedo():
     latitude = np.array([45.0, 50.0, 55.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = 0.2
     month = np.array([6, 6, 6])
     day = np.array([21, 21, 21])
     hour = np.array([12.0, 12.0, 12.0])
     expected = np.array([1309.2, 1267.965, 0.0])
 
-    result = SolarHeating._solar_radiation(latitude, azimuth, albedo, month, day, hour)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, month, day, hour
+    )
 
     assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_mismatched_array_sizes():
     latitude = np.array([45.0, 50.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
     month = np.array([6, 6, 6])
     day = np.array([21, 21])
     hour = np.array([12.0, 12.0])
     with pytest.raises(ValueError):
-        SolarHeating._solar_radiation(latitude, azimuth, albedo, month, day, hour)
+        SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, month, day, hour)
 
 
 solar_heating_instances = [
     (
         SolarHeating(
             latitude=np.array([45.0, 50.0, 55.0]),
-            azimuth=np.array([180.0, 180.0, 180.0]),
+            cable_azimuth=np.array([180.0, 180.0, 180.0]),
             albedo=np.array([0.2, 0.2, 0.2]),
             month=np.array([6, 6, 6]),
             day=np.array([21, 21, 21]),
@@ -81,7 +87,7 @@ solar_heating_instances = [
     (
         SolarHeating(
             latitude=45.0,
-            azimuth=180.0,
+            cable_azimuth=180.0,
             albedo=0.2,
             month=6,
             day=21,
@@ -112,7 +118,7 @@ def test_solar_heating_value_scalar(solar_heating, expected):
 
 def test_solar_heating_value_array():
     latitude = np.array([45.0, 50.0, 55.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2, 0.2])
     month = np.array([6, 6, 6])
     day = np.array([21, 21, 21])
@@ -122,7 +128,7 @@ def test_solar_heating_value_array():
     conductor_temperature = np.array([25.0, 30.0, 35.0])
     solar_heating = SolarHeating(
         latitude,
-        azimuth,
+        cable_azimuth,
         albedo,
         month,
         day,
@@ -139,7 +145,7 @@ def test_solar_heating_value_array():
 
 def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
     latitude = np.array([45.0, 50.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
     month = np.array([6, 6, 6])
     day = np.array([21, 21])
@@ -150,7 +156,7 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
     with pytest.raises(ValueError):
         solar_heating = SolarHeating(
             latitude,
-            azimuth,
+            cable_azimuth,
             albedo,
             month,
             day,
@@ -197,7 +203,7 @@ def test_solar_heating_derivative_temperature_array(solar_heating, expected):
 
 def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
     latitude = np.array([45.0, 50.0])
-    azimuth = np.array([180.0, 180.0, 180.0])
+    cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
     month = np.array([6, 6, 6])
     day = np.array([21, 21])
@@ -208,7 +214,7 @@ def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
     with pytest.raises(ValueError):
         solar_heating = SolarHeating(
             latitude,
-            azimuth,
+            cable_azimuth,
             albedo,
             month,
             day,

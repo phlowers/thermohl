@@ -17,7 +17,7 @@ from thermohl.solver import rte
 def test_solver3t_legacy():
     data = {
         "cpo_nbr_cable": array([1]),
-        "azimuth": array([90.0]),
+        "cable_azimuth": array([90.0]),
         "wind_speed": array([0]),
         "wind_angle": array([45.0]),
         "altitude": array([100]),

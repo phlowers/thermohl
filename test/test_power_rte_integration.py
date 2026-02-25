@@ -217,7 +217,7 @@ def scenarios():
         ],
         latitude=[46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0, 46.0],
         altitude=[1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0, 1.0],
-        azimuth=90.0,
+        cable_azimuth=90.0,
         transit=[
             1000.0,
             1000.0,
@@ -257,7 +257,9 @@ def test_compare_power():
 
     d1 = df2dct(ds)
     ds["wind_angle"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(ds["azimuth"] - ds["wind_angle"]) % 180.0)))
+        np.arcsin(
+            np.sin(np.deg2rad(np.abs(ds["cable_azimuth"] - ds["wind_angle"]) % 180.0))
+        )
     )
     d2 = df2dct(ds)
     del (ds, n)
@@ -289,7 +291,7 @@ def test_solar_heating():
     ones = np.ones(n)
 
     latitude = np.array([40.0, 46.0, 46.0, 46.0, 46.0])
-    azimuth = np.array([90.0, 0.0, 0.0, 0.0, 0.0])
+    cable_azimuth = np.array([90.0, 0.0, 0.0, 0.0, 0.0])
     month = np.array([7, 3, 3, 3, 3])
     day = np.array([19, 7, 14, 7, 7])
     hour = np.array([14.0, 12.0, 17.0, 12.0, 12.0])
@@ -299,7 +301,7 @@ def test_solar_heating():
     p = np.array([34.9, 21.9357, 13.95, 21.9357, 21.9357])
     s = rte.SolarHeating(
         latitude,
-        azimuth,
+        cable_azimuth,
         month,
         day,
         hour,

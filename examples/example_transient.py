@@ -35,7 +35,7 @@ if __name__ == "__main__":
     dct = dict(
         latitude=45.0,
         altitude=100.0,
-        azimuth=90.0,
+        cable_azimuth=90.0,
         month=3,
         day=21,
         hour=0,

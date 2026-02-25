@@ -27,7 +27,7 @@ This guide helps you migrate your code from the old version with short variable 
 | `lat` | `latitude` | Latitude | degrees |
 | `lon` | `longitude` or `longitude` depending on context | Longitude | degrees or rad |
 | `alt` | `altitude` | Altitude | meters |
-| `azm` | `azimuth` | Azimuth angle | degrees |
+| `azm` | `cable_azimuth` | Azimuth angle | degrees |
 
 **Example:**
 ```python
@@ -44,7 +44,7 @@ params = {
     'latitude': 45.0,
     'longitude': 2.5,
     'altitude': 100.0,
-    'azimuth': 90.0
+    'cable_azimuth': 90.0
 }
 ```
 
@@ -673,7 +673,7 @@ params = dict(
     latitude=45.0,
     longitude=2.5,
     altitude=100.0,
-    azimuth=90.0,
+    cable_azimuth=90.0,
     month=3,
     day=21,
     hour=12,

@@ -19,7 +19,7 @@ class ConvectiveCoolingBase(PowerTerm):
     def __init__(
         self,
         altitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         ambient_temperature: floatArrayLike,
         wind_speed: floatArrayLike,
         wind_angle: floatArrayLike,
@@ -33,7 +33,7 @@ class ConvectiveCoolingBase(PowerTerm):
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
         self.attack_angle = np.arcsin(
-            np.sin(np.deg2rad(np.abs(azimuth - wind_angle) % 180.0))
+            np.sin(np.deg2rad(np.abs(cable_azimuth - wind_angle) % 180.0))
         )
         self.outer_diameter = outer_diameter
 

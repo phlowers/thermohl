@@ -103,7 +103,7 @@ def plot_solar_heating(dic):
 
 def plot_convective_cooling(dic):
     wind_speed = np.linspace(0, 1, 5)
-    wind_angle = dic["azimuth"] - np.array([0, 45, 90])
+    wind_angle = dic["cable_azimuth"] - np.array([0, 45, 90])
     conductor_temperature = np.linspace(0.0, 80.0, 41)
     ambient_temperatures = np.linspace(-10, 40, 6)
 

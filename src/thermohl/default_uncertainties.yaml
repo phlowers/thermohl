@@ -21,7 +21,7 @@ altitude:
   max: 3000.
   std: 10.
   relative_std: false
-azimuth:
+cable_azimuth:
   dist: 'wrapnorm'
   std: 10.
   relative_std: false
