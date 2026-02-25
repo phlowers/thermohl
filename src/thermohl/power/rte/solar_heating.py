@@ -40,6 +40,9 @@ def compute_solar_irradiance(
         np.sin(incidence) + pi / 2 * albedo * np.sin(solar_altitude)
     ) + diffuse_radiation * pi / 2 * (1 + albedo)
 
+    # print(
+    #     f"YOMAN50 : {nebulosity=}, Qb={beam_radiation}, Qd={diffuse_radiation}, Qs={solar_irradiance}"
+    # )
     return np.where(solar_altitude > 0.0, solar_irradiance, 0.0)
 
 

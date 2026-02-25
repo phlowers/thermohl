@@ -7,16 +7,9 @@
 
 from datetime import datetime
 import os.path
-
 import numpy as np
 import pandas as pd
-import yaml
-from typing import List, Dict
-
 from thermohl.solver import rte, HeatEquationType
-
-# from thermohl.solver import rte, HeatEquationType
-# from thermohl.solver.enums.temperature_location import TemperatureLocation
 from thermohl.solver.enums.variable_type import VariableType
 
 
@@ -30,15 +23,9 @@ def cable_data(cable_name: str) -> dict:
         raise ValueError(f"Conductor {cable_name} not found in file {f}.")
 
 
-# def scenario(key: str, mode: str) -> List[Dict]:
-#     f = os.path.join("test", "functional_test", "scenario.yaml")
-#     y = yaml.safe_load(open(f))
-#     return y[key][mode]
-
-
 def get_scenarios():
     f = os.path.join("test", "functional_test", "scenarios.csv")
-    return pd.read_csv(f, sep=";").to_dict(orient="records")
+    return pd.read_csv(f).to_dict(orient="records")
 
 
 def scn2dict(scn: dict) -> dict:
@@ -52,17 +39,20 @@ def scn2dict(scn: dict) -> dict:
     dic["ambient_temperature"] = scn["T_amb"]
     dic["wind_speed"] = scn["V"]
     dic["wind_angle"] = scn["Azimut_V"]
+    dic["albedo"] = scn["Albedo"]
+    dic["measured_solar_irradiance"] = scn["QG_mesure"]
+    dic["nebulosity"] = scn["Neb"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
 
-    # todo: gerer le qg_mesure + albedo + neb
     dt = datetime.strptime(f"{scn['Date']} {scn['Heure']}", "%d/%m/%Y %H:%M")
     dic["month"] = dt.month
     dic["day"] = dt.day
     dic["hour"] = dt.hour + dt.minute / 60.0
+    # utile uniquement pour le test test_steady_temperature
     dic[VariableType.TRANSIT.value] = scn["Intensite"]
 
-    print(f"YOMAN18  :{dic=}")
+    print(f"YOMAN10  :{dic=}")
     return dic
 
 
@@ -88,19 +78,17 @@ def test_steady_ampacity():
             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
-        print(result)
-        assert False
+        print(
+            f"YOMAN100 : {result.columns=}\n{result[VariableType.TRANSIT].values=}\n{scenario['Ampacite']=}"
+        )
+        pd.set_option("display.max_rows", None)
+        pd.set_option("display.max_columns", None)
+        pd.set_option("display.width", 1000)
 
-    # for d in scenario("ampacity", "steady"):
-    #     for _, e in d.items():
-    #         s = rte(
-    #             scn2dict(e),
-    #             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
-    #         )
-    #         r = s.steady_intensity(max_conductor_temperature=e["Tmax_cable"])
-    #
-    #         assert np.allclose(r[VariableType.TRANSIT], e["I_max"], atol=0.05)
-    #         # check for : nebulosity, qg_computed, qs, qd, qb, solar_hour, solar_altitude
+        print(f"YOMAN101 : {result=}")
+
+        assert np.allclose(result[VariableType.TRANSIT], scenario["Ampacite"])
+        # assert False
 
 
 # def test_transient_temperature():
