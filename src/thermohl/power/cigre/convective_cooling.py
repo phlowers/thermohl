@@ -51,7 +51,7 @@ class ConvectiveCooling(PowerTerm):
         self.outer_diameter = outer_diameter
         self.roughness_ratio = roughness_ratio
         self.gravity = g
-        self.attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+        self.wind_attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
 
     def _nu_forced(
         self, film_temperature: floatArrayLike, kinematic_viscosity: floatArrayLike
@@ -109,10 +109,10 @@ class ConvectiveCooling(PowerTerm):
             B1 = B1[0]
             n = n[0]
 
-        B2 = np.where(self.attack_angle < np.deg2rad(24.0), 0.68, 0.58)
-        m1 = np.where(self.attack_angle < np.deg2rad(24.0), 1.08, 0.90)
+        B2 = np.where(self.wind_attack_angle < np.deg2rad(24.0), 0.68, 0.58)
+        m1 = np.where(self.wind_attack_angle < np.deg2rad(24.0), 1.08, 0.90)
 
-        return np.maximum(0.42 + B2 * np.sin(self.attack_angle) ** m1, 0.55) * (
+        return np.maximum(0.42 + B2 * np.sin(self.wind_attack_angle) ** m1, 0.55) * (
             B1 * reynolds**n
         )
 

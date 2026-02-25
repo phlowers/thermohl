@@ -48,7 +48,7 @@ class ConvectiveCoolingBase(PowerTerm):
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-        self.attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+        self.wind_attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
@@ -80,9 +80,9 @@ class ConvectiveCoolingBase(PowerTerm):
         )
         direction_factor = (
             1.194
-            - np.cos(self.attack_angle)
-            + 0.194 * np.cos(2.0 * self.attack_angle)
-            + 0.368 * np.sin(2.0 * self.attack_angle)
+            - np.cos(self.wind_attack_angle)
+            + 0.194 * np.cos(2.0 * self.wind_attack_angle)
+            + 0.368 * np.sin(2.0 * self.wind_attack_angle)
         )
         return (
             direction_factor
