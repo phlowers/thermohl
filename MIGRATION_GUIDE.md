@@ -132,7 +132,7 @@ cable = {
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | dimensionless |
 | `epsilon` | `emissivity` | Emissivity | dimensionless |
-| `srad` | `precomputed_solar_radiation` | Direct solar radiation (precomputed) | W/m² |
+| `srad` | `measured_solar_irradiance` | Direct solar radiation | W/m² |
 | `Qs` | `measured_solar_irradiance` | Measured solar irradiance | W/m² |
 | `sigma` | `stefan_boltzmann_constant` | Stefan-Boltzmann constant | W/m²/$K^4$ |
 | `x` | `solar_altitude` | Solar altitude | degrees |
@@ -150,7 +150,7 @@ optical = {
 optical = {
     'solar_absorptivity': 0.5,
     'emissivity': 0.5,
-    'precomputed_solar_radiation': np.nan  # or measured value
+    'measured_solar_irradiance': np.nan  # or measured value
 }
 ```
 
@@ -743,7 +743,6 @@ ambient_temperature:
 2. All keyword arguments when calling functions
 3. All YAML configuration files
 4. All references to `transit` in transient solver method calls → `transit`
-5. All references to `srad` for solar radiation → `precomputed_solar_radiation`
 
 ## Validation Checklist
 

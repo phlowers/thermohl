@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Optional, Any
+from typing import Any
 
 from thermohl.power import ieee
 from thermohl import floatArrayLike, intArrayLike
@@ -24,7 +24,7 @@ class SolarHeating(ieee.SolarHeating):
         hour: floatArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        precomputed_solar_radiation: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -42,7 +42,7 @@ class SolarHeating(ieee.SolarHeating):
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
-            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            measured_solar_irradiance (float | numpy.ndarray): Optional precomputed solar radiation term.
 
         """
         if "turbidity" in kwargs.keys():
@@ -57,6 +57,6 @@ class SolarHeating(ieee.SolarHeating):
             hour=hour,
             outer_diameter=outer_diameter,
             solar_absorptivity=solar_absorptivity,
-            precomputed_solar_radiation=precomputed_solar_radiation,
+            measured_solar_irradiance=measured_solar_irradiance,
             **kwargs,
         )

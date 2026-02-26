@@ -19,13 +19,13 @@ def _solvers():
     li = []
     for heat_equation in [
         HeatEquationType.WITH_ONE_TEMPERATURE,
-        HeatEquationType.WITH_THREE_TEMPERATURES,
+        # HeatEquationType.WITH_THREE_TEMPERATURES,
     ]:
         for m in [
-            SolverType.SOLVER_RTE,
+            # SolverType.SOLVER_RTE,
             SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            # SolverType.SOLVER_IEEE,
+            # SolverType.SOLVER_OLLA,
         ]:
             li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
