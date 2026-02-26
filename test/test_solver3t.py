@@ -9,6 +9,7 @@ import numpy as np
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType
+from thermohl.solver.enums.cable_type import CableType
 from thermohl.solver.enums.solver_type import SolverType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.solver.enums.temperature_location import TemperatureLocation
@@ -37,22 +38,24 @@ def test_balance():
     # NB : this one fails only with 'cigre' powers
 
     tol = 1.0e-09
-    np.random.seed(_nprs)
+
+    rng = np.random.default_rng(_nprs)
+
     N = 9999
-    dic = dict(
-        latitude=np.random.uniform(42.0, 51.0, N),
-        altitude=np.random.uniform(0.0, 1600.0, N),
-        azimuth=np.random.uniform(0.0, 360.0, N),
-        month=np.random.randint(1, 13, N),
-        day=np.random.randint(1, 31, N),
-        hour=np.random.randint(0, 24, N),
-        ambient_temperature=np.random.uniform(0.0, 30.0, N),
-        wind_speed=np.random.uniform(0.0, 7.0, N),
-        wind_angle=np.random.uniform(0.0, 90.0, N),
-        transit=np.random.uniform(40.0, 4000.0, N),
-        core_diameter=np.random.randint(2, size=N)
+    dic = {
+        "latitude": rng.random(N) * 9 + 42.0,
+        "altitude": rng.random(N) * 1600.0,
+        "azimuth": rng.random(N) * 360.0,
+        "month": rng.integers(1, 13, N),
+        "day": rng.integers(1, 31, N),
+        "hour": rng.integers(0, 24, N),
+        "ambient_temperature": rng.random(N) * 30.0,
+        "wind_speed": rng.random(N) * 7.0,
+        "wind_angle": rng.random(N) * 90.0,
+        "transit": rng.random(N) * 3960 + 40.0,
+        "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
-    )
+    }
 
     for s in _solvers(dic):
         # compute guess with 1t solver
@@ -96,21 +99,24 @@ def test_balance():
 
 def test_consistency():
     tol = 1.0e-09
-    np.random.seed(_nprs)
+
+    rng = np.random.default_rng(_nprs)
+
     N = 9999
-    dic = dict(
-        latitude=np.random.uniform(42.0, 51.0, N),
-        altitude=np.random.uniform(0.0, 1600.0, N),
-        azimuth=np.random.uniform(0.0, 360.0, N),
-        month=np.random.randint(1, 13, N),
-        day=np.random.randint(1, 31, N),
-        hour=np.random.randint(0, 24, N),
-        ambient_temperature=np.random.uniform(0.0, 30.0, N),
-        wind_speed=np.random.uniform(0.0, 7.0, N),
-        wind_angle=np.random.uniform(0.0, 90.0, N),
-        core_diameter=np.random.randint(2, size=N)
+
+    dic = {
+        "latitude": rng.random(N) * 9 + 42.0,
+        "altitude": rng.random(N) * 1600.0,
+        "azimuth": rng.random(N) * 360.0,
+        "month": rng.integers(1, 13, N),
+        "day": rng.integers(1, 31, N),
+        "hour": rng.integers(0, 24, N),
+        "ambient_temperature": rng.random(N) * 30.0,
+        "wind_speed": rng.random(N) * 7.0,
+        "wind_angle": rng.random(N) * 90.0,
+        "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
-    )
+    }
 
     for s in _solvers(dic):
         d = {
@@ -162,3 +168,127 @@ def test_consistency():
             )
             # check consistency
             assert np.allclose(dg[temperature_at_location].values, 100.0)
+
+
+def test_steady_intensity_cable_type_scalar_homogeneous():
+    for s in _solvers():
+        df_with_specified_cable_type = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            cable_type=CableType.HOMOGENEOUS,
+            return_err=True,
+            return_power=True,
+        )
+
+        df_with_specified_target = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            target=CableLocation.AVERAGE,
+            return_err=True,
+            return_power=True,
+        )
+
+        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+
+
+def test_steady_intensity_cable_type_scalar_bimetallic():
+    for s in _solvers():
+        df_with_specified_cable_type = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            cable_type=CableType.BIMETALLIC,
+            return_err=True,
+            return_power=True,
+        )
+
+        df_with_specified_target = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            target=CableLocation.CORE,
+            return_err=True,
+            return_power=True,
+        )
+
+        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+
+
+def test_steady_intensity_cable_type_list():
+    rng = np.random.default_rng(_nprs)
+
+    N = 3
+
+    dic = {
+        "latitude": rng.random(N) * 9 + 42.0,
+        "altitude": rng.random(N) * 1600.0,
+        "azimuth": rng.random(N) * 360.0,
+        "month": rng.integers(1, 13, N),
+        "day": rng.integers(1, 31, N),
+        "hour": rng.integers(0, 24, N),
+        "ambient_temperature": rng.random(N) * 30.0,
+        "wind_speed": rng.random(N) * 7.0,
+        "wind_angle": rng.random(N) * 90.0,
+        "core_diameter": rng.integers(2, size=N)
+        * solver.default_values()["core_diameter"],
+    }
+
+    cable_type = np.array(
+        [CableType.BIMETALLIC, CableType.HOMOGENEOUS, CableType.HOMOGENEOUS]
+    )
+    target = np.array(
+        [CableLocation.CORE, CableLocation.AVERAGE, CableLocation.AVERAGE]
+    )
+
+    for s in _solvers(dic):
+        df_with_specified_cable_type = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            cable_type=cable_type,
+            return_err=True,
+            return_power=True,
+        )
+
+        df_with_specified_target = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            target=target,
+            return_err=True,
+            return_power=True,
+        )
+
+        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+
+
+def test_steady_intensity_cable_type_and_target():
+    # Both cable_type and target are provided so target should be ignored.
+    rng = np.random.default_rng(_nprs)
+
+    N = 9999
+    dic = {
+        "latitude": rng.random(N) * 9 + 42.0,
+        "altitude": rng.random(N) * 1600.0,
+        "azimuth": rng.random(N) * 360.0,
+        "month": rng.integers(1, 13, N),
+        "day": rng.integers(1, 31, N),
+        "hour": rng.integers(0, 24, N),
+        "ambient_temperature": rng.random(N) * 30.0,
+        "wind_speed": rng.random(N) * 7.0,
+        "wind_angle": rng.random(N) * 90.0,
+        "core_diameter": rng.integers(2, size=N)
+        * solver.default_values()["core_diameter"],
+    }
+
+    cable_type = rng.choice([CableType.BIMETALLIC, CableType.HOMOGENEOUS], size=N)
+
+    target = np.array([CableLocation.CORE] * N)
+
+    for s in _solvers(dic):
+        df_with_specified_cable_type = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            cable_type=cable_type,
+            target=target,
+            return_err=True,
+            return_power=True,
+        )
+
+        df_with_specified_target = s.steady_intensity(
+            max_conductor_temperature=100.0,
+            cable_type=cable_type,
+            return_err=True,
+            return_power=True,
+        )
+
+        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
