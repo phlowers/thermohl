@@ -12,15 +12,16 @@ position is then used to estimate the solar radiation in CIGRE and IEEE
 models.
 """
 
+from math import pi
 import numpy as np
 from thermohl import floatArrayLike, intArrayLike
 
 
 def utc2solar_hour(
     utc_hour: floatArrayLike,
-    utc_minute: floatArrayLike = 0.0,
-    utc_second: floatArrayLike = 0.0,
-    longitude: floatArrayLike = 0.0,
+    day_of_month: intArrayLike,
+    month_index: intArrayLike,
+    longitude: floatArrayLike,
 ) -> floatArrayLike:
     """convert utc hour to solar hour adding the longitude contribution
 
@@ -29,13 +30,9 @@ def utc2solar_hour(
     Parameters
     ----------
     utc_hour : float or numpy.ndarray
-        Hour of the day (solar, must be between 0 and 23).
-    utc_minute : float or numpy.ndarray, optional
-        Minutes on the clock. The default is 0.
-    utc_second : float or numpy.ndarray, optional
-        Seconds on the clock. The default is 0.
+        Hour of the day (must be between 0 and 24 excluded).
     longitude : float or numpy.ndarray, optional
-        Longitude (in rad). The default is 0.
+        Longitude (in rad)
 
     Returns
     -------
@@ -43,13 +40,14 @@ def utc2solar_hour(
         solar hour
 
     """
-    # add 4 min (1/15 of an hour) for every degree of east longitude
+    day_of_year = _csm[month_index - 1] + day_of_month
+    B = 2 * pi * (day_of_year - 81) / 365
     solar_hour = (
-        utc_hour % 24
-        + utc_minute / 60.0
-        + utc_second / 3600.0
-        + np.rad2deg(longitude) / 15.0
+        utc_hour
+        + longitude / (2 * pi) * 24
+        - (7.678 * np.sin(B + 1.374) - 9.87 * np.sin(2 * B)) / 60
     )
+
     return solar_hour
 
 
@@ -143,9 +141,7 @@ def solar_altitude(
 
     """
     computed_solar_declination = solar_declination(month_index, day_of_month)
-    computed_hour_angle = hour_angle(
-        solar_hour, solar_minute=solar_minute, solar_second=solar_second
-    )
+    computed_hour_angle = hour_angle(solar_hour, solar_minute, solar_second)
     return np.arcsin(
         np.cos(latitude)
         * np.cos(computed_solar_declination)
@@ -189,9 +185,7 @@ def solar_azimuth(
 
     """
     computed_solar_declination = solar_declination(month_index, day_of_month)
-    computed_hour_angle = hour_angle(
-        solar_hour, solar_minute=solar_minute, solar_second=solar_second
-    )
+    computed_hour_angle = hour_angle(solar_hour, solar_minute, solar_second)
     azimuth_ratio = np.sin(computed_hour_angle) / (
         np.sin(latitude) * np.cos(computed_hour_angle)
         - np.cos(latitude) * np.tan(computed_solar_declination)
