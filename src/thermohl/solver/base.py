@@ -57,17 +57,15 @@ class Args:
 
     def _set_default_values(self) -> None:
         """Set default values."""
-
-        self.measured_solar_irradiance = np.nan  # solar irradiance
+        # position
         self.latitude = 45.0  # latitude (deg)
         self.longitude = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
         self.cable_azimuth = 0.0  # cable_azimuth (deg)
+        self.datetime = datetime.datetime(2000, 3, 21, 12)
 
-        self.month = 3  # month number (1=Jan, 2=Feb, ...)
-        self.day = 21  # day of the month
-        self.hour = 12  # hour of the day (in [0, 23] range)
-
+        # weather and mesurement
+        self.measured_solar_irradiance = np.nan  # solar irradiance
         self.ambient_temperature = 15.0  # ambient temperature (C)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
@@ -77,25 +75,22 @@ class Args:
         self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
-
         self.transit = 100.0  # transit intensity (A)
 
+        # conductor
         self.linear_mass = 1.5  # mass per unit length (kg.m**-1)
         self.core_diameter = 1.9e-02  # core diameter (m)
         self.outer_diameter = 3.0e-02  # external (global) diameter (m)
         self.core_area = 2.84e-04  # core section (m**2)
         self.outer_area = 7.07e-04  # external (global) section (m**2)
         self.roughness_ratio = 4.0e-02  # roughness (1)
-        self.radial_thermal_conductivity = (
-            1.0  # radial thermal conductivity (W.m**-1.K**-1)
-        )
+        # radial thermal conductivity (W.m**-1.K**-1)
+        self.radial_thermal_conductivity = 1.0
         self.heat_capacity = 500.0  # specific heat capacity (J.kg**-1.K**-1)
-
         self.solar_absorptivity = 0.5  # solar absorption (1)
         self.emissivity = 0.5  # emissivity (1)
         # electric resistance per unit length (DC) at 20°C (Ohm.m**-1)
         self.linear_resistance_dc_20c = 2.5e-05
-
         self.magnetic_coeff = 1.006  # coefficient for magnetic effects (1)
         self.magnetic_coeff_per_a = 0.016  # coefficient for magnetic effects (A**-1)
         # linear resistance augmentation with temperature (K**-1)
@@ -106,12 +101,10 @@ class Args:
         self.linear_resistance_temp_high = 3.05e-05
         # electric resistance per unit length (DC) at temp_low (Ohm.m**-1)
         self.linear_resistance_temp_low = 2.66e-05
-        self.temp_high = (
-            60.0  # temperature for linear_resistance_temp_high measurement (°C)
-        )
-        self.temp_low = (
-            20.0  # temperature for linear_resistance_temp_low measurement (°C)
-        )
+        # temperature for linear_resistance_temp_high measurement (°C)
+        self.temp_high = 60.0
+        # temperature for linear_resistance_temp_low measurement (°C)
+        self.temp_low = 20.0
 
     def keys(self) -> KeysView[str]:
         """Get list of members as dict keys."""
