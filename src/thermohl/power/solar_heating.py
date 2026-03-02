@@ -19,9 +19,8 @@ class _SRad:
     def __init__(self, clean: List[float], indus: List[float]):
         """Initialize the solar radiation calculator.
 
-        Args:
-            clean (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in clean air conditions.
-            indus (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
+        :param clean: Coefficients for the polynomial function to compute atmospheric turbidity in clean air conditions.
+        :param indus: Coefficients for the polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
         """
         self.clean = clean
         self.indus = indus
@@ -37,12 +36,9 @@ class _SRad:
         average of the clean air and industrial air coefficients, with the weights
         determined by the turbidity factor.
 
-        Args:
-            solar_altitude (float | numpy.ndarray): Solar altitude in degrees.
-            turbidity (float | numpy.ndarray): Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
-
-        Returns:
-            float | numpy.ndarray: Coefficient for atmospheric turbidity.
+        :param solar_altitude: Solar altitude in degrees.
+        :param turbidity: Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
+        :return: Coefficient for atmospheric turbidity.
         """
         clean_weight = 1.0 - turbidity
         coeff_6 = clean_weight * self.clean[6] + turbidity * self.indus[6]
@@ -129,12 +125,8 @@ class SolarHeatingBase(PowerTerm):
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
         r"""Compute solar heating.
 
-        Args:
-            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
-
-        Returns:
-            float | numpy.ndarray: Power term value (W·m⁻¹).
-
+        :param conductor_temperature: Conductor temperature (°C).
+        :return: Power term value (W·m⁻¹).
         """
         return (
             self.solar_absorptivity
@@ -144,5 +136,9 @@ class SolarHeatingBase(PowerTerm):
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
-        """Compute solar heating derivative."""
+        """Compute solar heating derivative.
+
+        :param conductor_temperature: Conductor temperature.
+        :return: Derivative of solar heating.
+        """
         return np.zeros_like(conductor_temperature)
