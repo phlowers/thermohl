@@ -267,26 +267,15 @@ def _set_dates(
     number_of_computations: int,
 ) -> npt.NDArray[np.datetime64]:
     """
-    Set months, days and hours as 2D arrays.
+    This function is used in transient temperature computations
+    It provides a 2D array of size (len(offset), number_of_computations) such that
+    datetime_with_offset[i, j] = datetime_utc[j] + offset[i]
 
-    This function is used in transient temperature computations. Inputs month,
-    day and hour are floats or 1D arrays of size input_size; input offset is a time vector of
-    size time_size with evaluation times in seconds. It sets arrays months, days and
-    hours, of size (time_size, input_size) such that
-        months[i, j] = datetime(month[j], day[j], hour[j]) + offset[i] .
+    :param datetime_utc: Datetime or list of datetimes representing the initial times.
+    :param offset: Array representing the time offsets in seconds.
+    :param number_of_computations: Number of computations.
 
-    Args:
-        month (floatArrayLike): Array of floats or float representing the months.
-        day (floatArrayLike): Array of floats or float representing the days.
-        hour (floatArrayLike): Array of floats or float representing the hours.
-        offset (floatArray): Array of floats representing the time vector in seconds.
-        number_of_computations (int): Size of the input arrays month, day, and hour.
-
-    Returns:
-    Tuple[intArray, intArray, floatArray]:
-        - months (intArray): 2D array of shape (time_size, input_size) with month values.
-        - days (intArray): 2D array of shape (time_size, input_size) with day values.
-        - hours (floatArray): 2D array of shape (time_size, input_size) with hour values.
+    :return: 2D array of shape (len(offset), number_of_computations) with datetime values.
     """
     datetime_utc = (
         datetime_utc
@@ -295,8 +284,8 @@ def _set_dates(
     )
 
     number_of_offset = len(offset)
-    out_datetime_utc = np.zeros((number_of_offset, number_of_computations))
+    datetime_with_offset = np.zeros((number_of_offset, number_of_computations))
     for i in range(number_of_offset):
-        out_datetime_utc[i, :] = datetime_utc + timedelta(seconds=offset[i])
+        datetime_with_offset[i, :] = datetime_utc + timedelta(seconds=offset[i])
 
-    return out_datetime_utc
+    return datetime_with_offset
