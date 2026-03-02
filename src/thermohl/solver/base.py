@@ -7,7 +7,7 @@
 
 """Base class to build a solver for heat equation."""
 
-import datetime
+from datetime import datetime, timezone
 from abc import ABC, abstractmethod
 from typing import Tuple, Type, Any, Optional, KeysView, Dict
 
@@ -49,11 +49,11 @@ class Args:
         self._set_default_values()
         # use values from input dict
         if input_dict is None:
-            input_dict = {}
-        keys = self.keys()
-        for key in input_dict:
-            if key in keys and input_dict[key] is not None:
-                self[key] = input_dict[key]
+            return
+        arg_keys = self.keys()
+        for input_key, input_value in input_dict.items():
+            if input_key in arg_keys and input_value is not None:
+                self[input_key] = input_value
 
     def _set_default_values(self) -> None:
         """Set default values."""
@@ -62,7 +62,7 @@ class Args:
         self.longitude = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
         self.cable_azimuth = 0.0  # cable_azimuth (deg)
-        self.datetime = datetime.datetime(2000, 3, 21, 12)
+        self.datetime_utc = datetime(2000, 3, 21, 12, tzinfo=timezone.utc)
 
         # weather and mesurement
         self.measured_solar_irradiance = np.nan  # solar irradiance
@@ -152,17 +152,12 @@ class Args:
             None
         """
         max_len = self.max_len()
-        for k in self.keys():
-            if isinstance(self[k], np.ndarray):
-                t = self[k].dtype
-                c = len(self[k]) == max_len
-            else:
-                t = type(self[k])
-                c = False
-            if c:
-                self[k] = self[k][:]
-            else:
-                self[k] = self[k] * np.ones((max_len,), dtype=t)
+        for key in self.keys():
+            same_size = False
+            if isinstance(self[key], np.ndarray):
+                same_size = len(self[key]) == max_len
+            if not same_size:
+                self[key] = np.array(max_len * [self[key]])
 
     def compress(self) -> None:
         """
