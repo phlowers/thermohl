@@ -19,6 +19,8 @@ from thermohl.solver.enums.cable_type import CableTypeListLike
 
 from thermohl.utils import depends_on_optional
 
+from thermohl.logger import logger
+
 try:
     import scipy
     from scipy.stats._distn_infrastructure import rv_continuous_frozen as frozen_dist
@@ -394,8 +396,7 @@ def _diff_method(
             delta_output.loc[:, column_name] *= delta_param
         delta_results += delta_output
         if np.any(delta_output.isna()):
-            print("Nans with key %s" % (key,))
-
+            logger.warning("NaNs detected with key %s", key)
     results = pd.DataFrame()
     for column_name in baseline.columns:
         results.loc[:, column_name] = baseline.loc[:, column_name]
