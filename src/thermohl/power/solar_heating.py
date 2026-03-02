@@ -9,8 +9,9 @@ from typing import List, Optional, Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, intArrayLike, sun
+from thermohl import floatArrayLike, sun, datetimeListLike
 from thermohl.power.power_term import PowerTerm
+from thermohl.sun import time_to_float_hours
 
 
 class _SRad:
@@ -64,13 +65,13 @@ class _SRad:
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        computed_solar_altitude = sun.solar_altitude(latitude, month, day, hour)
-        computed_solar_azimuth = sun.solar_azimuth(latitude, month, day, hour)
+        date = [d.date() for d in datetime_utc]
+        hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+        computed_solar_altitude = sun.solar_altitude(latitude, date, hour)
+        computed_solar_azimuth = sun.solar_azimuth(latitude, date, hour)
         computed_incidence_angle = np.arccos(
             np.cos(computed_solar_altitude)
             * np.cos(computed_solar_azimuth - cable_azimuth)
@@ -94,9 +95,7 @@ class SolarHeatingBase(PowerTerm):
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
@@ -115,15 +114,13 @@ class SolarHeatingBase(PowerTerm):
                 altitude,
                 np.deg2rad(cable_azimuth),
                 turbidity,
-                month,
-                day,
-                hour,
+                datetime_utc,
             )
 
         self.outer_diameter = outer_diameter
 
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
-        r"""Compute solar heating.
+        """Compute solar heating.
 
         :param conductor_temperature: Conductor temperature (°C).
         :return: Power term value (W·m⁻¹).
