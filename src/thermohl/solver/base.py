@@ -7,10 +7,10 @@
 
 """Base class to build a solver for heat equation."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from abc import ABC, abstractmethod
-from typing import Tuple, Type, Any, Optional, KeysView, Dict
-
+from typing import Type, Any, Optional, KeysView, Dict, Iterable
+import numpy.typing as npt
 import numpy as np
 import pandas as pd
 from numpy import ndarray
@@ -18,9 +18,9 @@ from numpy import ndarray
 from thermohl import (
     floatArrayLike,
     floatArray,
-    intArray,
     numberArray,
     numberArrayLike,
+    datetimeListLike,
 )
 from thermohl.power import PowerTerm
 from thermohl.solver.enums.power_type import PowerType
@@ -39,7 +39,7 @@ class Args:
     """Object to store Solver args in a dict-like manner."""
 
     # __slots__ = [
-    #     'latitude', 'longitude', 'altitude', 'cable_azimuth', 'month', 'day', 'hour', 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_azimuth', 'albedo', 'turbidity', 'transit', 'm',
+    #     'latitude', 'longitude', 'altitude', 'azimuth', 'datetime_utc, 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_angle', 'albedo', 'turbidity', 'transit', 'm',
     #     'core_diameter', 'outer_diameter', 'core_area', 'outer_area', 'roughness_ratio', 'radial_thermal_conductivity', 'heat_capacity', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high', 'linear_resistance_temp_low',
     #     'temp_high', 'temp_low'
     # ]
@@ -67,6 +67,8 @@ class Args:
         # weather and mesurement
         self.measured_solar_irradiance = np.nan  # solar irradiance
         self.ambient_temperature = 15.0  # ambient temperature (C)
+        self.wind_speed = 0.0  # wind speed (m.s**-1)
+        self.wind_angle = 90.0  # wind angle (deg, regarding north)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
         self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
@@ -116,62 +118,29 @@ class Args:
     def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
 
-    def max_len(self) -> int:
+    def extend(self) -> None:
         """
-        Calculate the maximum length of the values in the dictionary.
-
-        This method iterates over all keys in the dictionary and determines the maximum length
-        of the values associated with those keys.
-        If a value is not of a type that has a length, it is ignored.
-
-        Returns:
-            int: The maximum length of the values in the dictionary. If the dictionary is empty
-            or all values are of types that do not have a length, the method returns 1.
+        Extend all compressed elements in the Args dictionary to the right length, ie the number of computations.
+        If the element is a list, it has already the right length.
+        If the element is a scalar, it is replaced with a list of the right length filled with the scalar value.
         """
-        result = 1
-        for k in self.keys():
-            try:
-                result = max(result, len(self[k]))
-            except TypeError:
-                pass
-        return result
-
-    def extend_to_max_len(self) -> None:
-        """
-        Extend all elements in the dictionary to the maximum length.
-
-        This method iterates over all keys in the dictionary and checks if the
-        corresponding value is a numpy ndarray. If it is, it checks if its length
-        matches the maximum length obtained from the `max_len` method.
-        If the length matches, it creates a copy of the array.
-        If the length does not match or for non-ndarray values, it creates
-        a new numpy array of the maximum length, filled with the original value
-        and having the same data type.
-
-        Returns:
-            None
-        """
-        max_len = self.max_len()
+        number_of_computations = max(
+            (len(self[k]) for k in self.keys() if isinstance(self[k], Iterable)),
+            default=1,
+        )
         for key in self.keys():
-            same_size = False
-            if isinstance(self[key], np.ndarray):
-                same_size = len(self[key]) == max_len
-            if not same_size:
-                self[key] = np.array(max_len * [self[key]])
+            if not isinstance(self[key], Iterable):
+                self[key] = np.array(number_of_computations * [self[key]])
 
     def compress(self) -> None:
         """
-        Compresses the values in the dictionary by replacing numpy arrays with a
-        single unique value if all elements in the array are the same.
-
-        Returns:
-            None
+        Compress the elements in the Args dictionary by replacing lists containing a unique value
+        with this value.
         """
         for key in self.keys():
-            if isinstance(self[key], np.ndarray):
-                u = np.unique(self[key])
-                if len(u) == 1:
-                    self[key] = u[0]
+            u = np.unique(self[key])
+            if len(u) == 1:
+                self[key] = u[0]
 
 
 class Solver(ABC):
@@ -208,7 +177,7 @@ class Solver(ABC):
 
         """
         self.args = Args(dic)
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.joule_heating = joule(**self.args.__dict__)
         self.solar_heating = solar(**self.args.__dict__)
         self.convective_cooling = convective(**self.args.__dict__)
@@ -217,7 +186,7 @@ class Solver(ABC):
         self.args.compress()
 
     def update(self) -> None:
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.joule_heating.__init__(**self.args.__dict__)
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
@@ -293,27 +262,25 @@ def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numbe
 
 
 def _set_dates(
-    month: floatArrayLike,
-    day: floatArrayLike,
-    hour: floatArrayLike,
-    time: floatArray,
-    input_size: int,
-) -> Tuple[intArray, intArray, floatArray]:
+    datetime_utc: datetimeListLike,
+    offset: floatArray,
+    number_of_computations: int,
+) -> npt.NDArray[np.datetime64]:
     """
     Set months, days and hours as 2D arrays.
 
     This function is used in transient temperature computations. Inputs month,
-    day and hour are floats or 1D arrays of size input_size; input t is a time vector of
+    day and hour are floats or 1D arrays of size input_size; input offset is a time vector of
     size time_size with evaluation times in seconds. It sets arrays months, days and
     hours, of size (time_size, input_size) such that
-        months[i, j] = datetime(month[j], day[j], hour[j]) + t[i] .
+        months[i, j] = datetime(month[j], day[j], hour[j]) + offset[i] .
 
     Args:
         month (floatArrayLike): Array of floats or float representing the months.
         day (floatArrayLike): Array of floats or float representing the days.
         hour (floatArrayLike): Array of floats or float representing the hours.
-        time (floatArray): Array of floats representing the time vector in seconds.
-        input_size (int): Size of the input arrays month, day, and hour.
+        offset (floatArray): Array of floats representing the time vector in seconds.
+        number_of_computations (int): Size of the input arrays month, day, and hour.
 
     Returns:
     Tuple[intArray, intArray, floatArray]:
@@ -321,39 +288,15 @@ def _set_dates(
         - days (intArray): 2D array of shape (time_size, input_size) with day values.
         - hours (floatArray): 2D array of shape (time_size, input_size) with hour values.
     """
-    ones_int = np.ones((input_size,), dtype=int)
-    ones_float = np.ones((input_size,), dtype=float)
-    month2 = month * ones_int
-    day2 = day * ones_int
-    hour2 = hour * ones_float
-
-    time_size = len(time)
-    months = np.zeros((time_size, input_size), dtype=int)
-    days = np.zeros((time_size, input_size), dtype=int)
-    hours = np.zeros((time_size, input_size), dtype=float)
-
-    time_delta = np.array(
-        [datetime.timedelta()]
-        + [
-            datetime.timedelta(seconds=float(time[i] - time[i - 1]))
-            for i in range(1, time_size)
-        ]
+    datetime_utc = (
+        datetime_utc
+        if isinstance(datetime_utc, Iterable)
+        else np.array(number_of_computations * [datetime_utc])
     )
 
-    for j in range(input_size):
-        hour_j = int(np.floor(hour2[j]))
-        time_delta_j = datetime.timedelta(seconds=float(3600.0 * (hour2[j] - hour_j)))
-        t0 = (
-            datetime.datetime(year=2000, month=month2[j], day=day2[j], hour=hour_j)
-            + time_delta_j
-        )
-        ts = pd.Series(t0 + time_delta)
-        months[:, j] = ts.dt.month
-        days[:, j] = ts.dt.day
-        hours[:, j] = (
-            ts.dt.hour
-            + ts.dt.minute / 60.0
-            + (ts.dt.second + ts.dt.microsecond * 1.0e-06) / 3600.0
-        )
+    number_of_offset = len(offset)
+    out_datetime_utc = np.zeros((number_of_offset, number_of_computations))
+    for i in range(number_of_offset):
+        out_datetime_utc[i, :] = datetime_utc + timedelta(seconds=offset[i])
 
-    return months, days, hours
+    return out_datetime_utc
