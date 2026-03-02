@@ -11,137 +11,78 @@ These positions usually depend on the point latitude and the time. The sun
 position is then used to estimate the solar radiation in CIGRE and IEEE
 models.
 """
-
+from datetime import time
 from math import pi
 import numpy as np
-from thermohl import floatArrayLike, intArrayLike
+from thermohl import (
+    floatArrayLike,
+    dateListLike,
+    datetimeListLike,
+)
 
 
 def utc2solar_hour(
-    utc_hour: floatArrayLike,
-    day_of_month: intArrayLike,
-    month_index: intArrayLike,
+    datetime_utc: datetimeListLike,
     longitude: floatArrayLike,
 ) -> floatArrayLike:
-    """convert utc hour to solar hour adding the longitude contribution
-
+    """Convert UTC datetime to solar hour adding the longitude contribution.
     If more than one input are numpy arrays, they should have the same size.
 
-    Parameters
-    ----------
-    utc_hour : float or numpy.ndarray
-        Hour of the day (must be between 0 and 24 excluded).
-    longitude : float or numpy.ndarray, optional
-        Longitude (in rad)
-
-    Returns
-    -------
-    float or numpy.ndarray
-        solar hour
-
+    :param datetime_utc: Datetime in UTC.
+    :param longitude: Longitude (in rad).
+    :return: Solar hour.
     """
-    day_of_year = _csm[month_index - 1] + day_of_month
+
+    def time_to_float_hours(t: time) -> float:
+        return t.hour + t.minute / 60 + t.second / 3600
+
+    day_of_year = np.array([d.timetuple().tm_yday for d in datetime_utc])
+    utc_hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
     B = 2 * pi * (day_of_year - 81) / 365
     solar_hour = (
         utc_hour
         + longitude / (2 * pi) * 24
         - (7.678 * np.sin(B + 1.374) - 9.87 * np.sin(2 * B)) / 60
     )
-
     return solar_hour
 
 
-def hour_angle(
-    solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
-) -> floatArrayLike:
+def hour_angle(solar_hour: floatArrayLike) -> floatArrayLike:
     """Compute hour angle.
-
     If more than one input are numpy arrays, they should have the same size.
 
-    Parameters
-    ----------
-    solar_hour : float or numpy.ndarray
-        Hour of the day (solar, must be between 0 and 23).
-    solar_minute : float or numpy.ndarray, optional
-        Minutes on the clock. The default is 0.
-    solar_second : float or numpy.ndarray, optional
-        Seconds on the clock. The default is 0.
-
-    Returns
-    -------
-    float or numpy.ndarray
-        Hour angle in radians.
-
+    :param solar_hour: solar hour of the day.
+    :return: Hour angle in radians.
     """
-    solar_hour = solar_hour % 24 + solar_minute / 60.0 + solar_second / 3600.0
     return np.radians(15.0 * (solar_hour - 12.0))
 
 
-_csm = np.array([0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334])
-
-
-def solar_declination(
-    month_index: intArrayLike, day_of_month: intArrayLike
-) -> floatArrayLike:
+def solar_declination(date: dateListLike) -> floatArrayLike:
     """Compute solar declination.
-
     If more than one input are numpy arrays, they should have the same size.
 
-    Parameters
-    ----------
-    month_index : int or numpy.ndarray
-        Month number (must be between 1 and 12)
-    day_of_month: int or numpy.ndarray
-        Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-        month)
-    Returns
-    -------
-    float or numpy.ndarray
-        Solar declination in radians.
-
+    :param date: Date of the year.
+    :return: Solar declination in radians.
     """
-    day_of_year = _csm[month_index - 1] + day_of_month
+    day_of_year = np.array([d.timetuple().tm_yday for d in date])
     return np.deg2rad(23.46) * np.sin(2.0 * np.pi * (day_of_year + 284) / 365.0)
 
 
 def solar_altitude(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 ) -> floatArrayLike:
     """Compute solar altitude.
-
     If more than one input are numpy arrays, they should have the same size.
 
-    Parameters
-    ----------
-    latitude : float or numpy.ndarray
-        latitude in radians.
-    month_index : int or numpy.ndarray
-        Month number (must be between 1 and 12)
-    day_of_month: int or numpy.ndarray
-        Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-        month)
-    solar_hour : float or numpy.ndarray
-        Hour of the day (solar, must be between 0 and 23).
-    solar_minute : float or numpy.ndarray, optional
-        Minutes on the clock. The default is 0.
-    solar_second : float or numpy.ndarray, optional
-        Seconds on the clock. The default is 0.
-
-    Returns
-    -------
-    float or numpy.ndarray
-        Solar altitude in radians.
-
+    :param latitude: latitude in radians.
+    :param date: Date of the year.
+    :param solar_hour: solar hour of the day.
+    :return: Solar altitude in radians.
     """
-    computed_solar_declination = solar_declination(month_index, day_of_month)
-    computed_hour_angle = hour_angle(solar_hour, solar_minute, solar_second)
+    computed_solar_declination = solar_declination(date)
+    computed_hour_angle = hour_angle(solar_hour)
     return np.arcsin(
         np.cos(latitude)
         * np.cos(computed_solar_declination)
@@ -152,40 +93,19 @@ def solar_altitude(
 
 def solar_azimuth(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 ) -> floatArrayLike:
     """Compute solar azimuth.
-
     If more than one input are numpy arrays, they should have the same size.
 
-    Parameters
-    ----------
-    latitude : float or numpy.ndarray
-        latitude in radians.
-    month_index : int or numpy.ndarray
-        Month number (must be between 1 and 12)
-    day_of_month: int or numpy.ndarray
-        Day of the month (must be between 1 and 28, 29, 30 or 31 depending on
-        month)
-    solar_hour : float or numpy.ndarray
-        Hour of the day (solar, must be between 0 and 23).
-    solar_minute : float or numpy.ndarray, optional
-        Minutes on the clock. The default is 0.
-    solar_second : float or numpy.ndarray, optional
-        Seconds on the clock. The default is 0.
-
-    Returns
-    -------
-    float or numpy.ndarray
-        Solar azimuth in radians.
-
+    :param latitude: latitude in radians.
+    :param date: Date of the year.
+    :param solar_hour: solar hour of the day.
+    :return: Solar azimuth in radians.
     """
-    computed_solar_declination = solar_declination(month_index, day_of_month)
-    computed_hour_angle = hour_angle(solar_hour, solar_minute, solar_second)
+    computed_solar_declination = solar_declination(date)
+    computed_hour_angle = hour_angle(solar_hour)
     azimuth_ratio = np.sin(computed_hour_angle) / (
         np.sin(latitude) * np.cos(computed_hour_angle)
         - np.cos(latitude) * np.tan(computed_solar_declination)
