@@ -8,7 +8,11 @@ from typing import Optional, Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, intArrayLike, sun
+from thermohl import (
+    floatArrayLike,
+    sun,
+    datetimeListLike,
+)
 from thermohl.power import SolarHeatingBase, _SRad
 
 CLEAN_AIR_COEFFICIENTS = [
@@ -48,9 +52,7 @@ class SolarHeating(SolarHeatingBase):
         latitude: floatArrayLike,
         longitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         measured_solar_irradiance: Optional[floatArrayLike] = None,
@@ -72,13 +74,12 @@ class SolarHeating(SolarHeatingBase):
             measured_solar_irradiance (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
         """
         self.solar_absorptivity = solar_absorptivity
-        solar_hour = sun.utc2solar_hour(hour, day, month, np.deg2rad(longitude))
-        solar_altitude_rad = sun.solar_altitude(
-            np.deg2rad(latitude), month, day, solar_hour
-        )
+        solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+        date = [d.date() for d in datetime_utc]
+        solar_altitude_rad = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         if np.isnan(measured_solar_irradiance).all():
             measured_solar_irradiance = solar_irradiance(solar_altitude_rad)
-        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), month, day, hour)
+        solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
         incidence_angle_rad = np.arccos(
             np.cos(solar_altitude_rad)
             * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
