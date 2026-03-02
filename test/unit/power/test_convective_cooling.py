@@ -297,3 +297,38 @@ def test_compute_wind_attack_angle_opposite_angles():
     assert np.allclose(base, shifted_cable)
     assert np.allclose(base, shifted_wind)
     assert np.allclose(base, shifted_both)
+
+
+def test_value_provided_wind_attack_angle():
+    dic = set_default_values_scalar()
+    dic["wind_attack_angle"] = np.deg2rad(30.0)
+    # wind azimuth must be ignored
+    dic["wind_azimuth"] = 100.0
+    convective_cooling = ConvectiveCooling(**dic)
+
+    assert np.isclose(convective_cooling.wind_attack_angle, np.deg2rad(30.0))
+
+    dic_without_wind_attack_angle = set_default_values_scalar()
+    dic_without_wind_attack_angle["wind_azimuth"] = 90.0
+    dic_without_wind_attack_angle["cable_azimuth"] = 60.0
+    expected_convective_cooling = ConvectiveCooling(
+        **dic_without_wind_attack_angle,
+    )
+
+    conductor_temperature = 100.0
+
+    assert np.isclose(
+        convective_cooling.value(conductor_temperature),
+        expected_convective_cooling.value(conductor_temperature),
+    )
+
+
+def test_value_missing_wind_attack_angle_and_wind_azimuth():
+    dic = set_default_values_scalar()
+    # dic doesn't contain wind_attack_angle
+    del dic["wind_azimuth"]
+
+    with pytest.raises(
+        ValueError, match="Must provide either wind_attack_angle or wind_azimuth."
+    ):
+        ConvectiveCooling(**dic)
