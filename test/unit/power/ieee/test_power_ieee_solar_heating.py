@@ -121,6 +121,7 @@ def test_solar_heating_init_no_srad():
         hour,
         outer_diameter,
         solar_absorptivity,
+        np.nan,
     )
 
     assert solar_heating.solar_absorptivity == solar_absorptivity

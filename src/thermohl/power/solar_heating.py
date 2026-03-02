@@ -103,12 +103,17 @@ class SolarHeatingBase(PowerTerm):
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
-        precomputed_solar_radiation: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         self.solar_absorptivity = solar_absorptivity
-        if precomputed_solar_radiation is None:
-            self.solar_irradiance = est(
+
+        mask = np.isnan(measured_solar_irradiance)
+        self.solar_irradiance = np.empty_like(measured_solar_irradiance)
+        if np.any(~mask):
+            self.solar_irradiance[~mask] = np.maximum(measured_solar_irradiance, 0.0)
+        if np.any(mask):
+            self.solar_irradiance[mask] = est(
                 np.deg2rad(latitude),
                 altitude,
                 np.deg2rad(azimuth),
@@ -117,8 +122,7 @@ class SolarHeatingBase(PowerTerm):
                 day,
                 hour,
             )
-        else:
-            self.solar_irradiance = np.maximum(precomputed_solar_radiation, 0.0)
+
         self.outer_diameter = outer_diameter
 
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:

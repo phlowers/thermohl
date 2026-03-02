@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Optional, Any
+from typing import Any
 
 import numpy as np
 
@@ -72,7 +72,7 @@ class SolarHeating(PowerTerm):
         hour: floatArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        precomputed_solar_radiation: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         r"""Init with args.
@@ -88,15 +88,19 @@ class SolarHeating(PowerTerm):
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
             outer_diameter (float | numpy.ndarray): external diameter.
             solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
-            precomputed_solar_radiation (float | numpy.ndarray | None): Optional precomputed solar radiation term.
+            measured_solar_irradiance (float | numpy.ndarray): Optional precomputed solar radiation term.
         """
         self.solar_absorptivity = solar_absorptivity
-        if precomputed_solar_radiation is None:
-            self.solar_irradiance = SolarHeating._solar_radiation(
+
+        mask = np.isnan(measured_solar_irradiance)
+        self.solar_irradiance = np.empty_like(measured_solar_irradiance)
+        if np.any(~mask):
+            self.solar_irradiance[~mask] = np.maximum(measured_solar_irradiance, 0.0)
+        if np.any(mask):
+            self.solar_irradiance[mask] = SolarHeating._solar_radiation(
                 np.deg2rad(latitude), np.deg2rad(azimuth), albedo, month, day, hour
             )
-        else:
-            self.solar_irradiance = precomputed_solar_radiation
+
         self.outer_diameter = outer_diameter
 
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
