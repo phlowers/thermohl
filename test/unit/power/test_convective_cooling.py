@@ -9,6 +9,7 @@ import pytest
 import numpy as np
 
 from thermohl import solver
+from thermohl.power.convective_cooling import compute_wind_attack_angle
 from thermohl.power.ieee import ConvectiveCooling
 
 
@@ -223,3 +224,76 @@ def test_convective_cooling_value_array(convective_cooling, expected):
         ),
     )
     assert np.allclose(result, expected_result, rtol=0.002)
+
+
+@pytest.mark.parametrize(
+    "cable_azimuth, wind_azimuth",
+    [
+        (0.0, 0.0),
+        (0.0, 90.0),
+        (0.0, 180.0),
+        (90.0, 0.0),
+        (90.0, 180.0),
+        (30, -80),
+        (-60, -80),
+        (30, 100),
+        (-60, 100),
+    ],
+)
+def test_compute_wind_attack_angle_scalar_bounds(cable_azimuth, wind_azimuth):
+    attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+    assert 0.0 <= attack_angle <= np.pi / 2.0
+
+
+def test_compute_wind_attack_angle_array_bounds():
+    cable_azimuth = np.linspace(-1080.0, 1080.0, 1001)
+    wind_azimuth = np.linspace(1440.0, -1440.0, 1001)
+
+    attack_angle = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+
+    assert np.all(attack_angle >= 0.0)
+    assert np.all(attack_angle <= np.pi / 2.0)
+
+
+def test_compute_wind_attack_angle_symmetry():
+    cable_azimuth = np.array([-720.0, -30.0, 0.0, 45.0, 90.0, 271.0, 810.0])
+    wind_azimuth = np.array([1080.0, 15.0, 0.0, 315.0, 180.0, -89.0, -450.0])
+
+    attack_angle_ab = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+    attack_angle_ba = compute_wind_attack_angle(wind_azimuth, cable_azimuth)
+
+    assert np.allclose(attack_angle_ab, attack_angle_ba)
+
+
+def test_compute_wind_attack_angle_periodicity_360_deg():
+    cable_azimuth = np.array([-123.0, -30.5, 0.0, 44.0, 90.0, 278.0, 512.0])
+    wind_azimuth = np.array([301.0, -185.0, 0.0, 359.9, 180.0, -92.0, 33.0])
+
+    base = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+
+    shifted_cable = compute_wind_attack_angle(cable_azimuth + 360.0, wind_azimuth)
+    shifted_wind = compute_wind_attack_angle(cable_azimuth, wind_azimuth - 720.0)
+    shifted_both = compute_wind_attack_angle(
+        cable_azimuth + 1080.0, wind_azimuth - 360.0
+    )
+
+    assert np.allclose(base, shifted_cable)
+    assert np.allclose(base, shifted_wind)
+    assert np.allclose(base, shifted_both)
+
+
+def test_compute_wind_attack_angle_opposite_angles():
+    cable_azimuth = np.array([-123.0, -30.5, 0.0, 44.0, 90.0, 278.0, 512.0])
+    wind_azimuth = np.array([301.0, -185.0, 0.0, 359.9, 180.0, -92.0, 33.0])
+
+    base = compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+
+    shifted_cable = compute_wind_attack_angle(cable_azimuth + 180.0, wind_azimuth)
+    shifted_wind = compute_wind_attack_angle(cable_azimuth, wind_azimuth - 180.0)
+    shifted_both = compute_wind_attack_angle(
+        cable_azimuth + 180.0, wind_azimuth - 180.0
+    )
+
+    assert np.allclose(base, shifted_cable)
+    assert np.allclose(base, shifted_wind)
+    assert np.allclose(base, shifted_both)
