@@ -174,9 +174,7 @@ class Solver3T(Solver_):
         self.convective_cooling.__init__(**self.args.__dict__)
         self.radiative_cooling.__init__(**self.args.__dict__)
         self.precipitation_cooling.__init__(**self.args.__dict__)
-
         self.morgan_coefficients = self._morgan_coefficients()
-
         self.args.compress()
 
     def average(
@@ -442,18 +440,14 @@ class Solver3T(Solver_):
             else 1.0 + surface_temperature_0
         )
 
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
+        # get datetime
+        datetime_utc = _set_dates(self.args.datetime_utc, time, n)
 
         # Two dicts, one (dc) with static quantities (with all elements of size
         # n), the other (de) with time-changing quantities (with all elements of
         # size N*n); uk is a list of keys that are in dc but not in de.
         de = dict(
-            month=month,
-            day=day,
-            hour=hour,
+            datetime_utc=datetime_utc,
             transit=reshape(self.args.transit, N, n),
             ambient_temperature=reshape(self.args.ambient_temperature, N, n),
             wind_azimuth=reshape(self.args.wind_azimuth, N, n),
@@ -462,7 +456,7 @@ class Solver3T(Solver_):
             relative_humidity=reshape(self.args.relative_humidity, N, n),
             precipitation_rate=reshape(self.args.precipitation_rate, N, n),
         )
-        del (month, day, hour)
+        del datetime_utc
 
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
@@ -542,7 +536,7 @@ class Solver3T(Solver_):
                     CableLocation.AVERAGE,
                     CableLocation.CORE,
                 ]:
-                    raise ValueError()
+                    raise ValueError(f"unknown target : {t}")
             target_ = np.array(target)
         return target_
 

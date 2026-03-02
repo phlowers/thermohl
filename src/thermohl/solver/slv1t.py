@@ -104,16 +104,12 @@ class Solver1T(Solver_):
                 else self.args.ambient_temperature[0]
             )
 
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, args_size
-        )
+        # get datetime
+        datetime_utc = _set_dates(self.args.datetime_utc, time, args_size)
 
         # A dict with time-changing quantities (with all elements of size time_size * args_size)
         de = dict(
-            month=month,
-            day=day,
-            hour=hour,
+            datetime_utc=datetime_utc,
             transit=reshape(self.args.transit, time_size, args_size),
             ambient_temperature=reshape(
                 self.args.ambient_temperature, time_size, args_size
@@ -128,7 +124,7 @@ class Solver1T(Solver_):
                 self.args.precipitation_rate, time_size, args_size
             ),
         )
-        del (month, day, hour)
+        del datetime_utc
 
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
