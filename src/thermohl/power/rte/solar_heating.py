@@ -34,10 +34,9 @@ def solar_irradiance(
 ) -> floatArrayLike:
     """Compute solar radiation.
     Difference with IEEE version are neither turbidity or altitude influence.
-    Args:
-        solar_altitude_rad (float | numpy.ndarray): solar altitude in radians.
-    Returns:
-        float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
+
+    :param solar_altitude_rad: solar altitude in radians.
+    :return: Solar radiation value. Negative values are set to zero.
     """
 
     clearness_factor = solar_radiation.atmosphere_turbidity(
@@ -58,20 +57,16 @@ class SolarHeating(SolarHeatingBase):
         measured_solar_irradiance: Optional[floatArrayLike] = None,
         **kwargs: Any,
     ):
-        r"""Build with args.
-
+        """Build with args.
         If more than one input are numpy arrays, they should have the same size.
 
-        Args:
-            latitude (float | numpy.ndarray): Latitude.
-            longitude (float | numpy.ndarray): Longitude (must be between -180 and +180 degrees).
-            cable_azimuth (float | numpy.ndarray): Cable azimuth.
-            month (int | numpy.ndarray): Month number (must be between 1 and 12).
-            day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
-            hour (float | numpy.ndarray): Hour of the day (must be between 0 and 24 excluded).
-            outer_diameter (float | numpy.ndarray): external diameter.
-            solar_absorptivity (numpy.ndarray): Solar absorption coefficient.
-            measured_solar_irradiance (float | numpy.ndarray | None): Optional measured solar irradiance (W/m2).
+        :param latitude: Latitude in degrees.
+        :param longitude: Longitude in degrees (must be between -180 and +180 degrees).
+        :param cable_azimuth: Azimuth of the conductor in degrees.
+        :param datetime_utc: Datetime in UTC.
+        :param outer_diameter: external diameter of the conductor.
+        :param solar_absorptivity: Solar absorption coefficient of the conductor.
+        :param measured_solar_irradiance: Optional measured solar irradiance (W/m2).
         """
         self.solar_absorptivity = solar_absorptivity
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
