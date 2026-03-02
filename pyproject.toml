@@ -65,6 +65,12 @@ docs = [
     "mkdocs-markdownextradata-plugin >= 0.2.6",
     { include-group = 'lint' },
 ]
+notebooks = [
+    "ipykernel>=6.30.1",
+    "ipython>=8.18.1",
+    "matplotlib>=3.9.4",
+    "matplotlib-inline>=0.1.7",
+]
 
 [project.optional-dependencies]
 scientific = [
