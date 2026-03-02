@@ -9,8 +9,9 @@ from typing import Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, intArrayLike, sun as sun
+from thermohl import floatArrayLike, sun as sun, datetimeListLike
 from thermohl.power import PowerTerm
+from thermohl.sun import time_to_float_hours
 
 
 class SolarHeating(PowerTerm):
@@ -21,14 +22,14 @@ class SolarHeating(PowerTerm):
         latitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        solar_declination_rad = sun.solar_declination(month, day)
+        date = [d.date() for d in datetime_utc]
+        hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+        solar_declination_rad = sun.solar_declination(date)
         hour_angle_rad = sun.hour_angle(hour)
-        solar_altitude_rad = sun.solar_altitude(latitude, month, day, hour)
+        solar_altitude_rad = sun.solar_altitude(latitude, date, hour)
         direct_irradiance = (
             1280.0 * np.sin(solar_altitude_rad) / (0.314 + np.sin(solar_altitude_rad))
         )
@@ -67,9 +68,7 @@ class SolarHeating(PowerTerm):
         latitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         measured_solar_irradiance: floatArrayLike,
@@ -101,24 +100,17 @@ class SolarHeating(PowerTerm):
                 np.deg2rad(latitude),
                 np.deg2rad(cable_azimuth),
                 albedo,
-                month,
-                day,
-                hour,
+                datetime_utc,
             )
 
         self.outer_diameter = outer_diameter
 
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
-        r"""Compute solar heating.
-
+        """Compute solar heating.
         If more than one input are numpy arrays, they should have the same size.
 
-        Args:
-            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
-
-        Returns:
-            float | numpy.ndarray: Power term value (W·m⁻¹).
-
+        :param conductor_temperature: Conductor temperature (°C).
+        :return: Power term value (W·m⁻¹).
         """
         return (
             self.solar_absorptivity

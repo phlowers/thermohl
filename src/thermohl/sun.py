@@ -21,6 +21,10 @@ from thermohl import (
 )
 
 
+def time_to_float_hours(t: time) -> float:
+    return t.hour + t.minute / 60 + t.second / 3600
+
+
 def utc2solar_hour(
     datetime_utc: datetimeListLike,
     longitude: floatArrayLike,
@@ -32,9 +36,6 @@ def utc2solar_hour(
     :param longitude: Longitude (in rad).
     :return: Solar hour.
     """
-
-    def time_to_float_hours(t: time) -> float:
-        return t.hour + t.minute / 60 + t.second / 3600
 
     day_of_year = np.array([d.timetuple().tm_yday for d in datetime_utc])
     utc_hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
