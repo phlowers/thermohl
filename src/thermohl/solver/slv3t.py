@@ -135,7 +135,7 @@ class Solver3T(Solver_):
             - positive_surface_diameter_indices : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        heat_capacity = 0.5 * np.ones((self.args.max_len(),))
+        heat_capacity = 0.5 * np.ones((self.args.get_number_of_computations(),))
         outer_diameter = self.args.outer_diameter * np.ones_like(heat_capacity)
         core_diameter = self.args.core_diameter * np.ones_like(heat_capacity)
         positive_surface_diameter_indices = np.nonzero(core_diameter > 0.0)[0]
@@ -168,7 +168,7 @@ class Solver3T(Solver_):
         Returns:
             None
         """
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.joule_heating.__init__(**self.args.__dict__)
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
@@ -294,7 +294,7 @@ class Solver3T(Solver_):
         """
 
         # if no guess provided, use ambient temp
-        shape = (self.args.max_len(),)
+        shape = (self.args.get_number_of_computations(),)
         surface_temperature_guess = (
             surface_temperature_guess
             if surface_temperature_guess is not None
@@ -404,7 +404,7 @@ class Solver3T(Solver_):
 
     def transient_temperature(
         self,
-        time: floatArray = np.array([]),
+        offset: floatArray = np.array([]),
         surface_temperature_0: Optional[floatArrayLike] = None,
         core_temperature_0: Optional[floatArrayLike] = None,
         return_power: bool = False,
@@ -413,7 +413,7 @@ class Solver3T(Solver_):
         Compute transient-state temperature.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
+            offset (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0 (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             core_temperature_0 (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             return_power (bool, optional): Return power term values. The default is False.
@@ -423,8 +423,8 @@ class Solver3T(Solver_):
 
         """
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
+        n = self.args.get_number_of_computations()
+        N = len(offset)
         if N < 2:
             raise ValueError()
 
@@ -440,8 +440,8 @@ class Solver3T(Solver_):
             else 1.0 + surface_temperature_0
         )
 
-        # get datetime
-        datetime_utc = _set_dates(self.args.datetime_utc, time, n)
+        # get datetime for each offset
+        datetime_utc = _set_dates(self.args.datetime_utc, offset, n)
 
         # Two dicts, one (dc) with static quantities (with all elements of size
         # n), the other (de) with time-changing quantities (with all elements of
@@ -473,7 +473,7 @@ class Solver3T(Solver_):
         )
 
         # main time loop
-        for i in range(1, len(time)):
+        for i in range(1, len(offset)):
             for k in de.keys():
                 self.args[k] = de[k][i, :]
             self.update()
@@ -481,14 +481,14 @@ class Solver3T(Solver_):
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
+                ambient_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
             )
             mrg = c1 * (self.joule_heating.value(ambient_temperature[i, :]) - bal)
             core_temperature[i, :] = ambient_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
         return self._transient_temperature_results(
-            time,
+            offset,
             surface_temperature,
             ambient_temperature,
             core_temperature,
@@ -545,7 +545,7 @@ class Solver3T(Solver_):
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
-        max_len = self.args.max_len()
+        max_len = self.args.get_number_of_computations()
         Tmax = T * np.ones(max_len)
         target_ = self._check_target(target, self.args.core_diameter, max_len)
 

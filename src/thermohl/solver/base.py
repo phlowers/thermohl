@@ -118,16 +118,19 @@ class Args:
     def __setitem__(self, key: str, value: Any) -> None:
         self.__dict__[key] = value
 
+    def get_number_of_computations(self) -> int:
+        return max(
+            (len(self[k]) for k in self.keys() if isinstance(self[k], Iterable)),
+            default=1,
+        )
+
     def extend(self) -> None:
         """
         Extend all compressed elements in the Args dictionary to the right length, ie the number of computations.
         If the element is a list, it has already the right length.
         If the element is a scalar, it is replaced with a list of the right length filled with the scalar value.
         """
-        number_of_computations = max(
-            (len(self[k]) for k in self.keys() if isinstance(self[k], Iterable)),
-            default=1,
-        )
+        number_of_computations = self.get_number_of_computations()
         for key in self.keys():
             if not isinstance(self[key], Iterable):
                 self[key] = np.array(number_of_computations * [self[key]])
