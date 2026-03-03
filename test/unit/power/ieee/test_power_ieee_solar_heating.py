@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime, timezone
 import numpy as np
 
 from thermohl.power.ieee import SolarHeating
@@ -15,9 +16,7 @@ def test_solar_heating_init_scalar():
     altitude = 1000.0
     cable_azimuth = 180.0
     turbidity = 0.5
-    month = 6
-    day = 21
-    hour = 12.0
+    datetime_utc = datetime(2000, 6, 21, 12, tzinfo=timezone.utc)
     outer_diameter = 0.01
     solar_absorptivity = 0.9
     srad = 800.0
@@ -27,9 +26,7 @@ def test_solar_heating_init_scalar():
         altitude,
         cable_azimuth,
         turbidity,
-        month,
-        day,
-        hour,
+        datetime_utc,
         outer_diameter,
         solar_absorptivity,
         srad,
@@ -45,9 +42,10 @@ def test_solar_heating_init_array():
     altitude = np.array([1000.0, 2000.0])
     cable_azimuth = np.array([180.0, 190.0])
     turbidity = np.array([0.5, 0.7])
-    month = np.array([6, 7])
-    day = np.array([21, 22])
-    hour = np.array([12.0, 13.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 7, 22, 13, tzinfo=timezone.utc),
+    ]
     outer_diameter = np.array([0.01, 0.02])
     solar_absorptivity = np.array([0.9, 0.8])
     srad = np.array([800.0, 900.0])
@@ -57,9 +55,7 @@ def test_solar_heating_init_array():
         altitude,
         cable_azimuth,
         turbidity,
-        month,
-        day,
-        hour,
+        datetime_utc,
         outer_diameter,
         solar_absorptivity,
         srad,
@@ -75,9 +71,7 @@ def test_solar_heating_init_mixed():
     altitude = 1000.0
     cable_azimuth = 180.0
     turbidity = 0.5
-    month = 6
-    day = 21
-    hour = 12.0
+    datetime_utc = datetime(2000, 6, 21, 12, tzinfo=timezone.utc)
     outer_diameter = 0.01
     solar_absorptivity = 0.9
     srad = np.array([800.0, 900.0])
@@ -87,9 +81,7 @@ def test_solar_heating_init_mixed():
         altitude,
         cable_azimuth,
         turbidity,
-        month,
-        day,
-        hour,
+        datetime_utc,
         outer_diameter,
         solar_absorptivity,
         srad,
@@ -105,9 +97,7 @@ def test_solar_heating_init_no_srad():
     altitude = 1000.0
     cable_azimuth = 180.0
     turbidity = 0.5
-    month = 6
-    day = 21
-    hour = 12.0
+    datetime_utc = datetime(2000, 6, 21, 12, tzinfo=timezone.utc)
     outer_diameter = 0.01
     solar_absorptivity = 0.9
 
@@ -116,9 +106,7 @@ def test_solar_heating_init_no_srad():
         altitude,
         cable_azimuth,
         turbidity,
-        month,
-        day,
-        hour,
+        datetime_utc,
         outer_diameter,
         solar_absorptivity,
         np.nan,
