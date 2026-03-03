@@ -36,10 +36,11 @@ nav:
   - Home: index.md
   - Getting Started: getting-started.md
   - Examples:
-      - Example of steady temperature with 1t solver and IEEE model: examples/ex_steady_1t.ipynb
-      - Example of steady temperature with 3t solver and CIGRE model: examples/ex_steady_3t.ipynb
-      - Example of transient temperature with 3t solver and OLLA model: examples/ex_transient_3t.ipynb
-      - Example of steady temperature with 1t solver, all models and all parameters: examples/ex_all_params.ipynb
+      - Steady temperature with 1t solver and IEEE model: examples/ex_steady_1t.ipynb
+      - Steady temperature with 3t solver and CIGRE model: examples/ex_steady_3t.ipynb
+      - Transient temperature with 3t solver and OLLA model: examples/ex_transient_3t.ipynb
+      - Steady temperature with 1t solver, all models and all parameters: examples/ex_all_params.ipynb
+      - IST reduction: examples/ex_ist_reduction.ipynb
   - Parameters: api-reference/parameters.md
   - User Guide: user-guide.md
   - Developer Guide:
