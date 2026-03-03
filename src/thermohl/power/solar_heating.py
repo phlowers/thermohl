@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Iterable
 
 import numpy as np
 
@@ -68,8 +68,16 @@ class _SRad:
         datetime_utc: datetimeListLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        date = [d.date() for d in datetime_utc]
-        hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+        date = (
+            [d.date() for d in datetime_utc]
+            if isinstance(datetime_utc, Iterable)
+            else datetime_utc.date()
+        )
+        hour = (
+            np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+            if isinstance(datetime_utc, Iterable)
+            else time_to_float_hours(datetime_utc.time())
+        )
         computed_solar_altitude = sun.solar_altitude(latitude, date, hour)
         computed_solar_azimuth = sun.solar_azimuth(latitude, date, hour)
         computed_incidence_angle = np.arccos(
