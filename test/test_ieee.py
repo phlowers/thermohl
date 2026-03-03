@@ -19,7 +19,7 @@ def test_compare_powers():
     # large tolerances used in our tests ...
 
     dic["wind_speed"] = 0.61
-    dic["wind_angle"] = 0.0
+    dic["wind_azimuth"] = 0.0
     dic["emissivity"] = 0.8
     dic["solar_absorptivity"] = 0.8
     dic["ambient_temperature"] = 40.0
@@ -27,7 +27,7 @@ def test_compare_powers():
     dic["temp_low"] = 25.0
     dic["linear_resistance_temp_high"] = 8.688e-05
     dic["linear_resistance_temp_low"] = 7.283e-05
-    dic["azimuth"] = 90.0
+    dic["cable_azimuth"] = 90.0
     dic["latitude"] = 30.0
     dic["turbidity"] = 0.0
     dic["altitude"] = 0.0
@@ -74,5 +74,5 @@ def test_compare_powers():
     )
     np.isclose(np.rad2deg(sz), 114.0, rtol=0.001)
 
-    th = np.arccos(np.cos(sa) * np.cos(sz - dic["azimuth"]))
+    th = np.arccos(np.cos(sa) * np.cos(sz - dic["cable_azimuth"]))
     np.isclose(np.rad2deg(th), 76.1, rtol=0.02)

@@ -21,7 +21,7 @@ def solver():
         VariableType.TRANSIT: np.array([0]),
         "ambient_temperature": np.array([25]),
         "wind_speed": np.array([0]),
-        "wind_angle": np.array([0]),
+        "wind_azimuth": np.array([0]),
         "ambient_pressure": np.array([101325]),
         "relative_humidity": np.array([50]),
         "precipitation_rate": np.array([0]),

@@ -18,7 +18,7 @@ class SolarHeating(ieee.SolarHeating):
         self,
         latitude: floatArrayLike,
         altitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
@@ -36,7 +36,7 @@ class SolarHeating(ieee.SolarHeating):
         Args:
             latitude (float | numpy.ndarray): Latitude.
             altitude (float | numpy.ndarray): Altitude.
-            azimuth (float | numpy.ndarray): Azimuth.
+            cable_azimuth (float | numpy.ndarray): Azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
@@ -50,7 +50,7 @@ class SolarHeating(ieee.SolarHeating):
         super().__init__(
             latitude=latitude,
             altitude=altitude,
-            azimuth=azimuth,
+            cable_azimuth=cable_azimuth,
             turbidity=0.0,
             month=month,
             day=day,

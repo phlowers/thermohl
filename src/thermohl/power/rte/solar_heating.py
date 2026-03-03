@@ -47,7 +47,7 @@ class SolarHeating(SolarHeatingBase):
         self,
         latitude: floatArrayLike,
         longitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
         hour: floatArrayLike,
@@ -63,7 +63,7 @@ class SolarHeating(SolarHeatingBase):
         Args:
             latitude (float | numpy.ndarray): Latitude.
             longitude (float | numpy.ndarray): Longitude (must be between -180 and +180 degrees).
-            azimuth (float | numpy.ndarray): Azimuth.
+            cable_azimuth (float | numpy.ndarray): Cable azimuth.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
             hour (float | numpy.ndarray): Hour of the day (must be between 0 and 24 excluded).
@@ -80,7 +80,8 @@ class SolarHeating(SolarHeatingBase):
             measured_solar_irradiance = solar_irradiance(solar_altitude_rad)
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), month, day, hour)
         incidence_angle_rad = np.arccos(
-            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - np.deg2rad(azimuth))
+            np.cos(solar_altitude_rad)
+            * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
         )
         irradiance = measured_solar_irradiance * np.sin(incidence_angle_rad)
         self.solar_irradiance = np.maximum(irradiance, 0.0)

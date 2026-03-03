@@ -118,7 +118,7 @@ class Solver1T(Solver_):
             ambient_temperature=reshape(
                 self.args.ambient_temperature, time_size, args_size
             ),
-            wind_angle=reshape(self.args.wind_angle, time_size, args_size),
+            wind_azimuth=reshape(self.args.wind_azimuth, time_size, args_size),
             wind_speed=reshape(self.args.wind_speed, time_size, args_size),
             ambient_pressure=reshape(self.args.ambient_pressure, time_size, args_size),
             relative_humidity=reshape(

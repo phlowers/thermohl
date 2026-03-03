@@ -13,7 +13,7 @@ from thermohl.power.ieee import SolarHeating
 def test_solar_heating_init_scalar():
     latitude = 45.0
     altitude = 1000.0
-    azimuth = 180.0
+    cable_azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
@@ -25,7 +25,7 @@ def test_solar_heating_init_scalar():
     solar_heating = SolarHeating(
         latitude,
         altitude,
-        azimuth,
+        cable_azimuth,
         turbidity,
         month,
         day,
@@ -43,7 +43,7 @@ def test_solar_heating_init_scalar():
 def test_solar_heating_init_array():
     latitude = np.array([45.0, 50.0])
     altitude = np.array([1000.0, 2000.0])
-    azimuth = np.array([180.0, 190.0])
+    cable_azimuth = np.array([180.0, 190.0])
     turbidity = np.array([0.5, 0.7])
     month = np.array([6, 7])
     day = np.array([21, 22])
@@ -55,7 +55,7 @@ def test_solar_heating_init_array():
     solar_heating = SolarHeating(
         latitude,
         altitude,
-        azimuth,
+        cable_azimuth,
         turbidity,
         month,
         day,
@@ -73,7 +73,7 @@ def test_solar_heating_init_array():
 def test_solar_heating_init_mixed():
     latitude = 45.0
     altitude = 1000.0
-    azimuth = 180.0
+    cable_azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
@@ -85,7 +85,7 @@ def test_solar_heating_init_mixed():
     solar_heating = SolarHeating(
         latitude,
         altitude,
-        azimuth,
+        cable_azimuth,
         turbidity,
         month,
         day,
@@ -103,7 +103,7 @@ def test_solar_heating_init_mixed():
 def test_solar_heating_init_no_srad():
     latitude = 45.0
     altitude = 1000.0
-    azimuth = 180.0
+    cable_azimuth = 180.0
     turbidity = 0.5
     month = 6
     day = 21
@@ -114,7 +114,7 @@ def test_solar_heating_init_no_srad():
     solar_heating = SolarHeating(
         latitude,
         altitude,
-        azimuth,
+        cable_azimuth,
         turbidity,
         month,
         day,

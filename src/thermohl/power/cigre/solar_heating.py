@@ -19,7 +19,7 @@ class SolarHeating(PowerTerm):
     @staticmethod
     def _solar_radiation(
         latitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -38,7 +38,7 @@ class SolarHeating(PowerTerm):
             / np.cos(solar_altitude_rad)
         )
         incidence_angle_rad = np.arccos(
-            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - azimuth)
+            np.cos(solar_altitude_rad) * np.cos(solar_azimuth_rad - cable_azimuth)
         )
         direct_term = 0.5 * np.pi * albedo * np.sin(solar_altitude_rad) + np.sin(
             incidence_angle_rad
@@ -65,7 +65,7 @@ class SolarHeating(PowerTerm):
     def __init__(
         self,
         latitude: floatArrayLike,
-        azimuth: floatArrayLike,
+        cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
         month: intArrayLike,
         day: intArrayLike,
@@ -81,7 +81,7 @@ class SolarHeating(PowerTerm):
 
         Args:
             latitude (float | numpy.ndarray): Latitude.
-            azimuth (float | numpy.ndarray): Azimuth.
+            cable_azimuth (float | numpy.ndarray): Azimuth.
             albedo (float | numpy.ndarray): Albedo.
             month (int | numpy.ndarray): Month number (must be between 1 and 12).
             day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
@@ -98,7 +98,12 @@ class SolarHeating(PowerTerm):
             self.solar_irradiance[~mask] = np.maximum(measured_solar_irradiance, 0.0)
         if np.any(mask):
             self.solar_irradiance[mask] = SolarHeating._solar_radiation(
-                np.deg2rad(latitude), np.deg2rad(azimuth), albedo, month, day, hour
+                np.deg2rad(latitude),
+                np.deg2rad(cable_azimuth),
+                albedo,
+                month,
+                day,
+                hour,
             )
 
         self.outer_diameter = outer_diameter

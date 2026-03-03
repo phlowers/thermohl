@@ -21,7 +21,7 @@ altitude:
   max: 3000.
   std: 10.
   relative_std: false
-azimuth:
+cable_azimuth:
   dist: 'wrapnorm'
   std: 10.
   relative_std: false
@@ -70,7 +70,7 @@ wind_speed:
   max: 100.
   std: 0.1
   relative_std: true
-wind_angle:
+wind_azimuth:
   dist: 'vonmises'
   std: 10.
   relative_std: false

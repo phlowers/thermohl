@@ -16,10 +16,10 @@ conv_cool_instances = [
     (
         ConvectiveCooling(
             altitude=np.array([100.0]),
-            azimuth=np.array([45.0]),
+            cable_azimuth=np.array([45.0]),
             ambient_temperature=np.array([25.0]),
             wind_speed=np.array([5.0]),
-            wind_angle=np.array([30.0]),
+            wind_azimuth=np.array([30.0]),
             outer_diameter=np.array([0.01]),
             roughness_ratio=np.array([0.02]),
         ),
@@ -28,10 +28,10 @@ conv_cool_instances = [
     (
         ConvectiveCooling(
             altitude=100.0,
-            azimuth=45.0,
+            cable_azimuth=45.0,
             ambient_temperature=25.0,
             wind_speed=5.0,
-            wind_angle=30.0,
+            wind_azimuth=30.0,
             outer_diameter=0.01,
             roughness_ratio=0.02,
         ),

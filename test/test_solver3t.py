@@ -45,13 +45,13 @@ def test_balance():
     dic = {
         "latitude": rng.random(N) * 9 + 42.0,
         "altitude": rng.random(N) * 1600.0,
-        "azimuth": rng.random(N) * 360.0,
+        "cable_azimuth": rng.random(N) * 360.0,
         "month": rng.integers(1, 13, N),
         "day": rng.integers(1, 31, N),
         "hour": rng.integers(0, 24, N),
         "ambient_temperature": rng.random(N) * 30.0,
         "wind_speed": rng.random(N) * 7.0,
-        "wind_angle": rng.random(N) * 90.0,
+        "wind_azimuth": rng.random(N) * 90.0,
         "transit": rng.random(N) * 3960 + 40.0,
         "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
@@ -107,13 +107,13 @@ def test_consistency():
     dic = {
         "latitude": rng.random(N) * 9 + 42.0,
         "altitude": rng.random(N) * 1600.0,
-        "azimuth": rng.random(N) * 360.0,
+        "cable_azimuth": rng.random(N) * 360.0,
         "month": rng.integers(1, 13, N),
         "day": rng.integers(1, 31, N),
         "hour": rng.integers(0, 24, N),
         "ambient_temperature": rng.random(N) * 30.0,
         "wind_speed": rng.random(N) * 7.0,
-        "wind_angle": rng.random(N) * 90.0,
+        "wind_azimuth": rng.random(N) * 90.0,
         "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
     }

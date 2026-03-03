@@ -27,7 +27,7 @@ This guide helps you migrate your code from the old version with short variable 
 | `lat` | `latitude` | Latitude | degrees |
 | `lon` | `longitude` or `longitude` depending on context | Longitude | degrees or rad |
 | `alt` | `altitude` | Altitude | meters |
-| `azm` | `azimuth` | Azimuth angle | degrees |
+| `azm` | `cable_azimuth` | Azimuth angle | degrees |
 
 **Example:**
 ```python
@@ -44,7 +44,7 @@ params = {
     'latitude': 45.0,
     'longitude': 2.5,
     'altitude': 100.0,
-    'azimuth': 90.0
+    'cable_azimuth': 90.0
 }
 ```
 
@@ -57,7 +57,7 @@ params = {
 | `rh` | `relative_humidity` | Relative humidity | dimensionless [0-1] |
 | `pr` | `precipitation_rate` | Precipitation rate | m/s |
 | `ws` | `wind_speed` | Wind speed | m/s |
-| `wa` | `wind_angle` | Wind angle | degrees |
+| `wa` | `wind_azimuth` | wind_azimuth | degrees |
 | `al` | `albedo` | Albedo | dimensionless |
 | `tb` and `trb` | `turbidity` | Turbidity coefficient | dimensionless [0-1] |
 
@@ -80,7 +80,7 @@ weather = {
     'ambient_pressure': 1.0e5,
     'relative_humidity': 0.8,
     'wind_speed': 2.0,
-    'wind_angle': 45.0,
+    'wind_azimuth': 45.0,
     'albedo': 0.8,
     'turbidity': 0.1
 }
@@ -673,14 +673,14 @@ params = dict(
     latitude=45.0,
     longitude=2.5,
     altitude=100.0,
-    azimuth=90.0,
+    cable_azimuth=90.0,
     month=3,
     day=21,
     hour=12,
     ambient_temperature=20.0,
     ambient_pressure=1.0e5,
     wind_speed=2.0,
-    wind_angle=45.0,
+    wind_azimuth=45.0,
     transit=1500.0,
     linear_mass=1.5,
     outer_diameter=3.0e-2,

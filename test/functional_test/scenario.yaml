@@ -15,7 +15,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 20
         wind_speed: 0
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -29,7 +29,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -43,7 +43,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 20
         wind_speed: 5
-        wind_angle: 0
+        wind_azimuth: 0
         latitude: 46
         longitude: 1
         altitude: 100
@@ -57,7 +57,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: -20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -71,7 +71,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 0
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -85,7 +85,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 40
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -99,7 +99,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -113,7 +113,7 @@ ampacity:
         Tmax_cable: 90
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -127,7 +127,7 @@ ampacity:
         Tmax_cable: 45
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -141,7 +141,7 @@ ampacity:
         Tmax_cable: 45
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 1000
@@ -155,7 +155,7 @@ ampacity:
         Tmax_cable: 200
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -169,7 +169,7 @@ ampacity:
         Tmax_cable: 45
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -185,7 +185,7 @@ temperature:
         cable: "ASTER600"
         weather_temperature: 20
         wind_speed: 0
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -200,7 +200,7 @@ temperature:
         cable: "CROCUS400"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -215,7 +215,7 @@ temperature:
         cable: "NARCISSE600G"
         weather_temperature: 20
         wind_speed: 5
-        wind_angle: 0
+        wind_azimuth: 0
         latitude: 46
         longitude: 1
         altitude: 100
@@ -230,7 +230,7 @@ temperature:
         cable: "PETUNIA600"
         weather_temperature: -20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -245,7 +245,7 @@ temperature:
         cable: "ASTER600"
         weather_temperature: 0
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -260,7 +260,7 @@ temperature:
         cable: "CROCUS400"
         weather_temperature: 40
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -275,7 +275,7 @@ temperature:
         cable: "NARCISSE600G"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -290,7 +290,7 @@ temperature:
         cable: "PETUNIA600"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -305,7 +305,7 @@ temperature:
         cable: "ASTER600"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -320,7 +320,7 @@ temperature:
         cable: "CROCUS400"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 1000
@@ -335,7 +335,7 @@ temperature:
         cable: "NARCISSE600G"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -350,7 +350,7 @@ temperature:
         cable: "PETUNIA600"
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -369,7 +369,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 0
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -407,7 +407,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 45
+        wind_azimuth: 45
         latitude: 46
         longitude: 1
         altitude: 100
@@ -445,7 +445,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 5
-        wind_angle: 0
+        wind_azimuth: 0
         latitude: 46
         longitude: 1
         altitude: 100
@@ -483,7 +483,7 @@ temperature:
         I0_cable: 500
         weather_temperature: -20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -521,7 +521,7 @@ temperature:
         I0_cable: 1000
         weather_temperature: 0
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -559,7 +559,7 @@ temperature:
         I0_cable: 1000
         weather_temperature: 40
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -597,7 +597,7 @@ temperature:
         I0_cable: 1000
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 46
         longitude: 1
         altitude: 100
@@ -635,7 +635,7 @@ temperature:
         I0_cable: 1000
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -673,7 +673,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -711,7 +711,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 1000
@@ -749,7 +749,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100
@@ -787,7 +787,7 @@ temperature:
         I0_cable: 500
         weather_temperature: 20
         wind_speed: 3
-        wind_angle: 90
+        wind_azimuth: 90
         latitude: 43
         longitude: 1
         altitude: 100

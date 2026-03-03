@@ -42,13 +42,15 @@ def scn2dict(d: dict) -> dict:
     dic["latitude"] = d["latitude"]
     dic["longitude"] = d["longitude"]
     dic["altitude"] = d["altitude"]
-    dic["azimuth"] = 90.0
+    dic["cable_azimuth"] = 90.0
     dic["ambient_temperature"] = d["weather_temperature"]
     dic["wind_speed"] = d["wind_speed"]
-    # in scenario file, wind angles are given regarding span, where in thermohl
+    # in scenario file, wind_azimuths are given regarding span, where in thermohl
     # they are supposed to be regarding north, hence this conversion formula
-    dic["wind_angle"] = np.rad2deg(
-        np.arcsin(np.sin(np.deg2rad(np.abs(dic["azimuth"] - d["wind_angle"]) % 180.0)))
+    dic["wind_azimuth"] = np.rad2deg(
+        np.arcsin(
+            np.sin(np.deg2rad(np.abs(dic["cable_azimuth"] - d["wind_azimuth"]) % 180.0))
+        )
     )
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
