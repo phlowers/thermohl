@@ -281,14 +281,16 @@ def _set_dates(
     :return: 2D array of shape (len(offset), number_of_computations) with datetime values.
     """
     datetime_utc = (
-        datetime_utc
+        np.array(datetime_utc)
         if isinstance(datetime_utc, Iterable)
         else np.array(number_of_computations * [datetime_utc])
     )
 
     number_of_offset = len(offset)
-    datetime_with_offset = np.zeros((number_of_offset, number_of_computations))
+    datetime_with_offset = np.zeros(
+        (number_of_offset, number_of_computations), dtype=object
+    )
     for i in range(number_of_offset):
-        datetime_with_offset[i, :] = datetime_utc + timedelta(seconds=offset[i])
+        datetime_with_offset[i, :] = datetime_utc + timedelta(seconds=float(offset[i]))
 
     return datetime_with_offset
