@@ -15,8 +15,6 @@ from thermohl.power import PowerTerm
 from thermohl.solver.base import (
     Solver as Solver_,
     _DEFPARAM as DP,
-    _set_dates,
-    reshape,
     get_time_changing_parameters,
 )
 from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
