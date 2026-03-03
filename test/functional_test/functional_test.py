@@ -55,12 +55,10 @@ def scn2dict(d: dict) -> dict:
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
 
-    dt = datetime.datetime.fromisoformat(d["date"])
-    dic["month"] = dt.month
-    dic["day"] = dt.day
-    dic["hour"] = (
-        dt.hour + dt.minute / 60.0 + (dt.second + dt.microsecond * 1.0e-06) / 3600.0
+    dt = datetime.datetime.fromisoformat(d["date"]).replace(
+        tzinfo=datetime.timezone.utc
     )
+    dic["datetime_utc"] = dt
     if "iac" in d.keys():
         dic[VariableType.TRANSIT.value] = d["iac"]
 
