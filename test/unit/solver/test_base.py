@@ -20,7 +20,7 @@ def test_max_len_with_mixed_types():
     }
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.get_number_of_computations()
 
     assert result == 3
 
@@ -32,7 +32,7 @@ def test_max_len_with_ndarray():
     }
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.get_number_of_computations()
 
     assert result == 2
 
@@ -41,7 +41,7 @@ def test_max_len_with_scalar():
     dic = {"latitude": 45.0, "longitude": 10.0}
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.get_number_of_computations()
 
     assert result == 1
 
@@ -49,7 +49,7 @@ def test_max_len_with_scalar():
 def test_max_len_with_empty_dict():
     args = Args({})
 
-    result = args.max_len()
+    result = args.get_number_of_computations()
 
     assert result == 1
 
@@ -62,7 +62,7 @@ def test_max_len_with_varied_lengths():
     }
     args = Args(dic)
 
-    result = args.max_len()
+    result = args.get_number_of_computations()
 
     assert result == 3
 
@@ -71,7 +71,7 @@ def test_extend_to_max_len_with_nd_array():
     dic = {"latitude": np.array([45.0, 46.0]), "longitude": 10.0}
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.latitude, ndarray)
     assert isinstance(args.longitude, ndarray)
@@ -85,7 +85,7 @@ def test_extend_to_max_len_with_scalar():
     dic = {"latitude": 45.0, "longitude": 10.0}
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.latitude, ndarray)
     assert isinstance(args.longitude, ndarray)
@@ -103,7 +103,7 @@ def test_extend_to_max_len_with_mixed_types():
     }
     args = Args(dic)
 
-    args.extend_to_max_len()
+    args.extend()
 
     assert isinstance(args.latitude, ndarray)
     assert isinstance(args.longitude, ndarray)
@@ -119,7 +119,7 @@ def test_extend_to_max_len_with_mixed_types():
 def test_extend_to_max_len_with_empty_dict():
     args = Args({})
 
-    args.extend_to_max_len()
+    args.extend()
 
     for key in args.keys():
         assert isinstance(args[key], (float, int, ndarray))
