@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Any
+from typing import Any, Iterable
 
 import numpy as np
 
@@ -32,8 +32,16 @@ class SolarHeating(PowerTerm):
         :param datetime_utc: Datetime in UTC.
         :return: Solar radiation.
         """
-        date = [d.date() for d in datetime_utc]
-        hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+        date = (
+            np.array([d.date() for d in datetime_utc])
+            if isinstance(datetime_utc, Iterable)
+            else datetime_utc.date()
+        )
+        hour = (
+            np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+            if isinstance(datetime_utc, Iterable)
+            else time_to_float_hours(datetime_utc.time())
+        )
         solar_declination_rad = sun.solar_declination(date)
         hour_angle_rad = sun.hour_angle(hour)
         solar_altitude_rad = sun.solar_altitude(latitude, date, hour)

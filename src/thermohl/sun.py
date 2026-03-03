@@ -13,6 +13,8 @@ models.
 """
 from datetime import time
 from math import pi
+from typing import Iterable
+
 import numpy as np
 from thermohl import (
     floatArrayLike,
@@ -65,7 +67,11 @@ def solar_declination(date: dateListLike) -> floatArrayLike:
     :param date: Date of the year.
     :return: Solar declination in radians.
     """
-    day_of_year = np.array([d.timetuple().tm_yday for d in date])
+    day_of_year = (
+        np.array([d.timetuple().tm_yday for d in date])
+        if isinstance(date, Iterable)
+        else date.timetuple().tm_yday
+    )
     return np.deg2rad(23.46) * np.sin(2.0 * np.pi * (day_of_year + 284) / 365.0)
 
 
