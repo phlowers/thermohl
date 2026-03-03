@@ -294,3 +294,22 @@ def _set_dates(
         datetime_with_offset[i, :] = datetime_utc + timedelta(seconds=float(offset[i]))
 
     return datetime_with_offset
+
+
+def get_time_changing_parameters(args, offset, N, n):
+    # get datetime for each offset
+    datetime_utc = _set_dates(args.datetime_utc, offset, n)
+
+    # A dict with time-changing quantities (with all elements of size N * n)
+    de = dict(
+        datetime_utc=datetime_utc,
+        transit=reshape(args.transit, N, n),
+        ambient_temperature=reshape(args.ambient_temperature, N, n),
+        wind_azimuth=reshape(args.wind_azimuth, N, n),
+        wind_speed=reshape(args.wind_speed, N, n),
+        ambient_pressure=reshape(args.ambient_pressure, N, n),
+        relative_humidity=reshape(args.relative_humidity, N, n),
+        precipitation_rate=reshape(args.precipitation_rate, N, n),
+    )
+    del datetime_utc
+    return de

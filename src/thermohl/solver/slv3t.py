@@ -12,7 +12,13 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
+from thermohl.solver.base import (
+    Solver as Solver_,
+    _DEFPARAM as DP,
+    _set_dates,
+    reshape,
+    get_time_changing_parameters,
+)
 from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
 from thermohl.solver.enums.cable_type import CableType, CableTypeListLike
 from thermohl.solver.enums.power_type import PowerType
@@ -439,25 +445,7 @@ class Solver3T(Solver_):
             if core_temperature_0 is not None
             else 1.0 + surface_temperature_0
         )
-
-        # get datetime for each offset
-        datetime_utc = _set_dates(self.args.datetime_utc, offset, n)
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            datetime_utc=datetime_utc,
-            transit=reshape(self.args.transit, N, n),
-            ambient_temperature=reshape(self.args.ambient_temperature, N, n),
-            wind_azimuth=reshape(self.args.wind_azimuth, N, n),
-            wind_speed=reshape(self.args.wind_speed, N, n),
-            ambient_pressure=reshape(self.args.ambient_pressure, N, n),
-            relative_humidity=reshape(self.args.relative_humidity, N, n),
-            precipitation_rate=reshape(self.args.precipitation_rate, N, n),
-        )
-        del datetime_utc
-
+        de = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)

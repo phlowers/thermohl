@@ -12,7 +12,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
-from thermohl.solver.base import Solver as Solver_
+from thermohl.solver.base import Solver as Solver_, get_time_changing_parameters
 from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
 from thermohl.solver.enums.power_type import PowerType
@@ -108,23 +108,7 @@ class Solver1T(Solver_):
                 if isinstance(self.args.ambient_temperature, numbers.Number)
                 else self.args.ambient_temperature[0]
             )
-
-        # get datetime
-        datetime_utc = _set_dates(self.args.datetime_utc, offset, n)
-
-        # A dict with time-changing quantities (with all elements of size N * n)
-        de = dict(
-            datetime_utc=datetime_utc,
-            transit=reshape(self.args.transit, N, n),
-            ambient_temperature=reshape(self.args.ambient_temperature, N, n),
-            wind_azimuth=reshape(self.args.wind_azimuth, N, n),
-            wind_speed=reshape(self.args.wind_speed, N, n),
-            ambient_pressure=reshape(self.args.ambient_pressure, N, n),
-            relative_humidity=reshape(self.args.relative_humidity, N, n),
-            precipitation_rate=reshape(self.args.precipitation_rate, N, n),
-        )
-        del datetime_utc
-
+        de = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
