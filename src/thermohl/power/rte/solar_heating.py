@@ -4,7 +4,7 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from typing import Optional, Any
+from typing import Optional, Any, Iterable
 
 import numpy as np
 
@@ -70,7 +70,11 @@ class SolarHeating(SolarHeatingBase):
         """
         self.solar_absorptivity = solar_absorptivity
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
-        date = [d.date() for d in datetime_utc]
+        date = (
+            [d.date() for d in datetime_utc]
+            if isinstance(datetime_utc, Iterable)
+            else datetime_utc.date()
+        )
         solar_altitude_rad = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         if np.isnan(measured_solar_irradiance).all():
             measured_solar_irradiance = solar_irradiance(solar_altitude_rad)

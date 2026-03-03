@@ -46,10 +46,10 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
 
 def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     if isinstance(s, solver.Solver1T):
-        a = dict(time=t, T0=ds[VariableType.TEMPERATURE].values)
+        a = dict(offset=t, T0=ds[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
-            time=t,
+            offset=t,
             surface_temperature_0=ds[TemperatureLocation.SURFACE].values,
             core_temperature_0=ds[TemperatureLocation.CORE].values,
         )
