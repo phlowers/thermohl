@@ -38,9 +38,16 @@ def utc2solar_hour(
     :param longitude: Longitude (in rad).
     :return: Solar hour.
     """
-
-    day_of_year = np.array([d.timetuple().tm_yday for d in datetime_utc])
-    utc_hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+    day_of_year = (
+        np.array([d.timetuple().tm_yday for d in datetime_utc])
+        if isinstance(datetime_utc, Iterable)
+        else datetime_utc.timetuple().tm_yday
+    )
+    utc_hour = (
+        np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+        if isinstance(datetime_utc, Iterable)
+        else time_to_float_hours(datetime_utc.time())
+    )
     B = 2 * pi * (day_of_year - 81) / 365
     solar_hour = (
         utc_hour
