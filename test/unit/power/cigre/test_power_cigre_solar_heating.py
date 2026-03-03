@@ -81,6 +81,7 @@ solar_heating_instances = [
             hour=np.array([12.0, 12.0, 12.0]),
             outer_diameter=np.array([0.01, 0.01, 0.01]),
             solar_absorptivity=np.array([0.9, 0.9, 0.9]),
+            measured_solar_irradiance=np.array([np.nan, np.nan, np.nan]),
         ),
         np.array([12.3978, 11.8759, 11.2545]),
     ),
@@ -94,6 +95,7 @@ solar_heating_instances = [
             hour=12.0,
             outer_diameter=0.01,
             solar_absorptivity=0.9,
+            measured_solar_irradiance=np.array([np.nan, np.nan, np.nan]),
         ),
         12.3978,
     ),
@@ -135,6 +137,7 @@ def test_solar_heating_value_array():
         hour,
         outer_diameter,
         solar_absorptivity,
+        np.array([np.nan, np.nan, np.nan]),
     )
     expected = np.array([12.3978, 11.8759, 11.2545])
 
@@ -163,6 +166,7 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
             hour,
             outer_diameter,
             solar_absorptivity,
+            np.array([np.nan, np.nan]),
         )
         solar_heating.value(conductor_temperature)
 
@@ -221,5 +225,6 @@ def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
             hour,
             outer_diameter,
             solar_absorptivity,
+            np.array([np.nan, np.nan]),
         )
         solar_heating.derivative(conductor_temperature)

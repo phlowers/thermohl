@@ -19,7 +19,7 @@ input dictionary are replaced with a default value, available using
 Below is a table with all physical parameters used in ThermOHL, with
 units, default values and in which set of power terms they are used.
 
-[TODO : check with sources + add a paragraph explaining which parameters are not required if we use precomputed_solar_radiation directly]: #
+[TODO : check with sources + add a paragraph explaining which parameters are not required if we use measured_solar_irradiance directly]: #
 
 | Parameter | Default Value | Unit       | Used in CIGRE | Used in IEEE | Used in OLLA | Used in RTE | Comment                                                      |
 |-----------|---------------|------------|---------------|--------------|--------------|-------------|--------------------------------------------------------------|
@@ -55,7 +55,7 @@ units, default values and in which set of power terms they are used.
 | linear_resistance_temp_low    | 2.66E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at temp_low             |
 | temp_high     | 60            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
 | temp_low      | 20            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
-| precomputed_solar_radiation      | NaN           | W.m⁻²      | yes (opt.)    | yes (opt.)   | yes (opt.)   | yes (opt.)  | solar irradiance                                             |
+| measured_solar_irradiance      | NaN           | W.m⁻²      | yes          | yes          | yes          | yes         | solar irradiance                                             |
 
 For consistent joule heating outputs between CIGRE and IEEE joule
 power terms, you must have
@@ -65,7 +65,7 @@ power terms, you must have
 * any $ T_{\text{high}} > T_{\text{low}} $ and
 $ R_{\text{DC,high}} - R_{\text{DC,low}} = (T_{\text{high}} - T_{\text{low}}) \cdot k_{\ell} \cdot R_{\text{DC},20} $.
 
-If you use direct solar radiation formula (with `precomputed_solar_radiation` key), you can
+If you use direct solar radiation formula (with `measured_solar_irradiance` key), you can
 ignore the following parameters : `latitude`, `longitude`, `month`, `day`,
 `hour`, `albedo` and `turbidity`.
 
