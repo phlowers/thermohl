@@ -206,3 +206,22 @@ def test_steady_intensity_custom_params(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
+
+
+def test_reduced_intensity(solver):
+    solver_args = solver.args.__dict__.copy()
+
+    result = solver.reduced_intensity(
+        delta_T_measured=10.0,
+        measured_intensity=360.0,
+        T_limit=100.0,
+    )
+
+    assert isinstance(result, np.ndarray)
+    assert not np.isnan(result[0])
+
+    # Check that solver args have not been changed
+    assert np.isnan(solver.args.measured_solar_irradiance)
+    assert solver.args.ambient_temperature == solver_args["ambient_temperature"]
+    assert solver.args.wind_speed == solver_args["wind_speed"]
+    assert solver.args.transit == solver_args["transit"]
