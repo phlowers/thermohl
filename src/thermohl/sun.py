@@ -11,6 +11,7 @@ These positions usually depend on the point latitude and the time. The sun
 position is then used to estimate the solar radiation in CIGRE and IEEE
 models.
 """
+
 from datetime import time
 from math import pi
 from typing import Iterable

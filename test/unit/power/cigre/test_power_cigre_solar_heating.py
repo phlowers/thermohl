@@ -19,7 +19,9 @@ def test_solar_radiation_scalar():
     datetime_utc = [datetime(2000, 6, 21, 12, tzinfo=timezone.utc)]
     expected = 1309.2
 
-    result = SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, datetime_utc)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, datetime_utc
+    )
 
     assert np.allclose(
         result, expected, atol=1e-1
@@ -37,7 +39,9 @@ def test_solar_radiation_array():
     ]
     expected = np.array([1309.2, 1267.965, 0.0])
 
-    result = SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, datetime_utc)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, datetime_utc
+    )
 
     assert np.allclose(
         result, expected, atol=1e-1
@@ -55,7 +59,9 @@ def test_solar_radiation_default_albedo():
     ]
     expected = np.array([1309.2, 1267.965, 0.0])
 
-    result = SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, datetime_utc)
+    result = SolarHeating._solar_radiation(
+        latitude, cable_azimuth, albedo, datetime_utc
+    )
 
     assert np.allclose(
         result, expected, atol=1e-1
