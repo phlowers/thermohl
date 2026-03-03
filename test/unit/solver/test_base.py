@@ -100,7 +100,7 @@ def test_extend_to_max_len_with_mixed_types():
     dic = {
         "latitude": np.array([45.0, 46.0]),
         "longitude": 10.0,
-        "altitude": np.array([20.0]),
+        "altitude": 20.0,
     }
     args = Args(dic)
 
