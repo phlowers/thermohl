@@ -153,3 +153,27 @@ specific model with three temperatures for the conductor :
 * the surface temperature;
 * the average temperature;
 * the core temperature.
+
+## IST reduction (intensity limit reduction)
+
+For most computations, cable sleeves are ignored.
+However, if a sleeve is faulty, it can overheat. ThermoHL enables the user to
+compute a reduced intensity limit (called reduced IST) so that the interface
+between the sleeve and the cable doesn't exceed a given maximum temperature.
+Input data are
+- the mesaured temperature difference between the hotspot (at the interface between sleeve and cable)
+and the cable far away from the sleeve
+- the measured transit.
+
+This computation uses the single temperature model.
+
+Please note that following default values differ from the defaults for other
+computations:
+
+| Parameter | Default value |
+|----|----|
+| ambient_temperature | 30.0 °C |
+| wind_speed | 0.6 m/s |
+| measured_solar_irradiance | 600.0 W/m² |
+
+TODO: precision on wind_speed and wind_angle if needed
