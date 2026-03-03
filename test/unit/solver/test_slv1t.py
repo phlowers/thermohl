@@ -13,12 +13,14 @@ from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.solver.slv1t import Solver1T
 
+from thermohl import power
+
 
 @pytest.fixture
 def solver():
     args = {
         "max_len": lambda: 1,
-        VariableType.TRANSIT: np.array([0]),
+        VariableType.TRANSIT.value: np.array([0]),
         "ambient_temperature": np.array([25]),
         "wind_speed": np.array([0]),
         "wind_azimuth": np.array([0]),
@@ -30,8 +32,35 @@ def solver():
         "month": 1,
         "day": 1,
         "hour": 0,
+        "latitude": np.array([48.0]),
+        "longitude": np.array([2.3]),
+        "altitude": np.array([50.0]),
+        "cable_azimuth": np.array([0.0]),
+        "solar_absorptivity": np.array([0.5]),
     }
-    return Solver1T(dic=args)
+    cable = {
+        "outer_diameter": np.array([3.186e-02]),
+        "core_diameter": np.array([0.000]),
+        "outer_area": np.array([6.004e-4]),
+        "core_area": np.array([0.000]),
+        "magnetic_coeff": np.array([1.000]),
+        "magnetic_coeff_per_a": np.array([0.000]),
+        "temperature_coeff_linear": np.array([3.600e-3]),
+        "temperature_coeff_quadratic": np.array([8.000e-7]),
+        "linear_resistance_dc_20c": np.array([5.540e-5]),
+        "emissivity": np.array([0.8]),
+    }
+    args.update(cable)
+
+    joule = power.rte.joule_heating.JouleHeating
+    solar = power.rte.solar_heating.SolarHeating
+    convective = power.rte.convective_cooling.ConvectiveCooling
+    radiative = power.rte.radiative_cooling.RadiativeCooling
+
+    solver = Solver1T(
+        dic=args, joule=joule, solar=solar, convective=convective, radiative=radiative
+    )
+    return solver
 
 
 def test_steady_temperature_default(solver):
@@ -167,7 +196,7 @@ def test_steady_intensity_no_power(solver):
 def test_steady_intensity_custom_params(solver):
     conductor_temperature = np.array([75])
     Imin = 5.0
-    Imax = 100.0
+    Imax = 1010.0
     tol = 1e-5
     maxiter = 100
 

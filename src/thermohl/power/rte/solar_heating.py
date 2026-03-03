@@ -76,7 +76,10 @@ class SolarHeating(SolarHeatingBase):
         solar_altitude_rad = sun.solar_altitude(
             np.deg2rad(latitude), month, day, solar_hour
         )
-        if np.isnan(measured_solar_irradiance).all():
+        if (
+            measured_solar_irradiance is None
+            or np.isnan(measured_solar_irradiance).all()
+        ):
             measured_solar_irradiance = solar_irradiance(solar_altitude_rad)
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), month, day, hour)
         incidence_angle_rad = np.arccos(
