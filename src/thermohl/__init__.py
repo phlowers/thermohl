@@ -24,7 +24,6 @@ except ImportError:
 floatArrayLike = Union[float, npt.NDArray[np.float64]]
 numberArrayLike = Union[float, int, npt.NDArray[np.float64], npt.NDArray[np.int64]]
 strListLike = Union[str, List[str]]
-timeListLike = Union[time, List[time]]
 dateListLike = Union[date, List[date]]
 datetimeListLike = Union[datetime, List[datetime]]
 
