@@ -132,8 +132,9 @@ class SolarHeating(SolarHeatingBase):
             measured_solar_irradiance, nebulosity, solar_altitude
         )
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
-        incidence = np.cos(solar_altitude) * np.cos(
-            solar_azimuth_rad - np.deg2rad(cable_azimuth)
+        incidence = np.arccos(
+            np.cos(solar_altitude)
+            * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
         )
 
         self.solar_absorptivity = solar_absorptivity
