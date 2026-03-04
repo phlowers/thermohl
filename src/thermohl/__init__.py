@@ -22,7 +22,6 @@ except ImportError:
         __version__ = "unknown"
 
 floatArrayLike = Union[float, npt.NDArray[np.float64]]
-intArrayLike = Union[int, npt.NDArray[np.int64]]
 numberArrayLike = Union[float, int, npt.NDArray[np.float64], npt.NDArray[np.int64]]
 strListLike = Union[str, List[str]]
 timeListLike = Union[time, List[time]]
