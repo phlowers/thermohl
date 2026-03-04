@@ -48,9 +48,6 @@ def compute_solar_irradiance(
         np.sin(incidence) + pi / 2 * albedo * np.sin(solar_altitude)
     ) + diffuse_radiation * pi / 2 * (1 + albedo)
 
-    # print(
-    #     f"YOMAN50 : {nebulosity=}, Qb={beam_radiation}, Qd={diffuse_radiation}, Qs={solar_irradiance}"
-    # )
     return np.where(solar_altitude > 0.0, solar_irradiance, 0.0)
 
 
@@ -128,9 +125,7 @@ class SolarHeating(SolarHeatingBase):
             else datetime_utc.date()
         )
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
-        solar_altitude = sun.solar_altitude(
-            np.deg2rad(latitude), date, solar_hour
-        )
+        solar_altitude = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         nebulosity, global_radiation = compute_data_from_provided(
             measured_solar_irradiance, nebulosity, solar_altitude
         )
