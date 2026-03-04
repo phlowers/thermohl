@@ -183,7 +183,7 @@ class Solver3TL(Solver3T):
         average_temperature = np.zeros((N, n))
         core_temperature = np.zeros((N, n))
         temperature_difference = np.zeros((N, n))
-        # set initial values in first column
+        # set initial values in first row
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
         average_temperature[0, :] = self.average(
@@ -193,7 +193,7 @@ class Solver3TL(Solver3T):
             core_temperature[0, :] - surface_temperature[0, :]
         )
 
-        # compute transient temperatures for each column after the first.
+        # compute transient temperatures for each row after the first.
         for i in range(1, len(offset)):
             balance = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
