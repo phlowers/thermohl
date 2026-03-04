@@ -365,7 +365,7 @@ class Solver3T(Solver_):
         self,
         offset,
         surface_temperature,
-        ambient_temperature,
+        average_temperature,
         core_temperature,
         return_power,
         n,
@@ -373,7 +373,7 @@ class Solver3T(Solver_):
         dr = {
             VariableType.TIME: offset,
             TemperatureLocation.SURFACE: surface_temperature,
-            TemperatureLocation.AVERAGE: ambient_temperature,
+            TemperatureLocation.AVERAGE: average_temperature,
             TemperatureLocation.CORE: core_temperature,
         }
 

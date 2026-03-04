@@ -180,13 +180,13 @@ class Solver3TL(Solver3T):
 
         # init
         surface_temperature = np.zeros((n, N))
-        ambient_temperature = np.zeros((n, N))
+        average_temperature = np.zeros((n, N))
         core_temperature = np.zeros((n, N))
         temperature_difference_c = np.zeros((n, N))
 
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
-        ambient_temperature[0, :] = self.average(
+        average_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
         temperature_difference_c[0, :] = (
@@ -198,8 +198,8 @@ class Solver3TL(Solver3T):
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             time_difference = offset[i] - offset[i - 1]
-            ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + time_difference * imc * balance
+            average_temperature[i, :] = (
+                average_temperature[i - 1, :] + time_difference * imc * balance
             )
             temperature_difference_c[i, :] = (
                 1.0 - time_difference / time_constant
@@ -207,19 +207,19 @@ class Solver3TL(Solver3T):
                 time_difference
                 / time_constant
                 * self.morgan_coefficients[0]
-                * self.joule_heating.value(ambient_temperature[i, :])
+                * self.joule_heating.value(average_temperature[i, :])
             )
             core_temperature[i, :] = (
-                ambient_temperature[i, :] + 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] + 0.5 * temperature_difference_c[i, :]
             )
             surface_temperature[i, :] = (
-                ambient_temperature[i, :] - 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] - 0.5 * temperature_difference_c[i, :]
             )
 
         return self._transient_temperature_results(
             offset,
             surface_temperature,
-            ambient_temperature,
+            average_temperature,
             core_temperature,
             return_power,
             N,
