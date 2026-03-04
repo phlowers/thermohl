@@ -363,7 +363,7 @@ class Solver3T(Solver_):
 
     def _transient_temperature_results(
         self,
-        time,
+        offset,
         surface_temperature,
         ambient_temperature,
         core_temperature,
@@ -371,7 +371,7 @@ class Solver3T(Solver_):
         n,
     ):
         dr = {
-            VariableType.TIME: time,
+            VariableType.TIME: offset,
             TemperatureLocation.SURFACE: surface_temperature,
             TemperatureLocation.AVERAGE: ambient_temperature,
             TemperatureLocation.CORE: core_temperature,
@@ -381,7 +381,7 @@ class Solver3T(Solver_):
             for power in Solver_.powers():
                 dr[power] = np.zeros_like(surface_temperature)
 
-            for i in range(len(time)):
+            for i in range(len(offset)):
                 dr[PowerType.JOULE][i, :] = self.joule(
                     surface_temperature[i, :], core_temperature[i, :]
                 )
