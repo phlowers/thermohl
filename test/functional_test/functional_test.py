@@ -5,7 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime
+from datetime import datetime, timezone
+
+from zoneinfo import ZoneInfo
 import os.path
 import numpy as np
 import pandas as pd
@@ -13,7 +15,7 @@ from thermohl.solver import rte, HeatEquationType
 from thermohl.solver.enums.variable_type import VariableType
 
 
-def cable_data(cable_name: str) -> dict:
+def get_cable_data(cable_name: str) -> dict:
     """Get cable/conductor data from file."""
     f = os.path.join("test", "functional_test", "cable_catalog.csv")
     df = pd.read_csv(f)
@@ -25,17 +27,17 @@ def cable_data(cable_name: str) -> dict:
 
 def get_scenarios():
     f = os.path.join("test", "functional_test", "scenarios.csv")
-    return pd.read_csv(f).to_dict(orient="records")
+    return pd.read_csv(f, sep=";").to_dict(orient="records")
 
 
 def scn2dict(scn: dict) -> dict:
     """Convert scenario to thermohl input."""
-    dic = cable_data(scn["Conducteur"])
+    dic = get_cable_data(scn["Conducteur"])
 
     dic["latitude"] = scn["Lat"]
     dic["longitude"] = scn["Lon"]
     dic["altitude"] = scn["Altitude"]
-    dic["azimuth"] = scn["Azimut_portee"]
+    dic["cable_azimuth"] = scn["Azimut_portee"]
     dic["ambient_temperature"] = scn["T_amb"]
     dic["wind_speed"] = scn["V"]
     dic["wind_azimuth"] = scn["Azimut_V"]
@@ -45,10 +47,11 @@ def scn2dict(scn: dict) -> dict:
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
 
-    dt = datetime.datetime.fromisoformat(d["date"]).replace(
-        tzinfo=datetime.timezone.utc
-    )
-    dic["datetime_utc"] = dt
+    datetime_paris = datetime.strptime(
+        f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
+    ).replace(tzinfo=ZoneInfo("Europe/Paris"))
+    datetime_utc = datetime_paris.astimezone(timezone.utc)
+    dic["datetime_utc"] = datetime_utc
     # utile uniquement pour le test test_steady_temperature
     dic[VariableType.TRANSIT.value] = scn["Intensite"]
 
@@ -72,23 +75,14 @@ def scn2dict(scn: dict) -> dict:
 
 def test_steady_ampacity():
     for scenario in get_scenarios():
-        print(f"YOMAN : {scenario=}")
         solver = rte(
             scn2dict(scenario),
             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
-        print(
-            f"YOMAN100 : {result.columns=}\n{result[VariableType.TRANSIT].values=}\n{scenario['Ampacite']=}"
+        assert np.allclose(
+            result[VariableType.TRANSIT], scenario["Ampacite"], atol=0.05
         )
-        pd.set_option("display.max_rows", None)
-        pd.set_option("display.max_columns", None)
-        pd.set_option("display.width", 1000)
-
-        print(f"YOMAN101 : {result=}")
-
-        assert np.allclose(result[VariableType.TRANSIT], scenario["Ampacite"])
-        # assert False
 
 
 # def test_transient_temperature():
