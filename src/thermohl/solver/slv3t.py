@@ -444,8 +444,8 @@ class Solver3T(Solver_):
             else 1.0 + surface_temperature_0
         )
         time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
-        # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
+        # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init

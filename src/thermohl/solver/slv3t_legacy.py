@@ -175,21 +175,21 @@ class Solver3TL(Solver3T):
             else 1.0 + surface_temperature_0
         )
 
-        # shortcuts for time-loop
+        # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
         surface_temperature = np.zeros((n, N))
         average_temperature = np.zeros((n, N))
         core_temperature = np.zeros((n, N))
-        temperature_difference_c = np.zeros((n, N))
+        temperature_difference = np.zeros((n, N))
 
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
         average_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
-        temperature_difference_c[0, :] = (
+        temperature_difference[0, :] = (
             core_temperature[0, :] - surface_temperature[0, :]
         )
 
@@ -201,19 +201,19 @@ class Solver3TL(Solver3T):
             average_temperature[i, :] = (
                 average_temperature[i - 1, :] + time_difference * imc * balance
             )
-            temperature_difference_c[i, :] = (
+            temperature_difference[i, :] = temperature_difference[i - 1, :] * (
                 1.0 - time_difference / time_constant
-            ) * temperature_difference_c[i - 1, :] + (
+            ) + (
                 time_difference
                 / time_constant
                 * self.morgan_coefficients[0]
                 * self.joule_heating.value(average_temperature[i, :])
             )
             core_temperature[i, :] = (
-                average_temperature[i, :] + 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] + 0.5 * temperature_difference[i, :]
             )
             surface_temperature[i, :] = (
-                average_temperature[i, :] - 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] - 0.5 * temperature_difference[i, :]
             )
 
         return self._transient_temperature_results(

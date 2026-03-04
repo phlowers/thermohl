@@ -108,7 +108,7 @@ class Solver1T(Solver_):
                 else self.args.ambient_temperature[0]
             )
         time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
-        # shortcuts for time-loop
+        # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
