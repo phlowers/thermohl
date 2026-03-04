@@ -66,6 +66,7 @@ class Args:
         self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
         self.wind_speed = 0.0  # wind speed (m.s**-1)
         self.wind_azimuth = 90.0  # wind_azimuth (deg, regarding north)
+        self.nebulosity = 0  # nebulosity (1)
         self.albedo = 0.8  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1

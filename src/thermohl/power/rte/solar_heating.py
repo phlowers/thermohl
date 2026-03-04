@@ -105,7 +105,7 @@ class SolarHeating(SolarHeatingBase):
         solar_absorptivity: floatArrayLike,
         albedo: floatArrayLike,
         nebulosity: floatArrayLike,
-        measured_solar_irradiance: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         """Build with args.
