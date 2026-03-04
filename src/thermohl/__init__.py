@@ -9,7 +9,7 @@ from typing import Union, List
 
 import numpy as np
 import numpy.typing as npt
-from datetime import datetime, time, date
+from datetime import datetime, date
 
 try:
     from ._version import __version__
