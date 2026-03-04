@@ -157,10 +157,10 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (N for input dict entries, n for offsets)
-        N = self.args.get_number_of_computations()
-        n = len(offset)
-        if n < 2:
+        # get sizes (n for input dict entries, N for offsets)
+        n = self.args.get_number_of_computations()
+        N = len(offset)
+        if N < 2:
             raise ValueError()
 
         # get initial temperature
@@ -178,12 +178,12 @@ class Solver3TL(Solver3T):
         # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
-        # init
-        surface_temperature = np.zeros((n, N))
-        average_temperature = np.zeros((n, N))
-        core_temperature = np.zeros((n, N))
-        temperature_difference = np.zeros((n, N))
-
+        # define temperature data 2D arrays
+        surface_temperature = np.zeros((N, n))
+        average_temperature = np.zeros((N, n))
+        core_temperature = np.zeros((N, n))
+        temperature_difference = np.zeros((N, n))
+        # set initial values in first column
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
         average_temperature[0, :] = self.average(
@@ -193,6 +193,7 @@ class Solver3TL(Solver3T):
             core_temperature[0, :] - surface_temperature[0, :]
         )
 
+        # compute transient temperatures for each column after the first.
         for i in range(1, len(offset)):
             balance = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
@@ -222,5 +223,5 @@ class Solver3TL(Solver3T):
             average_temperature,
             core_temperature,
             return_power,
-            N,
+            n,
         )
