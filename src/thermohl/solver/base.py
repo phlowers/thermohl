@@ -127,7 +127,7 @@ class Args:
     def extend(self) -> None:
         """
         Extend all compressed elements in the Args dictionary to the right length, ie the number of computations.
-        If the element is a list, it has already the right length.
+        If the element is a list, it already has the right length.
         If the element is a scalar, it is replaced with a list of the right length filled with the scalar value.
         """
         number_of_computations = self.get_number_of_computations()
