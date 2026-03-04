@@ -443,7 +443,7 @@ class Solver3T(Solver_):
             if core_temperature_0 is not None
             else 1.0 + surface_temperature_0
         )
-        de = get_time_changing_parameters(self.args, offset, N, n)
+        time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
@@ -460,8 +460,8 @@ class Solver3T(Solver_):
 
         # main time loop
         for i in range(1, len(offset)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
+            for k in time_changing_parameters.keys():
+                self.args[k] = time_changing_parameters[k][i, :]
             self.update()
             bal = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]

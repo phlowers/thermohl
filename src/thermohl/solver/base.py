@@ -38,12 +38,6 @@ class _DEFPARAM:
 class Args:
     """Object to store Solver args in a dict-like manner."""
 
-    # __slots__ = [
-    #     'latitude', 'longitude', 'altitude', 'azimuth', 'datetime_utc, 'ambient_temperature', 'ambient_pressure', 'relative_humidity', 'precipitation_rate', 'wind_speed', 'wind_angle', 'albedo', 'turbidity', 'transit', 'm',
-    #     'core_diameter', 'outer_diameter', 'core_area', 'outer_area', 'roughness_ratio', 'radial_thermal_conductivity', 'heat_capacity', 'solar_absorptivity', 'emissivity', 'linear_resistance_dc_20c', 'magnetic_coeff', 'magnetic_coeff_per_a', 'temperature_coeff_linear', 'temperature_coeff_quadratic', 'linear_resistance_temp_high', 'linear_resistance_temp_low',
-    #     'temp_high', 'temp_low'
-    # ]
-
     def __init__(self, input_dict: Optional[dict[str, Any]] = None):
         # add default values
         self._set_default_values()

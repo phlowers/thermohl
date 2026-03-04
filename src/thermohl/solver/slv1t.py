@@ -107,7 +107,7 @@ class Solver1T(Solver_):
                 if isinstance(self.args.ambient_temperature, numbers.Number)
                 else self.args.ambient_temperature[0]
             )
-        de = get_time_changing_parameters(self.args, offset, N, n)
+        time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
@@ -117,7 +117,7 @@ class Solver1T(Solver_):
 
         # main time loop
         for i in range(1, N):
-            for k, v in de.items():
+            for k, v in time_changing_parameters.items():
                 self.args[k] = v[i, :]
             self.update()
             conductor_temperature[i, :] = (
@@ -138,8 +138,8 @@ class Solver1T(Solver_):
             for power in Solver_.powers():
                 result[power] = np.zeros_like(conductor_temperature)
             for i in range(N):
-                for key in de.keys():
-                    self.args[key] = de[key][i, :]
+                for key in time_changing_parameters.keys():
+                    self.args[key] = time_changing_parameters[key][i, :]
                 self.update()
                 result[PowerType.JOULE][i, :] = self.joule_heating.value(
                     conductor_temperature[i, :]
