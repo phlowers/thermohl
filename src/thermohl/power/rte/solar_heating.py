@@ -40,7 +40,9 @@ def compute_solar_irradiance(
         return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
 
     def compute_beam_radiation() -> floatArrayLike:
-        return (global_radiation - diffuse_radiation) / np.sin(solar_altitude)
+        # si l'altitude solaire est nulle, on fixe la radiation solaire à 0.
+        with np.errstate(divide="ignore", invalid="ignore"):
+            return (global_radiation - diffuse_radiation) / np.sin(solar_altitude)
 
     diffuse_radiation = compute_diffuse_radiation()
     beam_radiation = compute_beam_radiation()
@@ -67,7 +69,7 @@ def compute_data_from_provided(
             1, provided_global_radiation[~mask] / (910 * np.sin(solar_altitude) - 30)
         )
         nebulosity = 8 * (4 / 3 * (1 - intermediate)) ** (1 / 3.4)
-        return np.round(np.minimum(8, nebulosity))
+        return np.minimum(8, nebulosity)
 
     def compute_global_radiation(provided_nebulosity, solar_altitude):
         intermediate = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
