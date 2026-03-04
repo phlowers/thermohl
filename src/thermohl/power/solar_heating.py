@@ -5,12 +5,13 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List, Optional, Any
+from typing import List, Optional, Any, Iterable
 
 import numpy as np
 
-from thermohl import floatArrayLike, intArrayLike, sun
+from thermohl import floatArrayLike, sun, datetimeListLike
 from thermohl.power.power_term import PowerTerm
+from thermohl.sun import time_to_float_hours
 
 
 class _SRad:
@@ -19,9 +20,8 @@ class _SRad:
     def __init__(self, clean: List[float], indus: List[float]):
         """Initialize the solar radiation calculator.
 
-        Args:
-            clean (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in clean air conditions.
-            indus (list[float]): Coefficients for the polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
+        :param clean: Coefficients for the polynomial function to compute atmospheric turbidity in clean air conditions.
+        :param indus: Coefficients for the polynomial function to compute atmospheric turbidity in industrial (polluted) air conditions.
         """
         self.clean = clean
         self.indus = indus
@@ -37,12 +37,9 @@ class _SRad:
         average of the clean air and industrial air coefficients, with the weights
         determined by the turbidity factor.
 
-        Args:
-            solar_altitude (float | numpy.ndarray): Solar altitude in degrees.
-            turbidity (float | numpy.ndarray): Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
-
-        Returns:
-            float | numpy.ndarray: Coefficient for atmospheric turbidity.
+        :param solar_altitude: Solar altitude in degrees.
+        :param turbidity: Atmospheric turbidity factor (0 for clean air, 1 for industrial air).
+        :return: Coefficient for atmospheric turbidity.
         """
         clean_weight = 1.0 - turbidity
         coeff_6 = clean_weight * self.clean[6] + turbidity * self.indus[6]
@@ -68,13 +65,21 @@ class _SRad:
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        computed_solar_altitude = sun.solar_altitude(latitude, month, day, hour)
-        computed_solar_azimuth = sun.solar_azimuth(latitude, month, day, hour)
+        date = (
+            [d.date() for d in datetime_utc]
+            if isinstance(datetime_utc, Iterable)
+            else datetime_utc.date()
+        )
+        hour = (
+            np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+            if isinstance(datetime_utc, Iterable)
+            else time_to_float_hours(datetime_utc.time())
+        )
+        computed_solar_altitude = sun.solar_altitude(latitude, date, hour)
+        computed_solar_azimuth = sun.solar_azimuth(latitude, date, hour)
         computed_incidence_angle = np.arccos(
             np.cos(computed_solar_altitude)
             * np.cos(computed_solar_azimuth - cable_azimuth)
@@ -98,9 +103,7 @@ class SolarHeatingBase(PowerTerm):
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
@@ -119,22 +122,16 @@ class SolarHeatingBase(PowerTerm):
                 altitude,
                 np.deg2rad(cable_azimuth),
                 turbidity,
-                month,
-                day,
-                hour,
+                datetime_utc,
             )
 
         self.outer_diameter = outer_diameter
 
     def value(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
-        r"""Compute solar heating.
+        """Compute solar heating.
 
-        Args:
-            conductor_temperature (float | numpy.ndarray): Conductor temperature (°C).
-
-        Returns:
-            float | numpy.ndarray: Power term value (W·m⁻¹).
-
+        :param conductor_temperature: Conductor temperature (°C).
+        :return: Power term value (W·m⁻¹).
         """
         return (
             self.solar_absorptivity
@@ -144,5 +141,9 @@ class SolarHeatingBase(PowerTerm):
         )
 
     def derivative(self, conductor_temperature: floatArrayLike) -> floatArrayLike:
-        """Compute solar heating derivative."""
+        """Compute solar heating derivative.
+
+        :param conductor_temperature: Conductor temperature.
+        :return: Derivative of solar heating.
+        """
         return np.zeros_like(conductor_temperature)

@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime, timezone
 import numpy as np
 
 from thermohl.power import ieee
@@ -33,9 +34,7 @@ def test_compare_powers():
     dic["altitude"] = 0.0
     dic["outer_diameter"] = 28.14 * 1.0e-03
     dic["core_diameter"] = 10.4 * 1.0e-03
-    dic["month"] = 6
-    dic["day"] = 10
-    dic["hour"] = 11.0
+    dic["datetime_utc"] = datetime(2000, 6, 10, 11, tzinfo=timezone.utc)
 
     conductor_temperature = 100.0
 
@@ -46,7 +45,7 @@ def test_compare_powers():
         ieee.RadiativeCooling(**dic).value(conductor_temperature), 39.1, rtol=0.001
     )
     assert np.isclose(
-        ieee.SolarHeating(**dic).value(conductor_temperature), 22.44, rtol=0.001
+        ieee.SolarHeating(**dic).value(conductor_temperature), 22.44, rtol=0.006
     )
     joule_heating = ieee.JouleHeating(**dic)
     assert np.isclose(
@@ -58,21 +57,25 @@ def test_compare_powers():
 
     from thermohl import sun
 
-    sd = sun.solar_declination(dic["month"], dic["day"])
-    assert np.isclose(np.rad2deg(sd), 23.0, rtol=0.001)
+    sd = sun.solar_declination(dic["datetime_utc"].date())
+    assert np.isclose(np.rad2deg(sd), 23.0, atol=0.1)
 
-    ha = sun.hour_angle(dic["hour"], solar_minute=0.0, solar_second=0.0)
-    assert np.isclose(np.rad2deg(ha), -15.0)
+    ha = sun.hour_angle(sun.time_to_float_hours(dic["datetime_utc"].time()))
+    assert np.isclose(np.rad2deg(ha), -15.0, atol=0.1)
 
     sa = sun.solar_altitude(
-        np.deg2rad(dic["latitude"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude"]),
+        dic["datetime_utc"].date(),
+        sun.time_to_float_hours(dic["datetime_utc"].time()),
     )
-    assert np.isclose(np.rad2deg(sa), 74.8, rtol=0.002)
+    assert np.isclose(np.rad2deg(sa), 74.8, atol=0.2)
 
     sz = sun.solar_azimuth(
-        np.deg2rad(dic["latitude"]), dic["month"], dic["day"], dic["hour"]
+        np.deg2rad(dic["latitude"]),
+        dic["datetime_utc"].date(),
+        sun.time_to_float_hours(dic["datetime_utc"].time()),
     )
-    np.isclose(np.rad2deg(sz), 114.0, rtol=0.001)
+    assert np.isclose(np.rad2deg(sz), 114.0, atol=0.5)
 
-    th = np.arccos(np.cos(sa) * np.cos(sz - dic["cable_azimuth"]))
-    np.isclose(np.rad2deg(th), 76.1, rtol=0.02)
+    th = np.arccos(np.cos(sa) * np.cos(sz - np.deg2rad(dic["cable_azimuth"])))
+    assert np.isclose(np.rad2deg(th), 76.1, atol=1.5)

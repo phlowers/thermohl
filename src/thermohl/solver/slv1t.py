@@ -12,9 +12,8 @@ import numpy as np
 import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
-from thermohl.solver.base import Solver as Solver_
+from thermohl.solver.base import Solver as Solver_, get_time_changing_parameters
 from thermohl.solver.base import _DEFPARAM as DP
-from thermohl.solver.base import _set_dates, reshape
 from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
 from thermohl.utils import bisect_v
@@ -48,7 +47,12 @@ class Solver1T(Solver_):
 
         # solve with bisection
         conductor_temperature, err = bisect_v(
-            lambda x: -self.balance(x), Tmin, Tmax, (self.args.max_len(),), tol, maxiter
+            lambda x: -self.balance(x),
+            Tmin,
+            Tmax,
+            (self.args.get_number_of_computations(),),
+            tol,
+            maxiter,
         )
 
         # format output
@@ -74,7 +78,7 @@ class Solver1T(Solver_):
 
     def transient_temperature(
         self,
-        time: floatArray = np.array([]),
+        offset: floatArray = np.array([]),
         T0: Optional[float] = None,
         return_power: bool = False,
     ) -> Dict[str, Any]:
@@ -82,7 +86,7 @@ class Solver1T(Solver_):
         Compute transient-state temperature.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
+            offset (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
             T0 (float | None): Initial temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             return_power (bool, optional): Return power term values. The default is False.
 
@@ -91,9 +95,9 @@ class Solver1T(Solver_):
         """
 
         # get sizes
-        args_size = self.args.max_len()
-        time_size = len(time)
-        if time_size < 2:
+        n = self.args.get_number_of_computations()
+        N = len(offset)
+        if N < 2:
             raise ValueError("The length of the time array must be at least 2.")
 
         # get initial temperature
@@ -103,55 +107,29 @@ class Solver1T(Solver_):
                 if isinstance(self.args.ambient_temperature, numbers.Number)
                 else self.args.ambient_temperature[0]
             )
-
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, args_size
-        )
-
-        # A dict with time-changing quantities (with all elements of size time_size * args_size)
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            transit=reshape(self.args.transit, time_size, args_size),
-            ambient_temperature=reshape(
-                self.args.ambient_temperature, time_size, args_size
-            ),
-            wind_azimuth=reshape(self.args.wind_azimuth, time_size, args_size),
-            wind_speed=reshape(self.args.wind_speed, time_size, args_size),
-            ambient_pressure=reshape(self.args.ambient_pressure, time_size, args_size),
-            relative_humidity=reshape(
-                self.args.relative_humidity, time_size, args_size
-            ),
-            precipitation_rate=reshape(
-                self.args.precipitation_rate, time_size, args_size
-            ),
-        )
-        del (month, day, hour)
-
+        time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
-        conductor_temperature = np.zeros((time_size, args_size))
+        conductor_temperature = np.zeros((N, n))
         conductor_temperature[0, :] = T0
 
         # main time loop
-        for i in range(1, len(time)):
-            for k, v in de.items():
+        for i in range(1, N):
+            for k, v in time_changing_parameters.items():
                 self.args[k] = v[i, :]
             self.update()
             conductor_temperature[i, :] = (
                 conductor_temperature[i - 1, :]
-                + (time[i] - time[i - 1])
+                + (offset[i] - offset[i - 1])
                 * self.balance(conductor_temperature[i - 1, :])
                 * imc
             )
 
         # save results
         result = {
-            VariableType.TIME: time,
+            VariableType.TIME: offset,
             VariableType.TEMPERATURE: conductor_temperature,
         }
 
@@ -159,9 +137,9 @@ class Solver1T(Solver_):
         if return_power:
             for power in Solver_.powers():
                 result[power] = np.zeros_like(conductor_temperature)
-            for i in range(time_size):
-                for key in de.keys():
-                    self.args[key] = de[key][i, :]
+            for i in range(N):
+                for key in time_changing_parameters.keys():
+                    self.args[key] = time_changing_parameters[key][i, :]
                 self.update()
                 result[PowerType.JOULE][i, :] = self.joule_heating.value(
                     conductor_temperature[i, :]
@@ -179,8 +157,8 @@ class Solver1T(Solver_):
                     conductor_temperature[i, :]
                 )
 
-        # squeeze return values if args_size is 1
-        if args_size == 1:
+        # squeeze return values if n is 1
+        if n == 1:
             keys = list(result.keys())
             keys.remove(VariableType.TIME)
             for key in keys:
@@ -221,7 +199,7 @@ class Solver1T(Solver_):
         transit = self.args.transit
 
         # solve with bisection
-        shape = (self.args.max_len(),)
+        shape = (self.args.get_number_of_computations(),)
         T_ = max_conductor_temperature * np.ones(shape)
         joule_heating = (
             self.convective_cooling.value(T_)

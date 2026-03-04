@@ -8,7 +8,7 @@
 from typing import Any
 
 from thermohl.power import ieee
-from thermohl import floatArrayLike, intArrayLike
+from thermohl import floatArrayLike, datetimeListLike
 
 
 class SolarHeating(ieee.SolarHeating):
@@ -19,31 +19,23 @@ class SolarHeating(ieee.SolarHeating):
         latitude: floatArrayLike,
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
-        month: intArrayLike,
-        day: intArrayLike,
-        hour: floatArrayLike,
+        datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         measured_solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
-        r"""Init with args.
+        """Init with args.
+        See ieee.SolarHeating, it is exactly the same with altitude and turbidity set to zero.
+        If more than one input are numpy arrays, they should have the same size.
 
-        See ieee.SolarHeating; it is exactly the same with altitude and
-        turbidity set to zero. If more than one input are numpy arrays, they
-        should have the same size.
-
-        Args:
-            latitude (float | numpy.ndarray): Latitude.
-            altitude (float | numpy.ndarray): Altitude.
-            cable_azimuth (float | numpy.ndarray): Azimuth.
-            month (int | numpy.ndarray): Month number (must be between 1 and 12).
-            day (int | numpy.ndarray): Day of the month (must be between 1 and 28, 29, 30 or 31 depending on month).
-            hour (float | numpy.ndarray): Hour of the day (solar, must be between 0 and 23).
-            outer_diameter (float | numpy.ndarray): external diameter.
-            solar_absorptivity (float | numpy.ndarray): Solar absorption coefficient.
-            measured_solar_irradiance (float | numpy.ndarray): Optional precomputed solar radiation term.
-
+        :param latitude: Latitude in degrees.
+        :param altitude: Altitude.
+        :param cable_azimuth: Azimuth of the conductor in degrees.
+        :param datetime_utc: Datetime in UTC.
+        :param outer_diameter: external diameter of the conductor.
+        :param solar_absorptivity: Solar absorption coefficient of the conductor.
+        :param measured_solar_irradiance: Optional precomputed solar radiation term.
         """
         if "turbidity" in kwargs.keys():
             kwargs.pop("turbidity")
@@ -52,9 +44,7 @@ class SolarHeating(ieee.SolarHeating):
             altitude=altitude,
             cable_azimuth=cable_azimuth,
             turbidity=0.0,
-            month=month,
-            day=day,
-            hour=hour,
+            datetime_utc=datetime_utc,
             outer_diameter=outer_diameter,
             solar_absorptivity=solar_absorptivity,
             measured_solar_irradiance=measured_solar_irradiance,

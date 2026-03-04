@@ -9,6 +9,7 @@ from typing import Union, List
 
 import numpy as np
 import numpy.typing as npt
+from datetime import datetime, date
 
 try:
     from ._version import __version__
@@ -21,9 +22,10 @@ except ImportError:
         __version__ = "unknown"
 
 floatArrayLike = Union[float, npt.NDArray[np.float64]]
-intArrayLike = Union[int, npt.NDArray[np.int64]]
 numberArrayLike = Union[float, int, npt.NDArray[np.float64], npt.NDArray[np.int64]]
 strListLike = Union[str, List[str]]
+dateListLike = Union[date, List[date]]
+datetimeListLike = Union[datetime, List[datetime]]
 
 floatArray = npt.NDArray[np.float64]
 intArray = npt.NDArray[np.int64]

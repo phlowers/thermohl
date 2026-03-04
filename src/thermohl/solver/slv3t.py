@@ -12,7 +12,11 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import Solver as Solver_, _DEFPARAM as DP, _set_dates, reshape
+from thermohl.solver.base import (
+    Solver as Solver_,
+    _DEFPARAM as DP,
+    get_time_changing_parameters,
+)
 from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
 from thermohl.solver.enums.cable_type import CableType, CableTypeListLike
 from thermohl.solver.enums.power_type import PowerType
@@ -135,7 +139,7 @@ class Solver3T(Solver_):
             - positive_surface_diameter_indices : numpy.ndarray[int]
                 Indices where surface diameter `d_` is greater than 0.
         """
-        heat_capacity = 0.5 * np.ones((self.args.max_len(),))
+        heat_capacity = 0.5 * np.ones((self.args.get_number_of_computations(),))
         outer_diameter = self.args.outer_diameter * np.ones_like(heat_capacity)
         core_diameter = self.args.core_diameter * np.ones_like(heat_capacity)
         positive_surface_diameter_indices = np.nonzero(core_diameter > 0.0)[0]
@@ -168,15 +172,13 @@ class Solver3T(Solver_):
         Returns:
             None
         """
-        self.args.extend_to_max_len()
+        self.args.extend()
         self.joule_heating.__init__(**self.args.__dict__)
         self.solar_heating.__init__(**self.args.__dict__)
         self.convective_cooling.__init__(**self.args.__dict__)
         self.radiative_cooling.__init__(**self.args.__dict__)
         self.precipitation_cooling.__init__(**self.args.__dict__)
-
         self.morgan_coefficients = self._morgan_coefficients()
-
         self.args.compress()
 
     def average(
@@ -296,7 +298,7 @@ class Solver3T(Solver_):
         """
 
         # if no guess provided, use ambient temp
-        shape = (self.args.max_len(),)
+        shape = (self.args.get_number_of_computations(),)
         surface_temperature_guess = (
             surface_temperature_guess
             if surface_temperature_guess is not None
@@ -406,7 +408,7 @@ class Solver3T(Solver_):
 
     def transient_temperature(
         self,
-        time: floatArray = np.array([]),
+        offset: floatArray = np.array([]),
         surface_temperature_0: Optional[floatArrayLike] = None,
         core_temperature_0: Optional[floatArrayLike] = None,
         return_power: bool = False,
@@ -415,7 +417,7 @@ class Solver3T(Solver_):
         Compute transient-state temperature.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
+            offset (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0 (float | numpy.ndarray | None): Initial surface temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             core_temperature_0 (float | numpy.ndarray | None): Initial core temperature. If None, the ambient temperature from the internal dict will be used. The default is None.
             return_power (bool, optional): Return power term values. The default is False.
@@ -425,8 +427,8 @@ class Solver3T(Solver_):
 
         """
         # get sizes (n for input dict entries, N for time)
-        n = self.args.max_len()
-        N = len(time)
+        n = self.args.get_number_of_computations()
+        N = len(offset)
         if N < 2:
             raise ValueError()
 
@@ -441,29 +443,7 @@ class Solver3T(Solver_):
             if core_temperature_0 is not None
             else 1.0 + surface_temperature_0
         )
-
-        # get month, day and hours
-        month, day, hour = _set_dates(
-            self.args.month, self.args.day, self.args.hour, time, n
-        )
-
-        # Two dicts, one (dc) with static quantities (with all elements of size
-        # n), the other (de) with time-changing quantities (with all elements of
-        # size N*n); uk is a list of keys that are in dc but not in de.
-        de = dict(
-            month=month,
-            day=day,
-            hour=hour,
-            transit=reshape(self.args.transit, N, n),
-            ambient_temperature=reshape(self.args.ambient_temperature, N, n),
-            wind_azimuth=reshape(self.args.wind_azimuth, N, n),
-            wind_speed=reshape(self.args.wind_speed, N, n),
-            ambient_pressure=reshape(self.args.ambient_pressure, N, n),
-            relative_humidity=reshape(self.args.relative_humidity, N, n),
-            precipitation_rate=reshape(self.args.precipitation_rate, N, n),
-        )
-        del (month, day, hour)
-
+        time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
         # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
@@ -479,22 +459,22 @@ class Solver3T(Solver_):
         )
 
         # main time loop
-        for i in range(1, len(time)):
-            for k in de.keys():
-                self.args[k] = de[k][i, :]
+        for i in range(1, len(offset)):
+            for k in time_changing_parameters.keys():
+                self.args[k] = time_changing_parameters[k][i, :]
             self.update()
             bal = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + (time[i] - time[i - 1]) * bal * imc
+                ambient_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
             )
             mrg = c1 * (self.joule_heating.value(ambient_temperature[i, :]) - bal)
             core_temperature[i, :] = ambient_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
         return self._transient_temperature_results(
-            time,
+            offset,
             surface_temperature,
             ambient_temperature,
             core_temperature,
@@ -542,7 +522,7 @@ class Solver3T(Solver_):
                     CableLocation.AVERAGE,
                     CableLocation.CORE,
                 ]:
-                    raise ValueError()
+                    raise ValueError(f"unknown target : {t}")
             target_ = np.array(target)
         return target_
 
@@ -551,7 +531,7 @@ class Solver3T(Solver_):
     ) -> Tuple[np.ndarray, Callable]:
         """Format input for ampacity solver."""
 
-        max_len = self.args.max_len()
+        max_len = self.args.get_number_of_computations()
         Tmax = T * np.ones(max_len)
         target_ = self._check_target(target, self.args.core_diameter, max_len)
 

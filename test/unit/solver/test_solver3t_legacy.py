@@ -5,8 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime, timezone
 import numpy as np
-from numpy import array, int32
+from numpy import array
 from thermohl.solver.enums.temperature_location import TemperatureLocation
 
 from thermohl.solver.enums.heat_equation_type import HeatEquationType
@@ -45,9 +46,7 @@ def test_solver3t_legacy():
         "magnetic_coeff_per_a": array([0.0]),
         "solar_absorptivity": array([0.9]),
         "emissivity": array([0.8]),
-        "month": array([3], dtype=int32),
-        "day": array([7], dtype=int32),
-        "hour": array([0.0]),
+        "datetime_utc": datetime(2000, 3, 7, 0, tzinfo=timezone.utc),
     }
     Ts0 = [34.955032]
     Tc0 = [36.164476]

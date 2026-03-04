@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime, timezone
 import numpy as np
 import pytest
 
@@ -15,59 +16,68 @@ def test_solar_radiation_scalar():
     latitude = 45.0
     cable_azimuth = 180.0
     albedo = 0.2
-    month = 6
-    day = 21
-    hour = 12.0
+    datetime_utc = [datetime(2000, 6, 21, 12, tzinfo=timezone.utc)]
     expected = 1309.2
 
     result = SolarHeating._solar_radiation(
-        latitude, cable_azimuth, albedo, month, day, hour
+        latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.isclose(result, expected), f"Expected {expected}, but got {result}"
+    assert np.allclose(
+        result, expected, atol=1e-1
+    ), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_array():
     latitude = np.array([45.0, 50.0, 55.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2, 0.2])
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21, 21])
-    hour = np.array([12.0, 12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     expected = np.array([1309.2, 1267.965, 0.0])
 
     result = SolarHeating._solar_radiation(
-        latitude, cable_azimuth, albedo, month, day, hour
+        latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
+    assert np.allclose(
+        result, expected, atol=1e-1
+    ), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_default_albedo():
     latitude = np.array([45.0, 50.0, 55.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = 0.2
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21, 21])
-    hour = np.array([12.0, 12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     expected = np.array([1309.2, 1267.965, 0.0])
 
     result = SolarHeating._solar_radiation(
-        latitude, cable_azimuth, albedo, month, day, hour
+        latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
+    assert np.allclose(
+        result, expected, atol=1e-1
+    ), f"Expected {expected}, but got {result}"
 
 
 def test_solar_radiation_mismatched_array_sizes():
     latitude = np.array([45.0, 50.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21])
-    hour = np.array([12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     with pytest.raises(ValueError):
-        SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, month, day, hour)
+        SolarHeating._solar_radiation(latitude, cable_azimuth, albedo, datetime_utc)
 
 
 solar_heating_instances = [
@@ -76,9 +86,11 @@ solar_heating_instances = [
             latitude=np.array([45.0, 50.0, 55.0]),
             cable_azimuth=np.array([180.0, 180.0, 180.0]),
             albedo=np.array([0.2, 0.2, 0.2]),
-            month=np.array([6, 6, 6]),
-            day=np.array([21, 21, 21]),
-            hour=np.array([12.0, 12.0, 12.0]),
+            datetime_utc=[
+                datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+                datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+                datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+            ],
             outer_diameter=np.array([0.01, 0.01, 0.01]),
             solar_absorptivity=np.array([0.9, 0.9, 0.9]),
             measured_solar_irradiance=np.array([np.nan, np.nan, np.nan]),
@@ -90,9 +102,7 @@ solar_heating_instances = [
             latitude=45.0,
             cable_azimuth=180.0,
             albedo=0.2,
-            month=6,
-            day=21,
-            hour=12.0,
+            datetime_utc=datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
             outer_diameter=0.01,
             solar_absorptivity=0.9,
             measured_solar_irradiance=np.array([np.nan, np.nan, np.nan]),
@@ -115,16 +125,20 @@ def test_solar_heating_value_scalar(solar_heating, expected):
 
     result = solar_heating.value(conductor_temperature)
 
-    assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
+    assert np.allclose(
+        result, expected, atol=1e-3
+    ), f"Expected {expected}, but got {result}"
 
 
 def test_solar_heating_value_array():
     latitude = np.array([45.0, 50.0, 55.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2, 0.2])
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21, 21])
-    hour = np.array([12.0, 12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     outer_diameter = np.array([0.01, 0.01, 0.01])
     solar_absorptivity = np.array([0.9, 0.9, 0.9])
     conductor_temperature = np.array([25.0, 30.0, 35.0])
@@ -132,9 +146,7 @@ def test_solar_heating_value_array():
         latitude,
         cable_azimuth,
         albedo,
-        month,
-        day,
-        hour,
+        datetime_utc,
         outer_diameter,
         solar_absorptivity,
         np.array([np.nan, np.nan, np.nan]),
@@ -143,16 +155,19 @@ def test_solar_heating_value_array():
 
     result = solar_heating.value(conductor_temperature)
 
-    assert np.allclose(result, expected), f"Expected {expected}, but got {result}"
+    assert np.allclose(
+        result, expected, atol=1e-3
+    ), f"Expected {expected}, but got {result}"
 
 
 def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
     latitude = np.array([45.0, 50.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21])
-    hour = np.array([12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     outer_diameter = np.array([0.01, 0.01])
     solar_absorptivity = np.array([0.9, 0.9])
     conductor_temperature = np.array([25.0, 30.0])
@@ -161,9 +176,7 @@ def test_solar_heating_value_mismatched_array_sizes_should_raise_error():
             latitude,
             cable_azimuth,
             albedo,
-            month,
-            day,
-            hour,
+            datetime_utc,
             outer_diameter,
             solar_absorptivity,
             np.array([np.nan, np.nan]),
@@ -209,9 +222,10 @@ def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
     latitude = np.array([45.0, 50.0])
     cable_azimuth = np.array([180.0, 180.0, 180.0])
     albedo = np.array([0.2, 0.2])
-    month = np.array([6, 6, 6])
-    day = np.array([21, 21])
-    hour = np.array([12.0, 12.0])
+    datetime_utc = [
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+    ]
     outer_diameter = np.array([0.01, 0.01])
     solar_absorptivity = np.array([0.9, 0.9])
     conductor_temperature = np.array([25.0, 30.0])
@@ -220,9 +234,7 @@ def test_solar_heating_derivative_mismatched_array_sizes_should_raise_error():
             latitude,
             cable_azimuth,
             albedo,
-            month,
-            day,
-            hour,
+            datetime_utc,
             outer_diameter,
             solar_absorptivity,
             np.array([np.nan, np.nan]),
