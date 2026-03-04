@@ -4,18 +4,15 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from typing import Optional, Any, Iterable
 from math import pi
-from typing import Optional, Any, Tuple
-
+from typing import Any, Tuple, Iterable
 import numpy as np
-
 from thermohl import (
     floatArrayLike,
     sun,
     datetimeListLike,
 )
-from thermohl.power import SolarHeatingBase, _SRad
+from thermohl.power import SolarHeatingBase
 
 
 def compute_solar_irradiance(
