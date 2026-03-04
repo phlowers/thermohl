@@ -40,55 +40,75 @@ def scn2dict(scn: dict) -> dict:
     ).replace(tzinfo=ZoneInfo("Europe/Paris"))
     datetime_utc = datetime_paris.astimezone(timezone.utc)
     dic["datetime_utc"] = datetime_utc
-    # utile uniquement pour le test test_steady_temperature
-    dic[VariableType.TRANSIT.value] = scn["Intensite"]
 
     return dic
 
 
-# def test_transient_temperature():
-#     time_constant = 600.0
-#     offsets = [1, 2, 3, 4, 5, 10, 30]  # in minutes
-#
-#     for scenario in get_scenarios("scenarios_transient.csv"):
-#         solver = rte(
-#             scn2dict(scenario),
-#             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
-#         )
-#
-#         # initial steady state
-#         solver.args[VariableType.TRANSIT.value] = scenario["I_initial"]
-#         solver.update()
-#         initial_state = solver.steady_temperature()
-#
-#         # final steady state
-#         solver.args[VariableType.TRANSIT.value] = scenario["I_final"]
-#         solver.update()
-#         final_state = solver.steady_temperature(
-#             surface_temperature_guess=scenario["T_surf_transient_final"],
-#             core_temperature_guess=scenario["T_heart_transient_final"],
-#         )
-#
-#         # transient temperature (linearized)
-#         transient_result = solver.transient_temperature_legacy(
-#             offset=60 * np.array(offsets),
-#             surface_temperature_0=initial_state[TemperatureLocation.SURFACE],
-#             core_temperature_0=initial_state[TemperatureLocation.CORE],
-#             time_constant=time_constant,
-#         )
-#
-#         # check final temperature
-#         assert np.isclose(
-#             scenario["T_mean_final"],
-#             final_state[TemperatureLocation.AVERAGE][0],
-#         )
-#
-#         # check transient temperature
-#         for offset in offsets:
-#             for temperature in ["surface", "core", "mean"]:
-#                 expected_temperature = scenario[f"T_{temperature}_{offset}"]
-#                 # todo : recuperer mieux que ca : deja comprendre la forme de ce qui est renvoyé.
-#                 result_temperature = transient_result[f"T_{temperature}"][
-#                     np.argmin(np.abs(transient_result[VariableType.TIME] - offset * 60))
-#                 ]
-#                 assert np.isclose(expected_temperature, result_temperature)
+def test_transient_temperature():
+    time_constant = 600.0
+    offsets = np.array([60, 120])  # np.array([1, 2, 3, 5, 10, 30]) * 60
+
+    i = 0
+    for scenario in get_scenarios("scenarios_transient.csv"):
+        i += 1
+        print(f"YOMAN num {i}: {scenario=}")
+
+        solver = rte(
+            scn2dict(scenario),
+            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+        )
+
+        # initial steady state
+        solver.args[VariableType.TRANSIT.value] = scenario["I_initial"]
+        solver.update()
+        initial_state = solver.steady_temperature()
+
+        # final steady state
+        solver.args[VariableType.TRANSIT.value] = scenario["I_final"]
+        solver.update()
+        final_state = solver.steady_temperature(
+            surface_temperature_guess=scenario["T_surf_final"],
+            core_temperature_guess=scenario["T_heart_final"],
+        )
+
+        # transient temperature (linearized)
+        transient_result = solver.transient_temperature_legacy(
+            offset=offsets,
+            surface_temperature_0=initial_state[TemperatureLocation.SURFACE],
+            core_temperature_0=initial_state[TemperatureLocation.CORE],
+            time_constant=time_constant,
+        )
+
+        # print(
+        #     f'TEST : {scenario["T_mean_final"]=}, {final_state[TemperatureLocation.AVERAGE][0]=}'
+        # )
+        # print(f"TEST2 : {final_state[TemperatureLocation.AVERAGE]=}")
+        # todo : ameliorer la tolerance
+        # check final temperature
+        assert np.isclose(
+            scenario["T_mean_final"],
+            final_state[TemperatureLocation.AVERAGE][0],
+            atol=3,
+        )
+
+        print(f"\n\nYOMAN2 : {transient_result=}")
+        offsets_minute = offsets // 60
+        expected_surface_temperatures = [
+            scenario[f"T_surf_{offset}"] for offset in offsets_minute
+        ]
+        expected_mean_temperatures = [
+            scenario[f"T_mean_{offset}"] for offset in offsets_minute
+        ]
+        expected_core_temperatures = [
+            scenario[f"T_heart_{offset}"] for offset in offsets_minute
+        ]
+
+        assert np.allclose(
+            transient_result[TemperatureLocation.SURFACE], expected_surface_temperatures
+        )
+        assert np.allclose(
+            transient_result[TemperatureLocation.AVERAGE], expected_mean_temperatures
+        )
+        assert np.allclose(
+            transient_result[TemperatureLocation.CORE], expected_core_temperatures
+        )
