@@ -132,7 +132,7 @@ class Solver3TL(Solver3T):
 
     def transient_temperature_legacy(
         self,
-        time: floatArray = np.array([]),
+        offset: floatArray = np.array([]),
         surface_temperature_0: Optional[floatArrayLike] = None,
         core_temperature_0: Optional[floatArrayLike] = None,
         time_constant: float = 600.0,
@@ -142,7 +142,7 @@ class Solver3TL(Solver3T):
         Compute transient-state temperature with legacy method.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
+            offset (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0 (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
@@ -157,10 +157,10 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (input_size for input dict entries, time_size for time)
-        input_size = self.args.get_number_of_computations()
-        time_size = len(time)
-        if time_size < 2:
+        # get sizes (N for input dict entries, n for offsets)
+        N = self.args.get_number_of_computations()
+        n = len(offset)
+        if n < 2:
             raise ValueError()
 
         # get initial temperature
@@ -179,10 +179,10 @@ class Solver3TL(Solver3T):
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init
-        surface_temperature = np.zeros((time_size, input_size))
-        ambient_temperature = np.zeros((time_size, input_size))
-        core_temperature = np.zeros((time_size, input_size))
-        temperature_difference_c = np.zeros((time_size, input_size))
+        surface_temperature = np.zeros((n, N))
+        ambient_temperature = np.zeros((n, N))
+        core_temperature = np.zeros((n, N))
+        temperature_difference_c = np.zeros((n, N))
 
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
@@ -193,11 +193,11 @@ class Solver3TL(Solver3T):
             core_temperature[0, :] - surface_temperature[0, :]
         )
 
-        for i in range(1, len(time)):
+        for i in range(1, len(offset)):
             balance = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
-            time_difference = time[i] - time[i - 1]
+            time_difference = offset[i] - offset[i - 1]
             ambient_temperature[i, :] = (
                 ambient_temperature[i - 1, :] + time_difference * imc * balance
             )
@@ -217,10 +217,10 @@ class Solver3TL(Solver3T):
             )
 
         return self._transient_temperature_results(
-            time,
+            offset,
             surface_temperature,
             ambient_temperature,
             core_temperature,
             return_power,
-            input_size,
+            N,
         )
