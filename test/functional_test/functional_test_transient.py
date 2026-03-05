@@ -5,16 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
-
-from zoneinfo import ZoneInfo
-import os.path
 import numpy as np
-import pandas as pd
-
 from functional_test.functional_test_steady import (
     get_scenarios,
-    get_cable_data,
     scn2dict,
 )
 from thermohl.solver import rte, HeatEquationType, TemperatureLocation
@@ -23,7 +16,7 @@ from thermohl.solver.enums.variable_type import VariableType
 
 def test_transient_temperature():
     time_constant = 600.0
-    offsets = np.array([0, 1, 2, 3, 5]) * 60  # todo : ajouter 10 et 30
+    offsets = np.arange(0.0, 1800.0 + 1, 10)
 
     for scenario in get_scenarios("scenarios_transient.csv"):
         solver = rte(
@@ -66,33 +59,35 @@ def test_transient_temperature():
             time_constant=time_constant,
         )
 
-        # get expected temperatures from scenario
-        offsets_minute = offsets // 60
+        # get expected temperatures from scenario at the right offsets
+        useful_offsets = np.array([0, 1, 2, 3, 5, 10, 30])  # in minutes
         expected_surface_temperatures = [
-            scenario[f"T_surf_{offset}"] for offset in offsets_minute
+            scenario[f"T_surf_{offset}"] for offset in useful_offsets
         ]
         expected_mean_temperatures = [
-            scenario[f"T_mean_{offset}"] for offset in offsets_minute
+            scenario[f"T_mean_{offset}"] for offset in useful_offsets
         ]
         expected_core_temperatures = [
-            scenario[f"T_heart_{offset}"] for offset in offsets_minute
+            scenario[f"T_heart_{offset}"] for offset in useful_offsets
         ]
 
-        # todo : ameliorer la tolerance : elle explose sur l'horizon 30 : mais est ce que le calcul fait par Henri est bon ?
-        # je pense que passer de 10min a 30min n'est pas valide : il faut faire par petits pas.
-        atol = 3
+        atol = 0.01
+        # get indexes of the useful offsets in the thermohl computation of transient temperature.
+        useful_indexes = np.searchsorted(
+            transient_result[VariableType.TIME], useful_offsets * 60
+        )
         assert np.allclose(
-            transient_result[TemperatureLocation.SURFACE],
+            transient_result[TemperatureLocation.SURFACE][useful_indexes],
             expected_surface_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureLocation.AVERAGE],
+            transient_result[TemperatureLocation.AVERAGE][useful_indexes],
             expected_mean_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureLocation.CORE],
+            transient_result[TemperatureLocation.CORE][useful_indexes],
             expected_core_temperatures,
             atol=atol,
         )

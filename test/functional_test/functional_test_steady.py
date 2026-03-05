@@ -53,7 +53,8 @@ def scn2dict(scn: dict) -> dict:
     datetime_utc = datetime_paris.astimezone(timezone.utc)
     dic["datetime_utc"] = datetime_utc
     # utile uniquement pour le test test_steady_temperature
-    dic[VariableType.TRANSIT.value] = scn["Intensite"]
+    if "Intensite" in scn:
+        dic[VariableType.TRANSIT.value] = scn["Intensite"]
 
     return dic
 
