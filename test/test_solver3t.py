@@ -13,7 +13,7 @@ from thermohl.solver.entities import (
     CableType,
     ModelType,
     VariableType,
-    TemperatureLocation,
+    TemperatureType,
     TargetType,
 )
 
@@ -83,16 +83,16 @@ def test_balance():
         assert np.all(df[VariableType.ERROR] < tol)
         assert np.allclose(
             s.balance(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
+                surface_temperature=df[TemperatureType.SURFACE],
+                core_temperature=df[TemperatureType.CORE],
             ).values,
             0.0,
             atol=tol,
         )
         assert np.allclose(
             s.morgan(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
+                surface_temperature=df[TemperatureType.SURFACE],
+                core_temperature=df[TemperatureType.CORE],
             ).values,
             0.0,
             atol=tol,
@@ -122,9 +122,9 @@ def test_consistency():
 
     for s in _solvers(dic):
         d = {
-            TargetType.SURFACE: TemperatureLocation.SURFACE,
-            TargetType.AVERAGE: TemperatureLocation.AVERAGE,
-            TargetType.CORE: TemperatureLocation.CORE,
+            TargetType.SURFACE: TemperatureType.SURFACE,
+            TargetType.AVERAGE: TemperatureType.AVERAGE,
+            TargetType.CORE: TemperatureType.CORE,
         }
 
         for location, temperature_at_location in d.items():
@@ -143,26 +143,24 @@ def test_consistency():
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
+                    surface_temperature=df[TemperatureType.SURFACE],
+                    core_temperature=df[TemperatureType.CORE],
                 ).values,
                 0.0,
                 atol=tol,
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
+                    surface_temperature=df[TemperatureType.SURFACE],
+                    core_temperature=df[TemperatureType.CORE],
                 ).values,
                 0.0,
                 atol=tol,
             )
             # 3t solve
             dg = s.steady_temperature(
-                surface_temperature_guess=df[TemperatureLocation.SURFACE]
-                .round(1)
-                .values,
-                core_temperature_guess=df[TemperatureLocation.CORE].round(1).values,
+                surface_temperature_guess=df[TemperatureType.SURFACE].round(1).values,
+                core_temperature_guess=df[TemperatureType.CORE].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,

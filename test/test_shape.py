@@ -12,7 +12,7 @@ from thermohl import solver
 from thermohl.solver import HeatEquationType, ModelType
 from thermohl.solver.entities import (
     TargetType,
-    TemperatureLocation,
+    TemperatureType,
     VariableType,
 )
 
@@ -38,7 +38,7 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
         a = dict(max_conductor_temperature=t[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
-            max_conductor_temperature=t[TemperatureLocation.SURFACE].values,
+            max_conductor_temperature=t[TemperatureType.SURFACE].values,
             target=TargetType.SURFACE,
         )
     else:
@@ -52,8 +52,8 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             offset=t,
-            surface_temperature_0=ds[TemperatureLocation.SURFACE].values,
-            core_temperature_0=ds[TemperatureLocation.CORE].values,
+            surface_temperature_0=ds[TemperatureType.SURFACE].values,
+            core_temperature_0=ds[TemperatureType.CORE].values,
         )
     else:
         raise NotImplementedError

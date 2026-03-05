@@ -8,7 +8,7 @@
 from datetime import datetime, timezone
 import numpy as np
 from numpy import array
-from thermohl.solver.entities import TemperatureLocation, HeatEquationType
+from thermohl.solver.entities import TemperatureType, HeatEquationType
 
 from thermohl.solver import rte
 
@@ -58,6 +58,6 @@ def test_solver3t_legacy():
     )
 
     print(result)
-    assert abs(result[TemperatureLocation.CORE][-1] - 42) <= 0.5
-    assert abs(result[TemperatureLocation.SURFACE][-1] - 39.9) <= 0.5
-    assert abs(result[TemperatureLocation.AVERAGE][-1] - 40.9) <= 0.5
+    assert abs(result[TemperatureType.CORE][-1] - 42) <= 0.5
+    assert abs(result[TemperatureType.SURFACE][-1] - 39.9) <= 0.5
+    assert abs(result[TemperatureType.AVERAGE][-1] - 40.9) <= 0.5

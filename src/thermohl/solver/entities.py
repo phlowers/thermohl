@@ -82,7 +82,7 @@ class ModelType(Enum):
     RTE = "rte"
 
 
-class TemperatureLocation(Enum):
+class TemperatureType(Enum):
     """
     Defines all the possible temperature locations for the cable.
     * SURFACE: the temperature at the surface of the cable

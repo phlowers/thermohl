@@ -11,7 +11,7 @@ from zoneinfo import ZoneInfo
 import os.path
 import numpy as np
 import pandas as pd
-from thermohl.solver import rte, HeatEquationType, TemperatureLocation
+from thermohl.solver import rte, HeatEquationType, TemperatureType
 from thermohl.solver.entities import VariableType
 
 
@@ -67,14 +67,12 @@ def test_steady_temperature():
         )
         result = solver.steady_temperature()
         assert np.allclose(
-            result[TemperatureLocation.SURFACE], scenario["T_surf"], atol=0.05
+            result[TemperatureType.SURFACE], scenario["T_surf"], atol=0.05
         )
         assert np.allclose(
-            result[TemperatureLocation.AVERAGE], scenario["T_moy"], atol=0.05
+            result[TemperatureType.AVERAGE], scenario["T_moy"], atol=0.05
         )
-        assert np.allclose(
-            result[TemperatureLocation.CORE], scenario["T_coeur"], atol=0.05
-        )
+        assert np.allclose(result[TemperatureType.CORE], scenario["T_coeur"], atol=0.05)
 
 
 def test_steady_ampacity():

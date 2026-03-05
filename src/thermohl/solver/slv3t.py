@@ -23,7 +23,7 @@ from thermohl.solver.entities import (
     CableType,
     CableTypeListLike,
     PowerType,
-    TemperatureLocation,
+    TemperatureType,
     VariableType,
 )
 from thermohl.solver.slv1t import Solver1T
@@ -336,9 +336,9 @@ class Solver3T(Solver_):
         z = self.average(x, y)
         df = pd.DataFrame(
             {
-                TemperatureLocation.SURFACE: x,
-                TemperatureLocation.AVERAGE: z,
-                TemperatureLocation.CORE: y,
+                TemperatureType.SURFACE: x,
+                TemperatureType.AVERAGE: z,
+                TemperatureType.CORE: y,
             }
         )
 
@@ -376,9 +376,9 @@ class Solver3T(Solver_):
     ):
         dr = {
             VariableType.TIME: offset,
-            TemperatureLocation.SURFACE: surface_temperature,
-            TemperatureLocation.AVERAGE: average_temperature,
-            TemperatureLocation.CORE: core_temperature,
+            TemperatureType.SURFACE: surface_temperature,
+            TemperatureType.AVERAGE: average_temperature,
+            TemperatureType.CORE: core_temperature,
         }
 
         if return_power:
@@ -630,9 +630,9 @@ class Solver3T(Solver_):
             average_temperature = self.average(surface_temperature, core_temperature)
 
             if return_temp:
-                df[TemperatureLocation.SURFACE] = surface_temperature
-                df[TemperatureLocation.AVERAGE] = average_temperature
-                df[TemperatureLocation.CORE] = core_temperature
+                df[TemperatureType.SURFACE] = surface_temperature
+                df[TemperatureType.AVERAGE] = average_temperature
+                df[TemperatureType.CORE] = core_temperature
 
             if return_power:
                 df[PowerType.JOULE] = self.joule_heating.value(average_temperature)

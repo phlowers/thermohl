@@ -10,7 +10,7 @@ from functional_test.functional_test_steady import (
     get_scenarios,
     scn2dict,
 )
-from thermohl.solver import rte, HeatEquationType, TemperatureLocation
+from thermohl.solver import rte, HeatEquationType, TemperatureType
 from thermohl.solver.entities import VariableType
 
 
@@ -32,7 +32,7 @@ def test_transient_temperature():
         # check initial temperature
         assert np.isclose(
             scenario["T_mean_0"],
-            initial_state[TemperatureLocation.AVERAGE][0],
+            initial_state[TemperatureType.AVERAGE][0],
             atol=0.01,
         )
 
@@ -47,15 +47,15 @@ def test_transient_temperature():
         # check final temperature
         assert np.isclose(
             scenario["T_mean_final"],
-            final_state[TemperatureLocation.AVERAGE][0],
+            final_state[TemperatureType.AVERAGE][0],
             atol=0.05,
         )
 
         # transient temperature
         transient_result = solver.transient_temperature_legacy(
             offset=offsets,
-            surface_temperature_0=initial_state[TemperatureLocation.SURFACE],
-            core_temperature_0=initial_state[TemperatureLocation.CORE],
+            surface_temperature_0=initial_state[TemperatureType.SURFACE],
+            core_temperature_0=initial_state[TemperatureType.CORE],
             time_constant=time_constant,
         )
 
@@ -77,17 +77,17 @@ def test_transient_temperature():
             transient_result[VariableType.TIME], useful_offsets * 60
         )
         assert np.allclose(
-            transient_result[TemperatureLocation.SURFACE][useful_indexes],
+            transient_result[TemperatureType.SURFACE][useful_indexes],
             expected_surface_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureLocation.AVERAGE][useful_indexes],
+            transient_result[TemperatureType.AVERAGE][useful_indexes],
             expected_mean_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureLocation.CORE][useful_indexes],
+            transient_result[TemperatureType.CORE][useful_indexes],
             expected_core_temperatures,
             atol=atol,
         )
