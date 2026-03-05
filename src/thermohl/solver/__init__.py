@@ -20,7 +20,7 @@ from thermohl.solver.entities import (
     TargetType as CableLocation,
     HeatEquationType,
     PowerType as PowerType,
-    TemperatureLocation as TemperatureLocation,
+    TemperatureLocation,
     ModelType,
     VariableType as VariableType,
 )

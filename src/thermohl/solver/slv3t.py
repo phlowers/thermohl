@@ -202,17 +202,17 @@ class Solver3T(Solver_):
         Returns:
             float | numpy.ndarray: Array of average temperatures.
         """
-        ambient_temperature = 0.5 * (surface_temperature + core_temperature)
+        average_temperature = 0.5 * (surface_temperature + core_temperature)
         _, outer_diameter, core_diameter, positive_surface_diameter_indices = (
             self.morgan_coefficients
         )
-        ambient_temperature[positive_surface_diameter_indices] = _profile_bim_avg(
+        average_temperature[positive_surface_diameter_indices] = _profile_bim_avg(
             surface_temperature[positive_surface_diameter_indices],
             core_temperature[positive_surface_diameter_indices],
             0.5 * core_diameter[positive_surface_diameter_indices],
             0.5 * outer_diameter[positive_surface_diameter_indices],
         )
-        return ambient_temperature
+        return average_temperature
 
     def joule(
         self, surface_temperature: floatArray, core_temperature: floatArray
@@ -231,8 +231,8 @@ class Solver3T(Solver_):
         - The function computes the average temperature `temperature`.
         - Returns the Joule heating values based on the adjusted temperatures.
         """
-        ambient_temperature = self.average(surface_temperature, core_temperature)
-        return self.joule_heating.value(ambient_temperature)
+        average_temperature = self.average(surface_temperature, core_temperature)
+        return self.joule_heating.value(average_temperature)
 
     def balance(
         self, surface_temperature: floatArray, core_temperature: floatArray
@@ -454,11 +454,11 @@ class Solver3T(Solver_):
 
         # init
         surface_temperature = np.zeros((N, n))
-        ambient_temperature = np.zeros((N, n))
+        average_temperature = np.zeros((N, n))
         core_temperature = np.zeros((N, n))
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
-        ambient_temperature[0, :] = self.average(
+        average_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
 
@@ -470,17 +470,17 @@ class Solver3T(Solver_):
             bal = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
-            ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
+            average_temperature[i, :] = (
+                average_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
             )
-            mrg = c1 * (self.joule_heating.value(ambient_temperature[i, :]) - bal)
-            core_temperature[i, :] = ambient_temperature[i, :] + c2 * mrg
+            mrg = c1 * (self.joule_heating.value(average_temperature[i, :]) - bal)
+            core_temperature[i, :] = average_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
         return self._transient_temperature_results(
             offset,
             surface_temperature,
-            ambient_temperature,
+            average_temperature,
             core_temperature,
             return_power,
             n,
@@ -627,15 +627,15 @@ class Solver3T(Solver_):
 
         if return_temp or return_power:
             surface_temperature, core_temperature = newtheader(x, y)
-            ambient_temperature = self.average(surface_temperature, core_temperature)
+            average_temperature = self.average(surface_temperature, core_temperature)
 
             if return_temp:
                 df[TemperatureLocation.SURFACE] = surface_temperature
-                df[TemperatureLocation.AVERAGE] = ambient_temperature
+                df[TemperatureLocation.AVERAGE] = average_temperature
                 df[TemperatureLocation.CORE] = core_temperature
 
             if return_power:
-                df[PowerType.JOULE] = self.joule_heating.value(ambient_temperature)
+                df[PowerType.JOULE] = self.joule_heating.value(average_temperature)
                 df[PowerType.SOLAR] = self.solar_heating.value(surface_temperature)
                 df[PowerType.CONVECTION] = self.convective_cooling.value(
                     surface_temperature
