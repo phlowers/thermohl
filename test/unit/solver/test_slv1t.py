@@ -17,7 +17,7 @@ from thermohl import power
 
 
 @pytest.fixture
-def solver():
+def solver_args():
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT.value: np.array([0]),
@@ -27,8 +27,6 @@ def solver():
         "ambient_pressure": np.array([101325]),
         "relative_humidity": np.array([50]),
         "precipitation_rate": np.array([0]),
-        "linear_mass": 1.0,
-        "heat_capacity": 1.0,
         "month": 1,
         "day": 1,
         "hour": 0,
@@ -39,6 +37,8 @@ def solver():
         "solar_absorptivity": np.array([0.5]),
     }
     cable = {
+        "linear_mass": 1.0,
+        "heat_capacity": 1.0,
         "outer_diameter": np.array([3.186e-02]),
         "core_diameter": np.array([0.000]),
         "outer_area": np.array([6.004e-4]),
@@ -51,14 +51,26 @@ def solver():
         "emissivity": np.array([0.8]),
     }
     args.update(cable)
+    return args
 
+
+@pytest.fixture
+def solver(solver_args):
+    return create_solver(solver_args)
+
+
+def create_solver(solver_args):
     joule = power.rte.joule_heating.JouleHeating
     solar = power.rte.solar_heating.SolarHeating
     convective = power.rte.convective_cooling.ConvectiveCooling
     radiative = power.rte.radiative_cooling.RadiativeCooling
 
     solver = Solver1T(
-        dic=args, joule=joule, solar=solar, convective=convective, radiative=radiative
+        dic=solver_args,
+        joule=joule,
+        solar=solar,
+        convective=convective,
+        radiative=radiative,
     )
     return solver
 
@@ -206,3 +218,71 @@ def test_steady_intensity_custom_params(solver):
 
     assert isinstance(result, pd.DataFrame)
     assert VariableType.TRANSIT in result.columns
+
+
+def test_reduced_intensity(solver):
+    solver_args = solver.args.__dict__.copy()
+
+    result = solver.reduced_intensity(
+        delta_T_measured=10.0,
+        measured_intensity=360.0,
+        T_limit=100.0,
+    )
+
+    assert isinstance(result, np.ndarray)
+    assert not np.isnan(result[0])
+
+    # Check that solver args have not been changed
+    assert np.isnan(solver.args.measured_solar_irradiance)
+    assert solver.args.ambient_temperature == solver_args["ambient_temperature"]
+    assert solver.args.wind_speed == solver_args["wind_speed"]
+    assert solver.args.transit == solver_args["transit"]
+
+
+def test_reduced_intensity_several_computations():
+    args = {
+        "max_len": lambda: 2,
+        VariableType.TRANSIT.value: np.array([0, 0]),
+        "ambient_temperature": np.array([25, 25]),
+        "wind_speed": np.array([0, 0]),
+        "wind_azimuth": np.array([0, 0]),
+        "ambient_pressure": np.array([101325, 101325]),
+        "relative_humidity": np.array([50, 50]),
+        "precipitation_rate": np.array([0, 0]),
+        "month": 1,
+        "day": 1,
+        "hour": 0,
+        "latitude": np.array([48.0, 48.0]),
+        "longitude": np.array([2.3, 2.3]),
+        "altitude": np.array([50.0, 50.0]),
+        "cable_azimuth": np.array([0.0, 0.0]),
+        "solar_absorptivity": np.array([0.5, 0.5]),
+    }
+    cable = {
+        "linear_mass": 1.0,
+        "heat_capacity": 1.0,
+        "outer_diameter": np.array([3.186e-02, 3.186e-02]),
+        "core_diameter": np.array([0.000, 0.000]),
+        "outer_area": np.array([6.004e-4, 6.004e-4]),
+        "core_area": np.array([0.000, 0.000]),
+        "magnetic_coeff": np.array([1.000, 1.000]),
+        "magnetic_coeff_per_a": np.array([0.000, 0.000]),
+        "temperature_coeff_linear": np.array([3.600e-3, 3.600e-3]),
+        "temperature_coeff_quadratic": np.array([8.000e-7, 8.000e-7]),
+        "linear_resistance_dc_20c": np.array([5.540e-5, 5.540e-5]),
+        "emissivity": np.array([0.8, 0.8]),
+    }
+    args.update(cable)
+
+    solver = create_solver(args)
+
+    result = solver.reduced_intensity(
+        delta_T_measured=10.0,
+        measured_intensity=360.0,
+        T_limit=100.0,
+    )
+
+    assert isinstance(result, np.ndarray)
+    assert len(result) == 2
+    assert not np.isnan(result[0])
+    assert not np.isnan(result[1])

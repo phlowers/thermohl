@@ -17,7 +17,7 @@ from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
 from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
-from thermohl.utils import bisect_v
+from thermohl.utils import bisect_v, quasi_newton
 
 
 class Solver1T(Solver_):
@@ -260,3 +260,88 @@ class Solver1T(Solver_):
             )
 
         return df
+
+    def _set_default_reduced_intensity_args(
+        self,
+        ambient_temperature: Optional[floatArrayLike],
+        wind_speed: Optional[floatArrayLike],
+        measured_solar_irradiance: Optional[floatArrayLike],
+    ):
+        if ambient_temperature is None:
+            print(
+                "WARNING: ambient_temperature is not set. Using default value of 30 °C."
+            )
+            ambient_temperature = 30.0
+        self.args.ambient_temperature = ambient_temperature
+
+        if wind_speed is None:
+            print("WARNING: wind_speed is not set. Using default value of 0.6 m/s.")
+            wind_speed = 0.6
+        self.args.wind_speed = wind_speed
+
+        if measured_solar_irradiance is None:
+            print(
+                "WARNING: measured_solar_irradiance is not set. Using default value of 600 W/m²."
+            )
+            measured_solar_irradiance = 600.0
+        self.args.measured_solar_irradiance = measured_solar_irradiance
+
+    def reduced_intensity(
+        self,
+        delta_T_measured: floatArrayLike,
+        measured_intensity: floatArrayLike,
+        ambient_temperature: Optional[floatArrayLike] = None,
+        wind_speed: Optional[floatArrayLike] = None,
+        measured_solar_irradiance: Optional[floatArrayLike] = None,
+        T_limit: Optional[floatArrayLike] = np.array([100]),
+    ):
+        """
+        Compute the reduced intensity limit for a given measured temperature difference
+        betwwen the sound cable and a hotspot on the junction between a cable
+        and a faulty sleeve.
+
+        Args:
+            delta_T_measured (float): The measured temperature difference between the cable surface and the sleeve.
+            measured_intensity (float): The measuredintensity at which the temperature difference was measured.
+            ambient_temperature (Optional[float]): The ambient temperature. Default is 30.
+            wind_speed (Optional[float]): The wind speed. Default is 0.6.
+            measured_solar_irradiance (Optional[float]): The measured solar irradiance. Default is 600.
+            T_limit (Optional[float]): The maximum conductor temperature. Default is 100.
+        """
+        # Save args that will be modified so as to be able to restore them at the end of the computation
+        solver_transit = self.args.transit
+        solver_ambient_temperature = self.args.ambient_temperature
+        solver_wind_speed = self.args.wind_speed
+        solver_measured_solar_irradiance = self.args.measured_solar_irradiance
+
+        # Set default values for reduced intensity computation.
+        # These differ from those used for the other computations.
+        self._set_default_reduced_intensity_args(
+            ambient_temperature, wind_speed, measured_solar_irradiance
+        )
+
+        def conductor_temperature(transit):
+            self.args.transit = transit
+            self.joule_heating.__init__(**self.args.__dict__)
+            return self.steady_temperature()[VariableType.TEMPERATURE][0]
+
+        def delta_T(transit):
+            return delta_T_measured * ((transit / measured_intensity) ** 2)
+
+        def sleeve_temperature(transit):
+            return conductor_temperature(transit) + delta_T(transit)
+
+        def f(transit):
+            return sleeve_temperature(transit) - T_limit
+
+        x0 = np.ones_like(measured_intensity) * 100
+
+        reduced_intensity = quasi_newton(f, x0=x0)
+
+        # Restore previous args
+        self.args.transit = solver_transit
+        self.args.ambient_temperature = solver_ambient_temperature
+        self.args.wind_speed = solver_wind_speed
+        self.args.measured_solar_irradiance = solver_measured_solar_irradiance
+
+        return reduced_intensity

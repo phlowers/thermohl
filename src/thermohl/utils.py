@@ -12,6 +12,9 @@
 import os
 from functools import wraps
 from importlib.util import find_spec
+import operator
+import warnings
+
 
 import numpy as np
 import pandas as pd
@@ -184,6 +187,80 @@ def bisect_v(
             f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
         )
     return midpoint, abs_error
+
+
+def _array_quasi_newton(func, x0, tol, maxiter):
+    """
+    A vectorized version of secant method for arrays.
+
+    Do not use this method directly. This method is called from `quasi_newton`
+    when ``np.size(x0) > 1`` is ``True``. For docstring, see `quasi_newton`.
+
+    Heavily inspired by the implementation of the SciPy library.
+    """
+    # Explicitly copy `x0` as `p` will be modified inplace, but the
+    # user's array should not be altered.
+    p = np.array(x0, copy=True)
+
+    failures = np.ones_like(p, dtype=bool)
+    nz_der = np.ones_like(failures)
+
+    dx = np.finfo(float).eps ** 0.33
+    p1 = p * (1 + dx) + np.where(p >= 0, dx, -dx)
+    q0 = np.asarray(func(p))
+    q1 = np.asarray(func(p1))
+    active = np.ones_like(p, dtype=bool)
+    for _ in range(maxiter):
+        nz_der = q1 != q0
+        # stop iterating if all derivatives are zero
+        if not nz_der.any():
+            p = (p1 + p) / 2.0
+            break
+        # Secant Step
+        dp = (q1 * (p1 - p))[nz_der] / (q1 - q0)[nz_der]
+        # only update nonzero derivatives
+        p = np.asarray(p, dtype=np.result_type(p, p1, dp, np.float64))
+        p[nz_der] = p1[nz_der] - dp
+        active_zero_der = ~nz_der & active
+        p[active_zero_der] = (p1 + p)[active_zero_der] / 2.0
+        active &= nz_der  # don't assign zero derivatives again
+        failures[nz_der] = np.abs(dp) >= tol  # not yet converged
+        # stop iterating if there aren't any failures, not incl zero der
+        if not failures[nz_der].any():
+            break
+        p1, p = p, p1
+        q0 = q1
+        q1 = np.asarray(func(p1))
+
+    zero_der = ~nz_der & failures  # don't include converged with zero-ders
+    if zero_der.any():
+        nonzero_dp = p1 != p
+        # non-zero dp, but infinite newton step
+        zero_der_nz_dp = zero_der & nonzero_dp
+        if zero_der_nz_dp.any():
+            rms = np.sqrt(sum((p1[zero_der_nz_dp] - p[zero_der_nz_dp]) ** 2))
+            warnings.warn(f"RMS of {rms:g} reached", RuntimeWarning, stacklevel=3)
+    elif failures.any():
+        all_or_some = "all" if failures.all() else "some"
+        msg = f"{all_or_some:s} failed to converge after {maxiter:d} iterations"
+        if failures.all():
+            raise RuntimeError(msg)
+        warnings.warn(msg, RuntimeWarning, stacklevel=3)
+
+    return p
+
+
+def quasi_newton(func, x0, tol=1.48e-8, maxiter=50, rtol=0.0):
+    """Find the zero of a function using the quasi-Newton (secant) method.
+
+    Heavily inspired by the implementation of optimize.newton in the SciPy library.
+    """
+    if tol <= 0:
+        raise ValueError(f"tol too small ({tol:g} <= 0)")
+    maxiter = operator.index(maxiter)
+    if maxiter < 1:
+        raise ValueError("maxiter must be greater than 0")
+    return _array_quasi_newton(func, x0, tol, maxiter)
 
 
 # In agreement with Eurobios, this function has been retrieved from the pyntb library,
