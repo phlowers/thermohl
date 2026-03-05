@@ -17,7 +17,7 @@ from thermohl.solver.base import _DEFPARAM as DP
 from thermohl.solver.base import _set_dates, reshape
 from thermohl.solver.enums.power_type import PowerType
 from thermohl.solver.enums.variable_type import VariableType
-from thermohl.utils import bisect_v
+from thermohl.utils import bisect_v, quasi_newton
 
 
 class Solver1T(Solver_):
@@ -334,12 +334,9 @@ class Solver1T(Solver_):
         def f(transit):
             return sleeve_temperature(transit) - T_limit
 
-        imax = 4500.0  # Used as upper bound for the bisection method.
-        # It is a very high value that should not be reached in practice.
+        x0 = np.ones_like(measured_intensity) * 100
 
-        reduced_intensity, _ = bisect_v(
-            f, DP.imin, imax, output_shape=(self.args.max_len(),)
-        )
+        reduced_intensity = quasi_newton(f, x0=x0)
 
         # Restore previous args
         self.args.transit = solver_transit
