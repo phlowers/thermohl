@@ -43,13 +43,11 @@ class HeatEquationType(Enum):
     * WITH_ONE_TEMPERATURE: computes a single temperature for the cable
     * WITH_THREE_TEMPERATURES: computes three temperatures for the cable (core, surface and average)
     * WITH_THREE_TEMPERATURES_LEGACY: computes three temperatures for the cable (core, surface and average), with specifications
-    * WITH_1D: computes the temperature with 1D solver
     """
 
-    WITH_ONE_TEMPERATURE = "1t"
-    WITH_THREE_TEMPERATURES = "3t"
-    WITH_THREE_TEMPERATURES_LEGACY = "3tl"
-    WITH_1D = "1d"
+    ONE_TEMPERATURE = "1t"
+    THREE_TEMPERATURES = "3t"
+    THREE_TEMPERATURES_LEGACY = "3tl"
 
 
 class PowerType(Enum):
@@ -69,19 +67,19 @@ class PowerType(Enum):
     RAIN = "P_precipitation"
 
 
-class SolverType(Enum):
+class ModelType(Enum):
     """
-    All the solvers available in thermohl.
-    * cigre : Solver published by CIGRE
-    * ieee : Solver published by IEEE
-    * olla : Solver developed by RTE's R&D team
-    * rte : Solver developed by RTE
+    All the models available in thermohl.
+    * cigre : model published by CIGRE
+    * ieee : model published by IEEE
+    * olla : model developed by RTE's R&D team
+    * rte : model developed by RTE
     """
 
-    SOLVER_CIGRE = "cigre"
-    SOLVER_IEEE = "ieee"
-    SOLVER_OLLA = "olla"
-    SOLVER_RTE = "rte"
+    CIGRE = "cigre"
+    IEEE = "ieee"
+    OLLA = "olla"
+    RTE = "rte"
 
 
 class TemperatureLocation(Enum):

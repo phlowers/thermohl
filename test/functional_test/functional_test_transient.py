@@ -21,7 +21,7 @@ def test_transient_temperature():
     for scenario in get_scenarios("scenarios_transient.csv"):
         solver = rte(
             scn2dict(scenario),
-            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
         )
 
         # initial steady state

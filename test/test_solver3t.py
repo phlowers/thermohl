@@ -11,7 +11,7 @@ from thermohl import solver
 from thermohl.solver import HeatEquationType
 from thermohl.solver.entities import (
     CableType,
-    SolverType,
+    ModelType,
     VariableType,
     TemperatureLocation,
     CableLocation,
@@ -24,14 +24,14 @@ def _solvers(dic=None):
     return [
         solver._factory(dic=dic, heat_equation=heat_equation, model=m)
         for heat_equation in [
-            HeatEquationType.WITH_THREE_TEMPERATURES,
-            HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            HeatEquationType.THREE_TEMPERATURES,
+            HeatEquationType.THREE_TEMPERATURES_LEGACY,
         ]
         for m in [
-            SolverType.SOLVER_RTE,
-            SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            ModelType.RTE,
+            ModelType.CIGRE,
+            ModelType.IEEE,
+            ModelType.OLLA,
         ]
     ]
 
@@ -63,8 +63,8 @@ def test_balance():
         # compute guess with 1t solver
         s1 = solver._factory(
             dic=dic,
-            heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
-            model=SolverType.SOLVER_IEEE,
+            heat_equation=HeatEquationType.ONE_TEMPERATURE,
+            model=ModelType.IEEE,
         )
         t1 = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False

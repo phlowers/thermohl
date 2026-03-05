@@ -82,7 +82,7 @@ surface temperature (°C) of a conductor in steady-state regime along with the c
 from thermohl import solver
 from thermohl.solver.entities import HeatEquationType
 
-slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
+slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.ONE_TEMPERATURE)
 temp = slvr.steady_temperature() 
 ```
 
@@ -106,7 +106,7 @@ import numpy as np
 from thermohl import solver
 from thermohl.solver.entities import HeatEquationType
 
-slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
+slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.ONE_TEMPERATURE)
 Tmax = 80.
 imax = slvr.steady_intensity(Tmax)
 ```

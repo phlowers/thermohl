@@ -49,7 +49,7 @@ def test_solver3t_legacy():
     Ts0 = [34.955032]
     Tc0 = [36.164476]
 
-    solver = rte(data, heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY)
+    solver = rte(data, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY)
     result = solver.transient_temperature_legacy(
         offset=np.linspace(0, 60, 61),
         surface_temperature_0=Ts0,

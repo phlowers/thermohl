@@ -63,7 +63,7 @@ def test_steady_temperature():
     for scenario in get_scenarios("scenarios_steady.csv"):
         solver = rte(
             scn2dict(scenario),
-            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_temperature()
         assert np.allclose(
@@ -81,7 +81,7 @@ def test_steady_ampacity():
     for scenario in get_scenarios():
         solver = rte(
             scn2dict(scenario),
-            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
         assert np.allclose(

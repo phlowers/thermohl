@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
-from thermohl.solver import HeatEquationType, SolverType
+from thermohl.solver import HeatEquationType, ModelType
 from thermohl.solver.entities import (
     CableLocation,
     TemperatureLocation,
@@ -20,14 +20,14 @@ from thermohl.solver.entities import (
 def _solvers():
     li = []
     for heat_equation in [
-        HeatEquationType.WITH_ONE_TEMPERATURE,
-        HeatEquationType.WITH_THREE_TEMPERATURES,
+        HeatEquationType.ONE_TEMPERATURE,
+        HeatEquationType.THREE_TEMPERATURES,
     ]:
         for m in [
-            SolverType.SOLVER_RTE,
-            SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            ModelType.RTE,
+            ModelType.CIGRE,
+            ModelType.IEEE,
+            ModelType.OLLA,
         ]:
             li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
