@@ -11,7 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.entities import CableLocation, CableLocationListLike
+from thermohl.solver.entities import TargetType, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
 
 
@@ -97,9 +97,9 @@ class Solver3TL(Solver3T):
         target_ = self._check_target(target, self.args.core_diameter, max_len)
 
         # pre-compute indexes
-        surface_indices = np.nonzero(target_ == CableLocation.SURFACE)[0]
-        average_indices = np.nonzero(target_ == CableLocation.AVERAGE)[0]
-        core_indices = np.nonzero(target_ == CableLocation.CORE)[0]
+        surface_indices = np.nonzero(target_ == TargetType.SURFACE)[0]
+        average_indices = np.nonzero(target_ == TargetType.AVERAGE)[0]
+        core_indices = np.nonzero(target_ == TargetType.CORE)[0]
 
         def newtheader(
             transit: floatArray, tg: floatArray

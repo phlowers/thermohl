@@ -14,7 +14,7 @@ from thermohl.solver.entities import (
     ModelType,
     VariableType,
     TemperatureLocation,
-    CableLocation,
+    TargetType,
 )
 
 _nprs = 123456
@@ -122,9 +122,9 @@ def test_consistency():
 
     for s in _solvers(dic):
         d = {
-            CableLocation.SURFACE: TemperatureLocation.SURFACE,
-            CableLocation.AVERAGE: TemperatureLocation.AVERAGE,
-            CableLocation.CORE: TemperatureLocation.CORE,
+            TargetType.SURFACE: TemperatureLocation.SURFACE,
+            TargetType.AVERAGE: TemperatureLocation.AVERAGE,
+            TargetType.CORE: TemperatureLocation.CORE,
         }
 
         for location, temperature_at_location in d.items():
@@ -183,7 +183,7 @@ def test_steady_intensity_cable_type_scalar_homogeneous():
 
         df_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
-            target=CableLocation.AVERAGE,
+            target=TargetType.AVERAGE,
             return_err=True,
             return_power=True,
         )
@@ -202,7 +202,7 @@ def test_steady_intensity_cable_type_scalar_bimetallic():
 
         df_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
-            target=CableLocation.CORE,
+            target=TargetType.CORE,
             return_err=True,
             return_power=True,
         )
@@ -232,9 +232,7 @@ def test_steady_intensity_cable_type_list():
     cable_type = np.array(
         [CableType.BIMETALLIC, CableType.HOMOGENEOUS, CableType.HOMOGENEOUS]
     )
-    target = np.array(
-        [CableLocation.CORE, CableLocation.AVERAGE, CableLocation.AVERAGE]
-    )
+    target = np.array([TargetType.CORE, TargetType.AVERAGE, TargetType.AVERAGE])
 
     for s in _solvers(dic):
         df_with_specified_cable_type = s.steady_intensity(
@@ -275,7 +273,7 @@ def test_steady_intensity_cable_type_and_target():
 
     cable_type = rng.choice([CableType.BIMETALLIC, CableType.HOMOGENEOUS], size=N)
 
-    target = np.array([CableLocation.CORE] * N)
+    target = np.array([TargetType.CORE] * N)
 
     for s in _solvers(dic):
         df_with_specified_cable_type = s.steady_intensity(

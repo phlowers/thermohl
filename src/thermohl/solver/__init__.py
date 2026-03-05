@@ -17,7 +17,7 @@ from thermohl.power import olla as ollap
 from thermohl.solver.solver import Solver
 from thermohl.solver.parameters import Parameters
 from thermohl.solver.entities import (
-    CableLocation as CableLocation,
+    TargetType as CableLocation,
     HeatEquationType,
     PowerType as PowerType,
     TemperatureLocation as TemperatureLocation,

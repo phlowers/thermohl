@@ -9,20 +9,20 @@ from typing import Union, List
 import numpy as np
 
 
-class CableLocation(Enum):
+class TargetType(Enum):
     """
-    Defines the locations in the cable where the measures are computed.
-    * SURFACE: the measure is at the surface of the cable
-    * AVERAGE: the average measure of the cable
-    * CORE: the measure is at the core of the cable
+    Defines the locations in the cable of the reference temperature
+    * SURFACE: the reference temperature is at the surface of the cable
+    * AVERAGE: the reference temperature is at an average thickness of the cable
+    * CORE: the reference temperature is at the core of the cable
     """
 
-    SURFACE = "surf"
-    AVERAGE = "avg"
+    SURFACE = "surface"
+    AVERAGE = "average"
     CORE = "core"
 
 
-CableLocationListLike = Union[CableLocation, List[CableLocation]]
+CableLocationListLike = Union[TargetType, List[TargetType]]
 
 
 class CableType(Enum):
@@ -60,11 +60,11 @@ class PowerType(Enum):
     * Precipitation : the way the rain cools the cable
     """
 
-    JOULE = "P_joule"
-    SOLAR = "P_solar"
-    CONVECTION = "P_convection"
-    RADIATION = "P_radiation"
-    RAIN = "P_precipitation"
+    JOULE = "joule_power"
+    SOLAR = "solar_power"
+    CONVECTION = "convection_power"
+    RADIATION = "radiation_power"
+    RAIN = "precipitation_power"
 
 
 class ModelType(Enum):
@@ -90,9 +90,9 @@ class TemperatureLocation(Enum):
     * CORE: the temperature at the core of the cable
     """
 
-    SURFACE = "t_surf"
-    AVERAGE = "t_avg"
-    CORE = "t_core"
+    SURFACE = "surface_temperature"
+    AVERAGE = "average_temperature"
+    CORE = "core_temperature"
 
 
 class VariableType(Enum):
@@ -104,7 +104,7 @@ class VariableType(Enum):
     * TEMPERATURE: the temperature used in the solver
     """
 
-    ERROR = "err"
+    ERROR = "error"
     TIME = "time"
     TRANSIT = "transit"
-    TEMPERATURE = "t"
+    TEMPERATURE = "temperature"

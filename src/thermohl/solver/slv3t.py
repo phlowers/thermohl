@@ -18,7 +18,7 @@ from thermohl.solver.solver import (
 )
 from thermohl.solver.parameters import _DEFPARAM as DP
 from thermohl.solver.entities import (
-    CableLocation,
+    TargetType,
     CableLocationListLike,
     CableType,
     CableTypeListLike,
@@ -102,12 +102,12 @@ def _infer_target_from_cable_type(
 
     if isinstance(cable_type, CableType):
         if cable_type == CableType.HOMOGENEOUS:
-            return CableLocation.AVERAGE
+            return TargetType.AVERAGE
         elif cable_type == CableType.BIMETALLIC:
-            return CableLocation.CORE
+            return TargetType.CORE
     else:
         return [
-            CableLocation.AVERAGE if ct == CableType.HOMOGENEOUS else CableLocation.CORE
+            TargetType.AVERAGE if ct == CableType.HOMOGENEOUS else TargetType.CORE
             for ct in cable_type
         ]
 
@@ -487,48 +487,30 @@ class Solver3T(Solver_):
         )
 
     @staticmethod
-    def _check_target(target: CableLocationListLike, core_diameter, max_len):
+    def _check_target(target: Optional[CableLocationListLike], core_diameter, max_len):
         """
         Validates and processes the target temperature input.
 
-        Args:
-            target (CableLocation | list[CableLocation]): The target temperature(s) to be validated. It can be:
-                - None: which sets the target automatically.
-                - A CableLocation: must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
-                - A list of CableLocation: each element of the list must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
-            max_len (int): The expected length of the target list if target is a list.
-
-        Returns:
-            numpy.ndarray: An array of target labels if the input is valid.
-
-        Raises:
-            ValueError: If the target is invalid or its length doesn't match max_len.
+        :param target: The target temperature(s) to be validated. It can be:
+            - None: which sets the target automatically.
+            - A CableLocation: must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
+            - A list of CableLocation: each element of the list must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
+        :param core_diameter: The core diameter of the cable.
+        :param max_len: The expected length of the target list if target is a list.
+        :return: An array of target labels if the input is valid.
         """
         # check target
         if target is None:
             d_ = core_diameter * np.ones(max_len)
-            target_ = np.array(
+            return np.array(
                 [
-                    CableLocation.CORE if d_[i] > 0.0 else CableLocation.AVERAGE
+                    TargetType.CORE if d_[i] > 0.0 else TargetType.AVERAGE
                     for i in range(max_len)
                 ]
             )
-        elif isinstance(target, CableLocation):
-            target_ = np.array([target for _ in range(max_len)])
-        else:
-            if len(target) != max_len:
-                raise ValueError(
-                    f"Length of target ({len(target)}) doesn't match max_len {max_len}."
-                )
-            for t in target:
-                if t not in [
-                    CableLocation.SURFACE,
-                    CableLocation.AVERAGE,
-                    CableLocation.CORE,
-                ]:
-                    raise ValueError(f"unknown target : {t}")
-            target_ = np.array(target)
-        return target_
+        elif isinstance(target, TargetType):
+            return np.array([target] * max_len)
+        return np.array(target)
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: CableLocationListLike
@@ -543,9 +525,9 @@ class Solver3T(Solver_):
         heat_capacity, outer_diameter, core_diameter, ix = self.morgan_coefficients
         a, b = _profile_bim_avg_coeffs(0.5 * core_diameter, 0.5 * outer_diameter)
 
-        js = np.nonzero(target_ == CableLocation.SURFACE)[0]
-        ja = np.nonzero(target_ == CableLocation.AVERAGE)[0]
-        jc = np.nonzero(target_ == CableLocation.CORE)[0]
+        js = np.nonzero(target_ == TargetType.SURFACE)[0]
+        ja = np.nonzero(target_ == TargetType.AVERAGE)[0]
+        jc = np.nonzero(target_ == TargetType.CORE)[0]
         jx = np.intersect1d(ix, ja)
 
         # get correct input for quasi-newton solver
@@ -587,7 +569,7 @@ class Solver3T(Solver_):
 
         Args:
             max_conductor_temperature (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
-            target (CableLocation | list[CableLocation]): Target specification for the solver. Default is None.
+            target (TargetType | list[CableLocation]): Target specification for the solver. Default is None.
             cable_type (CableType | list[CableType]): Cable type specification for the solver. Default is None. If provided, it overrides the target specification.
             tol (float): Tolerance for the solver. Default is DP.tol.
             maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.

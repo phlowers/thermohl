@@ -11,7 +11,7 @@ import pandas as pd
 from thermohl import solver
 from thermohl.solver import HeatEquationType, ModelType
 from thermohl.solver.entities import (
-    CableLocation,
+    TargetType,
     TemperatureLocation,
     VariableType,
 )
@@ -39,7 +39,7 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             max_conductor_temperature=t[TemperatureLocation.SURFACE].values,
-            target=CableLocation.SURFACE,
+            target=TargetType.SURFACE,
         )
     else:
         raise NotImplementedError
