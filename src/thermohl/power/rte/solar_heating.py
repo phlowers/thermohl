@@ -98,7 +98,6 @@ def compute_data_from_provided(
 
 
 class SolarHeating(SolarHeatingBase):
-
     def __init__(
         self,
         latitude: floatArrayLike,
