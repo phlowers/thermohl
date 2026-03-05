@@ -8,9 +8,7 @@
 from datetime import datetime, timezone
 import numpy as np
 from numpy import array
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
+from thermohl.solver.entities import TemperatureLocation, HeatEquationType
 
 from thermohl.solver import rte
 

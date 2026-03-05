@@ -12,10 +12,9 @@ import numpy as np
 import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
-from thermohl.solver.base import Solver as Solver_, get_time_changing_parameters
-from thermohl.solver.base import _DEFPARAM as DP
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.solver import Solver as Solver_, get_time_changing_parameters
+from thermohl.solver.parameters import _DEFPARAM as DP
+from thermohl.solver.entities import PowerType, VariableType
 from thermohl.utils import bisect_v
 
 

@@ -12,16 +12,20 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import (
+from thermohl.solver.solver import (
     Solver as Solver_,
-    _DEFPARAM as DP,
     get_time_changing_parameters,
 )
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
-from thermohl.solver.enums.cable_type import CableType, CableTypeListLike
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.parameters import _DEFPARAM as DP
+from thermohl.solver.entities import (
+    CableLocation,
+    CableLocationListLike,
+    CableType,
+    CableTypeListLike,
+    PowerType,
+    TemperatureLocation,
+    VariableType,
+)
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 

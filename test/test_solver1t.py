@@ -10,11 +10,12 @@ import numpy as np
 
 from thermohl import solver
 from thermohl.solver import SolverType
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
-from thermohl.solver.enums.variable_type import VariableType
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.base import _DEFPARAM as DP
-
+from thermohl.solver.entities import (
+    HeatEquationType,
+    VariableType,
+    PowerType,
+)
+from thermohl.solver.parameters import _DEFPARAM as DP
 
 _nprs = 123456
 

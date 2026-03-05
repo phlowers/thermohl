@@ -11,7 +11,7 @@ from functional_test.functional_test_steady import (
     scn2dict,
 )
 from thermohl.solver import rte, HeatEquationType, TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.entities import VariableType
 
 
 def test_transient_temperature():

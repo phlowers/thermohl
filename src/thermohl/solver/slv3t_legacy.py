@@ -11,7 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
+from thermohl.solver.entities import CableLocation, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
 
 

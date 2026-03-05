@@ -11,8 +11,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import power
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.entities import PowerType, VariableType
 from thermohl.solver.slv1t import Solver1T
 
 

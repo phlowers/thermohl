@@ -14,8 +14,11 @@ from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
-from thermohl.solver.enums.cable_type import CableTypeListLike
+from thermohl.solver.entities import (
+    CableLocation,
+    CableLocationListLike,
+    CableTypeListLike,
+)
 
 from thermohl.utils import depends_on_optional
 

@@ -9,11 +9,13 @@ import numpy as np
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType
-from thermohl.solver.enums.cable_type import CableType
-from thermohl.solver.enums.solver_type import SolverType
-from thermohl.solver.enums.variable_type import VariableType
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.cable_location import CableLocation
+from thermohl.solver.entities import (
+    CableType,
+    SolverType,
+    VariableType,
+    TemperatureLocation,
+    CableLocation,
+)
 
 _nprs = 123456
 

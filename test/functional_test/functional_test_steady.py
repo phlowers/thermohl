@@ -12,7 +12,7 @@ import os.path
 import numpy as np
 import pandas as pd
 from thermohl.solver import rte, HeatEquationType, TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.entities import VariableType
 
 
 def get_cable_data(cable_name: str) -> dict:

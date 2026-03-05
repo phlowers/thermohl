@@ -14,27 +14,25 @@ from thermohl.power import rte as rtep
 from thermohl.power import ieee as ieeep
 from thermohl.power import olla as ollap
 
-from thermohl.solver.base import Args, Solver
-from thermohl.solver.enums.cable_location import CableLocation as CableLocation
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
-from thermohl.solver.enums.power_type import PowerType as PowerType
-from thermohl.solver.enums.temperature_location import (
+from thermohl.solver.solver import Solver
+from thermohl.solver.parameters import Parameters
+from thermohl.solver.entities import (
+    CableLocation as CableLocation,
+    HeatEquationType,
+    PowerType as PowerType,
     TemperatureLocation as TemperatureLocation,
+    SolverType,
+    VariableType as VariableType,
 )
-from thermohl.solver.enums.solver_type import SolverType
-from thermohl.solver.enums.variable_type import VariableType as VariableType
-from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[
-    Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]
-]
+concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL]]
 
 
 def default_values() -> Dict[str, Any]:
-    return Args().__dict__
+    return Parameters().__dict__
 
 
 def _factory(
@@ -71,7 +69,6 @@ def create_solver_from_heat_equation(
         HeatEquationType.WITH_ONE_TEMPERATURE: Solver1T,
         HeatEquationType.WITH_THREE_TEMPERATURES: Solver3T,
         HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY: Solver3TL,
-        HeatEquationType.WITH_1D: Solver1D,
     }
 
     if heat_equation not in heat_equations_solvers:

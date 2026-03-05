@@ -10,9 +10,11 @@ import pandas as pd
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType, SolverType
-from thermohl.solver.enums.cable_location import CableLocation
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.entities import (
+    CableLocation,
+    TemperatureLocation,
+    VariableType,
+)
 
 
 def _solvers():
