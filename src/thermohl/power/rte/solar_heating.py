@@ -24,12 +24,12 @@ def compute_solar_irradiance(
 ) -> floatArrayLike:
     """Compute solar radiation.
     Difference with IEEE version are neither turbidity or altitude influence.
-    Args:
-        solar_altitude (float | numpy.ndarray): solar altitude in radians.
-    Returns:
-        float | numpy.ndarray: Solar radiation value. Negative values are set to zero.
 
-    :param solar_altitude_rad: solar altitude in radians.
+    :param global_radiation: global radiation.
+    :param solar_altitude: solar altitude in radians.
+    :param incidence: incidence angle in radians.
+    :param nebulosity: nebulosity.
+    :param albedo: albedo.
     :return: Solar radiation value. Negative values are set to zero.
     """
 
@@ -59,6 +59,11 @@ def compute_data_from_provided(
     Returns a value of nebulosity and a value of global_radiation.
     If the global radiation is provided, the nebulosity is computed from it.
     Otherwise, the global radiation is computed from the provided nebulosity (default value of 0).
+
+    :param provided_global_radiation: provided global radiation (W/m2).
+    :param provided_nebulosity: provided nebulosity (0 to 8).
+    :param solar_altitude: solar altitude in radians.
+    :return: (nebulosity, global_radiation).
     """
 
     def compute_nebulosity(provided_global_radiation, solar_altitude):
@@ -116,6 +121,8 @@ class SolarHeating(SolarHeatingBase):
         :param datetime_utc: Datetime in UTC.
         :param outer_diameter: external diameter of the conductor.
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
+        :param albedo: Ground albedo.
+        :param nebulosity: Sky nebulosity (0 to 8).
         :param measured_solar_irradiance: Optional measured solar irradiance (W/m2).
         """
         date = (
