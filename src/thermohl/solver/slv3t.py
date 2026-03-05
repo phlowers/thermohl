@@ -16,7 +16,7 @@ from thermohl.solver.solver import (
     Solver as Solver_,
     get_time_changing_parameters,
 )
-from thermohl.solver.parameters import _DEFPARAM as DP
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import (
     TargetType,
     CableLocationListLike,
@@ -281,8 +281,8 @@ class Solver3T(Solver_):
         self,
         surface_temperature_guess: Optional[floatArrayLike] = None,
         core_temperature_guess: Optional[floatArrayLike] = None,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_power: bool = True,
     ) -> pd.DataFrame:
@@ -558,8 +558,8 @@ class Solver3T(Solver_):
         max_conductor_temperature: floatArrayLike = np.array([]),
         target: CableLocationListLike = None,
         cable_type: CableTypeListLike = None,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_temp: bool = True,
         return_power: bool = True,

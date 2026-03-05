@@ -15,7 +15,7 @@ from thermohl.solver.entities import (
     VariableType,
     PowerType,
 )
-from thermohl.solver.parameters import _DEFPARAM as DP
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as DP
 
 _nprs = 123456
 

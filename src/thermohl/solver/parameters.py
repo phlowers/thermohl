@@ -4,6 +4,15 @@ from typing import Optional, Any, KeysView, Iterable
 import numpy as np
 
 
+class DEFAULT_PARAMETERS:
+    tmin = -99.0
+    tmax = +999.0
+    tol = 1.0e-09
+    maxiter = 64
+    imin = 0.0
+    imax = 9999.0
+
+
 class Parameters:
     """Object to store Solver args in a dict-like manner."""
 
@@ -106,12 +115,3 @@ class Parameters:
             u = np.unique(self[key])
             if len(u) == 1:
                 self[key] = u[0]
-
-
-class _DEFPARAM:
-    tmin = -99.0
-    tmax = +999.0
-    tol = 1.0e-09
-    maxiter = 64
-    imin = 0.0
-    imax = 9999.0

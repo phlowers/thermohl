@@ -13,7 +13,7 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
 from thermohl.solver.solver import Solver as Solver_, get_time_changing_parameters
-from thermohl.solver.parameters import _DEFPARAM as DP
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import PowerType, VariableType
 from thermohl.utils import bisect_v
 
@@ -21,10 +21,10 @@ from thermohl.utils import bisect_v
 class Solver1T(Solver_):
     def steady_temperature(
         self,
-        Tmin: float = DP.tmin,
-        Tmax: float = DP.tmax,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        Tmin: float = default.tmin,
+        Tmax: float = default.tmax,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_power: bool = True,
     ) -> pd.DataFrame:
@@ -168,10 +168,10 @@ class Solver1T(Solver_):
     def steady_intensity(
         self,
         max_conductor_temperature: floatArrayLike = np.array([]),
-        Imin: float = DP.imin,
-        Imax: float = DP.imax,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        Imin: float = default.imin,
+        Imax: float = default.imax,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_power: bool = True,
     ) -> pd.DataFrame:
