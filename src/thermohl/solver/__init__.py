@@ -19,7 +19,6 @@ from thermohl.solver.parameters import Parameters
 from thermohl.solver.entities import (
     HeatEquationType,
     PowerType as PowerType,
-    TemperatureType,
     ModelType,
     VariableType as VariableType,
 )
