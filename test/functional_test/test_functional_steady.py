@@ -11,8 +11,8 @@ from zoneinfo import ZoneInfo
 import os.path
 import numpy as np
 import pandas as pd
-from thermohl.solver import rte, HeatEquationType, TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver import rte
+from thermohl.solver.entities import VariableType, HeatEquationType, TemperatureType
 
 
 def get_cable_data(cable_name: str) -> dict:
@@ -65,25 +65,23 @@ def test_steady_temperature():
     for scenario in get_scenarios("scenarios_steady.csv"):
         solver = rte(
             scn2dict(scenario),
-            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_temperature()
         assert np.allclose(
-            result[TemperatureLocation.SURFACE], scenario["T_surf"], atol=0.05
+            result[TemperatureType.SURFACE], scenario["T_surf"], atol=0.05
         )
         assert np.allclose(
-            result[TemperatureLocation.AVERAGE], scenario["T_moy"], atol=0.05
+            result[TemperatureType.AVERAGE], scenario["T_moy"], atol=0.05
         )
-        assert np.allclose(
-            result[TemperatureLocation.CORE], scenario["T_coeur"], atol=0.05
-        )
+        assert np.allclose(result[TemperatureType.CORE], scenario["T_coeur"], atol=0.05)
 
 
 def test_steady_ampacity():
     for scenario in get_scenarios("scenarios_steady.csv"):
         solver = rte(
             scn2dict(scenario),
-            heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
         )
         result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
         assert np.allclose(
