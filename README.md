@@ -133,9 +133,9 @@ surface temperature (°C) of a conductor in steady-state regime along with the c
 
 ```python
 from thermohl import solver
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
+from thermohl.solver.entities import HeatEquationType
 
-slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
+slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.ONE_TEMPERATURE)
 temp = slvr.steady_temperature() 
 ```
 
@@ -157,9 +157,9 @@ distinct ampacities (and the lower the ambient temperature, the higher the ampac
 ```python
 import numpy as np
 from thermohl import solver
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
+from thermohl.solver.entities import HeatEquationType
 
-slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE)
+slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.ONE_TEMPERATURE)
 Tmax = 80.
 imax = slvr.steady_intensity(Tmax)
 ```

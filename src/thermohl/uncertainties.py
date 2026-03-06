@@ -14,8 +14,11 @@ from typing import Union, Tuple
 import numpy as np
 import pandas as pd
 
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
-from thermohl.solver.enums.cable_type import CableTypeListLike
+from thermohl.solver.entities import (
+    TargetType,
+    CableLocationListLike,
+    CableTypeListLike,
+)
 
 from thermohl.utils import depends_on_optional
 
@@ -168,7 +171,7 @@ def _generate_samples(
 
 def _rdict(
     mode: str,
-    target: CableLocation,
+    target: TargetType,
     include_surface: bool,
     include_core: bool,
     include_average: bool,
@@ -212,7 +215,7 @@ def _compute(
 def _steady_uncertainties(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: CableLocation,
+    target_label: TargetType,
     uncertainties: dict,
     num_samples: int,
     include_surface: bool,
@@ -301,7 +304,7 @@ def temperature(
 def intensity(
     solver_instance: solver.Solver,
     target_max_temp: Union[float, np.ndarray],
-    target_label: CableLocation = CableLocation.SURFACE,
+    target_label: TargetType = TargetType.SURFACE,
     cable_type: CableTypeListLike = None,
     uncertainties: dict = {},
     num_samples: int = 4999,

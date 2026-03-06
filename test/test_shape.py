@@ -9,23 +9,25 @@ import numpy as np
 import pandas as pd
 
 from thermohl import solver
-from thermohl.solver import HeatEquationType, SolverType
-from thermohl.solver.enums.cable_location import CableLocation
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver import HeatEquationType, ModelType
+from thermohl.solver.entities import (
+    TargetType,
+    TemperatureType,
+    VariableType,
+)
 
 
 def _solvers():
     li = []
     for heat_equation in [
-        HeatEquationType.WITH_ONE_TEMPERATURE,
-        HeatEquationType.WITH_THREE_TEMPERATURES,
+        HeatEquationType.ONE_TEMPERATURE,
+        HeatEquationType.THREE_TEMPERATURES,
     ]:
         for m in [
-            SolverType.SOLVER_RTE,
-            SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            ModelType.RTE,
+            ModelType.CIGRE,
+            ModelType.IEEE,
+            ModelType.OLLA,
         ]:
             li.append(solver._factory(dic=None, heat_equation=heat_equation, model=m))
     return li
@@ -36,8 +38,8 @@ def _ampargs(s: solver.Solver, t: pd.DataFrame):
         a = dict(max_conductor_temperature=t[VariableType.TEMPERATURE].values)
     elif isinstance(s, solver.Solver3T):
         a = dict(
-            max_conductor_temperature=t[TemperatureLocation.SURFACE].values,
-            target=CableLocation.SURFACE,
+            max_conductor_temperature=t[TemperatureType.SURFACE].values,
+            target=TargetType.SURFACE,
         )
     else:
         raise NotImplementedError
@@ -50,8 +52,8 @@ def _traargs(s: solver.Solver, ds: pd.DataFrame, t):
     elif isinstance(s, solver.Solver3T):
         a = dict(
             offset=t,
-            surface_temperature_0=ds[TemperatureLocation.SURFACE].values,
-            core_temperature_0=ds[TemperatureLocation.CORE].values,
+            surface_temperature_0=ds[TemperatureType.SURFACE].values,
+            core_temperature_0=ds[TemperatureType.CORE].values,
         )
     else:
         raise NotImplementedError

@@ -12,16 +12,20 @@ import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.base import (
+from thermohl.solver.solver import (
     Solver as Solver_,
-    _DEFPARAM as DP,
     get_time_changing_parameters,
 )
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
-from thermohl.solver.enums.cable_type import CableType, CableTypeListLike
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.variable_type import VariableType
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
+from thermohl.solver.entities import (
+    TargetType,
+    CableLocationListLike,
+    CableType,
+    CableTypeListLike,
+    PowerType,
+    TemperatureType,
+    VariableType,
+)
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
 
@@ -98,12 +102,12 @@ def _infer_target_from_cable_type(
 
     if isinstance(cable_type, CableType):
         if cable_type == CableType.HOMOGENEOUS:
-            return CableLocation.AVERAGE
+            return TargetType.AVERAGE
         elif cable_type == CableType.BIMETALLIC:
-            return CableLocation.CORE
+            return TargetType.CORE
     else:
         return [
-            CableLocation.AVERAGE if ct == CableType.HOMOGENEOUS else CableLocation.CORE
+            TargetType.AVERAGE if ct == CableType.HOMOGENEOUS else TargetType.CORE
             for ct in cable_type
         ]
 
@@ -198,17 +202,17 @@ class Solver3T(Solver_):
         Returns:
             float | numpy.ndarray: Array of average temperatures.
         """
-        ambient_temperature = 0.5 * (surface_temperature + core_temperature)
+        average_temperature = 0.5 * (surface_temperature + core_temperature)
         _, outer_diameter, core_diameter, positive_surface_diameter_indices = (
             self.morgan_coefficients
         )
-        ambient_temperature[positive_surface_diameter_indices] = _profile_bim_avg(
+        average_temperature[positive_surface_diameter_indices] = _profile_bim_avg(
             surface_temperature[positive_surface_diameter_indices],
             core_temperature[positive_surface_diameter_indices],
             0.5 * core_diameter[positive_surface_diameter_indices],
             0.5 * outer_diameter[positive_surface_diameter_indices],
         )
-        return ambient_temperature
+        return average_temperature
 
     def joule(
         self, surface_temperature: floatArray, core_temperature: floatArray
@@ -227,8 +231,8 @@ class Solver3T(Solver_):
         - The function computes the average temperature `temperature`.
         - Returns the Joule heating values based on the adjusted temperatures.
         """
-        ambient_temperature = self.average(surface_temperature, core_temperature)
-        return self.joule_heating.value(ambient_temperature)
+        average_temperature = self.average(surface_temperature, core_temperature)
+        return self.joule_heating.value(average_temperature)
 
     def balance(
         self, surface_temperature: floatArray, core_temperature: floatArray
@@ -277,8 +281,8 @@ class Solver3T(Solver_):
         self,
         surface_temperature_guess: Optional[floatArrayLike] = None,
         core_temperature_guess: Optional[floatArrayLike] = None,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_power: bool = True,
     ) -> pd.DataFrame:
@@ -332,9 +336,9 @@ class Solver3T(Solver_):
         z = self.average(x, y)
         df = pd.DataFrame(
             {
-                TemperatureLocation.SURFACE: x,
-                TemperatureLocation.AVERAGE: z,
-                TemperatureLocation.CORE: y,
+                TemperatureType.SURFACE: x,
+                TemperatureType.AVERAGE: z,
+                TemperatureType.CORE: y,
             }
         )
 
@@ -372,9 +376,9 @@ class Solver3T(Solver_):
     ):
         dr = {
             VariableType.TIME: offset,
-            TemperatureLocation.SURFACE: surface_temperature,
-            TemperatureLocation.AVERAGE: average_temperature,
-            TemperatureLocation.CORE: core_temperature,
+            TemperatureType.SURFACE: surface_temperature,
+            TemperatureType.AVERAGE: average_temperature,
+            TemperatureType.CORE: core_temperature,
         }
 
         if return_power:
@@ -450,11 +454,11 @@ class Solver3T(Solver_):
 
         # init
         surface_temperature = np.zeros((N, n))
-        ambient_temperature = np.zeros((N, n))
+        average_temperature = np.zeros((N, n))
         core_temperature = np.zeros((N, n))
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
-        ambient_temperature[0, :] = self.average(
+        average_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
 
@@ -466,65 +470,47 @@ class Solver3T(Solver_):
             bal = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
-            ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
+            average_temperature[i, :] = (
+                average_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
             )
-            mrg = c1 * (self.joule_heating.value(ambient_temperature[i, :]) - bal)
-            core_temperature[i, :] = ambient_temperature[i, :] + c2 * mrg
+            mrg = c1 * (self.joule_heating.value(average_temperature[i, :]) - bal)
+            core_temperature[i, :] = average_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
         return self._transient_temperature_results(
             offset,
             surface_temperature,
-            ambient_temperature,
+            average_temperature,
             core_temperature,
             return_power,
             n,
         )
 
     @staticmethod
-    def _check_target(target: CableLocationListLike, core_diameter, max_len):
+    def _check_target(target: Optional[CableLocationListLike], core_diameter, max_len):
         """
         Validates and processes the target temperature input.
 
-        Args:
-            target (CableLocation | list[CableLocation]): The target temperature(s) to be validated. It can be:
-                - None: which sets the target automatically.
-                - A CableLocation: must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
-                - A list of CableLocation: each element of the list must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
-            max_len (int): The expected length of the target list if target is a list.
-
-        Returns:
-            numpy.ndarray: An array of target labels if the input is valid.
-
-        Raises:
-            ValueError: If the target is invalid or its length doesn't match max_len.
+        :param target: The target temperature(s) to be validated. It can be:
+            - None: which sets the target automatically.
+            - A CableLocation: must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
+            - A list of CableLocation: each element of the list must be one of CableLocation.SURFACE, CableLocation.AVERAGE, or CableLocation.CORE.
+        :param core_diameter: The core diameter of the cable.
+        :param max_len: The expected length of the target list if target is a list.
+        :return: An array of target labels if the input is valid.
         """
         # check target
         if target is None:
             d_ = core_diameter * np.ones(max_len)
-            target_ = np.array(
+            return np.array(
                 [
-                    CableLocation.CORE if d_[i] > 0.0 else CableLocation.AVERAGE
+                    TargetType.CORE if d_[i] > 0.0 else TargetType.AVERAGE
                     for i in range(max_len)
                 ]
             )
-        elif isinstance(target, CableLocation):
-            target_ = np.array([target for _ in range(max_len)])
-        else:
-            if len(target) != max_len:
-                raise ValueError(
-                    f"Length of target ({len(target)}) doesn't match max_len {max_len}."
-                )
-            for t in target:
-                if t not in [
-                    CableLocation.SURFACE,
-                    CableLocation.AVERAGE,
-                    CableLocation.CORE,
-                ]:
-                    raise ValueError(f"unknown target : {t}")
-            target_ = np.array(target)
-        return target_
+        elif isinstance(target, TargetType):
+            return np.array([target] * max_len)
+        return np.array(target)
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: CableLocationListLike
@@ -539,9 +525,9 @@ class Solver3T(Solver_):
         heat_capacity, outer_diameter, core_diameter, ix = self.morgan_coefficients
         a, b = _profile_bim_avg_coeffs(0.5 * core_diameter, 0.5 * outer_diameter)
 
-        js = np.nonzero(target_ == CableLocation.SURFACE)[0]
-        ja = np.nonzero(target_ == CableLocation.AVERAGE)[0]
-        jc = np.nonzero(target_ == CableLocation.CORE)[0]
+        js = np.nonzero(target_ == TargetType.SURFACE)[0]
+        ja = np.nonzero(target_ == TargetType.AVERAGE)[0]
+        jc = np.nonzero(target_ == TargetType.CORE)[0]
         jx = np.intersect1d(ix, ja)
 
         # get correct input for quasi-newton solver
@@ -572,8 +558,8 @@ class Solver3T(Solver_):
         max_conductor_temperature: floatArrayLike = np.array([]),
         target: CableLocationListLike = None,
         cable_type: CableTypeListLike = None,
-        tol: float = DP.tol,
-        maxiter: int = DP.maxiter,
+        tol: float = default.tol,
+        maxiter: int = default.maxiter,
         return_err: bool = False,
         return_temp: bool = True,
         return_power: bool = True,
@@ -583,7 +569,7 @@ class Solver3T(Solver_):
 
         Args:
             max_conductor_temperature (float | numpy.ndarray): Initial temperature profile. Default is an empty numpy array.
-            target (CableLocation | list[CableLocation]): Target specification for the solver. Default is None.
+            target (TargetType | list[CableLocation]): Target specification for the solver. Default is None.
             cable_type (CableType | list[CableType]): Cable type specification for the solver. Default is None. If provided, it overrides the target specification.
             tol (float): Tolerance for the solver. Default is DP.tol.
             maxiter (int): Maximum number of iterations for the solver. Default is DP.maxiter.
@@ -641,15 +627,15 @@ class Solver3T(Solver_):
 
         if return_temp or return_power:
             surface_temperature, core_temperature = newtheader(x, y)
-            ambient_temperature = self.average(surface_temperature, core_temperature)
+            average_temperature = self.average(surface_temperature, core_temperature)
 
             if return_temp:
-                df[TemperatureLocation.SURFACE] = surface_temperature
-                df[TemperatureLocation.AVERAGE] = ambient_temperature
-                df[TemperatureLocation.CORE] = core_temperature
+                df[TemperatureType.SURFACE] = surface_temperature
+                df[TemperatureType.AVERAGE] = average_temperature
+                df[TemperatureType.CORE] = core_temperature
 
             if return_power:
-                df[PowerType.JOULE] = self.joule_heating.value(ambient_temperature)
+                df[PowerType.JOULE] = self.joule_heating.value(average_temperature)
                 df[PowerType.SOLAR] = self.solar_heating.value(surface_temperature)
                 df[PowerType.CONVECTION] = self.convective_cooling.value(
                     surface_temperature

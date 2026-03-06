@@ -7,5 +7,7 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-# SolverBase
-::: thermohl.solver.base
+# Solver
+::: thermohl.solver.entities
+::: thermohl.solver.solver
+::: thermohl.solver.parameters

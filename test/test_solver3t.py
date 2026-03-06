@@ -9,11 +9,13 @@ import numpy as np
 
 from thermohl import solver
 from thermohl.solver import HeatEquationType
-from thermohl.solver.enums.cable_type import CableType
-from thermohl.solver.enums.solver_type import SolverType
-from thermohl.solver.enums.variable_type import VariableType
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-from thermohl.solver.enums.cable_location import CableLocation
+from thermohl.solver.entities import (
+    CableType,
+    ModelType,
+    VariableType,
+    TemperatureType,
+    TargetType,
+)
 
 _nprs = 123456
 
@@ -22,14 +24,14 @@ def _solvers(dic=None):
     return [
         solver._factory(dic=dic, heat_equation=heat_equation, model=m)
         for heat_equation in [
-            HeatEquationType.WITH_THREE_TEMPERATURES,
-            HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
+            HeatEquationType.THREE_TEMPERATURES,
+            HeatEquationType.THREE_TEMPERATURES_LEGACY,
         ]
         for m in [
-            SolverType.SOLVER_RTE,
-            SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            ModelType.RTE,
+            ModelType.CIGRE,
+            ModelType.IEEE,
+            ModelType.OLLA,
         ]
     ]
 
@@ -61,8 +63,8 @@ def test_balance():
         # compute guess with 1t solver
         s1 = solver._factory(
             dic=dic,
-            heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
-            model=SolverType.SOLVER_IEEE,
+            heat_equation=HeatEquationType.ONE_TEMPERATURE,
+            model=ModelType.IEEE,
         )
         t1 = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
@@ -81,16 +83,16 @@ def test_balance():
         assert np.all(df[VariableType.ERROR] < tol)
         assert np.allclose(
             s.balance(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
+                surface_temperature=df[TemperatureType.SURFACE],
+                core_temperature=df[TemperatureType.CORE],
             ).values,
             0.0,
             atol=tol,
         )
         assert np.allclose(
             s.morgan(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
+                surface_temperature=df[TemperatureType.SURFACE],
+                core_temperature=df[TemperatureType.CORE],
             ).values,
             0.0,
             atol=tol,
@@ -120,9 +122,9 @@ def test_consistency():
 
     for s in _solvers(dic):
         d = {
-            CableLocation.SURFACE: TemperatureLocation.SURFACE,
-            CableLocation.AVERAGE: TemperatureLocation.AVERAGE,
-            CableLocation.CORE: TemperatureLocation.CORE,
+            TargetType.SURFACE: TemperatureType.SURFACE,
+            TargetType.AVERAGE: TemperatureType.AVERAGE,
+            TargetType.CORE: TemperatureType.CORE,
         }
 
         for location, temperature_at_location in d.items():
@@ -141,26 +143,24 @@ def test_consistency():
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
+                    surface_temperature=df[TemperatureType.SURFACE],
+                    core_temperature=df[TemperatureType.CORE],
                 ).values,
                 0.0,
                 atol=tol,
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
+                    surface_temperature=df[TemperatureType.SURFACE],
+                    core_temperature=df[TemperatureType.CORE],
                 ).values,
                 0.0,
                 atol=tol,
             )
             # 3t solve
             dg = s.steady_temperature(
-                surface_temperature_guess=df[TemperatureLocation.SURFACE]
-                .round(1)
-                .values,
-                core_temperature_guess=df[TemperatureLocation.CORE].round(1).values,
+                surface_temperature_guess=df[TemperatureType.SURFACE].round(1).values,
+                core_temperature_guess=df[TemperatureType.CORE].round(1).values,
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
@@ -181,7 +181,7 @@ def test_steady_intensity_cable_type_scalar_homogeneous():
 
         df_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
-            target=CableLocation.AVERAGE,
+            target=TargetType.AVERAGE,
             return_err=True,
             return_power=True,
         )
@@ -200,7 +200,7 @@ def test_steady_intensity_cable_type_scalar_bimetallic():
 
         df_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
-            target=CableLocation.CORE,
+            target=TargetType.CORE,
             return_err=True,
             return_power=True,
         )
@@ -230,9 +230,7 @@ def test_steady_intensity_cable_type_list():
     cable_type = np.array(
         [CableType.BIMETALLIC, CableType.HOMOGENEOUS, CableType.HOMOGENEOUS]
     )
-    target = np.array(
-        [CableLocation.CORE, CableLocation.AVERAGE, CableLocation.AVERAGE]
-    )
+    target = np.array([TargetType.CORE, TargetType.AVERAGE, TargetType.AVERAGE])
 
     for s in _solvers(dic):
         df_with_specified_cable_type = s.steady_intensity(
@@ -273,7 +271,7 @@ def test_steady_intensity_cable_type_and_target():
 
     cable_type = rng.choice([CableType.BIMETALLIC, CableType.HOMOGENEOUS], size=N)
 
-    target = np.array([CableLocation.CORE] * N)
+    target = np.array([TargetType.CORE] * N)
 
     for s in _solvers(dic):
         df_with_specified_cable_type = s.steady_intensity(
