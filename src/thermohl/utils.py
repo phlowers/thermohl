@@ -10,6 +10,7 @@
 """Misc. utility code for thermohl project."""
 
 import os
+import logging
 from functools import wraps
 from importlib.util import find_spec
 
@@ -17,6 +18,8 @@ import numpy as np
 import pandas as pd
 import yaml
 
+
+logger = loggin.getLogger(__name__)
 
 def _dict_completion(
     params: dict,
@@ -43,7 +46,7 @@ def _dict_completion(
         if key not in params.keys() or params[key] is None:
             params[key] = defaults[key]
             if warning:
-                print("Added key %s from default parameters" % (key,))
+                logger.info("Added key %s from default parameters", key)
         elif (
             not isinstance(params[key], int)
             and not isinstance(params[key], float)
@@ -180,9 +183,9 @@ def bisect_v(
     midpoint = 0.5 * (lower_bounds + upper_bounds)
     midpoint[np.isnan(func(midpoint))] = np.nan
     if print_error:
-        print(
-            f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
-        )
+            logger.info(
+              f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}" 
+            )
     return midpoint, abs_error
 
 

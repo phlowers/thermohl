@@ -14,6 +14,8 @@ from thermohl.solver.enums.heat_equation_type import HeatEquationType
 
 from thermohl.solver import rte
 
+from thermal.logger import logger
+
 
 def test_solver3t_legacy():
     data = {
@@ -59,7 +61,7 @@ def test_solver3t_legacy():
         return_power=True,
     )
 
-    print(result)
+    logger.debug(result)
     assert abs(result[TemperatureLocation.CORE][-1] - 42) <= 0.5
     assert abs(result[TemperatureLocation.SURFACE][-1] - 39.9) <= 0.5
     assert abs(result[TemperatureLocation.AVERAGE][-1] - 40.9) <= 0.5
