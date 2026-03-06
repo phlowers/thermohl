@@ -276,10 +276,35 @@ def vonmises(mean: float, standard_deviation: float)
 
 ```python
 # Before
-def __init__(self, dic: Optional[dict[str, Any]] = None)
+from thermohl.solver.base import Args # Deprecated
+params = Args(input_dict)
 
 # After
-def __init__(self, input_dict: Optional[dict[str, Any]] = None)
+from thermohl.solver.parameters import Parameters
+params = Parameters(input_dict)
+```
+
+### `src/thermohl/power/rte/solar_heating.py` Functions
+
+New utility functions have been added for solar irradiance calculations:
+
+```python
+from thermohl import floatArrayLike
+from typing import Tuple
+
+def compute_solar_irradiance(
+    global_radiation: floatArrayLike,
+    solar_altitude: floatArrayLike,
+    incidence: floatArrayLike,
+    nebulosity: floatArrayLike,
+    albedo: floatArrayLike,
+) -> floatArrayLike
+
+def compute_data_from_provided(
+    provided_global_radiation: floatArrayLike,
+    provided_nebulosity: floatArrayLike,
+    solar_altitude: floatArrayLike,
+) -> Tuple[floatArrayLike, floatArrayLike]
 ```
 
 ### `src/thermohl/sun.py` Function
@@ -587,15 +612,28 @@ Following global variables have been renamed:
 
 ### Solver classes
 
-| Old Name | New Name | Description | Unit |
-|----------|----------|-------------|------|
-| `Names.transit` | `Names.transit` | Transit intensity | A |
-| `jh` | `joule_heating` | Joule heating | |
-| `sh` | `solar_heating` | Solar heating | |
-| `cc` | `convective_cooling` | Convective cooling | |
-| `rc` | `radiative_cooling` | Radiative cooling | |
-| `pc` | `precipitation_cooling` | Precipitation cooling | |
-| `mgc` | `morgan_coefficients` | Morgan coefficients | |
+The enumeration classes for solver configurations have been moved and renamed. Please use the new `TargetType`, `CableType`, `HeatEquationType`, `PowerType`, `ModelType`, `TemperatureType` and `VariableType` from `thermohl.solver.entities`.
+
+| Old Name | New Name | Description |
+|----------|----------|-------------|
+| `Names.transit` | `VariableType.TRANSIT` | Transit intensity |
+| `jh` | `PowerType.JOULE` | Joule heating |
+| `sh` | `PowerType.SOLAR` | Solar heating |
+| `cc` | `PowerType.CONVECTION` | Convective cooling |
+| `rc` | `PowerType.RADIATION` | Radiative cooling |
+| `pc` | `PowerType.RAIN` | Precipitation cooling |
+
+**Example:**
+```python
+from thermohl.solver.entities import PowerType, VariableType
+
+# Before
+# Using strings or old Names class
+power = "joule_power"
+
+# After
+power = PowerType.JOULE
+```
 
 ### WrappedNormal classe
 
