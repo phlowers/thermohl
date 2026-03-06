@@ -308,34 +308,20 @@ def solar_azimuth(
 
 # After
 def utc2solar_hour(
-    utc_hour: floatArrayLike,
-    utc_minute: floatArrayLike = 0.0,
-    utc_second: floatArrayLike = 0.0,
-    longitude: floatArrayLike = 0.0,
+    datetime_utc: datetimeListLike,
+    longitude: floatArrayLike,
 )
-def hour_angle(
-    solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
-)
-def solar_declination(
-    month_index: intArrayLike, day_of_month: intArrayLike
-)
+def hour_angle(solar_hour: floatArrayLike)
+def solar_declination(date: dateListLike)
 def solar_altitude(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 )
 def solar_azimuth(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 )
 ```
 
