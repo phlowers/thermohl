@@ -363,17 +363,17 @@ class Solver3T(Solver_):
 
     def _transient_temperature_results(
         self,
-        time,
+        offset,
         surface_temperature,
-        ambient_temperature,
+        average_temperature,
         core_temperature,
         return_power,
         n,
     ):
         dr = {
-            VariableType.TIME: time,
+            VariableType.TIME: offset,
             TemperatureLocation.SURFACE: surface_temperature,
-            TemperatureLocation.AVERAGE: ambient_temperature,
+            TemperatureLocation.AVERAGE: average_temperature,
             TemperatureLocation.CORE: core_temperature,
         }
 
@@ -381,7 +381,7 @@ class Solver3T(Solver_):
             for power in Solver_.powers():
                 dr[power] = np.zeros_like(surface_temperature)
 
-            for i in range(len(time)):
+            for i in range(len(offset)):
                 dr[PowerType.JOULE][i, :] = self.joule(
                     surface_temperature[i, :], core_temperature[i, :]
                 )
@@ -444,8 +444,8 @@ class Solver3T(Solver_):
             else 1.0 + surface_temperature_0
         )
         time_changing_parameters = get_time_changing_parameters(self.args, offset, N, n)
-        # shortcuts for time-loop
         c1, c2 = self._morgan_transient()
+        # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
         # init

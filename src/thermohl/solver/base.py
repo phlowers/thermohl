@@ -61,14 +61,13 @@ class Args:
         # weather and mesurement
         self.measured_solar_irradiance = np.nan  # solar irradiance
         self.ambient_temperature = 15.0  # ambient temperature (C)
-        self.wind_speed = 0.0  # wind speed (m.s**-1)
-        self.wind_angle = 90.0  # wind angle (deg, regarding north)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
         self.precipitation_rate = 0.0  # rain precipitation rate (m.s**-1)
         self.wind_speed = 0.0  # wind speed (m.s**-1)
         self.wind_azimuth = 90.0  # wind_azimuth (deg, regarding north)
-        self.albedo = 0.8  # albedo (1)
+        self.nebulosity = 0  # nebulosity (1)
+        self.albedo = 0.15  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
         self.transit = 100.0  # transit intensity (A)

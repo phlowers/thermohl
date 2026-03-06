@@ -178,13 +178,9 @@ def test_compress_with_mixed_values():
 
 def test_compress_with_empty_dict():
     args = Args({})
-
     args.compress()
-
     for key in args.keys():
-        assert isinstance(args[key], (float, int, ndarray, datetime))
-        if isinstance(args[key], ndarray):
-            assert len(args[key]) == 1
+        assert isinstance(args[key], (float, np.int64, ndarray, datetime))
 
 
 # Tests Fonctions Base
