@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from functional_test.functional_test_steady import (
+from functional_test.test_functional_steady import (
     get_scenarios,
     scn2dict,
 )

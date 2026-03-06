@@ -78,7 +78,7 @@ def test_steady_temperature():
 
 
 def test_steady_ampacity():
-    for scenario in get_scenarios():
+    for scenario in get_scenarios("scenarios_steady.csv"):
         solver = rte(
             scn2dict(scenario),
             heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY,
