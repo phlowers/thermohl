@@ -27,7 +27,9 @@ def get_cable_data(cable_name: str) -> dict:
 
 def get_scenarios(scenario_file_name: str):
     f = os.path.join("test", "functional_test", scenario_file_name)
-    return pd.read_csv(f, sep=";").to_dict(orient="records")
+    df = pd.read_csv(f, sep=";")
+    records = df.astype(object).where(pd.notna(df), None).to_dict(orient="records")
+    return records
 
 
 def scn2dict(scn: dict) -> dict:

@@ -57,7 +57,7 @@ def compute_data_from_provided(
 ) -> Tuple[floatArrayLike, floatArrayLike]:
     """
     Returns a value of nebulosity and a value of global_radiation.
-    If the global radiation is provided, the nebulosity is computed from it.
+    If the global radiation is provided (ie not NaN), the nebulosity is computed from it.
     Otherwise, the global radiation is computed from the provided nebulosity (default value of 0).
 
     :param provided_global_radiation: provided global radiation (W/m2).
@@ -66,35 +66,27 @@ def compute_data_from_provided(
     :return: (nebulosity, global_radiation).
     """
 
-    def compute_nebulosity(provided_global_radiation, solar_altitude):
-        intermediate = np.minimum(
-            1, provided_global_radiation[~mask] / (910 * np.sin(solar_altitude) - 30)
-        )
-        nebulosity = 8 * (4 / 3 * (1 - intermediate)) ** (1 / 3.4)
-        return np.minimum(8, nebulosity)
-
-    def compute_global_radiation(provided_nebulosity, solar_altitude):
-        intermediate = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
-        global_radiation = (910 * np.sin(solar_altitude) - 30) * intermediate
-        return np.maximum(0, global_radiation)
-
     mask = np.isnan(provided_global_radiation)
+    # First, everything is computed (np.errstate ignore warnings on NaN values)
+    with np.errstate(divide="ignore", invalid="ignore"):
+        # nebulosity computation
+        inter_neb = np.minimum(
+            1, provided_global_radiation / (910 * np.sin(solar_altitude) - 30)
+        )
+        computed_nebulosity = np.minimum(8, 8 * (4 / 3 * (1 - inter_neb)) ** (1 / 3.4))
 
-    nebulosity = np.empty_like(provided_global_radiation)
-    nebulosity[mask] = provided_nebulosity[mask]
-    if np.any(~mask):
-        nebulosity[~mask] = compute_nebulosity(
-            provided_global_radiation[~mask], solar_altitude[~mask]
+        # global radiation computation
+        inter_rad = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
+        computed_global_radiation = np.maximum(
+            0, (910 * np.sin(solar_altitude) - 30) * inter_rad
         )
 
-    global_radiation = np.empty_like(provided_global_radiation)
-    global_radiation[~mask] = provided_global_radiation[~mask]
-    if np.any(mask):
-        global_radiation[mask] = compute_global_radiation(
-            provided_nebulosity[mask], solar_altitude[mask]
-        )
-
-    return nebulosity, global_radiation
+    # Then, a filter is applied to keep useful values amongst the computations.
+    final_nebulosity = np.where(mask, provided_nebulosity, computed_nebulosity)
+    final_global_radiation = np.where(
+        ~mask, provided_global_radiation, computed_global_radiation
+    )
+    return final_nebulosity, final_global_radiation
 
 
 class SolarHeating(SolarHeatingBase):
