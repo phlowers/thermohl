@@ -7,16 +7,19 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-# Migration Guide: Variable Renaming
+# Migration Guide: Variable Renaming and Model Changes
 
-This guide helps you migrate your code from the old version with short variable names, to the new version which introduces clearer, more descriptive variable names throughout the ThermOHL library. In this new version, variables are renamed to make the codebase more readable and maintainable. All abbreviated parameter names have been replaced with self-documenting names that include units where applicable.
+This guide helps you migrate your code from the old version to the new version which introduces clearer, more descriptive variable names and updates to the solar heating model.
+
+In this new version, variables are renamed to make the codebase more readable and maintainable. All abbreviated parameter names have been replaced with self-documenting names that include units where applicable. Additionally, the solar heating model has been updated to include nebulosity and a new default albedo value.
 
 ## Quick Migration Steps
 
-1. Update all parameter names in your dictionaries (see tables below)
-2. Update function parameter names if you use keyword arguments
-3. Update configuration files (YAML files with default values/uncertainties)
-4. Run your tests to ensure everything works correctly
+1. Update all parameter names in your dictionaries (see tables below).
+2. Note that `nebulosity` is now a required parameter in some contexts, and the default `albedo` has changed from 0.8 to 0.15.
+3. Update function parameter names if you use keyword arguments.
+4. Update configuration files (YAML files with default values/uncertainties).
+5. Run your tests to ensure everything works correctly.
 
 ## Parameter Name Changes
 
@@ -28,6 +31,7 @@ This guide helps you migrate your code from the old version with short variable 
 | `lon` | `longitude` or `longitude` depending on context | Longitude | degrees or rad |
 | `alt` | `altitude` | Altitude | meters |
 | `azm` | `cable_azimuth` | Azimuth angle | degrees |
+| `time` | `offset` | Time offset for transient simulations | seconds |
 
 **Example:**
 ```python
@@ -36,7 +40,8 @@ params = {
     'lat': 45.0,
     'lon': 2.5,
     'alt': 100.0,
-    'azm': 90.0
+    'azm': 90.0,
+    'time': np.linspace(0, 3600, 60)
 }
 
 # After
@@ -44,7 +49,8 @@ params = {
     'latitude': 45.0,
     'longitude': 2.5,
     'altitude': 100.0,
-    'cable_azimuth': 90.0
+    'cable_azimuth': 90.0,
+    'offset': np.linspace(0, 3600, 60)
 }
 ```
 
@@ -57,8 +63,9 @@ params = {
 | `rh` | `relative_humidity` | Relative humidity | dimensionless [0-1] |
 | `pr` | `precipitation_rate` | Precipitation rate | m/s |
 | `ws` | `wind_speed` | Wind speed | m/s |
-| `wa` | `wind_azimuth` | wind_azimuth | degrees |
-| `al` | `albedo` | Albedo | dimensionless |
+| `wa` | `wind_azimuth` | Wind azimuth | degrees |
+| `al` | `albedo` | Albedo (default changed from 0.8 to 0.15) | dimensionless |
+| `neb` | `nebulosity` | Sky nebulosity | dimensionless [0-8] |
 | `tb` and `trb` | `turbidity` | Turbidity coefficient | dimensionless [0-1] |
 
 **Example:**
@@ -81,8 +88,9 @@ weather = {
     'relative_humidity': 0.8,
     'wind_speed': 2.0,
     'wind_azimuth': 45.0,
-    'albedo': 0.8,
-    'turbidity': 0.1
+    'albedo': 0.15,
+    'turbidity': 0.1,
+    'nebulosity': 0
 }
 ```
 
@@ -139,6 +147,8 @@ cable = {
 
 **Example:**
 ```python
+import numpy as np
+
 # Before
 optical = {
     'alpha': 0.5,
@@ -612,14 +622,14 @@ Following global variables have been renamed:
 
 ## Transient Solver Method Changes
 
-When calling transient temperature methods, update the parameter name:
+When calling transient temperature methods, update the parameter name from `time` (or `t`) to `offset`.
 
 ```python
 # Before
-result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
+result = solver.transient_temperature(time=time_steps)
 
 # After
-result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
+result = solver.transient_temperature(offset=time_steps)
 ```
 
 ## Complete Migration Example
