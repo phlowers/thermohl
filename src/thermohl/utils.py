@@ -260,7 +260,7 @@ def _check_quasi_newton_arguments(tol: float, maxiter: int) -> None:
         raise ValueError("maxiter must be greater than 0")
 
 
-def quasi_newton(
+def quasi_newton(  # NOSONAR(S3776)
     func: Callable[[floatArrayLike], floatArrayLike],
     x0: floatArrayLike,
     tol: float = 1.48e-8,
