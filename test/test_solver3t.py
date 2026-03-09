@@ -64,34 +64,34 @@ def test_balance():
             heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
             model=SolverType.SOLVER_IEEE,
         )
-        t1 = s1.steady_temperature(
+        steady_temperature_1t = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
         )
-        t1 = t1[VariableType.TEMPERATURE].values
+        steady_temperature_1t = steady_temperature_1t[VariableType.TEMPERATURE]
         # 3t solve
-        df = s.steady_temperature(
-            surface_temperature_guess=t1,
-            core_temperature_guess=t1,
+        steady_temperature_3t = s.steady_temperature(
+            surface_temperature_guess=steady_temperature_1t,
+            core_temperature_guess=steady_temperature_1t,
             return_err=True,
             return_power=True,
             tol=tol,
             maxiter=64,
         )
         # checks
-        assert np.all(df[VariableType.ERROR] < tol)
+        assert np.all(steady_temperature_3t[VariableType.ERROR] < tol)
         assert np.allclose(
             s.balance(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
-            ).values,
+                surface_temperature=steady_temperature_3t[TemperatureLocation.SURFACE],
+                core_temperature=steady_temperature_3t[TemperatureLocation.CORE],
+            ),
             0.0,
             atol=tol,
         )
         assert np.allclose(
             s.morgan(
-                surface_temperature=df[TemperatureLocation.SURFACE],
-                core_temperature=df[TemperatureLocation.CORE],
-            ).values,
+                surface_temperature=steady_temperature_3t[TemperatureLocation.SURFACE],
+                core_temperature=steady_temperature_3t[TemperatureLocation.CORE],
+            ),
             0.0,
             atol=tol,
         )
@@ -127,7 +127,7 @@ def test_consistency():
 
         for location, temperature_at_location in d.items():
             # solve intensity with different targets
-            df = s.steady_intensity(
+            steady_temperature_1 = s.steady_intensity(
                 max_conductor_temperature=100.0,
                 target=location,
                 return_err=True,
@@ -135,77 +135,89 @@ def test_consistency():
                 tol=1.0e-09,
                 maxiter=64,
             )
-            assert np.all(df[VariableType.ERROR] < tol)
+            assert np.all(steady_temperature_1[VariableType.ERROR] < tol)
             # set args intensity to newly founds ampacities
-            s.args.I = df[VariableType.TRANSIT].values
+            s.args.I = steady_temperature_1[VariableType.TRANSIT]
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
-                ).values,
+                    surface_temperature=steady_temperature_1[
+                        TemperatureLocation.SURFACE
+                    ],
+                    core_temperature=steady_temperature_1[TemperatureLocation.CORE],
+                ),
                 0.0,
                 atol=tol,
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature=df[TemperatureLocation.SURFACE],
-                    core_temperature=df[TemperatureLocation.CORE],
-                ).values,
+                    surface_temperature=steady_temperature_1[
+                        TemperatureLocation.SURFACE
+                    ],
+                    core_temperature=steady_temperature_1[TemperatureLocation.CORE],
+                ),
                 0.0,
                 atol=tol,
             )
             # 3t solve
-            dg = s.steady_temperature(
-                surface_temperature_guess=df[TemperatureLocation.SURFACE]
-                .round(1)
-                .values,
-                core_temperature_guess=df[TemperatureLocation.CORE].round(1).values,
+            steady_temperature_2 = s.steady_temperature(
+                surface_temperature_guess=steady_temperature_1[
+                    TemperatureLocation.SURFACE
+                ].round(1),
+                core_temperature_guess=steady_temperature_1[
+                    TemperatureLocation.CORE
+                ].round(1),
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
                 maxiter=64,
             )
             # check consistency
-            assert np.allclose(dg[temperature_at_location].values, 100.0)
+            assert np.allclose(steady_temperature_2[temperature_at_location], 100.0)
 
 
 def test_steady_intensity_cable_type_scalar_homogeneous():
     for s in _solvers():
-        df_with_specified_cable_type = s.steady_intensity(
+        result_with_specified_cable_type = s.steady_intensity(
             max_conductor_temperature=100.0,
             cable_type=CableType.HOMOGENEOUS,
             return_err=True,
             return_power=True,
         )
 
-        df_with_specified_target = s.steady_intensity(
+        result_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
             target=CableLocation.AVERAGE,
             return_err=True,
             return_power=True,
         )
 
-        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+        assert np.allclose(
+            result_with_specified_cable_type[VariableType.TRANSIT],
+            result_with_specified_target[VariableType.TRANSIT],
+        )
 
 
 def test_steady_intensity_cable_type_scalar_bimetallic():
     for s in _solvers():
-        df_with_specified_cable_type = s.steady_intensity(
+        result_with_specified_cable_type = s.steady_intensity(
             max_conductor_temperature=100.0,
             cable_type=CableType.BIMETALLIC,
             return_err=True,
             return_power=True,
         )
 
-        df_with_specified_target = s.steady_intensity(
+        result_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
             target=CableLocation.CORE,
             return_err=True,
             return_power=True,
         )
 
-        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+        assert np.allclose(
+            result_with_specified_cable_type[VariableType.TRANSIT],
+            result_with_specified_target[VariableType.TRANSIT],
+        )
 
 
 def test_steady_intensity_cable_type_list():
@@ -235,21 +247,24 @@ def test_steady_intensity_cable_type_list():
     )
 
     for s in _solvers(dic):
-        df_with_specified_cable_type = s.steady_intensity(
+        result_with_specified_cable_type = s.steady_intensity(
             max_conductor_temperature=100.0,
             cable_type=cable_type,
             return_err=True,
             return_power=True,
         )
 
-        df_with_specified_target = s.steady_intensity(
+        result_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
             target=target,
             return_err=True,
             return_power=True,
         )
 
-        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+        assert np.allclose(
+            result_with_specified_cable_type[VariableType.TRANSIT],
+            result_with_specified_target[VariableType.TRANSIT],
+        )
 
 
 def test_steady_intensity_cable_type_and_target():
@@ -276,7 +291,7 @@ def test_steady_intensity_cable_type_and_target():
     target = np.array([CableLocation.CORE] * N)
 
     for s in _solvers(dic):
-        df_with_specified_cable_type = s.steady_intensity(
+        result_with_specified_cable_type = s.steady_intensity(
             max_conductor_temperature=100.0,
             cable_type=cable_type,
             target=target,
@@ -284,11 +299,14 @@ def test_steady_intensity_cable_type_and_target():
             return_power=True,
         )
 
-        df_with_specified_target = s.steady_intensity(
+        result_with_specified_target = s.steady_intensity(
             max_conductor_temperature=100.0,
             cable_type=cable_type,
             return_err=True,
             return_power=True,
         )
 
-        assert np.allclose(df_with_specified_cable_type, df_with_specified_target)
+        assert np.allclose(
+            result_with_specified_cable_type[VariableType.TRANSIT],
+            result_with_specified_target[VariableType.TRANSIT],
+        )

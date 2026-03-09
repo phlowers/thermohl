@@ -139,7 +139,7 @@ slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE
 temp = slvr.steady_temperature() 
 ```
 
-Results from the solver are returned in a `pandas.DataFrame`:
+Results from the solver are returned in a dict where values are numpy arrays:
 
 ``` python
 >>> print(temp)

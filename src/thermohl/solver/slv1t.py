@@ -6,10 +6,9 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numbers
-from typing import Dict, Any, Optional
+from typing import Optional
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
 from thermohl.solver.base import Solver as Solver_, get_time_changing_parameters
@@ -28,7 +27,7 @@ class Solver1T(Solver_):
         maxiter: int = DP.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.array]:
         """
         Compute steady-state temperature.
 
@@ -41,7 +40,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            pandas.DataFrame: A DataFrame with temperature and other results (depending on inputs) in the columns.
+            dict[str, np.array]: A dictionary with temperature and other results (depending on inputs) in the keys.
 
         """
 
@@ -56,32 +55,21 @@ class Solver1T(Solver_):
         )
 
         # format output
-        df = pd.DataFrame(
-            data=conductor_temperature, columns=[VariableType.TEMPERATURE]
+        result = {
+            VariableType.TEMPERATURE: conductor_temperature,
+        }
+        self.add_error_and_power_if_needed(
+            conductor_temperature, err, result, return_err, return_power
         )
 
-        if return_err:
-            df[VariableType.ERROR] = err
-
-        if return_power:
-            df[PowerType.JOULE] = self.joule_heating.value(conductor_temperature)
-            df[PowerType.SOLAR] = self.solar_heating.value(conductor_temperature)
-            df[PowerType.CONVECTION] = self.convective_cooling.value(
-                conductor_temperature
-            )
-            df[PowerType.RADIATION] = self.radiative_cooling.value(
-                conductor_temperature
-            )
-            df[PowerType.RAIN] = self.precipitation_cooling.value(conductor_temperature)
-
-        return df
+        return result
 
     def transient_temperature(
         self,
         offset: floatArray = np.array([]),
         T0: Optional[float] = None,
         return_power: bool = False,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, np.ndarray]:
         """
         Compute transient-state temperature.
 
@@ -91,7 +79,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
-            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            dict[str, np.ndarray]: A dictionary with temperature and other results (depending on inputs) in the keys.
         """
 
         # get sizes
@@ -175,7 +163,7 @@ class Solver1T(Solver_):
         maxiter: int = DP.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """Compute steady-state max intensity.
 
         Compute the maximum intensity that can be run in a conductor without
@@ -191,7 +179,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            pandas.DataFrame: A dataframe with maximum intensity and other results (depending on inputs) in the columns.
+            dict[str, np.ndarray]: A dictionary with maximum intensity and other results (depending on inputs) in the keys.
 
         """
 
@@ -219,22 +207,14 @@ class Solver1T(Solver_):
         self.args.transit = transit
 
         # format output
-        df = pd.DataFrame(data=A, columns=[VariableType.TRANSIT])
+        result = {VariableType.TRANSIT: A}
 
-        if return_err:
-            df[VariableType.ERROR] = err
+        self.add_error_and_power_if_needed(
+            max_conductor_temperature,
+            err,
+            result,
+            return_err,
+            return_power,
+        )
 
-        if return_power:
-            df[PowerType.JOULE] = self.joule_heating.value(max_conductor_temperature)
-            df[PowerType.SOLAR] = self.solar_heating.value(max_conductor_temperature)
-            df[PowerType.CONVECTION] = self.convective_cooling.value(
-                max_conductor_temperature
-            )
-            df[PowerType.RADIATION] = self.radiative_cooling.value(
-                max_conductor_temperature
-            )
-            df[PowerType.RAIN] = self.precipitation_cooling.value(
-                max_conductor_temperature
-            )
-
-        return df
+        return result

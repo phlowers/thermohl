@@ -93,7 +93,7 @@ def test_consistency():
     )
 
     for s in _solvers(dic):
-        df = s.steady_intensity(
+        steady_intensity = s.steady_intensity(
             max_conductor_temperature=100.0,
             return_err=True,
             return_power=True,
@@ -101,19 +101,19 @@ def test_consistency():
             maxiter=64,
         )
         bl = (
-            df[PowerType.JOULE]
-            + df[PowerType.SOLAR]
-            - df[PowerType.CONVECTION]
-            - df[PowerType.RADIATION]
-            - df[PowerType.RAIN]
+            steady_intensity[PowerType.JOULE]
+            + steady_intensity[PowerType.SOLAR]
+            - steady_intensity[PowerType.CONVECTION]
+            - steady_intensity[PowerType.RADIATION]
+            - steady_intensity[PowerType.RAIN]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
-        s.args[VariableType.TRANSIT.value] = df[VariableType.TRANSIT].values
+        s.args[VariableType.TRANSIT.value] = steady_intensity[VariableType.TRANSIT]
         s.update()
-        dg = s.steady_temperature(
+        steady_temperature = s.steady_temperature(
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
-        assert np.allclose(dg[VariableType.TEMPERATURE].values, 100.0)
+        assert np.allclose(steady_temperature[VariableType.TEMPERATURE], 100.0)
 
 
 def test_steady_intensity_hot_weather():
