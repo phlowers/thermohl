@@ -12,13 +12,14 @@
 import os
 from functools import wraps
 from importlib.util import find_spec
-import operator
 import warnings
-
+from typing import Callable
 
 import numpy as np
 import pandas as pd
 import yaml
+
+from thermohl import floatArrayLike
 
 
 def _dict_completion(
@@ -189,7 +190,9 @@ def bisect_v(
     return midpoint, abs_error
 
 
-def _array_quasi_newton(func, x0, tol, maxiter):
+def _array_quasi_newton(
+    func: Callable[[np.ndarray], np.ndarray], x0: np.ndarray, tol: float, maxiter: int
+) -> floatArrayLike:
     """
     A vectorized version of secant method for arrays.
 
@@ -250,16 +253,25 @@ def _array_quasi_newton(func, x0, tol, maxiter):
     return p
 
 
-def quasi_newton(func, x0, tol=1.48e-8, maxiter=50, rtol=0.0):  # TODO: add type hints
+def _check_quasi_newton_arguments(tol: float, maxiter: int) -> None:
+    if tol <= 0:
+        raise ValueError(f"tol too small ({tol:g} <= 0)")
+    if maxiter < 1:
+        raise ValueError("maxiter must be greater than 0")
+
+
+def quasi_newton(
+    func: Callable[[floatArrayLike], floatArrayLike],
+    x0: floatArrayLike,
+    tol: float = 1.48e-8,
+    maxiter: int = 50,
+    rtol: float = 0.0,
+) -> floatArrayLike:
     """Find the zero of a function using the quasi-Newton (secant) method.
 
     Heavily inspired by the implementation of optimize.newton in the SciPy library.
     """
-    if tol <= 0:
-        raise ValueError(f"tol too small ({tol:g} <= 0)")
-    maxiter = operator.index(maxiter)
-    if maxiter < 1:
-        raise ValueError("maxiter must be greater than 0")
+    _check_quasi_newton_arguments(tol, maxiter)
     if np.size(x0) > 1:
         return _array_quasi_newton(func, x0, tol, maxiter)
 

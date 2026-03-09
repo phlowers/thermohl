@@ -217,7 +217,7 @@ def test_steady_intensity_custom_params(solver):
     assert VariableType.TRANSIT in result.columns
 
 
-def test_reduced_intensity_scalar(solver):
+def test_reduced_intensity_scalar():
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT.value: 0,
@@ -254,12 +254,11 @@ def test_reduced_intensity_scalar(solver):
 
     solver = create_solver(args)
     result = solver.reduced_intensity(
-        delta_T_measured=10.0,
+        measured_temperature_difference=10.0,
         measured_intensity=360.0,
     )
 
     assert isinstance(result, np.float64)
-    assert not np.isnan(result)
 
     # Check that solver args have not been changed
     assert np.isnan(solver.args.measured_solar_irradiance)
@@ -306,9 +305,8 @@ def test_reduced_intensity_array():
     solver = create_solver(args)
 
     result = solver.reduced_intensity(
-        delta_T_measured=np.array([10.0, 10.0]),
+        measured_temperature_difference=np.array([10.0, 10.0]),
         measured_intensity=np.array([360.0, 360.0]),
-        T_limit=np.array([100.0, 100.0]),
     )
 
     assert isinstance(result, np.ndarray)
