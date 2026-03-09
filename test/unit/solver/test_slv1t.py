@@ -217,7 +217,7 @@ def test_steady_intensity_custom_params(solver):
     assert VariableType.TRANSIT in result.columns
 
 
-def test_reduced_intensity_scalar():
+def test_reduced_intensity_scalar_using_default_args():
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT.value: 20,
@@ -251,15 +251,75 @@ def test_reduced_intensity_scalar():
         "emissivity": 0.8,
     }
     args.update(cable)
-
     solver = create_solver(args)
 
     initial_wind_attack_angle = solver.convective_cooling.wind_attack_angle
-    initial_transit = 20
+    initial_transit = args[VariableType.TRANSIT.value]
 
     result = solver.reduced_intensity(
         measured_temperature_difference=10.0,
         measured_intensity=360.0,
+    )
+
+    assert isinstance(result, np.float64)
+
+    # Check that solver args and power term attributes have not been changed
+    assert np.isnan(solver.args.measured_solar_irradiance)
+    assert solver.args.ambient_temperature == args["ambient_temperature"]
+    assert solver.args.wind_speed == args["wind_speed"]
+    assert solver.args.transit == args["transit"]
+    assert np.isclose(solver.args.wind_attack_angle, np.deg2rad(30.0))
+
+    assert solver.convective_cooling.wind_attack_angle == initial_wind_attack_angle
+    assert solver.joule_heating.transit == initial_transit
+
+
+def test_reduced_intensity_scalar_providing_custom_args():
+    args = {
+        "max_len": lambda: 1,
+        VariableType.TRANSIT.value: 20,
+        "ambient_temperature": 25,
+        "wind_speed": 0,
+        "wind_azimuth": 30.0,
+        "ambient_pressure": 101325,
+        "relative_humidity": 50,
+        "precipitation_rate": 0,
+        "month": 1,
+        "day": 1,
+        "hour": 0,
+        "latitude": 48.0,
+        "longitude": 2.3,
+        "altitude": 50.0,
+        "cable_azimuth": 0.0,
+        "solar_absorptivity": 0.5,
+    }
+    cable = {
+        "linear_mass": 1.0,
+        "heat_capacity": 1.0,
+        "outer_diameter": 3.186e-02,
+        "core_diameter": 0.000,
+        "outer_area": 6.004e-4,
+        "core_area": 0.000,
+        "magnetic_coeff": 1.000,
+        "magnetic_coeff_per_a": 0.000,
+        "temperature_coeff_linear": 3.600e-3,
+        "temperature_coeff_quadratic": 8.000e-7,
+        "linear_resistance_dc_20c": 5.540e-5,
+        "emissivity": 0.8,
+    }
+    args.update(cable)
+    solver = create_solver(args)
+
+    initial_wind_attack_angle = solver.convective_cooling.wind_attack_angle
+    initial_transit = args[VariableType.TRANSIT.value]
+
+    result = solver.reduced_intensity(
+        measured_temperature_difference=10.0,
+        measured_intensity=360.0,
+        ambient_temperature=25.0,
+        wind_speed=4.0,
+        measured_solar_irradiance=800.0,
+        max_conductor_temperature=120.0,
     )
 
     assert isinstance(result, np.float64)
