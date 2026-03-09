@@ -197,7 +197,7 @@ def _array_quasi_newton(
     A vectorized version of secant method for arrays.
 
     Do not use this method directly. This method is called from `quasi_newton`
-    when ``np.size(x0) > 1`` is ``True``. For docstring, see `quasi_newton`.
+    when ``np.size(x0) > 1`` is ``True``.
 
     Heavily inspired by the implementation of the SciPy library.
     """
