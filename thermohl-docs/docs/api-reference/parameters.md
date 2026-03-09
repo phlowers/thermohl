@@ -32,7 +32,8 @@ units, default values and in which set of power terms they are used.
 | hour      | 12            | N/A        | yes           | yes          | yes          | yes         | hour of the day (float in[0, 24[)                            |
 | ambient_temperature        | 15            | celsius    | yes           | yes          | yes          | yes         | ambient temperature                                          |
 | wind_speed        | 0             | linear_mass.s⁻¹      | yes           | yes          | yes          | yes         | wind speed                                                   |
-| wind_azimuth        | 90            | degree     | yes           | yes          | yes          | yes         | wind_azimuth (regarding north)                                 |
+| wind_azimuth        | 90            | degree     | yes           | yes          | yes          | yes         | wind azimuth (regarding north)                                 |
+| wind_attack_angle        | None            | radian     | yes           | yes          | yes          | yes         | (absolute) angle between the wind and the cable. Must be comprised between 0 and π / 2. If provided, this overrides the angle computed from wind_azimuth and cable_azimuth.                                  |
 | albedo        | 0.8           | N/A        | yes           | no           | no           | no          | albedo                                                       |
 | turbidity        | 0.1           | N/A        | no            | yes          | no           | no          | coefficient for air pollution from 0 (clean) to 1 (polluted) |
 | transit   | 100           | A          | yes           | yes          | yes          | yes         | transit intensity                                            |
