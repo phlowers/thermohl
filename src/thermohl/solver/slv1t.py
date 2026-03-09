@@ -313,9 +313,7 @@ class Solver1T(Solver_):
         solver_ambient_temperature = self.args.ambient_temperature
         solver_wind_speed = self.args.wind_speed
         solver_measured_solar_irradiance = self.args.measured_solar_irradiance
-        solver_has_wind_attack_angle = hasattr(self.args, "wind_attack_angle")
-        if solver_has_wind_attack_angle:
-            solver_wind_attack_angle = self.args.wind_attack_angle
+        solver_wind_attack_angle = self.args.wind_attack_angle
 
         # Set args default values for reduced intensity computation.
         # These differ from those used for the other computations.
@@ -357,10 +355,7 @@ class Solver1T(Solver_):
         self.args.ambient_temperature = solver_ambient_temperature
         self.args.wind_speed = solver_wind_speed
         self.args.measured_solar_irradiance = solver_measured_solar_irradiance
-        if solver_has_wind_attack_angle:
-            self.args.wind_attack_angle = solver_wind_attack_angle
-        elif hasattr(self.args, "wind_attack_angle"):
-            del self.args.wind_attack_angle
+        self.args.wind_attack_angle = solver_wind_attack_angle
         # Update convective cooling with restored wind_attack_angle
         self.convective_cooling.__init__(**self.args.__dict__)
 
