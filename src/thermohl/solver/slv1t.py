@@ -288,12 +288,12 @@ class Solver1T(Solver_):
 
     def reduced_intensity(
         self,
-        delta_T_measured: floatArrayLike,
+        measured_temperature_difference: floatArrayLike,
         measured_intensity: floatArrayLike,
         ambient_temperature: Optional[floatArrayLike] = None,
         wind_speed: Optional[floatArrayLike] = None,
         measured_solar_irradiance: Optional[floatArrayLike] = None,
-        T_limit: Optional[floatArrayLike] = None,
+        max_conductor_temperature: Optional[floatArrayLike] = None,
     ):
         """
         Compute the reduced intensity limit for a given measured temperature difference
@@ -301,12 +301,12 @@ class Solver1T(Solver_):
         and a faulty sleeve.
 
         Args:
-            delta_T_measured (float): The measured temperature difference between the cable surface and the sleeve.
+            measured_temperature_difference (float): The measured temperature difference between the cable surface and the sleeve.
             measured_intensity (float): The measuredintensity at which the temperature difference was measured.
             ambient_temperature (Optional[float]): The ambient temperature. Default is 30.
             wind_speed (Optional[float]): The wind speed. Default is 0.6.
             measured_solar_irradiance (Optional[float]): The measured solar irradiance. Default is 600.
-            T_limit (Optional[float]): The maximum conductor temperature. Default is 100.
+            max_conductor_temperature (Optional[float]): The maximum conductor temperature. Default is 100.
         """
         # Save args that will be modified so as to be able to restore them at the end of the computation
         solver_transit = self.args.transit
@@ -320,23 +320,25 @@ class Solver1T(Solver_):
             ambient_temperature, wind_speed, measured_solar_irradiance
         )
 
-        # Set default value for T_limit if not provided.
-        if T_limit is None:
-            T_limit = np.ones_like(measured_intensity) * 100.0
+        # Set default value for max_conductor_temperature if not provided.
+        if max_conductor_temperature is None:
+            max_conductor_temperature = np.ones_like(measured_intensity) * 100.0
 
         def conductor_temperature(transit):
             self.args.transit = transit
             self.joule_heating.__init__(**self.args.__dict__)
             return self.steady_temperature()[VariableType.TEMPERATURE][0]
 
-        def delta_T(transit):
-            return delta_T_measured * ((transit / measured_intensity) ** 2)
+        def temperature_difference(transit):
+            return measured_temperature_difference * (
+                (transit / measured_intensity) ** 2
+            )
 
         def sleeve_temperature(transit):
-            return conductor_temperature(transit) + delta_T(transit)
+            return conductor_temperature(transit) + temperature_difference(transit)
 
         def f(transit):
-            return sleeve_temperature(transit) - T_limit
+            return sleeve_temperature(transit) - max_conductor_temperature
 
         x0 = np.ones_like(measured_intensity) * 100
 
