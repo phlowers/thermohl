@@ -301,20 +301,23 @@ class Solver1T(Solver_):
         and a faulty sleeve.
 
         Args:
-            measured_temperature_difference (float): The measured temperature difference between the cable surface and the sleeve.
-            measured_intensity (float): The measuredintensity at which the temperature difference was measured.
-            ambient_temperature (Optional[float]): The ambient temperature. Default is 30.
-            wind_speed (Optional[float]): The wind speed. Default is 0.6.
-            measured_solar_irradiance (Optional[float]): The measured solar irradiance. Default is 600.
-            max_conductor_temperature (Optional[float]): The maximum conductor temperature. Default is 100.
+            measured_temperature_difference (float | np.ndarray): The measured temperature difference between the cable surface and the sleeve.
+            measured_intensity (float | np.ndarray): The measuredintensity at which the temperature difference was measured.
+            ambient_temperature (Optional[float | np.ndarray]): The ambient temperature. Default is 30.
+            wind_speed (Optional[float | np.ndarray]): The wind speed. Default is 0.6.
+            measured_solar_irradiance (Optional[float | np.ndarray]): The measured solar irradiance. Default is 600.
+            max_conductor_temperature (Optional[float | np.ndarray]): The maximum conductor temperature. Default is 100.
         """
         # Save args that will be modified so as to be able to restore them at the end of the computation
         solver_transit = self.args.transit
         solver_ambient_temperature = self.args.ambient_temperature
         solver_wind_speed = self.args.wind_speed
         solver_measured_solar_irradiance = self.args.measured_solar_irradiance
+        solver_has_wind_attack_angle = hasattr(self.args, "wind_attack_angle")
+        if solver_has_wind_attack_angle:
+            solver_wind_attack_angle = self.args.wind_attack_angle
 
-        # Set default values for reduced intensity computation.
+        # Set args default values for reduced intensity computation.
         # These differ from those used for the other computations.
         self._set_default_reduced_intensity_args(
             ambient_temperature, wind_speed, measured_solar_irradiance
@@ -323,6 +326,9 @@ class Solver1T(Solver_):
         # Set default value for max_conductor_temperature if not provided.
         if max_conductor_temperature is None:
             max_conductor_temperature = np.ones_like(measured_intensity) * 100.0
+
+        self.args.wind_attack_angle = 90.0
+        self.convective_cooling.__init__(**self.args.__dict__)
 
         def conductor_temperature(transit):
             self.args.transit = transit
@@ -346,8 +352,16 @@ class Solver1T(Solver_):
 
         # Restore previous args
         self.args.transit = solver_transit
+        # Update joule heating with restored transit
+        self.joule_heating.__init__(**self.args.__dict__)
         self.args.ambient_temperature = solver_ambient_temperature
         self.args.wind_speed = solver_wind_speed
         self.args.measured_solar_irradiance = solver_measured_solar_irradiance
+        if solver_has_wind_attack_angle:
+            self.args.wind_attack_angle = solver_wind_attack_angle
+        elif hasattr(self.args, "wind_attack_angle"):
+            del self.args.wind_attack_angle
+        # Update convective cooling with restored wind_attack_angle
+        self.convective_cooling.__init__(**self.args.__dict__)
 
         return reduced_intensity

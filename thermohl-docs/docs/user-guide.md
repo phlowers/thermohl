@@ -161,7 +161,7 @@ However, if a sleeve is faulty, it can overheat. ThermoHL enables the user to
 compute a reduced intensity limit (called reduced IST) so that the interface
 between the sleeve and the cable doesn't exceed a given maximum temperature.
 Input data are
-- the mesaured temperature difference between the hotspot (at the interface between sleeve and cable)
+- the measured temperature difference between the hotspot (at the interface between sleeve and cable)
 and the cable far away from the sleeve
 - the measured transit.
 

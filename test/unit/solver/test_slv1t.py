@@ -223,10 +223,10 @@ def test_steady_intensity_custom_params(solver):
 def test_reduced_intensity_scalar():
     args = {
         "max_len": lambda: 1,
-        VariableType.TRANSIT.value: 0,
+        VariableType.TRANSIT.value: 20,
         "ambient_temperature": 25,
         "wind_speed": 0,
-        "wind_azimuth": 0,
+        "wind_azimuth": 30.0,
         "ambient_pressure": 101325,
         "relative_humidity": 50,
         "precipitation_rate": 0,
@@ -256,6 +256,10 @@ def test_reduced_intensity_scalar():
     args.update(cable)
 
     solver = create_solver(args)
+
+    initial_wind_attack_angle = solver.convective_cooling.wind_attack_angle
+    initial_transit = 20
+
     result = solver.reduced_intensity(
         measured_temperature_difference=10.0,
         measured_intensity=360.0,
@@ -263,11 +267,15 @@ def test_reduced_intensity_scalar():
 
     assert isinstance(result, np.float64)
 
-    # Check that solver args have not been changed
+    # Check that solver args and power term attributes have not been changed
     assert np.isnan(solver.args.measured_solar_irradiance)
     assert solver.args.ambient_temperature == args["ambient_temperature"]
     assert solver.args.wind_speed == args["wind_speed"]
     assert solver.args.transit == args["transit"]
+    assert np.isclose(solver.args.wind_attack_angle, np.deg2rad(30.0))
+
+    assert solver.convective_cooling.wind_attack_angle == initial_wind_attack_angle
+    assert solver.joule_heating.transit == initial_transit
 
 
 def test_reduced_intensity_array():
@@ -277,6 +285,7 @@ def test_reduced_intensity_array():
         "ambient_temperature": np.array([25, 25]),
         "wind_speed": np.array([0, 0]),
         "wind_azimuth": np.array([0, 0]),
+        "wind_attack_angle": np.array([45.0, 45.0]),
         "ambient_pressure": np.array([101325, 101325]),
         "relative_humidity": np.array([50, 50]),
         "precipitation_rate": np.array([0, 0]),
@@ -316,3 +325,6 @@ def test_reduced_intensity_array():
     assert len(result) == 2
     assert not np.isnan(result[0])
     assert not np.isnan(result[1])
+
+    # Assert solver wind attack angle has not been changed
+    assert np.allclose(solver.args.wind_attack_angle, args["wind_attack_angle"])
