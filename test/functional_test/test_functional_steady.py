@@ -48,6 +48,9 @@ def scn2dict(scn: dict) -> dict:
     dic["nebulosity"] = scn["Neb"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
+    #
+    dic["T_conf"] = scn["T_conf"]
+    dic["Ampacite"] = scn["Ampacite"]
 
     datetime_paris = datetime.strptime(
         f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
@@ -87,3 +90,30 @@ def test_steady_ampacity():
         assert np.allclose(
             result[VariableType.TRANSIT], scenario["Ampacite"], atol=0.05
         )
+
+
+def test_steady_ampacity_array():
+    list_scenarios = get_scenarios("scenarios_steady.csv")
+    list_scenarios = [scn2dict(scenario) for scenario in list_scenarios]
+    dict_scenarios = {
+        cle: np.array([d[cle] for d in list_scenarios]) for cle in list_scenarios[0]
+    }
+    # Initialisation des valeurs manquantes pour nebulosite et measured_solar_irradiance
+    dict_scenarios["nebulosity"] = np.array(
+        [d if d is not None else 0 for d in dict_scenarios["nebulosity"]]
+    )
+    dict_scenarios["measured_solar_irradiance"] = np.array(
+        [
+            d if d is not None else np.nan
+            for d in dict_scenarios["measured_solar_irradiance"]
+        ]
+    )
+
+    solver = rte(
+        dict_scenarios,
+        heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
+    )
+    result = solver.steady_intensity(max_conductor_temperature=dict_scenarios["T_conf"])
+    assert np.allclose(
+        result[VariableType.TRANSIT], dict_scenarios["Ampacite"], atol=0.05
+    )
