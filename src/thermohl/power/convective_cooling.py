@@ -46,28 +46,55 @@ class ConvectiveCoolingBase(PowerTerm):
         wind_attack_angle: floatArrayLike = None,
         **kwargs: Any,
     ):
+        self._check_arguments(wind_azimuth, wind_attack_angle)
+        self._set_wind_attack_angle(cable_azimuth, wind_azimuth, wind_attack_angle)
+
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-
-        if wind_attack_angle is None and wind_azimuth is None:
-            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
-        if wind_attack_angle is not None and wind_azimuth is not None:
-            print(
-                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
-            )
-        if wind_attack_angle is not None:
-            self.wind_attack_angle = wind_attack_angle
-        else:
-            self.wind_attack_angle = compute_wind_attack_angle(
-                cable_azimuth, wind_azimuth
-            )
 
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
         self.dynamic_viscosity = dynamic_viscosity
         self.thermal_conductivity = thermal_conductivity
+
+    def _check_arguments(
+        self, wind_azimuth: floatArrayLike, wind_attack_angle: floatArrayLike
+    ) -> None:
+        if (
+            wind_attack_angle is None or np.isnan(wind_attack_angle).any()
+        ) and wind_azimuth is None:
+            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
+        if (
+            wind_attack_angle is not None
+            and not np.isnan(wind_attack_angle).all()
+            and wind_azimuth is not None
+        ):
+            print(
+                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            )
+
+    def _set_wind_attack_angle(
+        self,
+        cable_azimuth: floatArrayLike,
+        wind_azimuth: floatArrayLike,
+        wind_attack_angle: floatArrayLike,
+    ) -> None:
+        # Compute missing wind attack angles
+        if isinstance(wind_attack_angle, np.ndarray) and wind_attack_angle.ndim > 0:
+            mask = np.isnan(wind_attack_angle)
+            if np.any(mask):
+                wind_attack_angle[mask] = compute_wind_attack_angle(
+                    cable_azimuth[mask], wind_azimuth[mask]
+                )
+            self.wind_attack_angle = wind_attack_angle
+        elif wind_attack_angle is None or np.isnan(wind_attack_angle):
+            self.wind_attack_angle = compute_wind_attack_angle(
+                cable_azimuth, wind_azimuth
+            )
+        else:
+            self.wind_attack_angle = wind_attack_angle
 
     def _value_forced(
         self,
