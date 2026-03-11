@@ -44,7 +44,7 @@ def scn2dict(scn: dict) -> dict:
     dic["wind_speed"] = scn["V"]
     dic["wind_azimuth"] = scn["Azimut_V"]
     dic["albedo"] = scn["Albedo"]
-    dic["measured_solar_irradiance"] = scn["QG_mesure"]
+    dic["measured_global_radiation"] = scn["QG_mesure"]
     dic["nebulosity"] = scn["Neb"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
@@ -99,14 +99,14 @@ def test_steady_ampacity_array():
     dict_scenarios = {
         cle: np.array([d[cle] for d in list_scenarios]) for cle in list_scenarios[0]
     }
-    # Initialisation des valeurs manquantes pour nebulosite et measured_solar_irradiance
+    # Initialisation des valeurs manquantes pour nebulosite et measured_global_radiation
     dict_scenarios["nebulosity"] = np.array(
         [d if d is not None else 0 for d in dict_scenarios["nebulosity"]]
     )
-    dict_scenarios["measured_solar_irradiance"] = np.array(
+    dict_scenarios["measured_global_radiation"] = np.array(
         [
             d if d is not None else np.nan
-            for d in dict_scenarios["measured_solar_irradiance"]
+            for d in dict_scenarios["measured_global_radiation"]
         ]
     )
 

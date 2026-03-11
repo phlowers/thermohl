@@ -100,7 +100,7 @@ class SolarHeating(SolarHeatingBase):
         solar_absorptivity: floatArrayLike,
         albedo: floatArrayLike,
         nebulosity: floatArrayLike,
-        measured_solar_irradiance: floatArrayLike,
+        measured_global_radiation: floatArrayLike,
         **kwargs: Any,
     ):
         """Build with args.
@@ -114,7 +114,7 @@ class SolarHeating(SolarHeatingBase):
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
         :param albedo: Ground albedo.
         :param nebulosity: Sky nebulosity (0 to 8).
-        :param measured_solar_irradiance: Optional measured solar irradiance (W/m2).
+        :param measured_global_radiation: Optional measured solar irradiance (W/m2).
         """
         date = (
             [d.date() for d in datetime_utc]
@@ -124,7 +124,7 @@ class SolarHeating(SolarHeatingBase):
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
         solar_altitude = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         nebulosity, global_radiation = compute_data_from_provided(
-            measured_solar_irradiance, nebulosity, solar_altitude
+            measured_global_radiation, nebulosity, solar_altitude
         )
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
         incidence = np.arccos(
@@ -134,6 +134,7 @@ class SolarHeating(SolarHeatingBase):
 
         self.solar_absorptivity = solar_absorptivity
         self.outer_diameter = outer_diameter
+        self.global_radiation = global_radiation
         self.solar_irradiance = compute_solar_irradiance(
             global_radiation,
             solar_altitude,

@@ -6,7 +6,8 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-from thermohl.power.rte.solar_heating import compute_solar_irradiance
+from thermohl.power.rte.solar_heating import compute_solar_irradiance, SolarHeating
+from pandas import Timestamp
 
 
 def test_compute_solar_irradiance_night():
@@ -79,3 +80,29 @@ def test_compute_solar_irradiance_array():
     # expected0 = beam * (sin(0.6) + pi / 2 * 0.1 * sin(0.4)) + diffuse * pi / 2 * (1.1) = 1158.648723646428
     expected0 = 1158.631321677975
     assert np.isclose(res[0], expected0)
+
+
+def test_solar_heating():
+    latitude = [0.86892843, 0.86909212, 0.86957649]
+    longitude = [0.03194659, 0.03498268, 0.03403367]
+    cable_azimuth = [1.29034491, -2.43771926, 1.05803243]
+    datetime_utc = [
+        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
+        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
+        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
+    ]
+
+    solar_heating = SolarHeating(
+        latitude=latitude,
+        longitude=longitude,
+        cable_azimuth=cable_azimuth,
+        datetime_utc=datetime_utc,
+        outer_diameter=0,
+        solar_absorptivity=0,
+        albedo=0.15,
+        nebulosity=0,
+        measured_global_radiation=np.nan,
+    )
+
+    print(solar_heating.solar_irradiance)
+    # assert False

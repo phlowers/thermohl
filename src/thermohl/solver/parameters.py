@@ -43,7 +43,7 @@ class Parameters:
         self.datetime_utc = datetime(2000, 3, 21, 12, tzinfo=timezone.utc)
 
         # weather and mesurement
-        self.measured_solar_irradiance = np.nan  # solar irradiance
+        self.measured_global_radiation = np.nan  # solar irradiance
         self.ambient_temperature = 15.0  # ambient temperature (C)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
