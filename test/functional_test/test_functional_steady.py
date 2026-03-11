@@ -48,19 +48,20 @@ def scn2dict(scn: dict) -> dict:
     dic["nebulosity"] = scn["Neb"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
-    #
-    dic["T_conf"] = scn["T_conf"]
-    dic["Ampacite"] = scn["Ampacite"]
-
     datetime_paris = datetime.strptime(
         f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
     ).replace(tzinfo=ZoneInfo("Europe/Paris"))
     datetime_utc = datetime_paris.astimezone(timezone.utc)
     dic["datetime_utc"] = datetime_utc
+
     # utile uniquement pour le test test_steady_temperature
     if "Intensite" in scn:
         dic[VariableType.TRANSIT.value] = scn["Intensite"]
-
+    # utiles pour le test test_steady_ampacity_array
+    if "T_conf" in scn:
+        dic["T_conf"] = scn["T_conf"]
+    if "Ampacite" in scn:
+        dic["Ampacite"] = scn["Ampacite"]
     return dic
 
 
