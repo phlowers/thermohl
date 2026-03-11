@@ -253,11 +253,13 @@ def _array_quasi_newton(
     return p
 
 
-def _check_quasi_newton_arguments(tol: float, maxiter: int) -> None:
+def _check_quasi_newton_arguments(tol: float, maxiter: int, rtol: float) -> None:
     if tol <= 0:
         raise ValueError(f"tol too small ({tol:g} <= 0)")
     if maxiter < 1:
         raise ValueError("maxiter must be greater than 0")
+    if rtol < 0:
+        raise ValueError(f"rtol too small ({rtol:g} < 0)")
 
 
 def quasi_newton(  # NOSONAR(S3776)
@@ -271,7 +273,7 @@ def quasi_newton(  # NOSONAR(S3776)
 
     Heavily inspired by the implementation of optimize.newton in the SciPy library.
     """
-    _check_quasi_newton_arguments(tol, maxiter)
+    _check_quasi_newton_arguments(tol, maxiter, rtol)
     if np.size(x0) > 1:
         return _array_quasi_newton(func, x0, tol, maxiter)
 
