@@ -140,8 +140,8 @@ cable = {
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | dimensionless |
 | `epsilon` | `emissivity` | Emissivity | dimensionless |
-| `srad` | `measured_solar_irradiance` | Direct solar radiation | W/m² |
-| `Qs` | `measured_solar_irradiance` | Measured solar irradiance | W/m² |
+| `srad` | `measured_global_radiation` | Direct solar radiation | W/m² |
+| `Qs` | `measured_global_radiation` | Measured solar irradiance | W/m² |
 | `sigma` | `stefan_boltzmann_constant` | Stefan-Boltzmann constant | W/m²/$K^4$ |
 | `x` | `solar_altitude` | Solar altitude | degrees |
 
@@ -160,7 +160,7 @@ optical = {
 optical = {
     'solar_absorptivity': 0.5,
     'emissivity': 0.5,
-    'measured_solar_irradiance': np.nan  # or measured value
+    'measured_global_radiation': np.nan  # or measured value
 }
 ```
 
@@ -597,7 +597,7 @@ Following global variables have been renamed:
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | |
-| `srad` | `solar_irradiance` | Solar irradiance | |
+| `srad` | `measured_global_radiation` | Measured global radiation | |
 | `D` | `outer_diameter` | Cable external diameter | m |
 
 ### Classes RadiativeCooling

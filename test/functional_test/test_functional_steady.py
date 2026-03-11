@@ -44,20 +44,24 @@ def scn2dict(scn: dict) -> dict:
     dic["wind_speed"] = scn["V"]
     dic["wind_azimuth"] = scn["Azimut_V"]
     dic["albedo"] = scn["Albedo"]
-    dic["measured_solar_irradiance"] = scn["QG_mesure"]
+    dic["measured_global_radiation"] = scn["QG_mesure"]
     dic["nebulosity"] = scn["Neb"]
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
-
     datetime_paris = datetime.strptime(
         f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
     ).replace(tzinfo=ZoneInfo("Europe/Paris"))
     datetime_utc = datetime_paris.astimezone(timezone.utc)
     dic["datetime_utc"] = datetime_utc
+
     # utile uniquement pour le test test_steady_temperature
     if "Intensite" in scn:
         dic[VariableType.TRANSIT.value] = scn["Intensite"]
-
+    # utiles pour le test test_steady_ampacity_array
+    if "T_conf" in scn:
+        dic["T_conf"] = scn["T_conf"]
+    if "Ampacite" in scn:
+        dic["Ampacite"] = scn["Ampacite"]
     return dic
 
 
@@ -87,3 +91,30 @@ def test_steady_ampacity():
         assert np.allclose(
             result[VariableType.TRANSIT], scenario["Ampacite"], atol=0.05
         )
+
+
+def test_steady_ampacity_array():
+    list_scenarios = get_scenarios("scenarios_steady.csv")
+    list_scenarios = [scn2dict(scenario) for scenario in list_scenarios]
+    dict_scenarios = {
+        cle: np.array([d[cle] for d in list_scenarios]) for cle in list_scenarios[0]
+    }
+    # Initialisation des valeurs manquantes pour nebulosite et measured_global_radiation
+    dict_scenarios["nebulosity"] = np.array(
+        [d if d is not None else 0 for d in dict_scenarios["nebulosity"]]
+    )
+    dict_scenarios["measured_global_radiation"] = np.array(
+        [
+            d if d is not None else np.nan
+            for d in dict_scenarios["measured_global_radiation"]
+        ]
+    )
+
+    solver = rte(
+        dict_scenarios,
+        heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY,
+    )
+    result = solver.steady_intensity(max_conductor_temperature=dict_scenarios["T_conf"])
+    assert np.allclose(
+        result[VariableType.TRANSIT], dict_scenarios["Ampacite"], atol=0.05
+    )
