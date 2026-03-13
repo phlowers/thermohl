@@ -57,20 +57,26 @@ def test_balance():
         df = s.steady_temperature(
             return_err=True, return_power=True, tol=tol, maxiter=64
         )
-        assert np.all(df[VariableType.ERROR] < tol)
+        assert np.all(df[VariableType.ERROR.value] < tol)
         bl = np.abs(
-            df[PowerType.JOULE]
-            + df[PowerType.SOLAR]
-            - df[PowerType.CONVECTION]
-            - df[PowerType.RADIATION]
-            - df[PowerType.RAIN]
+            df[PowerType.JOULE.value]
+            + df[PowerType.SOLAR.value]
+            - df[PowerType.CONVECTION.value]
+            - df[PowerType.RADIATION.value]
+            - df[PowerType.RAIN.value]
         )
         atol = np.maximum(
             np.abs(
-                s.balance(df[VariableType.TEMPERATURE] + 0.5 * df[VariableType.ERROR])
+                s.balance(
+                    df[VariableType.TEMPERATURE.value]
+                    + 0.5 * df[VariableType.ERROR.value]
+                )
             ),
             np.abs(
-                s.balance(df[VariableType.TEMPERATURE] - 0.5 * df[VariableType.ERROR])
+                s.balance(
+                    df[VariableType.TEMPERATURE.value]
+                    - 0.5 * df[VariableType.ERROR.value]
+                )
             ),
         )
         assert np.allclose(bl, 0.0, atol=atol)
@@ -102,19 +108,21 @@ def test_consistency():
             maxiter=64,
         )
         bl = (
-            steady_intensity[PowerType.JOULE]
-            + steady_intensity[PowerType.SOLAR]
-            - steady_intensity[PowerType.CONVECTION]
-            - steady_intensity[PowerType.RADIATION]
-            - steady_intensity[PowerType.RAIN]
+            steady_intensity[PowerType.JOULE.value]
+            + steady_intensity[PowerType.SOLAR.value]
+            - steady_intensity[PowerType.CONVECTION.value]
+            - steady_intensity[PowerType.RADIATION.value]
+            - steady_intensity[PowerType.RAIN.value]
         )
         assert np.allclose(bl, 0.0, atol=1.0e-06)
-        s.args[VariableType.TRANSIT.value] = steady_intensity[VariableType.TRANSIT]
+        s.args[VariableType.TRANSIT.value] = steady_intensity[
+            VariableType.TRANSIT.value
+        ]
         s.update()
         steady_temperature = s.steady_temperature(
             return_err=True, return_power=True, tol=1.0e-09, maxiter=64
         )
-        assert np.allclose(steady_temperature[VariableType.TEMPERATURE], 100.0)
+        assert np.allclose(steady_temperature[VariableType.TEMPERATURE.value], 100.0)
 
 
 def test_steady_intensity_hot_weather():

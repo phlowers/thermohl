@@ -334,9 +334,9 @@ class Solver3T(Solver_):
         # format output
         average_temperature = self.average(surface_temperature, core_temperature)
         result = {
-            TemperatureType.SURFACE: surface_temperature,
-            TemperatureType.AVERAGE: average_temperature,
-            TemperatureType.CORE: core_temperature,
+            TemperatureType.SURFACE.value: surface_temperature,
+            TemperatureType.AVERAGE.value: average_temperature,
+            TemperatureType.CORE.value: core_temperature,
         }
 
         self.add_error_if_needed(err, result, return_err)
@@ -367,36 +367,36 @@ class Solver3T(Solver_):
         n,
     ):
         dr = {
-            VariableType.TIME: offset,
-            TemperatureType.SURFACE: surface_temperature,
-            TemperatureType.AVERAGE: average_temperature,
-            TemperatureType.CORE: core_temperature,
+            VariableType.TIME.value: offset,
+            TemperatureType.SURFACE.value: surface_temperature,
+            TemperatureType.AVERAGE.value: average_temperature,
+            TemperatureType.CORE.value: core_temperature,
         }
 
         if return_power:
             for power in Solver_.powers():
-                dr[power] = np.zeros_like(surface_temperature)
+                dr[power.value] = np.zeros_like(surface_temperature)
 
             for i in range(len(offset)):
-                dr[PowerType.JOULE][i, :] = self.joule(
+                dr[PowerType.JOULE.value][i, :] = self.joule(
                     surface_temperature[i, :], core_temperature[i, :]
                 )
-                dr[PowerType.SOLAR][i, :] = self.solar_heating.value(
+                dr[PowerType.SOLAR.value][i, :] = self.solar_heating.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.CONVECTION][i, :] = self.convective_cooling.value(
+                dr[PowerType.CONVECTION.value][i, :] = self.convective_cooling.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.RADIATION][i, :] = self.radiative_cooling.value(
+                dr[PowerType.RADIATION.value][i, :] = self.radiative_cooling.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.RAIN][i, :] = self.precipitation_cooling.value(
+                dr[PowerType.RAIN.value][i, :] = self.precipitation_cooling.value(
                     surface_temperature[i, :]
                 )
 
         if n == 1:
             keys = list(dr.keys())
-            keys.remove(VariableType.TIME)
+            keys.remove(VariableType.TIME.value)
             for k in keys:
                 dr[k] = dr[k][:, 0]
 
@@ -599,7 +599,7 @@ class Solver3T(Solver_):
         x, y, iterations, err = quasi_newton_2d(
             balance,
             morgan,
-            r[VariableType.TRANSIT],
+            r[VariableType.TRANSIT.value],
             Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
@@ -612,7 +612,7 @@ class Solver3T(Solver_):
             )
 
         # format output
-        result = {VariableType.TRANSIT: x}
+        result = {VariableType.TRANSIT.value: x}
 
         self.add_error_if_needed(err, result, return_err)
 
@@ -621,20 +621,24 @@ class Solver3T(Solver_):
             average_temperature = self.average(surface_temperature, core_temperature)
 
             if return_temp:
-                result[TemperatureType.SURFACE] = surface_temperature
-                result[TemperatureType.AVERAGE] = average_temperature
-                result[TemperatureType.CORE] = core_temperature
+                result[TemperatureType.SURFACE.value] = surface_temperature
+                result[TemperatureType.AVERAGE.value] = average_temperature
+                result[TemperatureType.CORE.value] = core_temperature
 
             if return_power:
-                result[PowerType.JOULE] = self.joule_heating.value(average_temperature)
-                result[PowerType.SOLAR] = self.solar_heating.value(surface_temperature)
-                result[PowerType.CONVECTION] = self.convective_cooling.value(
+                result[PowerType.JOULE.value] = self.joule_heating.value(
+                    average_temperature
+                )
+                result[PowerType.SOLAR.value] = self.solar_heating.value(
                     surface_temperature
                 )
-                result[PowerType.RADIATION] = self.radiative_cooling.value(
+                result[PowerType.CONVECTION.value] = self.convective_cooling.value(
                     surface_temperature
                 )
-                result[PowerType.RAIN] = self.precipitation_cooling.value(
+                result[PowerType.RADIATION.value] = self.radiative_cooling.value(
+                    surface_temperature
+                )
+                result[PowerType.RAIN.value] = self.precipitation_cooling.value(
                     surface_temperature
                 )
 

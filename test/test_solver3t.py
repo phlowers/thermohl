@@ -69,7 +69,7 @@ def test_balance():
         steady_temperature_1t = s1.steady_temperature(
             tol=2.0, maxiter=16, return_err=False, return_power=False
         )
-        steady_temperature_1t = steady_temperature_1t[VariableType.TEMPERATURE]
+        steady_temperature_1t = steady_temperature_1t[VariableType.TEMPERATURE.value]
         # 3t solve
         steady_temperature_3t = s.steady_temperature(
             surface_temperature_guess=steady_temperature_1t,
@@ -80,19 +80,23 @@ def test_balance():
             maxiter=64,
         )
         # checks
-        assert np.all(steady_temperature_3t[VariableType.ERROR] < tol)
+        assert np.all(steady_temperature_3t[VariableType.ERROR.value] < tol)
         assert np.allclose(
             s.balance(
-                surface_temperature=steady_temperature_3t[TemperatureType.SURFACE],
-                core_temperature=steady_temperature_3t[TemperatureType.CORE],
+                surface_temperature=steady_temperature_3t[
+                    TemperatureType.SURFACE.value
+                ],
+                core_temperature=steady_temperature_3t[TemperatureType.CORE.value],
             ),
             0.0,
             atol=tol,
         )
         assert np.allclose(
             s.morgan(
-                surface_temperature=steady_temperature_3t[TemperatureType.SURFACE],
-                core_temperature=steady_temperature_3t[TemperatureType.CORE],
+                surface_temperature=steady_temperature_3t[
+                    TemperatureType.SURFACE.value
+                ],
+                core_temperature=steady_temperature_3t[TemperatureType.CORE.value],
             ),
             0.0,
             atol=tol,
@@ -137,22 +141,26 @@ def test_consistency():
                 tol=1.0e-09,
                 maxiter=64,
             )
-            assert np.all(steady_temperature_1[VariableType.ERROR] < tol)
+            assert np.all(steady_temperature_1[VariableType.ERROR.value] < tol)
             # set args intensity to newly founds ampacities
-            s.args.I = steady_temperature_1[VariableType.TRANSIT]
+            s.args.I = steady_temperature_1[VariableType.TRANSIT.value]
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature=steady_temperature_1[TemperatureType.SURFACE],
-                    core_temperature=steady_temperature_1[TemperatureType.CORE],
+                    surface_temperature=steady_temperature_1[
+                        TemperatureType.SURFACE.value
+                    ],
+                    core_temperature=steady_temperature_1[TemperatureType.CORE.value],
                 ),
                 0.0,
                 atol=tol,
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature=steady_temperature_1[TemperatureType.SURFACE],
-                    core_temperature=steady_temperature_1[TemperatureType.CORE],
+                    surface_temperature=steady_temperature_1[
+                        TemperatureType.SURFACE.value
+                    ],
+                    core_temperature=steady_temperature_1[TemperatureType.CORE.value],
                 ),
                 0.0,
                 atol=tol,
@@ -160,18 +168,20 @@ def test_consistency():
             # 3t solve
             steady_temperature_2 = s.steady_temperature(
                 surface_temperature_guess=steady_temperature_1[
-                    TemperatureType.SURFACE
+                    TemperatureType.SURFACE.value
                 ].round(1),
-                core_temperature_guess=steady_temperature_1[TemperatureType.CORE].round(
-                    1
-                ),
+                core_temperature_guess=steady_temperature_1[
+                    TemperatureType.CORE.value
+                ].round(1),
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,
                 maxiter=64,
             )
             # check consistency
-            assert np.allclose(steady_temperature_2[temperature_at_location], 100.0)
+            assert np.allclose(
+                steady_temperature_2[temperature_at_location.value], 100.0
+            )
 
 
 def test_steady_intensity_cable_type_scalar_homogeneous():
@@ -191,8 +201,8 @@ def test_steady_intensity_cable_type_scalar_homogeneous():
         )
 
         assert np.allclose(
-            result_with_specified_cable_type[VariableType.TRANSIT],
-            result_with_specified_target[VariableType.TRANSIT],
+            result_with_specified_cable_type[VariableType.TRANSIT.value],
+            result_with_specified_target[VariableType.TRANSIT.value],
         )
 
 
@@ -213,8 +223,8 @@ def test_steady_intensity_cable_type_scalar_bimetallic():
         )
 
         assert np.allclose(
-            result_with_specified_cable_type[VariableType.TRANSIT],
-            result_with_specified_target[VariableType.TRANSIT],
+            result_with_specified_cable_type[VariableType.TRANSIT.value],
+            result_with_specified_target[VariableType.TRANSIT.value],
         )
 
 
@@ -258,8 +268,8 @@ def test_steady_intensity_cable_type_list():
         )
 
         assert np.allclose(
-            result_with_specified_cable_type[VariableType.TRANSIT],
-            result_with_specified_target[VariableType.TRANSIT],
+            result_with_specified_cable_type[VariableType.TRANSIT.value],
+            result_with_specified_target[VariableType.TRANSIT.value],
         )
 
 
@@ -303,6 +313,6 @@ def test_steady_intensity_cable_type_and_target():
         )
 
         assert np.allclose(
-            result_with_specified_cable_type[VariableType.TRANSIT],
-            result_with_specified_target[VariableType.TRANSIT],
+            result_with_specified_cable_type[VariableType.TRANSIT.value],
+            result_with_specified_target[VariableType.TRANSIT.value],
         )

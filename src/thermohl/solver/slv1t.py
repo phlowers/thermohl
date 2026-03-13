@@ -55,7 +55,7 @@ class Solver1T(Solver_):
 
         # format output
         result = {
-            VariableType.TEMPERATURE: conductor_temperature,
+            VariableType.TEMPERATURE.value: conductor_temperature,
         }
         self.add_error_and_power_if_needed(
             conductor_temperature, err, result, return_err, return_power
@@ -116,38 +116,38 @@ class Solver1T(Solver_):
 
         # save results
         result = {
-            VariableType.TIME: offset,
-            VariableType.TEMPERATURE: conductor_temperature,
+            VariableType.TIME.value: offset,
+            VariableType.TEMPERATURE.value: conductor_temperature,
         }
 
         # manage return dict 2: powers
         if return_power:
             for power in Solver_.powers():
-                result[power] = np.zeros_like(conductor_temperature)
+                result[power.value] = np.zeros_like(conductor_temperature)
             for i in range(N):
                 for key in time_changing_parameters.keys():
                     self.args[key] = time_changing_parameters[key][i, :]
                 self.update()
-                result[PowerType.JOULE][i, :] = self.joule_heating.value(
+                result[PowerType.JOULE.value][i, :] = self.joule_heating.value(
                     conductor_temperature[i, :]
                 )
-                result[PowerType.SOLAR][i, :] = self.solar_heating.value(
+                result[PowerType.SOLAR.value][i, :] = self.solar_heating.value(
                     conductor_temperature[i, :]
                 )
-                result[PowerType.CONVECTION][i, :] = self.convective_cooling.value(
+                result[PowerType.CONVECTION.value][i, :] = (
+                    self.convective_cooling.value(conductor_temperature[i, :])
+                )
+                result[PowerType.RADIATION.value][i, :] = self.radiative_cooling.value(
                     conductor_temperature[i, :]
                 )
-                result[PowerType.RADIATION][i, :] = self.radiative_cooling.value(
-                    conductor_temperature[i, :]
-                )
-                result[PowerType.RAIN][i, :] = self.precipitation_cooling.value(
+                result[PowerType.RAIN.value][i, :] = self.precipitation_cooling.value(
                     conductor_temperature[i, :]
                 )
 
         # squeeze return values if n is 1
         if n == 1:
             keys = list(result.keys())
-            keys.remove(VariableType.TIME)
+            keys.remove(VariableType.TIME.value)
             for key in keys:
                 result[key] = result[key][:, 0]
 
@@ -206,7 +206,7 @@ class Solver1T(Solver_):
         self.args.transit = transit
 
         # format output
-        result = {VariableType.TRANSIT: A}
+        result = {VariableType.TRANSIT.value: A}
 
         self.add_error_and_power_if_needed(
             max_conductor_temperature,

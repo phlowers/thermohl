@@ -115,7 +115,7 @@ class Solver(ABC):
     @staticmethod
     def add_error_if_needed(err, output, return_err):
         if return_err:
-            output[VariableType.ERROR] = err
+            output[VariableType.ERROR.value] = err
 
     def add_power_if_needed(
         self, temperature_average, output, return_power, temperature_surface=None
@@ -126,15 +126,19 @@ class Solver(ABC):
                 if temperature_surface is not None
                 else temperature_average
             )
-            output[PowerType.JOULE] = self.joule_heating.value(temperature_average)
-            output[PowerType.SOLAR] = self.solar_heating.value(temperature_surface)
-            output[PowerType.CONVECTION] = self.convective_cooling.value(
+            output[PowerType.JOULE.value] = self.joule_heating.value(
+                temperature_average
+            )
+            output[PowerType.SOLAR.value] = self.solar_heating.value(
                 temperature_surface
             )
-            output[PowerType.RADIATION] = self.radiative_cooling.value(
+            output[PowerType.CONVECTION.value] = self.convective_cooling.value(
                 temperature_surface
             )
-            output[PowerType.RAIN] = self.precipitation_cooling.value(
+            output[PowerType.RADIATION.value] = self.radiative_cooling.value(
+                temperature_surface
+            )
+            output[PowerType.RAIN.value] = self.precipitation_cooling.value(
                 temperature_surface
             )
 
