@@ -58,6 +58,6 @@ def test_solver3t_legacy():
     )
 
     print(result)
-    assert abs(result[TemperatureType.CORE][-1] - 42) <= 0.5
-    assert abs(result[TemperatureType.SURFACE][-1] - 39.9) <= 0.5
-    assert abs(result[TemperatureType.AVERAGE][-1] - 40.9) <= 0.5
+    assert abs(result[TemperatureType.CORE.value][-1] - 42) <= 0.5
+    assert abs(result[TemperatureType.SURFACE.value][-1] - 39.9) <= 0.5
+    assert abs(result[TemperatureType.AVERAGE.value][-1] - 40.9) <= 0.5
