@@ -107,6 +107,18 @@ extend-exclude = [
     "thermohl-docs/docs/examples/*.ipynb",
 ]
 
+[tool.ruff.lint]
+# List of rules to enable
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+]
+
+# List of rules to ignore
+ignore = [
+    "E501", # line too long (handled by ruff format)
+]
+
 [tool.ruff.format]
 quote-style = "double"
 indent-style = "space"
