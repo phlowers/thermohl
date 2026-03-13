@@ -143,9 +143,7 @@ def test_consistency():
             s.update()
             assert np.allclose(
                 s.balance(
-                    surface_temperature=steady_temperature_1[
-                        TemperatureType.SURFACE
-                    ],
+                    surface_temperature=steady_temperature_1[TemperatureType.SURFACE],
                     core_temperature=steady_temperature_1[TemperatureType.CORE],
                 ),
                 0.0,
@@ -153,9 +151,7 @@ def test_consistency():
             )
             assert np.allclose(
                 s.morgan(
-                    surface_temperature=steady_temperature_1[
-                        TemperatureType.SURFACE
-                    ],
+                    surface_temperature=steady_temperature_1[TemperatureType.SURFACE],
                     core_temperature=steady_temperature_1[TemperatureType.CORE],
                 ),
                 0.0,
@@ -166,9 +162,9 @@ def test_consistency():
                 surface_temperature_guess=steady_temperature_1[
                     TemperatureType.SURFACE
                 ].round(1),
-                core_temperature_guess=steady_temperature_1[
-                    TemperatureType.CORE
-                ].round(1),
+                core_temperature_guess=steady_temperature_1[TemperatureType.CORE].round(
+                    1
+                ),
                 return_err=True,
                 return_power=True,
                 tol=1.0e-09,

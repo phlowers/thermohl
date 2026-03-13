@@ -9,7 +9,7 @@
 
 from datetime import timedelta
 from abc import ABC, abstractmethod
-from typing import Type, Any, Optional, KeysView, Iterable
+from typing import Type, Any, Optional, Iterable
 import numpy.typing as npt
 import numpy as np
 from numpy import ndarray
@@ -23,7 +23,7 @@ from thermohl import (
 )
 from thermohl.power import PowerTerm
 from thermohl.solver.parameters import Parameters
-from thermohl.solver.entities import PowerType
+from thermohl.solver.entities import PowerType, VariableType
 
 
 class Solver(ABC):
