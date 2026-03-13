@@ -22,7 +22,7 @@ class SolarHeating(SolarHeatingBase):
         datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        measured_solar_irradiance: floatArrayLike,
+        measured_global_radiation: floatArrayLike,
         **kwargs: Any,
     ):
         """Init with args.
@@ -35,7 +35,7 @@ class SolarHeating(SolarHeatingBase):
         :param datetime_utc: Datetime in UTC.
         :param outer_diameter: external diameter of the conductor.
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
-        :param measured_solar_irradiance: Optional precomputed solar radiation term.
+        :param measured_global_radiation: Optional precomputed solar radiation term.
         """
         est = _SRad(
             [
@@ -66,6 +66,6 @@ class SolarHeating(SolarHeatingBase):
             outer_diameter,
             solar_absorptivity,
             est,
-            measured_solar_irradiance,
+            measured_global_radiation,
             **kwargs,
         )

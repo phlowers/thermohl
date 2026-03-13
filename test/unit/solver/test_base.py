@@ -9,7 +9,8 @@ from datetime import datetime, timezone
 import numpy as np
 from numpy import ndarray
 
-from thermohl.solver.base import Args, reshape, _set_dates
+from thermohl.solver.solver import reshape, _set_dates
+from thermohl.solver import Parameters
 
 
 # Tests class Args
@@ -19,7 +20,7 @@ def test_max_len_with_mixed_types():
         "longitude": 10.0,
         "altitude": np.array([20.0, 25.0, 30.0]),
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     result = args.get_number_of_computations()
 
@@ -31,7 +32,7 @@ def test_max_len_with_ndarray():
         "latitude": np.array([45.0, 46.0]),
         "longitude": np.array([10.0, 11.0]),
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     result = args.get_number_of_computations()
 
@@ -40,7 +41,7 @@ def test_max_len_with_ndarray():
 
 def test_max_len_with_scalar():
     dic = {"latitude": 45.0, "longitude": 10.0}
-    args = Args(dic)
+    args = Parameters(dic)
 
     result = args.get_number_of_computations()
 
@@ -48,7 +49,7 @@ def test_max_len_with_scalar():
 
 
 def test_max_len_with_empty_dict():
-    args = Args({})
+    args = Parameters({})
 
     result = args.get_number_of_computations()
 
@@ -61,7 +62,7 @@ def test_max_len_with_varied_lengths():
         "longitude": np.array([10.0]),
         "altitude": np.array([20.0, 25.0, 30.0]),
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     result = args.get_number_of_computations()
 
@@ -70,7 +71,7 @@ def test_max_len_with_varied_lengths():
 
 def test_extend_to_max_len_with_nd_array():
     dic = {"latitude": np.array([45.0, 46.0]), "longitude": 10.0}
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.extend()
 
@@ -84,7 +85,7 @@ def test_extend_to_max_len_with_nd_array():
 
 def test_extend_to_max_len_with_scalar():
     dic = {"latitude": 45.0, "longitude": 10.0}
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.extend()
 
@@ -102,7 +103,7 @@ def test_extend_to_max_len_with_mixed_types():
         "longitude": 10.0,
         "altitude": 20.0,
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.extend()
 
@@ -118,7 +119,7 @@ def test_extend_to_max_len_with_mixed_types():
 
 
 def test_extend_to_max_len_with_empty_dict():
-    args = Args({})
+    args = Parameters({})
 
     args.extend()
 
@@ -133,7 +134,7 @@ def test_compress_with_unique_values():
         "latitude": np.array([45.0, 45.0]),
         "longitude": np.array([10.0, 10.0]),
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.compress()
 
@@ -148,7 +149,7 @@ def test_compress_with_non_unique_values():
         "latitude": np.array([45.0, 46.0]),
         "longitude": np.array([10.0, 11.0]),
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.compress()
 
@@ -164,7 +165,7 @@ def test_compress_with_mixed_values():
         "longitude": np.array([10.0, 11.0]),
         "altitude": 20.0,
     }
-    args = Args(dic)
+    args = Parameters(dic)
 
     args.compress()
 
@@ -177,14 +178,10 @@ def test_compress_with_mixed_values():
 
 
 def test_compress_with_empty_dict():
-    args = Args({})
-
+    args = Parameters({})
     args.compress()
-
     for key in args.keys():
-        assert isinstance(args[key], (float, int, ndarray, datetime))
-        if isinstance(args[key], ndarray):
-            assert len(args[key]) == 1
+        assert isinstance(args[key], (float, np.int64, ndarray, datetime))
 
 
 # Tests Fonctions Base

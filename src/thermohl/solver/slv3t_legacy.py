@@ -11,7 +11,7 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.enums.cable_location import CableLocation, CableLocationListLike
+from thermohl.solver.entities import TargetType, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
 
 
@@ -97,9 +97,9 @@ class Solver3TL(Solver3T):
         target_ = self._check_target(target, self.args.core_diameter, max_len)
 
         # pre-compute indexes
-        surface_indices = np.nonzero(target_ == CableLocation.SURFACE)[0]
-        average_indices = np.nonzero(target_ == CableLocation.AVERAGE)[0]
-        core_indices = np.nonzero(target_ == CableLocation.CORE)[0]
+        surface_indices = np.nonzero(target_ == TargetType.SURFACE)[0]
+        average_indices = np.nonzero(target_ == TargetType.AVERAGE)[0]
+        core_indices = np.nonzero(target_ == TargetType.CORE)[0]
 
         def newtheader(
             transit: floatArray, tg: floatArray
@@ -132,7 +132,7 @@ class Solver3TL(Solver3T):
 
     def transient_temperature_legacy(
         self,
-        time: floatArray = np.array([]),
+        offset: floatArray = np.array([]),
         surface_temperature_0: Optional[floatArrayLike] = None,
         core_temperature_0: Optional[floatArrayLike] = None,
         time_constant: float = 600.0,
@@ -142,7 +142,7 @@ class Solver3TL(Solver3T):
         Compute transient-state temperature with legacy method.
 
         Args:
-            time (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
+            offset (numpy.ndarray): A 1D array with times (in seconds) when the temperature needs to be
                 computed. The array must contain increasing values (undefined behaviour otherwise).
             surface_temperature_0 (float): Initial surface temperature. If set to None, the ambient temperature from
                 internal dict will be used. The default is None.
@@ -157,10 +157,10 @@ class Solver3TL(Solver3T):
 
         """
 
-        # get sizes (input_size for input dict entries, time_size for time)
-        input_size = self.args.get_number_of_computations()
-        time_size = len(time)
-        if time_size < 2:
+        # get sizes (n for input dict entries, N for offsets)
+        n = self.args.get_number_of_computations()
+        N = len(offset)
+        if N < 2:
             raise ValueError()
 
         # get initial temperature
@@ -175,52 +175,53 @@ class Solver3TL(Solver3T):
             else 1.0 + surface_temperature_0
         )
 
-        # shortcuts for time-loop
+        # inverse of m*C : shortcuts for time-loop
         imc = 1.0 / (self.args.linear_mass * self.args.heat_capacity)
 
-        # init
-        surface_temperature = np.zeros((time_size, input_size))
-        ambient_temperature = np.zeros((time_size, input_size))
-        core_temperature = np.zeros((time_size, input_size))
-        temperature_difference_c = np.zeros((time_size, input_size))
-
+        # define temperature data 2D arrays
+        surface_temperature = np.zeros((N, n))
+        average_temperature = np.zeros((N, n))
+        core_temperature = np.zeros((N, n))
+        temperature_difference = np.zeros((N, n))
+        # set initial values in first row
         surface_temperature[0, :] = surface_temperature_0
         core_temperature[0, :] = core_temperature_0
-        ambient_temperature[0, :] = self.average(
+        average_temperature[0, :] = self.average(
             surface_temperature[0, :], core_temperature[0, :]
         )
-        temperature_difference_c[0, :] = (
+        temperature_difference[0, :] = (
             core_temperature[0, :] - surface_temperature[0, :]
         )
 
-        for i in range(1, len(time)):
+        # compute transient temperatures for each row after the first.
+        for i in range(1, len(offset)):
             balance = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
-            time_difference = time[i] - time[i - 1]
-            ambient_temperature[i, :] = (
-                ambient_temperature[i - 1, :] + time_difference * imc * balance
+            time_difference = offset[i] - offset[i - 1]
+            average_temperature[i, :] = (
+                average_temperature[i - 1, :] + time_difference * imc * balance
             )
-            temperature_difference_c[i, :] = (
+            temperature_difference[i, :] = temperature_difference[i - 1, :] * (
                 1.0 - time_difference / time_constant
-            ) * temperature_difference_c[i - 1, :] + (
+            ) + (
                 time_difference
                 / time_constant
                 * self.morgan_coefficients[0]
-                * self.joule_heating.value(ambient_temperature[i, :])
+                * self.joule_heating.value(average_temperature[i, :])
             )
             core_temperature[i, :] = (
-                ambient_temperature[i, :] + 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] + 0.5 * temperature_difference[i, :]
             )
             surface_temperature[i, :] = (
-                ambient_temperature[i, :] - 0.5 * temperature_difference_c[i, :]
+                average_temperature[i, :] - 0.5 * temperature_difference[i, :]
             )
 
         return self._transient_temperature_results(
-            time,
+            offset,
             surface_temperature,
-            ambient_temperature,
+            average_temperature,
             core_temperature,
             return_power,
-            input_size,
+            n,
         )

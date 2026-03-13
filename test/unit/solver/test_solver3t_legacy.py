@@ -8,9 +8,7 @@
 from datetime import datetime, timezone
 import numpy as np
 from numpy import array
-from thermohl.solver.enums.temperature_location import TemperatureLocation
-
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
+from thermohl.solver.entities import TemperatureType, HeatEquationType
 
 from thermohl.solver import rte
 
@@ -51,15 +49,15 @@ def test_solver3t_legacy():
     Ts0 = [34.955032]
     Tc0 = [36.164476]
 
-    solver = rte(data, heat_equation=HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY)
+    solver = rte(data, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY)
     result = solver.transient_temperature_legacy(
-        time=np.linspace(0, 60, 61),
+        offset=np.linspace(0, 60, 61),
         surface_temperature_0=Ts0,
         core_temperature_0=Tc0,
         return_power=True,
     )
 
     print(result)
-    assert abs(result[TemperatureLocation.CORE][-1] - 42) <= 0.5
-    assert abs(result[TemperatureLocation.SURFACE][-1] - 39.9) <= 0.5
-    assert abs(result[TemperatureLocation.AVERAGE][-1] - 40.9) <= 0.5
+    assert abs(result[TemperatureType.CORE][-1] - 42) <= 0.5
+    assert abs(result[TemperatureType.SURFACE][-1] - 39.9) <= 0.5
+    assert abs(result[TemperatureType.AVERAGE][-1] - 40.9) <= 0.5

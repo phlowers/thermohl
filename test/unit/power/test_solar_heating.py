@@ -149,7 +149,7 @@ solar_heating_instances = [
         ],
         outer_diameter=np.array([0.01, 0.02]),
         solar_absorptivity=np.array([0.9, 0.8]),
-        measured_solar_irradiance=np.array([800.0, 900.0]),
+        measured_global_radiation=np.array([800.0, 900.0]),
     ),
     SolarHeating(
         latitude=45.0,
@@ -159,7 +159,7 @@ solar_heating_instances = [
         datetime_utc=datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
         outer_diameter=0.01,
         solar_absorptivity=0.9,
-        measured_solar_irradiance=800.0,
+        measured_global_radiation=800.0,
     ),
 ]
 

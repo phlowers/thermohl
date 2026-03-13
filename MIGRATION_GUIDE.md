@@ -7,16 +7,19 @@ file, You can obtain one at http://mozilla.org/MPL/2.0/.
 SPDX-License-Identifier: MPL-2.0
 -->
 
-# Migration Guide: Variable Renaming
+# Migration Guide: Variable Renaming and Model Changes
 
-This guide helps you migrate your code from the old version with short variable names, to the new version which introduces clearer, more descriptive variable names throughout the ThermOHL library. In this new version, variables are renamed to make the codebase more readable and maintainable. All abbreviated parameter names have been replaced with self-documenting names that include units where applicable.
+This guide helps you migrate your code from the old version to the new version which introduces clearer, more descriptive variable names and updates to the solar heating model.
+
+In this new version, variables are renamed to make the codebase more readable and maintainable. All abbreviated parameter names have been replaced with self-documenting names that include units where applicable. Additionally, the solar heating model has been updated to include nebulosity and a new default albedo value.
 
 ## Quick Migration Steps
 
-1. Update all parameter names in your dictionaries (see tables below)
-2. Update function parameter names if you use keyword arguments
-3. Update configuration files (YAML files with default values/uncertainties)
-4. Run your tests to ensure everything works correctly
+1. Update all parameter names in your dictionaries (see tables below).
+2. Note that `nebulosity` is now a required parameter in some contexts, and the default `albedo` has changed from 0.8 to 0.15.
+3. Update function parameter names if you use keyword arguments.
+4. Update configuration files (YAML files with default values/uncertainties).
+5. Run your tests to ensure everything works correctly.
 
 ## Parameter Name Changes
 
@@ -28,6 +31,7 @@ This guide helps you migrate your code from the old version with short variable 
 | `lon` | `longitude` or `longitude` depending on context | Longitude | degrees or rad |
 | `alt` | `altitude` | Altitude | meters |
 | `azm` | `cable_azimuth` | Azimuth angle | degrees |
+| `time` | `offset` | Time offset for transient simulations | seconds |
 
 **Example:**
 ```python
@@ -36,7 +40,8 @@ params = {
     'lat': 45.0,
     'lon': 2.5,
     'alt': 100.0,
-    'azm': 90.0
+    'azm': 90.0,
+    'time': np.linspace(0, 3600, 60)
 }
 
 # After
@@ -44,7 +49,8 @@ params = {
     'latitude': 45.0,
     'longitude': 2.5,
     'altitude': 100.0,
-    'cable_azimuth': 90.0
+    'cable_azimuth': 90.0,
+    'offset': np.linspace(0, 3600, 60)
 }
 ```
 
@@ -57,8 +63,9 @@ params = {
 | `rh` | `relative_humidity` | Relative humidity | dimensionless [0-1] |
 | `pr` | `precipitation_rate` | Precipitation rate | m/s |
 | `ws` | `wind_speed` | Wind speed | m/s |
-| `wa` | `wind_azimuth` | wind_azimuth | degrees |
-| `al` | `albedo` | Albedo | dimensionless |
+| `wa` | `wind_azimuth` | Wind azimuth | degrees |
+| `al` | `albedo` | Albedo (default changed from 0.8 to 0.15) | dimensionless |
+| `neb` | `nebulosity` | Sky nebulosity | dimensionless [0-8] |
 | `tb` and `trb` | `turbidity` | Turbidity coefficient | dimensionless [0-1] |
 
 **Example:**
@@ -81,8 +88,9 @@ weather = {
     'relative_humidity': 0.8,
     'wind_speed': 2.0,
     'wind_azimuth': 45.0,
-    'albedo': 0.8,
-    'turbidity': 0.1
+    'albedo': 0.15,
+    'turbidity': 0.1,
+    'nebulosity': 0
 }
 ```
 
@@ -132,13 +140,15 @@ cable = {
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | dimensionless |
 | `epsilon` | `emissivity` | Emissivity | dimensionless |
-| `srad` | `measured_solar_irradiance` | Direct solar radiation | W/m² |
-| `Qs` | `measured_solar_irradiance` | Measured solar irradiance | W/m² |
+| `srad` | `measured_global_radiation` | Direct solar radiation | W/m² |
+| `Qs` | `measured_global_radiation` | Measured solar irradiance | W/m² |
 | `sigma` | `stefan_boltzmann_constant` | Stefan-Boltzmann constant | W/m²/$K^4$ |
 | `x` | `solar_altitude` | Solar altitude | degrees |
 
 **Example:**
 ```python
+import numpy as np
+
 # Before
 optical = {
     'alpha': 0.5,
@@ -150,7 +160,7 @@ optical = {
 optical = {
     'solar_absorptivity': 0.5,
     'emissivity': 0.5,
-    'measured_solar_irradiance': np.nan  # or measured value
+    'measured_global_radiation': np.nan  # or measured value
 }
 ```
 
@@ -266,10 +276,35 @@ def vonmises(mean: float, standard_deviation: float)
 
 ```python
 # Before
-def __init__(self, dic: Optional[dict[str, Any]] = None)
+from thermohl.solver.base import Args # Deprecated
+params = Args(input_dict)
 
 # After
-def __init__(self, input_dict: Optional[dict[str, Any]] = None)
+from thermohl.solver.parameters import Parameters
+params = Parameters(input_dict)
+```
+
+### `src/thermohl/power/rte/solar_heating.py` Functions
+
+New utility functions have been added for solar irradiance calculations:
+
+```python
+from thermohl import floatArrayLike
+from typing import Tuple
+
+def compute_solar_irradiance(
+    global_radiation: floatArrayLike,
+    solar_altitude: floatArrayLike,
+    incidence: floatArrayLike,
+    nebulosity: floatArrayLike,
+    albedo: floatArrayLike,
+) -> floatArrayLike
+
+def compute_data_from_provided(
+    provided_global_radiation: floatArrayLike,
+    provided_nebulosity: floatArrayLike,
+    solar_altitude: floatArrayLike,
+) -> Tuple[floatArrayLike, floatArrayLike]
 ```
 
 ### `src/thermohl/sun.py` Function
@@ -298,34 +333,20 @@ def solar_azimuth(
 
 # After
 def utc2solar_hour(
-    utc_hour: floatArrayLike,
-    utc_minute: floatArrayLike = 0.0,
-    utc_second: floatArrayLike = 0.0,
-    longitude: floatArrayLike = 0.0,
+    datetime_utc: datetimeListLike,
+    longitude: floatArrayLike,
 )
-def hour_angle(
-    solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
-)
-def solar_declination(
-    month_index: intArrayLike, day_of_month: intArrayLike
-)
+def hour_angle(solar_hour: floatArrayLike)
+def solar_declination(date: dateListLike)
 def solar_altitude(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 )
 def solar_azimuth(
     latitude: floatArrayLike,
-    month_index: intArrayLike,
-    day_of_month: intArrayLike,
+    date: dateListLike,
     solar_hour: floatArrayLike,
-    solar_minute: floatArrayLike = 0.0,
-    solar_second: floatArrayLike = 0.0,
 )
 ```
 
@@ -576,7 +597,7 @@ Following global variables have been renamed:
 | Old Name | New Name | Description | Unit |
 |----------|----------|-------------|------|
 | `alpha` | `solar_absorptivity` | Solar absorption coefficient | |
-| `srad` | `solar_irradiance` | Solar irradiance | |
+| `srad` | `measured_global_radiation` | Measured global radiation | |
 | `D` | `outer_diameter` | Cable external diameter | m |
 
 ### Classes RadiativeCooling
@@ -591,15 +612,28 @@ Following global variables have been renamed:
 
 ### Solver classes
 
-| Old Name | New Name | Description | Unit |
-|----------|----------|-------------|------|
-| `Names.transit` | `Names.transit` | Transit intensity | A |
-| `jh` | `joule_heating` | Joule heating | |
-| `sh` | `solar_heating` | Solar heating | |
-| `cc` | `convective_cooling` | Convective cooling | |
-| `rc` | `radiative_cooling` | Radiative cooling | |
-| `pc` | `precipitation_cooling` | Precipitation cooling | |
-| `mgc` | `morgan_coefficients` | Morgan coefficients | |
+The enumeration classes for solver configurations have been moved and renamed. Please use the new `TargetType`, `CableType`, `HeatEquationType`, `PowerType`, `ModelType`, `TemperatureType` and `VariableType` from `thermohl.solver.entities`.
+
+| Old Name | New Name | Description |
+|----------|----------|-------------|
+| `Names.transit` | `VariableType.TRANSIT` | Transit intensity |
+| `jh` | `PowerType.JOULE` | Joule heating |
+| `sh` | `PowerType.SOLAR` | Solar heating |
+| `cc` | `PowerType.CONVECTION` | Convective cooling |
+| `rc` | `PowerType.RADIATION` | Radiative cooling |
+| `pc` | `PowerType.RAIN` | Precipitation cooling |
+
+**Example:**
+```python
+from thermohl.solver.entities import PowerType, VariableType
+
+# Before
+# Using strings or old Names class
+power = "joule_power"
+
+# After
+power = PowerType.JOULE
+```
 
 ### WrappedNormal classe
 
@@ -612,14 +646,14 @@ Following global variables have been renamed:
 
 ## Transient Solver Method Changes
 
-When calling transient temperature methods, update the parameter name:
+When calling transient temperature methods, update the parameter name from `time` (or `t`) to `offset`.
 
 ```python
 # Before
-result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
+result = solver.transient_temperature(time=time_steps)
 
 # After
-result = solver.transient_temperature(t, T0=initial_temp, transit=current_array)
+result = solver.transient_temperature(offset=time_steps)
 ```
 
 ## Complete Migration Example

@@ -9,12 +9,13 @@ import pytest
 import numpy as np
 
 from thermohl import solver
-from thermohl.solver import SolverType
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
-from thermohl.solver.enums.variable_type import VariableType
-from thermohl.solver.enums.power_type import PowerType
-from thermohl.solver.base import _DEFPARAM as DP
-
+from thermohl.solver import ModelType
+from thermohl.solver.entities import (
+    HeatEquationType,
+    VariableType,
+    PowerType,
+)
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as DP
 
 _nprs = 123456
 
@@ -22,13 +23,13 @@ _nprs = 123456
 def _solvers(dic=None):
     return [
         solver._factory(
-            dic=dic, heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE, model=m
+            dic=dic, heat_equation=HeatEquationType.ONE_TEMPERATURE, model=m
         )
         for m in [
-            SolverType.SOLVER_RTE,
-            SolverType.SOLVER_CIGRE,
-            SolverType.SOLVER_IEEE,
-            SolverType.SOLVER_OLLA,
+            ModelType.RTE,
+            ModelType.CIGRE,
+            ModelType.IEEE,
+            ModelType.OLLA,
         ]
     ]
 
@@ -123,7 +124,7 @@ def test_steady_intensity_hot_weather():
         dic={
             "ambient_temperature": ambient_temperature,
         },
-        heat_equation=HeatEquationType.WITH_ONE_TEMPERATURE,
+        heat_equation=HeatEquationType.ONE_TEMPERATURE,
     )
 
     # Here some ambient temperatures are above the maximum conductor temperature,

@@ -14,47 +14,43 @@ from thermohl.power import rte as rtep
 from thermohl.power import ieee as ieeep
 from thermohl.power import olla as ollap
 
-from thermohl.solver.base import Args, Solver
-from thermohl.solver.enums.cable_location import CableLocation as CableLocation
-from thermohl.solver.enums.heat_equation_type import HeatEquationType
-from thermohl.solver.enums.power_type import PowerType as PowerType
-from thermohl.solver.enums.temperature_location import (
-    TemperatureLocation as TemperatureLocation,
+from thermohl.solver.solver import Solver
+from thermohl.solver.parameters import Parameters
+from thermohl.solver.entities import (
+    HeatEquationType,
+    PowerType as PowerType,
+    ModelType,
+    VariableType as VariableType,
 )
-from thermohl.solver.enums.solver_type import SolverType
-from thermohl.solver.enums.variable_type import VariableType as VariableType
-from thermohl.solver.slv1d import Solver1D
 from thermohl.solver.slv1t import Solver1T
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.slv3t_legacy import Solver3TL
 
-concreteSolverType = Union[
-    Type[Solver1T], Type[Solver3T], Type[Solver3TL], Type[Solver1D]
-]
+concreteSolverType = Union[Type[Solver1T], Type[Solver3T], Type[Solver3TL]]
 
 
 def default_values() -> Dict[str, Any]:
-    return Args().__dict__
+    return Parameters().__dict__
 
 
 def _factory(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
-    model: SolverType = SolverType.SOLVER_IEEE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
+    model: ModelType = ModelType.IEEE,
 ) -> Solver:
     solver = create_solver_from_heat_equation(heat_equation)
 
-    solver_modules = {
-        SolverType.SOLVER_CIGRE: cigrep,
-        SolverType.SOLVER_IEEE: ieeep,
-        SolverType.SOLVER_OLLA: ollap,
-        SolverType.SOLVER_RTE: rtep,
+    model_modules = {
+        ModelType.CIGRE: cigrep,
+        ModelType.IEEE: ieeep,
+        ModelType.OLLA: ollap,
+        ModelType.RTE: rtep,
     }
 
-    if model not in solver_modules:
+    if model not in model_modules:
         raise ValueError(f"Unsupported solver model: {model}")
 
-    module = solver_modules[model]
+    module = model_modules[model]
     return solver(
         dic,
         module.JouleHeating,
@@ -68,10 +64,9 @@ def create_solver_from_heat_equation(
     heat_equation: HeatEquationType,
 ) -> concreteSolverType:
     heat_equations_solvers = {
-        HeatEquationType.WITH_ONE_TEMPERATURE: Solver1T,
-        HeatEquationType.WITH_THREE_TEMPERATURES: Solver3T,
-        HeatEquationType.WITH_THREE_TEMPERATURES_LEGACY: Solver3TL,
-        HeatEquationType.WITH_1D: Solver1D,
+        HeatEquationType.ONE_TEMPERATURE: Solver1T,
+        HeatEquationType.THREE_TEMPERATURES: Solver3T,
+        HeatEquationType.THREE_TEMPERATURES_LEGACY: Solver3TL,
     }
 
     if heat_equation not in heat_equations_solvers:
@@ -82,15 +77,15 @@ def create_solver_from_heat_equation(
 
 def __solver_model(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
-    model: SolverType = SolverType.SOLVER_CIGRE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
+    model: ModelType = ModelType.CIGRE,
 ) -> Solver:
     """Get a Solver using a given model and heat equation.
 
     Args:
         dic (dict | None): Input values. The default is None.
         heat_equation (HeatEquationType): Input heat equation.
-        model (SolverType): Solver model to use.
+        model (ModelType): Solver model to use.
 
     """
     return _factory(dic, heat_equation=heat_equation, model=model)
@@ -98,7 +93,7 @@ def __solver_model(
 
 def cigre(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
 ) -> Solver:
     """Get a Solver using CIGRE models.
 
@@ -107,14 +102,12 @@ def cigre(
         heat_equation (HeatEquationType): Input heat equation.
 
     """
-    return __solver_model(
-        dic=dic, heat_equation=heat_equation, model=SolverType.SOLVER_CIGRE
-    )
+    return __solver_model(dic=dic, heat_equation=heat_equation, model=ModelType.CIGRE)
 
 
 def ieee(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
 ) -> Solver:
     """Get a Solver using IEEE models.
 
@@ -123,14 +116,12 @@ def ieee(
         heat_equation (HeatEquationType): Input heat equation.
 
     """
-    return __solver_model(
-        dic, heat_equation=heat_equation, model=SolverType.SOLVER_IEEE
-    )
+    return __solver_model(dic, heat_equation=heat_equation, model=ModelType.IEEE)
 
 
 def olla(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
 ) -> Solver:
     """Get a Solver using RTE-olla models.
 
@@ -139,14 +130,12 @@ def olla(
         heat_equation (HeatEquationType): Input heat equation.
 
     """
-    return __solver_model(
-        dic, heat_equation=heat_equation, model=SolverType.SOLVER_OLLA
-    )
+    return __solver_model(dic, heat_equation=heat_equation, model=ModelType.OLLA)
 
 
 def rte(
     dic: Optional[Dict[str, Any]] = None,
-    heat_equation: HeatEquationType = HeatEquationType.WITH_ONE_TEMPERATURE,
+    heat_equation: HeatEquationType = HeatEquationType.ONE_TEMPERATURE,
 ) -> Solver:
     """Get a Solver using RTE models.
 
@@ -155,4 +144,4 @@ def rte(
         heat_equation (HeatEquationType): Input heat equation.
 
     """
-    return __solver_model(dic, heat_equation=heat_equation, model=SolverType.SOLVER_RTE)
+    return __solver_model(dic, heat_equation=heat_equation, model=ModelType.RTE)
