@@ -95,7 +95,6 @@ def _generate_samples(
     index: int,
     uncertainty_spec: dict,
     num_samples: int,
-    include_check: bool = False,
 ) -> Union[dict, Tuple[dict, pd.DataFrame]]:
     """
     Generate random samples for all input parameters affected with a probability distribution.
@@ -103,25 +102,6 @@ def _generate_samples(
 
     # sample dict
     samples_dict = {}
-    # check dataframe
-    if include_check:
-        columns = [
-            "key",
-            "dist",
-            "mean",
-            "std",
-            "min",
-            "max",
-            "s_mean",
-            "s_std",
-            "s_min",
-            "s_max",
-            "circular",
-        ]
-        check_table = pd.DataFrame(
-            columns=columns, data=np.zeros((len(input_params), len(columns))) * np.nan
-        )
-        check_table.loc[:, "circular"] = False
 
     # loop on dict
     for row_index, key in enumerate(input_params):
@@ -136,35 +116,6 @@ def _generate_samples(
             if dist == "vonmises" or dist == "wrapnorm":
                 sample = np.rad2deg(sample) % 360.0
         samples_dict[key] = sample
-
-        if include_check:
-            check_table.loc[row_index, "key"] = key
-            check_table.loc[row_index, "dist"] = dist
-            check_table.loc[row_index, "mean"] = mean_value
-            if "std" in uncertainty_spec[key].keys():
-                check_table.loc[row_index, "std"] = uncertainty_spec[key]["std"]
-                if uncertainty_spec[key]["relative_std"]:
-                    check_table.loc[row_index, "std"] *= mean_value
-            if "min" in uncertainty_spec[key].keys():
-                check_table.loc[row_index, "min"] = uncertainty_spec[key]["min"]
-            if "max" in uncertainty_spec[key].keys():
-                check_table.loc[row_index, "max"] = uncertainty_spec[key]["max"]
-            if dist in ["vonmises", "wrapnorm"]:
-                check_table.loc[row_index, "s_mean"] = scipy.stats.circmean(
-                    sample, high=360.0, low=0.0
-                )
-                check_table.loc[row_index, "s_std"] = scipy.stats.circstd(
-                    sample, high=360.0, low=0.0
-                )
-                check_table.loc[row_index, "circular"] = True
-            else:
-                check_table.loc[row_index, "s_mean"] = sample.mean()
-                check_table.loc[row_index, "s_std"] = sample.std()
-            check_table.loc[row_index, "s_min"] = sample.min()
-            check_table.loc[row_index, "s_max"] = sample.max()
-
-    if include_check:
-        return samples_dict, check_table
 
     return samples_dict
 
@@ -256,7 +207,10 @@ def _steady_uncertainties(
     # for each entry, generate sample then compute
     for index in range(num_entries):
         solver_instance.dc = _generate_samples(
-            input_params, index, uncertainty_spec, num_samples, include_check=False
+            input_params,
+            index,
+            uncertainty_spec,
+            num_samples,
         )
         result = _compute(mode, solver_instance, max_temp_vector[index], return_config)
         if return_raw:
@@ -502,7 +456,10 @@ def sensitivity(
     for index in range(num_entries):
         # first sample
         samples_a = _generate_samples(
-            input_params, index, uncertainty_spec, num_samples, include_check=False
+            input_params,
+            index,
+            uncertainty_spec,
+            num_samples,
         )
         solver_instance.dc = samples_a
         result_a = _compute(
@@ -511,7 +468,10 @@ def sensitivity(
 
         # second sample
         samples_b = _generate_samples(
-            input_params, index, uncertainty_spec, num_samples, include_check=False
+            input_params,
+            index,
+            uncertainty_spec,
+            num_samples,
         )
         solver_instance.dc = samples_b
         result_b = _compute(
