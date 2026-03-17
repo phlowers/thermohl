@@ -39,7 +39,8 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            dict[str, np.array]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            dict[str, np.array]: A dictionary with temperature and other results (depending on inputs) in the keys,
+            along with input data.
 
         """
 
@@ -60,7 +61,7 @@ class Solver1T(Solver_):
         self.add_error_and_power_if_needed(
             conductor_temperature, err, result, return_err, return_power
         )
-
+        result = self._add_input_data_to_result(result)
         return result
 
     def transient_temperature(
@@ -78,7 +79,7 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
-            dict[str, np.ndarray]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            dict[str, np.ndarray]: A dictionary with temperature and other results (depending on inputs) in the keys, along with input data.
         """
 
         # get sizes
@@ -151,6 +152,8 @@ class Solver1T(Solver_):
             for key in keys:
                 result[key] = result[key][:, 0]
 
+        result = self._add_input_data_to_result(result)
+
         return result
 
     def steady_intensity(
@@ -178,7 +181,8 @@ class Solver1T(Solver_):
             return_power (bool, optional): Return power term values. The default is True.
 
         Returns:
-            dict[str, np.ndarray]: A dictionary with maximum intensity and other results (depending on inputs) in the keys.
+            dict[str, np.ndarray]: A dictionary with maximum intensity and other results (depending on inputs) in the keys,
+            along with input data.
 
         """
 
@@ -215,5 +219,7 @@ class Solver1T(Solver_):
             return_err,
             return_power,
         )
+
+        result = self._add_input_data_to_result(result)
 
         return result

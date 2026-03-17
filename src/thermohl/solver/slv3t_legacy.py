@@ -153,7 +153,7 @@ class Solver3TL(Solver3T):
 
         Returns:
             Dict[str, Any]: A dictionary with temperature and other results (depending on inputs)
-                in the keys.
+                in the keys, along with input data.
 
         """
 
@@ -217,7 +217,7 @@ class Solver3TL(Solver3T):
                 average_temperature[i, :] - 0.5 * temperature_difference[i, :]
             )
 
-        return self._transient_temperature_results(
+        result = self._transient_temperature_results(
             offset,
             surface_temperature,
             average_temperature,
@@ -225,3 +225,7 @@ class Solver3TL(Solver3T):
             return_power,
             n,
         )
+
+        result = self._add_input_data_to_result(result)
+
+        return result
