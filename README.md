@@ -1,4 +1,4 @@
-from thermohl.solver import HeatEquationType<!--
+<!--
 SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
 
 This Source Code Form is subject to the terms of the Mozilla Public
