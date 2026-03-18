@@ -68,7 +68,7 @@ docs = [
 notebooks = [
     "ipykernel>=6.30.1",
     "ipython>=8.18.1",
-    "matplotlib>=3.9.4",
+    "matplotlib>=3.10.8",
     "matplotlib-inline>=0.1.7",
 ]
 

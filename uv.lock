@@ -2761,7 +2761,7 @@ lint = [
 notebooks = [
     { name = "ipykernel", specifier = ">=6.30.1" },
     { name = "ipython", specifier = ">=8.18.1" },
-    { name = "matplotlib", specifier = ">=3.9.4" },
+    { name = "matplotlib", specifier = ">=3.10.8" },
     { name = "matplotlib-inline", specifier = ">=0.1.7" },
 ]
 test = [
