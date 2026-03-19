@@ -294,7 +294,7 @@ class Solver1T(Solver_):
         wind_speed: Optional[floatArrayLike] = None,
         measured_solar_irradiance: Optional[floatArrayLike] = None,
         max_conductor_temperature: Optional[floatArrayLike] = None,
-    ):
+    ) -> floatArrayLike:
         """
         Compute the reduced intensity limit for a given measured temperature difference
         betwwen the sound cable and a hotspot on the junction between a cable
