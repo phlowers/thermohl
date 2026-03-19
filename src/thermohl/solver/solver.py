@@ -108,9 +108,11 @@ class Solver(ABC):
     def steady_intensity(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
-    def add_error_and_power_if_needed(self, T, err, output, return_err, return_power):
+    def add_error_and_power_if_needed(
+        self, temperature_average, err, output, return_err, return_power
+    ):
         self.add_error_if_needed(err, output, return_err)
-        self.add_power_if_needed(T, output, return_power)
+        self.add_power_if_needed(temperature_average, output, return_power)
 
     @staticmethod
     def add_error_if_needed(err, output, return_err):
