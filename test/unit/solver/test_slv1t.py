@@ -63,7 +63,7 @@ def test_steady_temperature_default(solver):
     result = solver.steady_temperature()
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TEMPERATURE.value in result
     assert PowerType.JOULE.value in result
@@ -77,7 +77,7 @@ def test_steady_temperature_with_error(solver):
     result = solver.steady_temperature(return_err=True)
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TEMPERATURE.value in result
     assert VariableType.ERROR.value in result
@@ -87,7 +87,7 @@ def test_steady_temperature_no_power(solver):
     result = solver.steady_temperature(return_power=False)
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TEMPERATURE.value in result
     assert PowerType.JOULE.value not in result
@@ -111,8 +111,8 @@ def test_steady_temperature_custom_params(solver):
     )
 
     assert isinstance(result, dict)
-    for _, value in result.items():
-        assert isinstance(value, np.ndarray)
+    for key in result.keys():
+        assert isinstance(result[key], np.ndarray)
     assert VariableType.TEMPERATURE.value in result
 
 
@@ -165,7 +165,7 @@ def test_steady_intensity_default(solver):
     result = solver.steady_intensity(conductor_temperature)
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TRANSIT.value in result
     assert PowerType.JOULE.value in result
@@ -181,7 +181,7 @@ def test_steady_intensity_with_error(solver):
     result = solver.steady_intensity(conductor_temperature, return_err=True)
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TRANSIT.value in result
     assert VariableType.ERROR.value in result
@@ -193,7 +193,7 @@ def test_steady_intensity_no_power(solver):
     result = solver.steady_intensity(conductor_temperature, return_power=False)
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TRANSIT.value in result
     assert PowerType.JOULE.value not in result
@@ -215,6 +215,6 @@ def test_steady_intensity_custom_params(solver):
     )
 
     assert isinstance(result, dict)
-    for _, value in result.items():
+    for value in result.values():
         assert isinstance(value, np.ndarray)
     assert VariableType.TRANSIT.value in result

@@ -297,7 +297,8 @@ class Solver3T(Solver_):
             return_power (bool): If True, power-related values are included in the returned DataFrame.
 
         Returns:
-            dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and power-related values.
+            dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and power-related values,
+            along with input data.
         """
 
         # if no guess provided, use ambient temp
@@ -343,6 +344,8 @@ class Solver3T(Solver_):
         self.add_power_if_needed(
             average_temperature, result, return_power, surface_temperature
         )
+
+        result = self._add_input_data_to_result(result)
 
         return result
 
@@ -419,7 +422,8 @@ class Solver3T(Solver_):
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
-            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys,
+            along with input data.
 
         """
         # get sizes (n for input dict entries, N for time)
@@ -469,7 +473,7 @@ class Solver3T(Solver_):
             core_temperature[i, :] = average_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
-        return self._transient_temperature_results(
+        result = self._transient_temperature_results(
             offset,
             surface_temperature,
             average_temperature,
@@ -477,6 +481,8 @@ class Solver3T(Solver_):
             return_power,
             n,
         )
+        result = self._add_input_data_to_result(result)
+        return result
 
     @staticmethod
     def _check_target(target: Optional[CableLocationListLike], core_diameter, max_len):
@@ -570,7 +576,8 @@ class Solver3T(Solver_):
             return_power (bool): If True, return the power profiles in the output DataFrame. Default is True.
 
         Returns:
-            dict[str, np.ndarray]: Dictionary containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
+            dict[str, np.ndarray]: Dictionary containing the steady-state intensity and optionally the error, temperature profiles, and power profiles,
+            along with input data.
         """
         target = _infer_target_from_cable_type(cable_type, target)
 
@@ -641,5 +648,7 @@ class Solver3T(Solver_):
                 result[PowerType.RAIN.value] = self.precipitation_cooling.value(
                     surface_temperature
                 )
+
+        result = self._add_input_data_to_result(result)
 
         return result
