@@ -12,10 +12,14 @@
 import os
 from functools import wraps
 from importlib.util import find_spec
+import warnings
+from typing import Callable
 
 import numpy as np
 import pandas as pd
 import yaml
+
+from thermohl import floatArrayLike
 
 
 def _dict_completion(
@@ -184,6 +188,132 @@ def bisect_v(
             f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
         )
     return midpoint, abs_error
+
+
+def _array_quasi_newton(
+    func: Callable[[np.ndarray], np.ndarray], x0: np.ndarray, tol: float, maxiter: int
+) -> floatArrayLike:
+    """
+    A vectorized version of secant method for arrays.
+
+    Do not use this method directly. This method is called from `quasi_newton`
+    when ``np.size(x0) > 1`` is ``True``.
+
+    Heavily inspired by the implementation of the SciPy library.
+    """
+    # Explicitly copy `x0` as `p` will be modified inplace, but the
+    # user's array should not be altered.
+    p = np.array(x0, copy=True)
+
+    failures = np.ones_like(p, dtype=bool)
+    nz_der = np.ones_like(failures)
+
+    dx = np.finfo(float).eps ** 0.33
+    p1 = p * (1 + dx) + np.where(p >= 0, dx, -dx)
+    q0 = np.asarray(func(p))
+    q1 = np.asarray(func(p1))
+    active = np.ones_like(p, dtype=bool)
+    for _ in range(maxiter):
+        nz_der = q1 != q0
+        # stop iterating if all derivatives are zero
+        if not nz_der.any():
+            p = (p1 + p) / 2.0
+            break
+        # Secant Step
+        dp = (q1 * (p1 - p))[nz_der] / (q1 - q0)[nz_der]
+        # only update nonzero derivatives
+        p = np.asarray(p, dtype=np.result_type(p, p1, dp, np.float64))
+        p[nz_der] = p1[nz_der] - dp
+        active_zero_der = ~nz_der & active
+        p[active_zero_der] = (p1 + p)[active_zero_der] / 2.0
+        active &= nz_der  # don't assign zero derivatives again
+        failures[nz_der] = np.abs(dp) >= tol  # not yet converged
+        # stop iterating if there aren't any failures, not incl zero der
+        if not failures[nz_der].any():
+            break
+        p1, p = p, p1
+        q0 = q1
+        q1 = np.asarray(func(p1))
+
+    zero_der = ~nz_der & failures  # don't include converged with zero-ders
+    if zero_der.any():
+        nonzero_dp = p1 != p
+        # non-zero dp, but infinite newton step
+        zero_der_nz_dp = zero_der & nonzero_dp
+        if zero_der_nz_dp.any():
+            rms = np.sqrt(sum((p1[zero_der_nz_dp] - p[zero_der_nz_dp]) ** 2))
+            warnings.warn(f"RMS of {rms:g} reached", RuntimeWarning, stacklevel=3)
+    elif failures.any():
+        all_or_some = "all" if failures.all() else "some"
+        msg = f"{all_or_some:s} failed to converge after {maxiter:d} iterations"
+        if failures.all():
+            raise RuntimeError(msg)
+        warnings.warn(msg, RuntimeWarning, stacklevel=3)
+
+    return p
+
+
+def _check_quasi_newton_arguments(tol: float, maxiter: int, rtol: float) -> None:
+    if tol <= 0:
+        raise ValueError(f"tol too small ({tol:g} <= 0)")
+    if maxiter < 1:
+        raise ValueError("maxiter must be greater than 0")
+    if rtol < 0:
+        raise ValueError(f"rtol too small ({rtol:g} < 0)")
+
+
+def quasi_newton(  # NOSONAR(S3776)
+    func: Callable[[floatArrayLike], floatArrayLike],
+    x0: floatArrayLike,
+    tol: float = 1.48e-8,
+    maxiter: int = 50,
+    rtol: float = 0.0,
+) -> floatArrayLike:
+    """Find the zero of a function using the quasi-Newton (secant) method.
+
+    Heavily inspired by the implementation of optimize.newton in the SciPy library.
+    """
+    _check_quasi_newton_arguments(tol, maxiter, rtol)
+    if np.size(x0) > 1:
+        return _array_quasi_newton(func, x0, tol, maxiter)
+
+    # Convert to float (don't use float(x0); this works also for complex x0)
+    # Use np.asarray because we want x0 to be a numpy object, not a Python
+    # object. e.g. np.complex(1+1j) > 0 is possible, but (1 + 1j) > 0 raises
+    # a TypeError
+    x0 = np.asarray(x0)[()] * 1.0
+    p0 = x0
+
+    eps = 1e-4
+    p1 = x0 * (1 + eps)
+    p1 += eps if p1 >= 0 else -eps
+    q0 = func(p0)
+    q1 = func(p1)
+    if abs(q1) < abs(q0):
+        p0, p1, q0, q1 = p1, p0, q1, q0
+    for itr in range(maxiter):
+        if q1 == q0:
+            if p1 != p0:
+                msg = f"Tolerance of {p1 - p0} reached."
+                msg += (
+                    f" Failed to converge after {itr + 1} iterations,"
+                    f" value is {p1}."
+                )
+                raise RuntimeError(msg)
+            return (p1 + p0) / 2.0
+        else:
+            if abs(q1) > abs(q0):
+                p = (-q0 / q1 * p1 + p0) / (1 - q0 / q1)
+            else:
+                p = (-q1 / q0 * p0 + p1) / (1 - q1 / q0)
+        if np.isclose(p, p1, rtol=rtol, atol=tol):
+            return p
+        p0, q0 = p1, q1
+        p1 = p
+        q1 = func(p1)
+
+    msg = f"Failed to converge after {itr + 1} iterations, value is {p}."
+    raise RuntimeError(msg)
 
 
 # In agreement with Eurobios, this function has been retrieved from the pyntb library,
