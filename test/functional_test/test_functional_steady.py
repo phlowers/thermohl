@@ -73,12 +73,14 @@ def test_steady_temperature():
         )
         result = solver.steady_temperature()
         assert np.allclose(
-            result[TemperatureType.SURFACE], scenario["T_surf"], atol=0.05
+            result[TemperatureType.SURFACE.value], scenario["T_surf"], atol=0.05
         )
         assert np.allclose(
-            result[TemperatureType.AVERAGE], scenario["T_moy"], atol=0.05
+            result[TemperatureType.AVERAGE.value], scenario["T_moy"], atol=0.05
         )
-        assert np.allclose(result[TemperatureType.CORE], scenario["T_coeur"], atol=0.05)
+        assert np.allclose(
+            result[TemperatureType.CORE.value], scenario["T_coeur"], atol=0.05
+        )
 
 
 def test_steady_ampacity():
@@ -89,7 +91,7 @@ def test_steady_ampacity():
         )
         result = solver.steady_intensity(max_conductor_temperature=scenario["T_conf"])
         assert np.allclose(
-            result[VariableType.TRANSIT], scenario["Ampacite"], atol=0.05
+            result[VariableType.TRANSIT.value], scenario["Ampacite"], atol=0.05
         )
 
 
@@ -116,5 +118,5 @@ def test_steady_ampacity_array():
     )
     result = solver.steady_intensity(max_conductor_temperature=dict_scenarios["T_conf"])
     assert np.allclose(
-        result[VariableType.TRANSIT], dict_scenarios["Ampacite"], atol=0.05
+        result[VariableType.TRANSIT.value], dict_scenarios["Ampacite"], atol=0.05
     )

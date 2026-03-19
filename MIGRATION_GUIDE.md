@@ -690,7 +690,7 @@ params = dict(
 solver = slv1t.Slv1tCigre(params)
 
 # Compute temperature
-df = solver.steady_temperature()
+solver.steady_temperature()
 
 # Transient analysis
 t = np.linspace(0, 3600, 361)
@@ -727,7 +727,7 @@ params = dict(
 solver = slv1t.Slv1tCigre(params)
 
 # Compute temperature
-df = solver.steady_temperature()
+solver.steady_temperature()
 
 # Transient analysis
 t = np.linspace(0, 3600, 361)

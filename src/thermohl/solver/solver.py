@@ -9,10 +9,9 @@
 
 from datetime import timedelta
 from abc import ABC, abstractmethod
-from typing import Type, Any, Optional, Dict, Iterable
+from typing import Type, Any, Optional, Iterable
 import numpy.typing as npt
 import numpy as np
-import pandas as pd
 from numpy import ndarray
 
 from thermohl import (
@@ -24,7 +23,7 @@ from thermohl import (
 )
 from thermohl.power import PowerTerm
 from thermohl.solver.parameters import Parameters
-from thermohl.solver.entities import PowerType
+from thermohl.solver.entities import PowerType, VariableType
 
 
 class Solver(ABC):
@@ -98,16 +97,52 @@ class Solver(ABC):
         )
 
     @abstractmethod
-    def steady_temperature(self) -> pd.DataFrame:
+    def steady_temperature(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     @abstractmethod
-    def transient_temperature(self) -> Dict[str, Any]:
+    def transient_temperature(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
 
     @abstractmethod
-    def steady_intensity(self) -> pd.DataFrame:
+    def steady_intensity(self) -> dict[str, np.ndarray]:
         raise NotImplementedError
+
+    def add_error_and_power_if_needed(
+        self, temperature_average, err, output, return_err, return_power
+    ):
+        self.add_error_if_needed(err, output, return_err)
+        self.add_power_if_needed(temperature_average, output, return_power)
+
+    @staticmethod
+    def add_error_if_needed(err, output, return_err):
+        if return_err:
+            output[VariableType.ERROR.value] = err
+
+    def add_power_if_needed(
+        self, temperature_average, output, return_power, temperature_surface=None
+    ):
+        if return_power:
+            temperature_surface = (
+                temperature_surface
+                if temperature_surface is not None
+                else temperature_average
+            )
+            output[PowerType.JOULE.value] = self.joule_heating.value(
+                temperature_average
+            )
+            output[PowerType.SOLAR.value] = self.solar_heating.value(
+                temperature_surface
+            )
+            output[PowerType.CONVECTION.value] = self.convective_cooling.value(
+                temperature_surface
+            )
+            output[PowerType.RADIATION.value] = self.radiative_cooling.value(
+                temperature_surface
+            )
+            output[PowerType.RAIN.value] = self.precipitation_cooling.value(
+                temperature_surface
+            )
 
 
 def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
