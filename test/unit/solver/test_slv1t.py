@@ -217,7 +217,7 @@ def test_steady_intensity_custom_params(solver):
     assert VariableType.TRANSIT in result.columns
 
 
-def test_reduced_intensity_scalar_using_default_args():
+def test_reduced_intensity_scalar_using_default_args() -> None:
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT.value: 20,
@@ -274,7 +274,7 @@ def test_reduced_intensity_scalar_using_default_args():
     assert solver.joule_heating.transit == initial_transit
 
 
-def test_reduced_intensity_scalar_providing_custom_args():
+def test_reduced_intensity_scalar_providing_custom_args() -> None:
     args = {
         "max_len": lambda: 1,
         VariableType.TRANSIT.value: 20,
@@ -335,7 +335,7 @@ def test_reduced_intensity_scalar_providing_custom_args():
     assert solver.joule_heating.transit == initial_transit
 
 
-def test_reduced_intensity_array():
+def test_reduced_intensity_array() -> None:
     args = {
         "max_len": lambda: 2,
         VariableType.TRANSIT.value: np.array([0, 0]),

@@ -102,7 +102,7 @@ def test_bisect_no_convergence_array():
         )
 
 
-def test_quasi_newton_wrong_tol():
+def test_quasi_newton_wrong_tol() -> None:
     def f(x):
         return x**2 - 2
 
@@ -114,7 +114,7 @@ def test_quasi_newton_wrong_tol():
         )
 
 
-def test_quasi_newton_wrong_maxiter():
+def test_quasi_newton_wrong_maxiter() -> None:
     def f(x):
         return x**2 - 2
 
@@ -126,7 +126,7 @@ def test_quasi_newton_wrong_maxiter():
         )
 
 
-def test_quasi_newton_wrong_rtol():
+def test_quasi_newton_wrong_rtol() -> None:
     def f(x):
         return x**2 - 2
 
@@ -138,7 +138,7 @@ def test_quasi_newton_wrong_rtol():
         )
 
 
-def test_quasi_newton_scalar_increasing():
+def test_quasi_newton_scalar_increasing() -> None:
     def f(x):
         return np.log(x)
 
@@ -149,7 +149,7 @@ def test_quasi_newton_scalar_increasing():
     assert np.isclose(root, 1.0)
 
 
-def test_quasi_newton_scalar_decreasing():
+def test_quasi_newton_scalar_decreasing() -> None:
     def f(x):
         return -np.log(x)
 
@@ -160,7 +160,7 @@ def test_quasi_newton_scalar_decreasing():
     assert np.isclose(root, 1.0)
 
 
-def test_quasi_newton_scalar_no_convergence():
+def test_quasi_newton_scalar_no_convergence() -> None:
     def f(x):
         return x**2 + 2
 
@@ -171,7 +171,7 @@ def test_quasi_newton_scalar_no_convergence():
         )
 
 
-def test_quasi_newton_array_no_convergence():
+def test_quasi_newton_array_no_convergence() -> None:
     def f(x: np.ndarray) -> np.ndarray:
         return x**2 + np.array([1, 2])
 
@@ -182,7 +182,7 @@ def test_quasi_newton_array_no_convergence():
         )
 
 
-def test_quasi_newton_array_mixed():
+def test_quasi_newton_array_mixed() -> None:
     def f(x: np.ndarray) -> np.ndarray:
         return x**2 + np.array([-1, 2])
 
