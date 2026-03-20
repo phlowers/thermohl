@@ -57,7 +57,6 @@ dev = [
 ]
 docs = [
     "mkdocs >= 1.6.1",
-    "mkdocs-bibtex",
     "mkdocs-jupyter",
     "mkdocs-material >= 9.6.9",
     "mkdocstrings[python] >= 0.29.0",
