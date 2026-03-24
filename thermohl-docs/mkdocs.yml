@@ -83,7 +83,8 @@ nav:
 plugins:
   - search
   - mkdocs-jupyter:
-      execute: false
+      execute: true
+      allow_errors: false
 
   - markdownextradata # Used to include README.md in getting-started.md file
   - mkdocstrings:

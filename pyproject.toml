@@ -64,6 +64,7 @@ docs = [
     "markdown-include >= 0.8.1",
     "mkdocs-markdownextradata-plugin >= 0.2.6",
     { include-group = 'lint' },
+    { include-group = 'notebooks' },
 ]
 notebooks = [
     "ipykernel>=6.30.1",

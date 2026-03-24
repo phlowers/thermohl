@@ -3025,8 +3025,14 @@ dev = [
     { name = "ruff" },
 ]
 docs = [
+    { name = "ipykernel" },
+    { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.11'" },
+    { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "ipython", version = "9.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "markdown-extensions" },
     { name = "markdown-include" },
+    { name = "matplotlib" },
+    { name = "matplotlib-inline" },
     { name = "mkdocs" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-markdownextradata-plugin" },
@@ -3072,8 +3078,12 @@ dev = [
     { name = "ruff", specifier = "==0.6.1" },
 ]
 docs = [
+    { name = "ipykernel", specifier = ">=6.30.1" },
+    { name = "ipython", specifier = ">=8.18.1" },
     { name = "markdown-extensions", specifier = ">=0.0.1" },
     { name = "markdown-include", specifier = ">=0.8.1" },
+    { name = "matplotlib", specifier = ">=3.10.8" },
+    { name = "matplotlib-inline", specifier = ">=0.1.7" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-markdownextradata-plugin", specifier = ">=0.2.6" },
