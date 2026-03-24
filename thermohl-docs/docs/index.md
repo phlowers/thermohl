@@ -49,7 +49,7 @@ power terms used, and default values are provided.
 
 * [1] Stephen et al., **Thermal behaviour of overhead conductors**.
   *CIGRE, Study committee 22, working group 12*, 2002.
-  https://e-cigre.org/publications/detail/207-thermal-behaviour-of-overhead-conductors.html.
+  [https://e-cigre.org/publications/detail/207-thermal-behaviour-of-overhead-conductors.html](https://e-cigre.org/publications/detail/207-thermal-behaviour-of-overhead-conductors.html).
 * [2] IEEE, **Standard for Calculating the Current-Temperature Relationship of Bare Overhead Conductors**.
   *IEEE Std 738–2012 (Revision of IEEE Std 738–2006, Incorporates IEEE Std 738–2012 Cor 1–2013)*, 2013.
-  https://doi.org/10.1109/IEEESTD.2013.6692858.
+  [https://doi.org/10.1109/IEEESTD.2013.6692858](https://doi.org/10.1109/IEEESTD.2013.6692858).
