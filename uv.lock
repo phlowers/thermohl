@@ -1090,6 +1090,7 @@ wheels = [
 name = "griffelib"
 version = "2.0.0"
 source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/ad/06/eccbd311c9e2b3ca45dbc063b93134c57a1ccc7607c5e545264ad092c4a9/griffelib-2.0.0.tar.gz", hash = "sha256:e504d637a089f5cab9b5daf18f7645970509bf4f53eda8d79ed71cce8bd97934", size = 166312, upload-time = "2026-03-23T21:06:55.954Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/4d/51/c936033e16d12b627ea334aaaaf42229c37620d0f15593456ab69ab48161/griffelib-2.0.0-py3-none-any.whl", hash = "sha256:01284878c966508b6d6f1dbff9b6fa607bc062d8261c5c7253cb285b06422a7f", size = 142004, upload-time = "2026-02-09T19:09:40.561Z" },
 ]
@@ -4184,8 +4185,16 @@ dev = [
     { name = "ruff" },
 ]
 docs = [
+    { name = "ipykernel" },
+    { name = "ipython", version = "8.18.1", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "ipython", version = "8.38.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.10.*'" },
+    { name = "ipython", version = "9.10.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version == '3.11.*'" },
+    { name = "ipython", version = "9.11.0", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
     { name = "markdown-extensions" },
     { name = "markdown-include" },
+    { name = "matplotlib", version = "3.9.4", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.10'" },
+    { name = "matplotlib", version = "3.10.8", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.10'" },
+    { name = "matplotlib-inline" },
     { name = "mkdocs" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-markdownextradata-plugin" },
@@ -4236,8 +4245,12 @@ dev = [
     { name = "ruff", specifier = "==0.6.1" },
 ]
 docs = [
+    { name = "ipykernel", specifier = ">=6.30.1" },
+    { name = "ipython", specifier = ">=8.18.1" },
     { name = "markdown-extensions", specifier = ">=0.0.1" },
     { name = "markdown-include", specifier = ">=0.8.1" },
+    { name = "matplotlib", specifier = ">=3.9.4" },
+    { name = "matplotlib-inline", specifier = ">=0.1.7" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-jupyter" },
     { name = "mkdocs-markdownextradata-plugin", specifier = ">=0.2.6" },
