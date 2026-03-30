@@ -3061,7 +3061,7 @@ test = [
 
 [package.metadata]
 requires-dist = [
-    { name = "numpy", specifier = ">=1.26.0" },
+    { name = "numpy", specifier = ">=1.26.4" },
     { name = "pandas", specifier = ">=2.1.2" },
     { name = "pyyaml", specifier = ">=6.0.1" },
     { name = "scipy", marker = "extra == 'scientific'", specifier = ">=1.13.1" },
