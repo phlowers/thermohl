@@ -1,4 +1,4 @@
-from thermohl.solver import HeatEquationType<!--
+<!--
 SPDX-FileCopyrightText: 2025 RTE (https://www.rte-france.com)
 
 This Source Code Form is subject to the terms of the Mozilla Public
@@ -89,8 +89,13 @@ Use it ! You can report to the user guide section.
 Install the development dependencies and program scripts via
 
 ```shell
-  uv pip install -e .
   uv sync --group dev
+```
+
+Then install the pre-commit hooks:
+
+```shell
+  uv run pre-commit install
 ```
 
 Build a new wheel via
@@ -100,6 +105,17 @@ Build a new wheel via
 ```
 
 This build a wheel in newly-created dist/ directory
+
+## Pre-commit
+
+This project uses `pre-commit` to ensure code quality through `ruff`.
+Hooks are automatically run on `git commit`.
+
+You can also run them manually on all files:
+
+```shell
+  uv run pre-commit run --all-files
+```
 
 ## Building the documentation with mkdocs
 

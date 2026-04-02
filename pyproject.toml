@@ -19,7 +19,7 @@ dynamic = ["version"]
 description = "Calculations relative to temperature and ampacity in overhead conductors."
 license = "MPL-2.0"
 readme = "README.md"
-requires-python = ">=3.9,<3.14"
+requires-python = ">=3.10,<3.14"
 classifiers = [
     "Intended Audience :: Science/Research",
     "Intended Audience :: Developers",
@@ -27,7 +27,6 @@ classifiers = [
     "Natural Language :: English",
 
     "Programming Language :: Python :: 3 :: Only",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -52,7 +51,8 @@ lint = [
 ]
 dev = [
     { include-group = 'test' },
-    { include-group = 'lint' }
+    { include-group = 'lint' },
+    "pre-commit",
 ]
 docs = [
     "mkdocs >= 1.6.1",
@@ -68,7 +68,7 @@ docs = [
 notebooks = [
     "ipykernel>=6.30.1",
     "ipython>=8.18.1",
-    "matplotlib>=3.9.4",
+    "matplotlib>=3.10.8",
     "matplotlib-inline>=0.1.7",
 ]
 
@@ -81,12 +81,6 @@ scientific = [
 "Homepage" = "https://github.com/phlowers/thermohl"
 "Documentation" = "https://phlowers.readthedocs.io/projects/thermohl"
 "Issues" = "https://github.com/phlowers/thermohl/issues"
-
-[tool.mypy]
-strict = true
-ignore_missing_imports = true
-warn_return_any = false
-#plugins = "numpy.typing.mypy_plugin"
 
 [tool.coverage.run]
 branch = true
@@ -104,6 +98,18 @@ ignore_errors = true
 extend-exclude = [
     "src/thermohl/_version.py",
     "thermohl-docs/docs/examples/*.ipynb",
+]
+
+[tool.ruff.lint]
+# List of rules to enable
+select = [
+    "E",   # pycodestyle errors
+    "F",   # pyflakes
+]
+
+# List of rules to ignore
+ignore = [
+    "E501", # line too long (handled by ruff format)
 ]
 
 [tool.ruff.format]
