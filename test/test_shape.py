@@ -133,41 +133,57 @@ def test_steady_1d_mix():
 
 
 def test_transient_0():
-    for s in _solvers():
-        t = np.linspace(0, 3600, 361)
+    for _solver in _solvers():
+        time = np.linspace(0, 3600, 361)
 
-        ds = s.steady_temperature()
-        a = _traargs(s, ds, t)
+        steady_temperature = _solver.steady_temperature()
+        transient_temperature_args = _traargs(_solver, steady_temperature, time)
 
-        r = s.transient_temperature(**a)
-        assert len(r.pop(VariableType.TIME.value)) == len(t)
-        for k in r.keys():
-            assert r[k].shape == (len(t),)
+        result_without_power = _solver.transient_temperature(
+            **transient_temperature_args
+        )
+        assert len(result_without_power.pop(VariableType.TIME.value)) == len(time)
+        for key, value in result_without_power.items():
+            if key.startswith("input_"):
+                continue
+            assert value.shape == (len(time),)
 
-        r = s.transient_temperature(**{**a, "return_power": True})
+        result_with_power = _solver.transient_temperature(
+            **{**transient_temperature_args, "return_power": True}
+        )
 
-        assert len(r.pop(VariableType.TIME.value)) == len(t)
-        for k in r.keys():
-            assert r[k].shape == (len(t),)
+        assert len(result_with_power.pop(VariableType.TIME.value)) == len(time)
+        for key, value in result_with_power.items():
+            if key.startswith("input_"):
+                continue
+            assert value.shape == (len(time),), value
 
 
 def test_transient_1():
     n = 7
-    for s in _solvers():
-        s.args.ambient_temperature = np.linspace(-10, +50, n)
-        s.update()
+    for _solver in _solvers():
+        _solver.args.ambient_temperature = np.linspace(-10, +50, n)
+        _solver.update()
 
-        t = np.linspace(0, 3600, 361)
+        time = np.linspace(0, 3600, 361)
 
-        ds = s.steady_temperature()
-        a = _traargs(s, ds, t)
+        steady_temperature = _solver.steady_temperature()
+        transient_temperature_args = _traargs(_solver, steady_temperature, time)
 
-        r = s.transient_temperature(**a)
-        assert len(r.pop(VariableType.TIME.value)) == len(t)
-        for k in r.keys():
-            assert r[k].shape == (len(t), n)
+        result_without_power = _solver.transient_temperature(
+            **transient_temperature_args
+        )
+        assert len(result_without_power.pop(VariableType.TIME.value)) == len(time)
+        for key, value in result_without_power.items():
+            if key.startswith("input_"):
+                continue
+            assert value.shape == (len(time), n)
 
-        r = s.transient_temperature(**{**a, "return_power": True})
-        assert len(r.pop(VariableType.TIME.value)) == len(t)
-        for k in r.keys():
-            assert r[k].shape == (len(t), n)
+        result_with_power = _solver.transient_temperature(
+            **{**transient_temperature_args, "return_power": True}
+        )
+        assert len(result_with_power.pop(VariableType.TIME.value)) == len(time)
+        for key, value in result_with_power.items():
+            if key.startswith("input_"):
+                continue
+            assert value.shape == (len(time), n)

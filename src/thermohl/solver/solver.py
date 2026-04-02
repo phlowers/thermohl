@@ -144,6 +144,16 @@ class Solver(ABC):
                 temperature_surface
             )
 
+    def _add_input_data_to_result(
+        self, result: dict[str, floatArrayLike]
+    ) -> dict[str, floatArrayLike]:
+        self.args.extend()
+        result.update(
+            {"input_" + key: value for key, value in self.args.__dict__.items()}
+        )
+        self.args.compress()
+        return result
+
 
 def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
     """
