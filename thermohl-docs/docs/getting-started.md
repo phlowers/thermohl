@@ -95,11 +95,10 @@ Results from the solver are returned in a dict where values are numpy arrays::
  'solar_power': array([9.73237776]),
  'convection_power': array([6.65130481]),
  'radiation_power': array([3.35422215]),
- 'precipitation_power': array([0.])
- 'args': {
-  'latitude': np.float64(45.0),
+ 'precipitation_power': array([0.]),
+ 'input_latitude': 45.0,
   ...
- }}
+ }
 ```
 
 ### Example 2
@@ -126,11 +125,10 @@ imax = slvr.steady_intensity(Tmax)
  'solar_power': array([9.73237776, 9.73237776, 9.73237776]),
  'convection_power': array([66.75078505, 50.88447273, 36.23473652]),
  'radiation_power': array([26.62745888, 23.08934764, 18.95302277]),
- 'precipitation_power': 0.0
- 'args': {
-  'latitude': np.float64(45.0),
+ 'precipitation_power': 0.0,
+ 'input_latitude': 45.0,
   ...
- }}
+ }
 ```
 
 

@@ -687,7 +687,7 @@ params = dict(
 )
 
 # Create solver
-solver = slv1t.Slv1tCigre(params)
+solver = slv1t.Solver1T(params)
 
 # Compute temperature
 solver.steady_temperature()
@@ -724,7 +724,7 @@ params = dict(
 )
 
 # Create solver
-solver = slv1t.Slv1tCigre(params)
+solver = slv1t.Solver1T(params)
 
 # Compute temperature
 solver.steady_temperature()
