@@ -5,12 +5,16 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 from typing import Callable, Any
 
 import numpy as np
 
 from thermohl import floatArrayLike
 from thermohl.power import PowerTerm
+
+
+logger = logging.getLogger(__name__)
 
 
 def compute_wind_attack_angle(
@@ -71,8 +75,8 @@ class ConvectiveCoolingBase(PowerTerm):
             and not np.isnan(wind_attack_angle).all()
             and wind_azimuth is not None
         ):
-            print(
-                "Warning: both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            logger.warning(
+                "Both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
             )
 
     def _set_wind_attack_angle(

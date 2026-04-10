@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 from typing import Any
 
 import numpy as np
@@ -14,6 +15,9 @@ from thermohl.power.convective_cooling import (
     ConvectiveCoolingBase,
 )
 from thermohl.power.cigre import Air
+
+
+logger = logging.getLogger(__name__)
 
 
 class ConvectiveCooling(ConvectiveCoolingBase):

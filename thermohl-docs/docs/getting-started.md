@@ -29,6 +29,30 @@ Use it ! You can report to the user guide section.
     print(thermohl.__version__)
 ```
 
+### Logging
+
+By default, the `thermohl` logger is silent (it uses a `logging.NullHandler`).
+
+To enable log messages in the console, you can use the provided utility function:
+
+```python
+import thermohl.utils
+import logging
+
+thermohl.utils.add_stderr_logger(level=logging.INFO)
+```
+
+Alternatively, you can manually configure the `thermohl` logger using Python's standard `logging` module:
+
+```python
+import logging
+
+logger = logging.getLogger("thermohl")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+logger.addHandler(handler)
+```
+
 ## Developers
 
 ---

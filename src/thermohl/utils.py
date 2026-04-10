@@ -9,6 +9,7 @@
 
 """Misc. utility code for thermohl project."""
 
+import logging
 import os
 from functools import wraps
 from importlib.util import find_spec
@@ -20,6 +21,28 @@ import pandas as pd
 import yaml
 
 from thermohl import floatArrayLike
+
+
+logger = logging.getLogger(__name__)
+
+
+def add_stderr_logger(level: int = logging.DEBUG) -> logging.StreamHandler:
+    """Helper for quickly adding a StreamHandler to the logger.
+
+    Args:
+        level (int): Logging level.
+
+    Returns:
+        logging.StreamHandler: The added handler.
+    """
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    logger.addHandler(handler)
+    logger.setLevel(level)
+    logger.debug("Added a stderr logging handler to logger: %s", __name__)
+    return handler
 
 
 def _dict_completion(
@@ -47,7 +70,7 @@ def _dict_completion(
         if key not in params.keys() or params[key] is None:
             params[key] = defaults[key]
             if warning:
-                print("Added key %s from default parameters" % (key,))
+                logger.warning("Added key %s from default parameters" % (key,))
         elif (
             not isinstance(params[key], int)
             and not isinstance(params[key], float)
@@ -184,7 +207,7 @@ def bisect_v(
     midpoint = 0.5 * (lower_bounds + upper_bounds)
     midpoint[np.isnan(func(midpoint))] = np.nan
     if print_error:
-        print(
+        logger.info(
             f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
         )
     return midpoint, abs_error
