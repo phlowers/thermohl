@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 import numbers
 from typing import Dict, Any, Optional
 
@@ -17,6 +18,9 @@ from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import PowerType, VariableType
 from thermohl.utils import bisect_v
 from thermohl.utils import quasi_newton
+
+
+logger = logging.getLogger(__name__)
 
 
 class Solver1T(Solver_):
@@ -246,20 +250,20 @@ class Solver1T(Solver_):
         measured_global_radiation: Optional[floatArrayLike],
     ):
         if ambient_temperature is None:
-            print(
-                "WARNING: ambient_temperature is not set. Using default value of 30 °C."
+            logger.warning(
+                "ambient_temperature is not set. Using default value of 30 °C."
             )
             ambient_temperature = 30.0
         self.args.ambient_temperature = ambient_temperature
 
         if wind_speed is None:
-            print("WARNING: wind_speed is not set. Using default value of 0.6 m/s.")
+            logger.warning("wind_speed is not set. Using default value of 0.6 m/s.")
             wind_speed = 0.6
         self.args.wind_speed = wind_speed
 
         if measured_global_radiation is None:
-            print(
-                "WARNING: measured_global_radiation is not set. Using default value of 600 W/m²."
+            logger.warning(
+                "measured_global_radiation is not set. Using default value of 600 W/m²."
             )
             measured_global_radiation = 600.0
         self.args.measured_global_radiation = measured_global_radiation
