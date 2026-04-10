@@ -8,7 +8,7 @@
 import numpy as np
 import pytest
 
-from thermohl.utils import bisect_v, quasi_newton_2d
+from thermohl.utils import bisect_v, quasi_newton, quasi_newton_2d
 
 _nprs = 3141592654
 
@@ -102,7 +102,97 @@ def test_bisect_no_convergence_array():
         )
 
 
-#
+def test_quasi_newton_wrong_tol() -> None:
+    def f(x):
+        return x**2 - 2
+
+    with pytest.raises(ValueError):
+        quasi_newton(
+            f,
+            x0=1.0,
+            tol=-1.0e-6,  # Invalid tolerance
+        )
+
+
+def test_quasi_newton_wrong_maxiter() -> None:
+    def f(x):
+        return x**2 - 2
+
+    with pytest.raises(ValueError):
+        quasi_newton(
+            f,
+            x0=1.0,
+            maxiter=0,  # Invalid max iterations
+        )
+
+
+def test_quasi_newton_wrong_rtol() -> None:
+    def f(x):
+        return x**2 - 2
+
+    with pytest.raises(ValueError):
+        quasi_newton(
+            f,
+            x0=1.0,
+            rtol=-1.0e-6,  # Invalid relative tolerance
+        )
+
+
+def test_quasi_newton_scalar_increasing() -> None:
+    def f(x):
+        return np.log(x)
+
+    root = quasi_newton(
+        f,
+        x0=0.5,
+    )
+    assert np.isclose(root, 1.0)
+
+
+def test_quasi_newton_scalar_decreasing() -> None:
+    def f(x):
+        return -np.log(x)
+
+    root = quasi_newton(
+        f,
+        x0=0.5,
+    )
+    assert np.isclose(root, 1.0)
+
+
+def test_quasi_newton_scalar_no_convergence() -> None:
+    def f(x):
+        return x**2 + 2
+
+    with pytest.raises(RuntimeError):
+        quasi_newton(
+            f,
+            x0=1.0,
+        )
+
+
+def test_quasi_newton_array_no_convergence() -> None:
+    def f(x: np.ndarray) -> np.ndarray:
+        return x**2 + np.array([1, 2])
+
+    with pytest.raises(RuntimeError):
+        quasi_newton(
+            f,
+            x0=np.array([1.0, 1.0]),
+        )
+
+
+def test_quasi_newton_array_mixed() -> None:
+    def f(x: np.ndarray) -> np.ndarray:
+        return x**2 + np.array([-1, 2])
+
+    result = quasi_newton(
+        f,
+        x0=np.array([1.0, 1.0]),
+    )
+    assert np.isclose(result[0], 1.0)
+
+
 def test_quasi_newton_2d_convergence():
     np.random.seed(_nprs)
     size = 10

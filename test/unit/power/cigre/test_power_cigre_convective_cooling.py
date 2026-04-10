@@ -45,12 +45,12 @@ conv_cool_instances = [
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_forced_float_value(convective_cooling, expected_type):
+def test_nusselt_forced_float_value(convective_cooling, expected_type):
     Tf = 30.0
     nu = 1.5e-5
     expected_result = 17.3425
 
-    result = convective_cooling._nu_forced(Tf, nu)
+    result = convective_cooling._nusselt_forced(Tf, nu)
 
     np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
@@ -60,12 +60,12 @@ def test_nu_forced_float_value(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_forced_array_single_value(convective_cooling, expected_type):
+def test_nusselt_forced_array_single_value(convective_cooling, expected_type):
     Tf = np.array([30.0])
     nu = np.array([1.5e-5])
     expected_result = np.array([17.3425])
 
-    result = convective_cooling._nu_forced(Tf, nu)
+    result = convective_cooling._nusselt_forced(Tf, nu)
 
     np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
@@ -75,12 +75,12 @@ def test_nu_forced_array_single_value(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_forced_array_values(convective_cooling, expected_type):
+def test_nusselt_forced_array_values(convective_cooling, expected_type):
     Tf = np.array([30.0, 35.0])
     nu = np.array([1.5e-5, 1.6e-5])
     expected_result = np.array([17.3425, 16.6482])
 
-    result = convective_cooling._nu_forced(Tf, nu)
+    result = convective_cooling._nusselt_forced(Tf, nu)
 
     np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
@@ -90,14 +90,14 @@ def test_nu_forced_array_values(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_forced_boundary_conditions(convective_cooling, expected_type):
+def test_nusselt_forced_boundary_conditions(convective_cooling, expected_type):
     Tf = np.array([30.0])
     nu = np.array([1.5e-5])
     convective_cooling.roughness_ratio = np.array([0.05])
     convective_cooling.wind_speed = np.array([100.0])
     expected_result = np.array([115.5214])
 
-    result = convective_cooling._nu_forced(Tf, nu)
+    result = convective_cooling._nusselt_forced(Tf, nu)
 
     np.testing.assert_allclose(result, expected_result, rtol=1e-5)
 
@@ -107,12 +107,12 @@ def test_nu_forced_boundary_conditions(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_natural_single_value(convective_cooling, expected_type):
+def test_nusselt_natural_single_value(convective_cooling, expected_type):
     air_temperature = 50.0
     Td = 25.0
     nu = Air.kinematic_viscosity(air_temperature)
 
-    result = convective_cooling._nu_natural(air_temperature, Td, nu)
+    result = convective_cooling._nusselt_natural(air_temperature, Td, nu)
 
     assert isinstance(result, expected_type)
     np.testing.assert_allclose(result, [3.42404], rtol=1e-4)
@@ -123,12 +123,12 @@ def test_nu_natural_single_value(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_natural_array_values(convective_cooling, expected_type):
+def test_nusselt_natural_array_values(convective_cooling, expected_type):
     air_temperature = np.array([50.0, 60.0, 70.0])
     Td = np.array([25.0, 35.0, 45.0])
     nu = Air.kinematic_viscosity(air_temperature)
 
-    result = convective_cooling._nu_natural(air_temperature, Td, nu)
+    result = convective_cooling._nusselt_natural(air_temperature, Td, nu)
 
     assert isinstance(result, np.ndarray)
     assert result.shape == air_temperature.shape
@@ -140,12 +140,12 @@ def test_nu_natural_array_values(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_natural_edge_case(convective_cooling, expected_type):
+def test_nusselt_natural_edge_case(convective_cooling, expected_type):
     air_temperature = 0.0
     Td = 0.0
     nu = Air.kinematic_viscosity(air_temperature)
 
-    result = convective_cooling._nu_natural(air_temperature, Td, nu)
+    result = convective_cooling._nusselt_natural(air_temperature, Td, nu)
 
     assert isinstance(result, expected_type)
     assert result == 0.0
@@ -156,12 +156,12 @@ def test_nu_natural_edge_case(convective_cooling, expected_type):
     conv_cool_instances,
     ids=["ConvectiveCooling with arrays", "ConvectiveCooling with scalars"],
 )
-def test_nu_natural_high_values(convective_cooling, expected_type):
+def test_nusselt_natural_high_values(convective_cooling, expected_type):
     air_temperature = 1000.0
     Td = 500.0
     nu = Air.kinematic_viscosity(air_temperature)
 
-    result = convective_cooling._nu_natural(air_temperature, Td, nu)
+    result = convective_cooling._nusselt_natural(air_temperature, Td, nu)
 
     assert isinstance(result, expected_type)
     np.testing.assert_allclose(result, [2.18853], rtol=1e-4)
