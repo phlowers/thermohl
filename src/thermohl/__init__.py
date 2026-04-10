@@ -14,6 +14,7 @@ from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
+logger.debug("Thermohl package initialized.")
 
 try:
     from ._version import __version__

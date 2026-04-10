@@ -22,6 +22,25 @@ import yaml
 logger = logging.getLogger(__name__)
 
 
+def add_stderr_logger(level: int = logging.DEBUG) -> logging.StreamHandler:
+    """Helper for quickly adding a StreamHandler to the logger.
+
+    Args:
+        level (int): Logging level.
+
+    Returns:
+        logging.StreamHandler: The added handler.
+    """
+    handler = logging.StreamHandler()
+    handler.setFormatter(
+        logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    )
+    logger.addHandler(handler)
+    logger.setLevel(level)
+    logger.debug("Added a stderr logging handler to logger: %s", __name__)
+    return handler
+
+
 def _dict_completion(
     params: dict,
     filename: str,
