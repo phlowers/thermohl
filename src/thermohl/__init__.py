@@ -5,11 +5,15 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 from typing import Union, List
 
 import numpy as np
 import numpy.typing as npt
 from datetime import datetime, date
+
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.NullHandler())
 
 try:
     from ._version import __version__
