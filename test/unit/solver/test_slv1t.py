@@ -264,7 +264,7 @@ def test_reduced_intensity_scalar_using_default_args() -> None:
     assert isinstance(result, np.float64)
 
     # Check that solver args and power term attributes have not been changed
-    assert np.isnan(solver.args.measured_solar_irradiance)
+    assert np.isnan(solver.args.measured_global_radiation)
     assert solver.args.ambient_temperature == args["ambient_temperature"]
     assert solver.args.wind_speed == args["wind_speed"]
     assert solver.args.transit == args["transit"]
@@ -318,14 +318,14 @@ def test_reduced_intensity_scalar_providing_custom_args() -> None:
         measured_intensity=360.0,
         ambient_temperature=25.0,
         wind_speed=4.0,
-        measured_solar_irradiance=800.0,
+        measured_global_radiation=800.0,
         max_conductor_temperature=120.0,
     )
 
     assert isinstance(result, np.float64)
 
     # Check that solver args and power term attributes have not been changed
-    assert np.isnan(solver.args.measured_solar_irradiance)
+    assert np.isnan(solver.args.measured_global_radiation)
     assert solver.args.ambient_temperature == args["ambient_temperature"]
     assert solver.args.wind_speed == args["wind_speed"]
     assert solver.args.transit == args["transit"]

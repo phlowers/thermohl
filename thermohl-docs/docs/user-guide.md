@@ -174,6 +174,6 @@ computations:
 |----|----|
 | ambient_temperature | 30.0 °C |
 | wind_speed | 0.6 m/s |
-| measured_solar_irradiance | 600.0 W/m² |
+| measured_global_radiation | 600.0 W/m² |
 
 TODO: precision on wind_speed and wind_angle if needed

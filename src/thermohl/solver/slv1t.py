@@ -16,7 +16,7 @@ from thermohl.solver.solver import Solver as Solver_, get_time_changing_paramete
 from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import PowerType, VariableType
 from thermohl.utils import bisect_v
-from thermohl.utils import bisect_v, quasi_newton
+from thermohl.utils import quasi_newton
 
 
 class Solver1T(Solver_):
@@ -243,7 +243,7 @@ class Solver1T(Solver_):
         self,
         ambient_temperature: Optional[floatArrayLike],
         wind_speed: Optional[floatArrayLike],
-        measured_solar_irradiance: Optional[floatArrayLike],
+        measured_global_radiation: Optional[floatArrayLike],
     ):
         if ambient_temperature is None:
             print(
@@ -257,12 +257,12 @@ class Solver1T(Solver_):
             wind_speed = 0.6
         self.args.wind_speed = wind_speed
 
-        if measured_solar_irradiance is None:
+        if measured_global_radiation is None:
             print(
-                "WARNING: measured_solar_irradiance is not set. Using default value of 600 W/m²."
+                "WARNING: measured_global_radiation is not set. Using default value of 600 W/m²."
             )
-            measured_solar_irradiance = 600.0
-        self.args.measured_solar_irradiance = measured_solar_irradiance
+            measured_global_radiation = 600.0
+        self.args.measured_global_radiation = measured_global_radiation
 
     def reduced_intensity(
         self,
@@ -270,7 +270,7 @@ class Solver1T(Solver_):
         measured_intensity: floatArrayLike,
         ambient_temperature: Optional[floatArrayLike] = None,
         wind_speed: Optional[floatArrayLike] = None,
-        measured_solar_irradiance: Optional[floatArrayLike] = None,
+        measured_global_radiation: Optional[floatArrayLike] = None,
         max_conductor_temperature: Optional[floatArrayLike] = None,
     ) -> floatArrayLike:
         """
@@ -283,20 +283,20 @@ class Solver1T(Solver_):
             measured_intensity (float | np.ndarray): The measuredintensity at which the temperature difference was measured.
             ambient_temperature (Optional[float | np.ndarray]): The ambient temperature. Default is 30.
             wind_speed (Optional[float | np.ndarray]): The wind speed. Default is 0.6.
-            measured_solar_irradiance (Optional[float | np.ndarray]): The measured solar irradiance. Default is 600.
+            measured_global_radiation (Optional[float | np.ndarray]): The measured solar irradiance. Default is 600.
             max_conductor_temperature (Optional[float | np.ndarray]): The maximum conductor temperature. Default is 100.
         """
         # Save args that will be modified so as to be able to restore them at the end of the computation
         solver_transit = self.args.transit
         solver_ambient_temperature = self.args.ambient_temperature
         solver_wind_speed = self.args.wind_speed
-        solver_measured_solar_irradiance = self.args.measured_solar_irradiance
+        solver_measured_solar_irradiance = self.args.measured_global_radiation
         solver_wind_attack_angle = self.args.wind_attack_angle
 
         # Set args default values for reduced intensity computation.
         # These differ from those used for the other computations.
         self._set_default_reduced_intensity_args(
-            ambient_temperature, wind_speed, measured_solar_irradiance
+            ambient_temperature, wind_speed, measured_global_radiation
         )
 
         # Set default value for max_conductor_temperature if not provided.
@@ -332,7 +332,7 @@ class Solver1T(Solver_):
         self.joule_heating.__init__(**self.args.__dict__)
         self.args.ambient_temperature = solver_ambient_temperature
         self.args.wind_speed = solver_wind_speed
-        self.args.measured_solar_irradiance = solver_measured_solar_irradiance
+        self.args.measured_global_radiation = solver_measured_solar_irradiance
         self.args.wind_attack_angle = solver_wind_attack_angle
         # Update convective cooling with restored wind_attack_angle
         self.convective_cooling.__init__(**self.args.__dict__)
