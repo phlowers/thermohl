@@ -5,7 +5,9 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+from datetime import datetime
 import pytest
+import random
 import numpy as np
 
 from thermohl import solver
@@ -36,15 +38,17 @@ def _solvers(dic=None):
 
 def test_balance():
     tol = 1.0e-09
+    random.seed(_nprs)
     np.random.seed(_nprs)
     N = 9999
+    month = random.randint(1, 12)
+    day = random.randint(1, 30)
+    hour = random.randint(0, 23)
     dic = dict(
         latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         cable_azimuth=np.random.uniform(0.0, 360.0, N),
-        month=np.random.randint(1, 13, N),
-        day=np.random.randint(1, 31, N),
-        hour=np.random.randint(0, 24, N),
+        datetime_utc=[datetime(2026, month, day, hour) for _ in range(N)],
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
         wind_azimuth=np.random.uniform(0.0, 90.0, N),
@@ -54,28 +58,28 @@ def test_balance():
     )
 
     for s in _solvers(dic):
-        df = s.steady_temperature(
+        steady_temperature = s.steady_temperature(
             return_err=True, return_power=True, tol=tol, maxiter=64
         )
-        assert np.all(df[VariableType.ERROR.value] < tol)
+        assert np.all(steady_temperature[VariableType.ERROR.value] < tol)
         bl = np.abs(
-            df[PowerType.JOULE.value]
-            + df[PowerType.SOLAR.value]
-            - df[PowerType.CONVECTION.value]
-            - df[PowerType.RADIATION.value]
-            - df[PowerType.RAIN.value]
+            steady_temperature[PowerType.JOULE.value]
+            + steady_temperature[PowerType.SOLAR.value]
+            - steady_temperature[PowerType.CONVECTION.value]
+            - steady_temperature[PowerType.RADIATION.value]
+            - steady_temperature[PowerType.RAIN.value]
         )
         atol = np.maximum(
             np.abs(
                 s.balance(
-                    df[VariableType.TEMPERATURE.value]
-                    + 0.5 * df[VariableType.ERROR.value]
+                    steady_temperature[VariableType.TEMPERATURE.value]
+                    + 0.5 * steady_temperature[VariableType.ERROR.value]
                 )
             ),
             np.abs(
                 s.balance(
-                    df[VariableType.TEMPERATURE.value]
-                    - 0.5 * df[VariableType.ERROR.value]
+                    steady_temperature[VariableType.TEMPERATURE.value]
+                    - 0.5 * steady_temperature[VariableType.ERROR.value]
                 )
             ),
         )
