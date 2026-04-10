@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
@@ -27,6 +28,9 @@ from thermohl.solver.entities import (
 )
 from thermohl.solver.slv1t import Solver1T
 from thermohl.utils import quasi_newton_2d
+
+
+logger = logging.getLogger(__name__)
 
 
 def _profile_mom(
@@ -92,8 +96,8 @@ def _infer_target_from_cable_type(
     If both target and cable_type are provided, target is ignored."""
 
     if target is not None and cable_type is not None:
-        print(
-            "WARNING: Both target and cable_type are provided. Ignoring given target and using cable_type to determine target instead."
+        logger.warning(
+            "Both target and cable_type are provided. Ignoring given target and using cable_type to determine target instead."
         )
 
     if cable_type is None:
@@ -328,7 +332,7 @@ class Solver3T(Solver_):
             delta_y=1.0e-03,
         )
         if np.max(err) > tol or iterations == maxiter:
-            print(
+            logger.debug(
                 f"rstat_analytic max err is {np.max(err):.3E} in {iterations:d} iterations"
             )
 
@@ -614,7 +618,7 @@ class Solver3T(Solver_):
             delta_y=1.0e-03,
         )
         if np.max(err) > tol or iterations == maxiter:
-            print(
+            logger.debug(
                 f"rstat_analytic max err is {np.max(err):.3E} in {iterations:d} iterations"
             )
 

@@ -135,6 +135,30 @@ Then, in the same terminal, in the `thermohl-docs` folder, build the doc with:
 
 The documentation can then be accessed locally from http://127.0.0.1:8000.
 
+### Logging
+
+By default, the `thermohl` logger is silent (it uses a `logging.NullHandler`).
+
+To enable log messages in the console, you can use the provided utility function:
+
+```python
+import thermohl.utils
+import logging
+
+thermohl.utils.add_stderr_logger(level=logging.INFO)
+```
+
+Alternatively, you can manually configure the `thermohl` logger using Python's standard `logging` module:
+
+```python
+import logging
+
+logger = logging.getLogger("thermohl")
+logger.setLevel(logging.INFO)
+handler = logging.StreamHandler()
+logger.addHandler(handler)
+```
+
 ## Simple usage
 
 Solvers in thermOHL take a dictionary as an argument, where all keys are strings and all values are either integers,

@@ -8,6 +8,7 @@
 # mypy: ignore-errors
 """Tools to perform Monte Carlo simulations using the thermOHL steady solvers with uncertain input parameters."""
 
+import logging
 import warnings
 from typing import Union, Tuple
 
@@ -35,6 +36,9 @@ except ImportError:
 from thermohl import distributions
 from thermohl import solver
 from thermohl import utils
+
+
+logger = logging.getLogger(__name__)
 
 
 def default_uncertainties() -> dict:
@@ -397,7 +401,7 @@ def _diff_method(
             delta_output.loc[:, column_name] *= delta_param
         delta_results += delta_output
         if np.any(delta_output.isna()):
-            print("Nans with key %s" % (key,))
+            logger.warning("Nans with key %s" % (key,))
 
     results = pd.DataFrame()
     for column_name in baseline.columns:
