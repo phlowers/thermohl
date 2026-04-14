@@ -305,7 +305,7 @@ class Solver1T(Solver_):
 
         # Set default value for max_conductor_temperature if not provided.
         if max_conductor_temperature is None:
-            max_conductor_temperature = np.ones_like(measured_intensity) * 100.0
+            max_conductor_temperature = np.full_like(measured_intensity, 100.0)
 
         self.args.wind_attack_angle = 90.0
         self.convective_cooling.__init__(**self.args.__dict__)
@@ -326,7 +326,7 @@ class Solver1T(Solver_):
         def f(transit):
             return sleeve_temperature(transit) - max_conductor_temperature
 
-        x0 = np.ones_like(measured_intensity) * 100
+        x0 = np.full_like(measured_intensity, 100.0)
 
         reduced_intensity = quasi_newton(f, x0=x0)
 

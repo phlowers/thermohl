@@ -31,8 +31,8 @@ class ConvectiveCooling(ConvectiveCoolingBase):
         wind_speed: floatArrayLike,
         outer_diameter: floatArrayLike,
         roughness_ratio: floatArrayLike,
-        wind_azimuth: floatArrayLike = None,
-        wind_attack_angle: floatArrayLike = None,
+        wind_azimuth: floatArrayLike | None = None,
+        wind_attack_angle: floatArrayLike | None = None,
         g: float = 9.81,
         **kwargs: Any,
     ):
@@ -45,7 +45,8 @@ class ConvectiveCooling(ConvectiveCoolingBase):
             cable_azimuth (float | numpy.ndarray): Azimuth (deg).
             ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
             wind_speed (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wind_azimuth (float | numpy.ndarray): wind azimuth regarding north (deg).
+            wind_azimuth (float | numpy.ndarray | None): wind azimuth regarding north (deg).
+            wind_attack_angle (float | numpy.ndarray | None): wind attack angle (rad).
             outer_diameter (float | numpy.ndarray): External diameter (m).
             roughness_ratio (float | numpy.ndarray): Cable roughness (—).
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
