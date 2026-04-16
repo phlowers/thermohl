@@ -46,32 +46,77 @@ class ConvectiveCoolingBase(PowerTerm):
         air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         dynamic_viscosity: Callable[[floatArrayLike], floatArrayLike],
         thermal_conductivity: Callable[[floatArrayLike], floatArrayLike],
-        wind_azimuth: floatArrayLike = None,
-        wind_attack_angle: floatArrayLike = None,
+        wind_azimuth: floatArrayLike | None = None,
+        wind_attack_angle: floatArrayLike | None = None,
         **kwargs: Any,
     ):
+        self._check_arguments(wind_azimuth, wind_attack_angle)
+        self._set_wind_attack_angle(cable_azimuth, wind_azimuth, wind_attack_angle)
+
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-
-        if wind_attack_angle is None and wind_azimuth is None:
-            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
-        if wind_attack_angle is not None and wind_azimuth is not None:
-            logger.warning(
-                "both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
-            )
-        if wind_attack_angle is not None:
-            self.wind_attack_angle = wind_attack_angle
-        else:
-            self.wind_attack_angle = compute_wind_attack_angle(
-                cable_azimuth, wind_azimuth
-            )
 
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
         self.dynamic_viscosity = dynamic_viscosity
         self.thermal_conductivity = thermal_conductivity
+
+    @classmethod
+    def _check_arguments(
+        cls,
+        wind_azimuth: floatArrayLike | None,
+        wind_attack_angle: floatArrayLike | None,
+    ) -> None:
+        if (wind_attack_angle is None or np.isnan(wind_attack_angle).any()) and (
+            wind_azimuth is None or np.isnan(wind_azimuth).any()
+        ):
+            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
+
+        if (
+            wind_attack_angle is not None
+            and not np.isnan(wind_attack_angle).all()
+            and wind_azimuth is not None
+        ):
+            logger.warning(
+                "Both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
+            )
+
+    def _set_wind_attack_angle(
+        self,
+        cable_azimuth: floatArrayLike,
+        wind_azimuth: floatArrayLike,
+        wind_attack_angle: floatArrayLike,
+    ) -> None:
+        # Compute missing wind attack angles
+        if isinstance(wind_attack_angle, np.ndarray) and wind_attack_angle.ndim > 0:
+            if (
+                not isinstance(cable_azimuth, np.ndarray)
+                or cable_azimuth.shape != wind_attack_angle.shape
+            ):
+                raise ValueError(
+                    "If wind_attack_angle is an array, cable_azimuth must be an array of the same shape."
+                )
+            if (
+                not isinstance(wind_azimuth, np.ndarray)
+                or wind_azimuth.shape != wind_attack_angle.shape
+            ):
+                raise ValueError(
+                    "If wind_attack_angle is an array, wind_azimuth must be an array of the same shape."
+                )
+            mask = np.isnan(wind_attack_angle)
+            if np.any(mask):
+                wind_attack_angle[mask] = compute_wind_attack_angle(
+                    cable_azimuth[mask], wind_azimuth[mask]
+                )
+            self.wind_attack_angle = wind_attack_angle
+        elif wind_attack_angle is None or np.isnan(wind_attack_angle):
+            self.wind_attack_angle = compute_wind_attack_angle(
+                cable_azimuth, wind_azimuth
+            )
+        else:
+            self.wind_attack_angle = wind_attack_angle
 
     def _value_forced(
         self,
