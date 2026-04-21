@@ -8,7 +8,6 @@
 from datetime import datetime, timezone
 import pytest
 import numpy as np
-import pandas as pd
 
 from thermohl import power
 from thermohl.solver.entities import PowerType, VariableType
@@ -63,33 +62,39 @@ def solver():
 def test_steady_temperature_default(solver):
     result = solver.steady_temperature()
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TEMPERATURE in result.columns
-    assert PowerType.JOULE in result.columns
-    assert PowerType.SOLAR in result.columns
-    assert PowerType.CONVECTION in result.columns
-    assert PowerType.RADIATION in result.columns
-    assert PowerType.RAIN in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TEMPERATURE.value in result
+    assert PowerType.JOULE.value in result
+    assert PowerType.SOLAR.value in result
+    assert PowerType.CONVECTION.value in result
+    assert PowerType.RADIATION.value in result
+    assert PowerType.RAIN.value in result
 
 
 def test_steady_temperature_with_error(solver):
     result = solver.steady_temperature(return_err=True)
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TEMPERATURE in result.columns
-    assert VariableType.ERROR in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TEMPERATURE.value in result
+    assert VariableType.ERROR.value in result
 
 
 def test_steady_temperature_no_power(solver):
     result = solver.steady_temperature(return_power=False)
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TEMPERATURE in result.columns
-    assert PowerType.JOULE not in result.columns
-    assert PowerType.SOLAR not in result.columns
-    assert PowerType.CONVECTION not in result.columns
-    assert PowerType.RADIATION not in result.columns
-    assert PowerType.RAIN not in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TEMPERATURE.value in result
+    assert PowerType.JOULE.value not in result
+    assert PowerType.SOLAR.value not in result
+    assert PowerType.CONVECTION.value not in result
+    assert PowerType.RADIATION.value not in result
+    assert PowerType.RAIN.value not in result
 
 
 def test_steady_temperature_custom_params(solver):
@@ -105,8 +110,10 @@ def test_steady_temperature_custom_params(solver):
         maxiter=maxiter,
     )
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TEMPERATURE in result.columns
+    assert isinstance(result, dict)
+    for key in result.keys():
+        assert isinstance(result[key], np.ndarray)
+    assert VariableType.TEMPERATURE.value in result
 
 
 def test_transient_temperature_default(solver):
@@ -115,10 +122,10 @@ def test_transient_temperature_default(solver):
     result = solver.transient_temperature(time)
 
     assert isinstance(result, dict)
-    assert VariableType.TIME in result
-    assert VariableType.TEMPERATURE in result
-    assert len(result[VariableType.TIME]) == len(time)
-    assert len(result[VariableType.TEMPERATURE]) == len(time)
+    assert VariableType.TIME.value in result
+    assert VariableType.TEMPERATURE.value in result
+    assert len(result[VariableType.TIME.value]) == len(time)
+    assert len(result[VariableType.TEMPERATURE.value]) == len(time)
 
 
 def test_transient_temperature_with_initial_temp(solver):
@@ -128,11 +135,11 @@ def test_transient_temperature_with_initial_temp(solver):
     result = solver.transient_temperature(time, T0=T0)
 
     assert isinstance(result, dict)
-    assert VariableType.TIME in result
-    assert VariableType.TEMPERATURE in result
-    assert len(result[VariableType.TIME]) == len(time)
-    assert len(result[VariableType.TEMPERATURE]) == len(time)
-    assert result[VariableType.TEMPERATURE][0] == T0
+    assert VariableType.TIME.value in result
+    assert VariableType.TEMPERATURE.value in result
+    assert len(result[VariableType.TIME.value]) == len(time)
+    assert len(result[VariableType.TEMPERATURE.value]) == len(time)
+    assert result[VariableType.TEMPERATURE.value][0] == T0
 
 
 def test_transient_temperature_with_error(solver):
@@ -141,15 +148,15 @@ def test_transient_temperature_with_error(solver):
     result = solver.transient_temperature(time, return_power=True)
 
     assert isinstance(result, dict)
-    assert VariableType.TIME in result
-    assert VariableType.TEMPERATURE in result
-    assert len(result[VariableType.TIME]) == len(time)
-    assert len(result[VariableType.TEMPERATURE]) == len(time)
-    assert PowerType.JOULE in result
-    assert PowerType.SOLAR in result
-    assert PowerType.CONVECTION in result
-    assert PowerType.RADIATION in result
-    assert PowerType.RAIN in result
+    assert VariableType.TIME.value in result
+    assert VariableType.TEMPERATURE.value in result
+    assert len(result[VariableType.TIME.value]) == len(time)
+    assert len(result[VariableType.TEMPERATURE.value]) == len(time)
+    assert PowerType.JOULE.value in result
+    assert PowerType.SOLAR.value in result
+    assert PowerType.CONVECTION.value in result
+    assert PowerType.RADIATION.value in result
+    assert PowerType.RAIN.value in result
 
 
 def test_steady_intensity_default(solver):
@@ -157,13 +164,15 @@ def test_steady_intensity_default(solver):
 
     result = solver.steady_intensity(conductor_temperature)
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TRANSIT in result.columns
-    assert PowerType.JOULE in result.columns
-    assert PowerType.SOLAR in result.columns
-    assert PowerType.CONVECTION in result.columns
-    assert PowerType.RADIATION in result.columns
-    assert PowerType.RAIN in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TRANSIT.value in result
+    assert PowerType.JOULE.value in result
+    assert PowerType.SOLAR.value in result
+    assert PowerType.CONVECTION.value in result
+    assert PowerType.RADIATION.value in result
+    assert PowerType.RAIN.value in result
 
 
 def test_steady_intensity_with_error(solver):
@@ -171,9 +180,11 @@ def test_steady_intensity_with_error(solver):
 
     result = solver.steady_intensity(conductor_temperature, return_err=True)
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TRANSIT in result.columns
-    assert VariableType.ERROR in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TRANSIT.value in result
+    assert VariableType.ERROR.value in result
 
 
 def test_steady_intensity_no_power(solver):
@@ -181,13 +192,15 @@ def test_steady_intensity_no_power(solver):
 
     result = solver.steady_intensity(conductor_temperature, return_power=False)
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TRANSIT in result.columns
-    assert PowerType.JOULE not in result.columns
-    assert PowerType.SOLAR not in result.columns
-    assert PowerType.CONVECTION not in result.columns
-    assert PowerType.RADIATION not in result.columns
-    assert PowerType.RAIN not in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TRANSIT.value in result
+    assert PowerType.JOULE.value not in result
+    assert PowerType.SOLAR.value not in result
+    assert PowerType.CONVECTION.value not in result
+    assert PowerType.RADIATION.value not in result
+    assert PowerType.RAIN.value not in result
 
 
 def test_steady_intensity_custom_params(solver):
@@ -201,5 +214,7 @@ def test_steady_intensity_custom_params(solver):
         conductor_temperature, Imin=Imin, Imax=Imax, tol=tol, maxiter=maxiter
     )
 
-    assert isinstance(result, pd.DataFrame)
-    assert VariableType.TRANSIT in result.columns
+    assert isinstance(result, dict)
+    for value in result.values():
+        assert isinstance(value, np.ndarray)
+    assert VariableType.TRANSIT.value in result

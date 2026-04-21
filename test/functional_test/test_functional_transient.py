@@ -33,7 +33,7 @@ def test_transient_temperature():
         # check initial temperature
         assert np.isclose(
             scenario["T_mean_0"],
-            initial_state[TemperatureType.AVERAGE][0],
+            initial_state[TemperatureType.AVERAGE.value][0],
             atol=0.01,
         )
 
@@ -48,15 +48,15 @@ def test_transient_temperature():
         # check final temperature
         assert np.isclose(
             scenario["T_mean_final"],
-            final_state[TemperatureType.AVERAGE][0],
+            final_state[TemperatureType.AVERAGE.value][0],
             atol=0.05,
         )
 
         # transient temperature
         transient_result = solver.transient_temperature_legacy(
             offset=offsets,
-            surface_temperature_0=initial_state[TemperatureType.SURFACE],
-            core_temperature_0=initial_state[TemperatureType.CORE],
+            surface_temperature_0=initial_state[TemperatureType.SURFACE.value],
+            core_temperature_0=initial_state[TemperatureType.CORE.value],
             time_constant=time_constant,
         )
 
@@ -75,20 +75,20 @@ def test_transient_temperature():
         atol = 0.01
         # get indexes of the useful offsets in the thermohl computation of transient temperature.
         useful_indexes = np.searchsorted(
-            transient_result[VariableType.TIME], useful_offsets * 60
+            transient_result[VariableType.TIME.value], useful_offsets * 60
         )
         assert np.allclose(
-            transient_result[TemperatureType.SURFACE][useful_indexes],
+            transient_result[TemperatureType.SURFACE.value][useful_indexes],
             expected_surface_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureType.AVERAGE][useful_indexes],
+            transient_result[TemperatureType.AVERAGE.value][useful_indexes],
             expected_mean_temperatures,
             atol=atol,
         )
         assert np.allclose(
-            transient_result[TemperatureType.CORE][useful_indexes],
+            transient_result[TemperatureType.CORE.value][useful_indexes],
             expected_core_temperatures,
             atol=atol,
         )
