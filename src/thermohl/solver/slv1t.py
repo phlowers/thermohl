@@ -13,6 +13,7 @@ import numpy as np
 import pandas as pd
 
 from thermohl import floatArrayLike, floatArray
+from thermohl.power import FixedSolarIrradianceSolarHeating
 from thermohl.solver.solver import Solver as Solver_, get_time_changing_parameters
 from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import PowerType, VariableType
@@ -247,7 +248,7 @@ class Solver1T(Solver_):
         self,
         ambient_temperature: Optional[floatArrayLike],
         wind_speed: Optional[floatArrayLike],
-        measured_global_radiation: Optional[floatArrayLike],
+        solar_irradiance: Optional[floatArrayLike],
     ):
         if ambient_temperature is None:
             logger.warning(
@@ -261,12 +262,12 @@ class Solver1T(Solver_):
             wind_speed = 0.6
         self.args.wind_speed = wind_speed
 
-        if measured_global_radiation is None:
+        if solar_irradiance is None:
             logger.warning(
-                "measured_global_radiation is not set. Using default value of 600 W/m²."
+                "solar_irradiance is not set. Using default value of 600 W/m²."
             )
-            measured_global_radiation = 600.0
-        self.args.measured_global_radiation = measured_global_radiation
+            solar_irradiance = 600.0
+        return solar_irradiance
 
     def reduced_intensity(
         self,
@@ -274,7 +275,7 @@ class Solver1T(Solver_):
         measured_intensity: floatArrayLike,
         ambient_temperature: Optional[floatArrayLike] = None,
         wind_speed: Optional[floatArrayLike] = None,
-        measured_global_radiation: Optional[floatArrayLike] = None,
+        solar_irradiance: Optional[floatArrayLike] = None,
         max_conductor_temperature: Optional[floatArrayLike] = None,
     ) -> floatArrayLike:
         """
@@ -287,20 +288,22 @@ class Solver1T(Solver_):
             measured_intensity (float | np.ndarray): The measuredintensity at which the temperature difference was measured.
             ambient_temperature (Optional[float | np.ndarray]): The ambient temperature. Default is 30.
             wind_speed (Optional[float | np.ndarray]): The wind speed. Default is 0.6.
-            measured_global_radiation (Optional[float | np.ndarray]): The measured solar irradiance. Default is 600.
+            solar_irradiance (Optional[float | np.ndarray]): The measured solar irradiance. Default is 600.
             max_conductor_temperature (Optional[float | np.ndarray]): The maximum conductor temperature. Default is 100.
         """
-        # Save args that will be modified so as to be able to restore them at the end of the computation
-        solver_transit = self.args.transit
-        solver_ambient_temperature = self.args.ambient_temperature
-        solver_wind_speed = self.args.wind_speed
-        solver_measured_solar_irradiance = self.args.measured_global_radiation
-        solver_wind_attack_angle = self.args.wind_attack_angle
+        # Save elements that will be modified to do the computations
+        # so as to be able to restore afterwards
+        saved_solver_transit = self.args.transit
+        saved_solver_ambient_temperature = self.args.ambient_temperature
+        saved_solver_wind_speed = self.args.wind_speed
+        saved_solver_wind_attack_angle = self.args.wind_attack_angle
+
+        saved_solar_heating = self.solar_heating
 
         # Set args default values for reduced intensity computation.
         # These differ from those used for the other computations.
-        self._set_default_reduced_intensity_args(
-            ambient_temperature, wind_speed, measured_global_radiation
+        solar_irradiance = self._set_default_reduced_intensity_args(
+            ambient_temperature, wind_speed, solar_irradiance
         )
 
         # Set default value for max_conductor_temperature if not provided.
@@ -309,6 +312,12 @@ class Solver1T(Solver_):
 
         self.args.wind_attack_angle = 90.0
         self.convective_cooling.__init__(**self.args.__dict__)
+
+        self.solar_heating = FixedSolarIrradianceSolarHeating(
+            outer_diameter=self.args.outer_diameter,
+            solar_absorptivity=self.args.solar_absorptivity,
+            solar_irradiance=solar_irradiance,
+        )
 
         def conductor_temperature(transit):
             self.args.transit = transit
@@ -330,15 +339,15 @@ class Solver1T(Solver_):
 
         reduced_intensity = quasi_newton(f, x0=x0)
 
-        # Restore previous args
-        self.args.transit = solver_transit
+        # Restore previous elements
+        self.args.transit = saved_solver_transit
         # Update joule heating with restored transit
         self.joule_heating.__init__(**self.args.__dict__)
-        self.args.ambient_temperature = solver_ambient_temperature
-        self.args.wind_speed = solver_wind_speed
-        self.args.measured_global_radiation = solver_measured_solar_irradiance
-        self.args.wind_attack_angle = solver_wind_attack_angle
+        self.args.ambient_temperature = saved_solver_ambient_temperature
+        self.args.wind_speed = saved_solver_wind_speed
+        self.args.wind_attack_angle = saved_solver_wind_attack_angle
         # Update convective cooling with restored wind_attack_angle
         self.convective_cooling.__init__(**self.args.__dict__)
+        self.solar_heating = saved_solar_heating
 
         return reduced_intensity

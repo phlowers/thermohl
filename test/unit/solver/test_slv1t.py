@@ -12,6 +12,7 @@ import pandas as pd
 
 from thermohl import power
 from thermohl.solver.entities import PowerType, VariableType
+from thermohl.power.rte.solar_heating import SolarHeating as RteSolarHeating
 from thermohl.solver.slv1t import Solver1T
 
 
@@ -272,6 +273,7 @@ def test_reduced_intensity_scalar_using_default_args() -> None:
 
     assert solver.convective_cooling.wind_attack_angle == initial_wind_attack_angle
     assert solver.joule_heating.transit == initial_transit
+    assert isinstance(solver.solar_heating, RteSolarHeating)
 
 
 def test_reduced_intensity_scalar_providing_custom_args() -> None:
@@ -318,7 +320,7 @@ def test_reduced_intensity_scalar_providing_custom_args() -> None:
         measured_intensity=360.0,
         ambient_temperature=25.0,
         wind_speed=4.0,
-        measured_global_radiation=800.0,
+        solar_irradiance=800.0,
         max_conductor_temperature=120.0,
     )
 
@@ -333,6 +335,7 @@ def test_reduced_intensity_scalar_providing_custom_args() -> None:
 
     assert solver.convective_cooling.wind_attack_angle == initial_wind_attack_angle
     assert solver.joule_heating.transit == initial_transit
+    assert isinstance(solver.solar_heating, RteSolarHeating)
 
 
 def test_reduced_intensity_array() -> None:
