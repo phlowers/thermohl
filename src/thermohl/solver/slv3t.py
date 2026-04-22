@@ -9,7 +9,6 @@ import logging
 from typing import Tuple, Type, Optional, Dict, Any, Callable
 
 import numpy as np
-import pandas as pd
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
@@ -289,7 +288,7 @@ class Solver3T(Solver_):
         maxiter: int = default.maxiter,
         return_err: bool = False,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """
         Compute the steady-state temperature distribution.
 
@@ -302,7 +301,8 @@ class Solver3T(Solver_):
             return_power (bool): If True, power-related values are included in the returned DataFrame.
 
         Returns:
-            pd.DataFrame: DataFrame containing the steady-state temperatures and optionally the error and power-related values.
+            dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and power-related values,
+            along with input data.
         """
 
         # if no guess provided, use ambient temp
@@ -321,7 +321,7 @@ class Solver3T(Solver_):
         core_temperature_guess_ = core_temperature_guess * np.ones(shape)
 
         # solve system
-        x, y, iterations, err = quasi_newton_2d(
+        surface_temperature, core_temperature, iterations, err = quasi_newton_2d(
             func1=self.balance,
             func2=self.morgan,
             x_init=surface_temperature_guess_,
@@ -337,26 +337,21 @@ class Solver3T(Solver_):
             )
 
         # format output
-        z = self.average(x, y)
-        df = pd.DataFrame(
-            {
-                TemperatureType.SURFACE: x,
-                TemperatureType.AVERAGE: z,
-                TemperatureType.CORE: y,
-            }
+        average_temperature = self.average(surface_temperature, core_temperature)
+        result = {
+            TemperatureType.SURFACE.value: surface_temperature,
+            TemperatureType.AVERAGE.value: average_temperature,
+            TemperatureType.CORE.value: core_temperature,
+        }
+
+        self.add_error_if_needed(err, result, return_err)
+        self.add_power_if_needed(
+            average_temperature, result, return_power, surface_temperature
         )
 
-        if return_err:
-            df[VariableType.ERROR] = err
+        result = self._add_input_data_to_result(result)
 
-        if return_power:
-            df[PowerType.JOULE] = self.joule(x, y)
-            df[PowerType.SOLAR] = self.solar_heating.value(x)
-            df[PowerType.CONVECTION] = self.convective_cooling.value(x)
-            df[PowerType.RADIATION] = self.radiative_cooling.value(x)
-            df[PowerType.RAIN] = self.precipitation_cooling.value(x)
-
-        return df
+        return result
 
     def _morgan_transient(self):
         """Morgan coefficients for transient temperature."""
@@ -379,36 +374,36 @@ class Solver3T(Solver_):
         n,
     ):
         dr = {
-            VariableType.TIME: offset,
-            TemperatureType.SURFACE: surface_temperature,
-            TemperatureType.AVERAGE: average_temperature,
-            TemperatureType.CORE: core_temperature,
+            VariableType.TIME.value: offset,
+            TemperatureType.SURFACE.value: surface_temperature,
+            TemperatureType.AVERAGE.value: average_temperature,
+            TemperatureType.CORE.value: core_temperature,
         }
 
         if return_power:
             for power in Solver_.powers():
-                dr[power] = np.zeros_like(surface_temperature)
+                dr[power.value] = np.zeros_like(surface_temperature)
 
             for i in range(len(offset)):
-                dr[PowerType.JOULE][i, :] = self.joule(
+                dr[PowerType.JOULE.value][i, :] = self.joule(
                     surface_temperature[i, :], core_temperature[i, :]
                 )
-                dr[PowerType.SOLAR][i, :] = self.solar_heating.value(
+                dr[PowerType.SOLAR.value][i, :] = self.solar_heating.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.CONVECTION][i, :] = self.convective_cooling.value(
+                dr[PowerType.CONVECTION.value][i, :] = self.convective_cooling.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.RADIATION][i, :] = self.radiative_cooling.value(
+                dr[PowerType.RADIATION.value][i, :] = self.radiative_cooling.value(
                     surface_temperature[i, :]
                 )
-                dr[PowerType.RAIN][i, :] = self.precipitation_cooling.value(
+                dr[PowerType.RAIN.value][i, :] = self.precipitation_cooling.value(
                     surface_temperature[i, :]
                 )
 
         if n == 1:
             keys = list(dr.keys())
-            keys.remove(VariableType.TIME)
+            keys.remove(VariableType.TIME.value)
             for k in keys:
                 dr[k] = dr[k][:, 0]
 
@@ -431,7 +426,8 @@ class Solver3T(Solver_):
             return_power (bool, optional): Return power term values. The default is False.
 
         Returns:
-            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys.
+            Dict[str, Any]: A dictionary with temperature and other results (depending on inputs) in the keys,
+            along with input data.
 
         """
         # get sizes (n for input dict entries, N for time)
@@ -481,7 +477,7 @@ class Solver3T(Solver_):
             core_temperature[i, :] = average_temperature[i, :] + c2 * mrg
             surface_temperature[i, :] = core_temperature[i, :] - mrg
 
-        return self._transient_temperature_results(
+        result = self._transient_temperature_results(
             offset,
             surface_temperature,
             average_temperature,
@@ -489,6 +485,8 @@ class Solver3T(Solver_):
             return_power,
             n,
         )
+        result = self._add_input_data_to_result(result)
+        return result
 
     @staticmethod
     def _check_target(target: Optional[CableLocationListLike], core_diameter, max_len):
@@ -567,7 +565,7 @@ class Solver3T(Solver_):
         return_err: bool = False,
         return_temp: bool = True,
         return_power: bool = True,
-    ) -> pd.DataFrame:
+    ) -> dict[str, np.ndarray]:
         """
         Compute the steady-state intensity for a given temperature profile.
 
@@ -582,7 +580,8 @@ class Solver3T(Solver_):
             return_power (bool): If True, return the power profiles in the output DataFrame. Default is True.
 
         Returns:
-            pd.DataFrame: DataFrame containing the steady-state intensity and optionally the error, temperature profiles, and power profiles.
+            dict[str, np.ndarray]: Dictionary containing the steady-state intensity and optionally the error, temperature profiles, and power profiles,
+            along with input data.
         """
         target = _infer_target_from_cable_type(cable_type, target)
 
@@ -611,7 +610,7 @@ class Solver3T(Solver_):
         x, y, iterations, err = quasi_newton_2d(
             balance,
             morgan,
-            r[VariableType.TRANSIT].values,
+            r[VariableType.TRANSIT.value],
             Tmax,
             relative_tolerance=tol,
             max_iterations=maxiter,
@@ -624,31 +623,36 @@ class Solver3T(Solver_):
             )
 
         # format output
-        df = pd.DataFrame({VariableType.TRANSIT: x})
+        result = {VariableType.TRANSIT.value: x}
 
-        if return_err:
-            df[VariableType.ERROR] = err
+        self.add_error_if_needed(err, result, return_err)
 
         if return_temp or return_power:
             surface_temperature, core_temperature = newtheader(x, y)
             average_temperature = self.average(surface_temperature, core_temperature)
 
             if return_temp:
-                df[TemperatureType.SURFACE] = surface_temperature
-                df[TemperatureType.AVERAGE] = average_temperature
-                df[TemperatureType.CORE] = core_temperature
+                result[TemperatureType.SURFACE.value] = surface_temperature
+                result[TemperatureType.AVERAGE.value] = average_temperature
+                result[TemperatureType.CORE.value] = core_temperature
 
             if return_power:
-                df[PowerType.JOULE] = self.joule_heating.value(average_temperature)
-                df[PowerType.SOLAR] = self.solar_heating.value(surface_temperature)
-                df[PowerType.CONVECTION] = self.convective_cooling.value(
+                result[PowerType.JOULE.value] = self.joule_heating.value(
+                    average_temperature
+                )
+                result[PowerType.SOLAR.value] = self.solar_heating.value(
                     surface_temperature
                 )
-                df[PowerType.RADIATION] = self.radiative_cooling.value(
+                result[PowerType.CONVECTION.value] = self.convective_cooling.value(
                     surface_temperature
                 )
-                df[PowerType.RAIN] = self.precipitation_cooling.value(
+                result[PowerType.RADIATION.value] = self.radiative_cooling.value(
+                    surface_temperature
+                )
+                result[PowerType.RAIN.value] = self.precipitation_cooling.value(
                     surface_temperature
                 )
 
-        return df
+        result = self._add_input_data_to_result(result)
+
+        return result

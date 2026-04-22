@@ -17,7 +17,6 @@ import warnings
 from typing import Callable
 
 import numpy as np
-import pandas as pd
 import yaml
 
 from thermohl import floatArrayLike
@@ -116,26 +115,6 @@ def add_default_uncertainties(params: dict, warning: bool = False) -> dict:
         os.path.dirname(os.path.realpath(__file__)), "default_uncertainties.yaml"
     )
     return _dict_completion(params, file_path, validate_types=False, warning=warning)
-
-
-def df2dct(df: pd.DataFrame) -> dict:
-    """Convert a pandas.DataFrame to a dictionary.
-
-    Would be an equivalent to df.to_dict(orient='numpy.ndarray') if it existed.
-
-    Args:
-        df (pandas.DataFrame): Input DataFrame.
-
-    Returns:
-        dict: Dictionary with values converted to scalars or numpy arrays.
-    """
-    values_by_key = df.to_dict(orient="list")
-    for key in values_by_key.keys():
-        if len(values_by_key[key]) > 1:
-            values_by_key[key] = np.array(values_by_key[key])
-        else:
-            values_by_key[key] = values_by_key[key][0]
-    return values_by_key
 
 
 def bisect_v(
