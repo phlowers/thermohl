@@ -240,6 +240,8 @@ class Solver3T(Solver_):
         Args:
             surface_temperature (numpy.ndarray): Array of surface temperatures.
             core_temperature (numpy.ndarray): Array of core temperatures.
+            joule_value (float | numpy.ndarray, optional): Precomputed joule heating value.
+                If None, it will be computed from the given temperatures.
 
         Returns:
             float | numpy.ndarray: The resulting thermal balance.
