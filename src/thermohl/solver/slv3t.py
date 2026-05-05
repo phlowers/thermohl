@@ -33,16 +33,6 @@ from thermohl.utils import quasi_newton_2d
 logger = logging.getLogger(__name__)
 
 
-def _profile_mom(
-    surface_temperature: float,
-    core_temperature: float,
-    radius: floatArrayLike,
-    outer_radius: float,
-) -> floatArrayLike:
-    """Analytic temperature profile for steady heat equation in cylinder (mono-mat)."""
-    return surface_temperature + (core_temperature - surface_temperature) * (
-        1.0 - (radius / outer_radius) ** 2
-    )
 
 
 def _phi(
@@ -254,31 +244,58 @@ class Solver3T(Solver_):
         Returns:
             float | numpy.ndarray: The resulting thermal balance.
         """
-        return (
-            self.joule(surface_temperature, core_temperature)
-            + self.solar_heating.value(surface_temperature)
-            - self.convective_cooling.value(surface_temperature)
-            - self.radiative_cooling.value(surface_temperature)
-            - self.precipitation_cooling.value(surface_temperature)
+        balance_value, _ = self._balance_with_joule(
+            surface_temperature, core_temperature
         )
+        return balance_value
 
-    def morgan(
+    def _balance_with_joule(
         self, surface_temperature: floatArray, core_temperature: floatArray
-    ) -> floatArray:
+    ) -> tuple[floatArrayLike, floatArrayLike]:
         """
-        Computes the Morgan function for given temperature arrays.
+        Calculate the thermal balance and return joule heating value.
 
         Args:
             surface_temperature (numpy.ndarray): Array of surface temperatures.
             core_temperature (numpy.ndarray): Array of core temperatures.
 
         Returns:
-            numpy.ndarray: Resulting array after applying the Morgan function.
+            tuple[float | numpy.ndarray, float | numpy.ndarray]:
+                The resulting thermal balance and the joule heating value.
         """
-        heat_capacity, _, _, _ = self.morgan_coefficients
-        return (core_temperature - surface_temperature) - heat_capacity * self.joule(
+        joule_value = self.joule(surface_temperature, core_temperature)
+        balance_value = (
+            joule_value
+            + self.solar_heating.value(surface_temperature)
+            - self.convective_cooling.value(surface_temperature)
+            - self.radiative_cooling.value(surface_temperature)
+            - self.precipitation_cooling.value(surface_temperature)
+        )
+        return balance_value, joule_value
+
+    def balance_and_morgan(
+        self, surface_temperature: floatArray, core_temperature: floatArray
+    ) -> tuple[floatArrayLike, floatArray]:
+        """
+        Compute both balance and morgan, sharing the joule computation.
+
+        Args:
+            surface_temperature (numpy.ndarray): Array of surface temperatures.
+            core_temperature (numpy.ndarray): Array of core temperatures.
+
+        Returns:
+            tuple[float | numpy.ndarray, numpy.ndarray]: 
+                The thermal balance and the Morgan function result.
+        """
+        balance_value, joule_value = self._balance_with_joule(
             surface_temperature, core_temperature
-        ) / (2.0 * np.pi * self.args.radial_thermal_conductivity)
+        )
+        heat_capacity = self.morgan_coefficients[0]
+        morgan_coefficient = heat_capacity / (
+            2.0 * np.pi * self.args.radial_thermal_conductivity
+        )
+        morgan_value = (core_temperature - surface_temperature) - morgan_coefficient * joule_value
+        return balance_value, morgan_value
 
     def steady_temperature(
         self,
@@ -322,8 +339,7 @@ class Solver3T(Solver_):
 
         # solve system
         surface_temperature, core_temperature, iterations, err = quasi_newton_2d(
-            func1=self.balance,
-            func2=self.morgan,
+            self.balance_and_morgan,
             x_init=surface_temperature_guess_,
             y_init=core_temperature_guess_,
             relative_tolerance=tol,
@@ -467,7 +483,7 @@ class Solver3T(Solver_):
             for k in time_changing_parameters.keys():
                 self.args[k] = time_changing_parameters[k][i, :]
             self.update()
-            bal = self.balance(
+            bal, _ = self._balance_with_joule(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             average_temperature[i, :] = (
@@ -589,13 +605,9 @@ class Solver3T(Solver_):
             max_conductor_temperature, target
         )
 
-        def balance(i: floatArray, tg: floatArray) -> floatArrayLike:
+        def balance_and_morgan(i: floatArray, tg: floatArray) -> Tuple[floatArrayLike, floatArray]:
             surface_temperature, core_temperature = newtheader(i, tg)
-            return self.balance(surface_temperature, core_temperature)
-
-        def morgan(i: floatArray, tg: floatArray) -> floatArray:
-            surface_temperature, core_temperature = newtheader(i, tg)
-            return self.morgan(surface_temperature, core_temperature)
+            return self.balance_and_morgan(surface_temperature, core_temperature)
 
         # solve system
         s = Solver1T(
@@ -608,8 +620,7 @@ class Solver3T(Solver_):
         )
         r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
         x, y, iterations, err = quasi_newton_2d(
-            balance,
-            morgan,
+            balance_and_morgan,
             r[VariableType.TRANSIT.value],
             Tmax,
             relative_tolerance=tol,

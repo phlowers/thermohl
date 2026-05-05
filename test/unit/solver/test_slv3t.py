@@ -12,70 +12,11 @@ import numpy as np
 
 from thermohl.solver import Solver3T
 from thermohl.solver.slv3t import (
-    _profile_mom,
     _phi,
     _profile_bim_avg_coeffs,
 )
 
 
-def test_profile_mom_basic():
-    ts = np.array([300])
-    tc = np.array([400])
-    r = np.array([0.5])
-    re = np.array([1.0])
-    expected = np.array([375])
-
-    result = _profile_mom(ts, tc, r, re)
-
-    np.testing.assert_array_almost_equal(result, expected)
-
-
-def test_profile_mom_multiple_values():
-    ts = np.array([300, 350])
-    tc = np.array([400, 450])
-    r = np.array([0.5, 0.2])
-    re = np.array([1.0, 1.0])
-    expected = np.array([375, 446])
-
-    result = _profile_mom(ts, tc, r, re)
-
-    np.testing.assert_array_almost_equal(result, expected)
-
-
-def test_profile_mom_edge_case_zero_radius():
-    ts = np.array([300])
-    tc = np.array([400])
-    r = np.array([0.0])
-    re = np.array([1.0])
-    expected = np.array([400])
-
-    result = _profile_mom(ts, tc, r, re)
-
-    np.testing.assert_array_almost_equal(result, expected)
-
-
-def test_profile_mom_edge_case_equal_temperatures():
-    ts = np.array([300])
-    tc = np.array([300])
-    r = np.array([0.5])
-    re = np.array([1.0])
-    expected = np.array([300])
-
-    result = _profile_mom(ts, tc, r, re)
-
-    np.testing.assert_array_almost_equal(result, expected)
-
-
-def test_profile_mom_large_values():
-    ts = np.array([1e6])
-    tc = np.array([2e6])
-    r = np.array([0.5])
-    re = np.array([1.0])
-    expected = np.array([1.75e6])
-
-    result = _profile_mom(ts, tc, r, re)
-
-    np.testing.assert_array_almost_equal(result, expected)
 
 
 def test_phi_basic():
