@@ -70,7 +70,10 @@ class Solver3TL(Solver3T):
         return 0.5 * (surface_temperature + core_temperature)
 
     def morgan(
-        self, surface_temperature: floatArray, core_temperature: floatArray
+        self,
+        surface_temperature: floatArray,
+        core_temperature: floatArray,
+        joule_value: Optional[floatArrayLike] = None,
     ) -> floatArray:
         """
         Computes the Morgan function for given temperature arrays.
@@ -78,14 +81,16 @@ class Solver3TL(Solver3T):
         Args:
             surface_temperature (numpy.ndarray): Array of surface temperatures.
             core_temperature (numpy.ndarray): Array of core temperatures.
+            joule_value (float | numpy.ndarray, optional): Precomputed joule heating value.
 
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
+        if joule_value is None:
+            joule_value = self.joule(surface_temperature, core_temperature)
+
         morgan_coefficient = self.morgan_coefficients[0]
-        return (
-            core_temperature - surface_temperature
-        ) - morgan_coefficient * self.joule(surface_temperature, core_temperature)
+        return (core_temperature - surface_temperature) - morgan_coefficient * joule_value
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: CableLocationListLike

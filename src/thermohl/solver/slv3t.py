@@ -12,11 +12,6 @@ import numpy as np
 
 from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
-from thermohl.solver.solver import (
-    Solver as Solver_,
-    get_time_changing_parameters,
-)
-from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import (
     TargetType,
     CableLocationListLike,
@@ -26,9 +21,13 @@ from thermohl.solver.entities import (
     TemperatureType,
     VariableType,
 )
+from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.slv1t import Solver1T
+from thermohl.solver.solver import (
+    Solver as Solver_,
+    get_time_changing_parameters,
+)
 from thermohl.utils import quasi_newton_2d
-
 
 logger = logging.getLogger(__name__)
 
@@ -226,7 +225,10 @@ class Solver3T(Solver_):
         return self.joule_heating.value(average_temperature)
 
     def balance(
-        self, surface_temperature: floatArray, core_temperature: floatArray
+        self,
+        surface_temperature: floatArray,
+        core_temperature: floatArray,
+        joule_value: Optional[floatArrayLike] = None,
     ) -> floatArrayLike:
         """
         Calculate the thermal balance.
@@ -242,40 +244,52 @@ class Solver3T(Solver_):
         Returns:
             float | numpy.ndarray: The resulting thermal balance.
         """
-        balance_value, _ = self._balance_with_joule(
-            surface_temperature, core_temperature
-        )
-        return balance_value
-
-    def _balance_with_joule(
-        self, surface_temperature: floatArray, core_temperature: floatArray
-    ) -> tuple[floatArrayLike, floatArrayLike]:
-        """
-        Calculate the thermal balance and return joule heating value.
-
-        Args:
-            surface_temperature (numpy.ndarray): Array of surface temperatures.
-            core_temperature (numpy.ndarray): Array of core temperatures.
-
-        Returns:
-            tuple[float | numpy.ndarray, float | numpy.ndarray]:
-                The resulting thermal balance and the joule heating value.
-        """
-        joule_value = self.joule(surface_temperature, core_temperature)
-        balance_value = (
+        if joule_value is None:
+            joule_value = self.joule(surface_temperature, core_temperature)
+        return (
             joule_value
             + self.solar_heating.value(surface_temperature)
             - self.convective_cooling.value(surface_temperature)
             - self.radiative_cooling.value(surface_temperature)
             - self.precipitation_cooling.value(surface_temperature)
         )
-        return balance_value, joule_value
+
+    def morgan(
+        self,
+        surface_temperature: floatArray,
+        core_temperature: floatArray,
+        joule_value: Optional[floatArrayLike] = None,
+    ) -> floatArray:
+        """
+        Computes the Morgan function for given temperature arrays.
+
+        Args:
+            surface_temperature (numpy.ndarray): Array of surface temperatures.
+            core_temperature (numpy.ndarray): Array of core temperatures.
+            joule_value (float | numpy.ndarray, optional): Precomputed joule heating value.
+                If None, it will be computed from the given temperatures.
+
+        Returns:
+            numpy.ndarray: Resulting array after applying the Morgan function.
+        """
+        if joule_value is None:
+            joule_value = self.joule(surface_temperature, core_temperature)
+        heat_capacity = self.morgan_coefficients[0]
+        morgan_coefficient = heat_capacity / (
+            2.0 * np.pi * self.args.radial_thermal_conductivity
+        )
+        return (
+            core_temperature - surface_temperature
+        ) - morgan_coefficient * joule_value
 
     def balance_and_morgan(
         self, surface_temperature: floatArray, core_temperature: floatArray
     ) -> tuple[floatArrayLike, floatArray]:
         """
-        Compute both balance and morgan, sharing the joule computation.
+        Compute both balance and morgan efficiently by sharing computations.
+
+        This is the optimized version used by steady-state solvers to avoid
+        redundant joule heating calculations.
 
         Args:
             surface_temperature (numpy.ndarray): Array of surface temperatures.
@@ -285,16 +299,15 @@ class Solver3T(Solver_):
             tuple[float | numpy.ndarray, numpy.ndarray]:
                 The thermal balance and the Morgan function result.
         """
-        balance_value, joule_value = self._balance_with_joule(
-            surface_temperature, core_temperature
+        # Compute joule once and reuse for both functions
+        joule_value = self.joule(surface_temperature, core_temperature)
+
+        balance_value = self.balance(
+            surface_temperature, core_temperature, joule_value=joule_value
         )
-        heat_capacity = self.morgan_coefficients[0]
-        morgan_coefficient = heat_capacity / (
-            2.0 * np.pi * self.args.radial_thermal_conductivity
+        morgan_value = self.morgan(
+            surface_temperature, core_temperature, joule_value=joule_value
         )
-        morgan_value = (
-            core_temperature - surface_temperature
-        ) - morgan_coefficient * joule_value
         return balance_value, morgan_value
 
     def steady_temperature(
@@ -483,7 +496,7 @@ class Solver3T(Solver_):
             for k in time_changing_parameters.keys():
                 self.args[k] = time_changing_parameters[k][i, :]
             self.update()
-            bal, _ = self._balance_with_joule(
+            bal = self.balance(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             average_temperature[i, :] = (
