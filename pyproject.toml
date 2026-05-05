@@ -37,7 +37,7 @@ classifiers = [
 dependencies = [
     "numpy >= 1.26.0",
     "pandas >= 2.1.2",
-    "pyyaml >= 6.0.1"
+    "pyyaml >= 6.0.1",
 ]
 
 [dependency-groups]
@@ -57,8 +57,21 @@ dev = [
 ]
 docs = [
     "mkdocs >= 1.6.1",
-    "mkdocs-jupyter",
-    "mkdocs-material >= 9.6.9",
+    "mkdocs-jupyter == 0.26.3",
+    # temporary constraint to avoid security vulnerabilities
+    # in nbconvert
+    # see https://github.com/phlowers/thermohl/security/dependabot/17
+    # and https://github.com/phlowers/thermohl/security/dependabot/18
+    "nbconvert >= 7.17.1",
+    # temporary constraint to avoid security vulnerabilities
+    # in mistune
+    # see https://github.com/phlowers/thermohl/security/dependabot/19
+    "mistune >= 3.2.1",
+    # temporary constraint to avoid security vulnerabilities
+    # in urllib3
+    # see https://github.com/phlowers/thermohl/security/dependabot/23
+    "urllib3 >= 2.7.0",
+    "mkdocs-material >= 9.7.6",
     "mkdocstrings[python] >= 0.29.0",
     "markdown_extensions >= 0.0.1",
     "markdown-include >= 0.8.1",
