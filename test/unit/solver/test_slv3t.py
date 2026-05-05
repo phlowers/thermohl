@@ -290,7 +290,7 @@ def test_balance_basic():
     tc = np.array([400])
     expected = np.array([105.0])
 
-    result = solver.balance(ts, tc)
+    result = solver.balance_3t(ts, tc)
 
     np.testing.assert_array_almost_equal(result, expected)
     solver.joule.assert_called_once_with(ts, tc)
@@ -318,7 +318,7 @@ def test_morgan_basic():
     tc = np.array([400])
     expected = np.array([92.042])
 
-    result = solver.morgan(ts, tc)
+    result = solver.morgan_3t(ts, tc)
 
     np.testing.assert_array_almost_equal(result, expected, decimal=3)
     solver.joule.assert_called_once_with(ts, tc)

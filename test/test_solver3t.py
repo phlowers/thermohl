@@ -82,7 +82,7 @@ def test_balance():
         # checks
         assert np.all(steady_temperature_3t[VariableType.ERROR.value] < tol)
         assert np.allclose(
-            s.balance(
+            s.balance_3t(
                 surface_temperature=steady_temperature_3t[
                     TemperatureType.SURFACE.value
                 ],
@@ -92,7 +92,7 @@ def test_balance():
             atol=tol,
         )
         assert np.allclose(
-            s.morgan(
+            s.morgan_3t(
                 surface_temperature=steady_temperature_3t[
                     TemperatureType.SURFACE.value
                 ],
@@ -146,7 +146,7 @@ def test_consistency():
             s.args.I = steady_temperature_1[VariableType.TRANSIT.value]
             s.update()
             assert np.allclose(
-                s.balance(
+                s.balance_3t(
                     surface_temperature=steady_temperature_1[
                         TemperatureType.SURFACE.value
                     ],
@@ -156,7 +156,7 @@ def test_consistency():
                 atol=tol,
             )
             assert np.allclose(
-                s.morgan(
+                s.morgan_3t(
                     surface_temperature=steady_temperature_1[
                         TemperatureType.SURFACE.value
                     ],

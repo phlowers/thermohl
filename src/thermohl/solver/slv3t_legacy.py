@@ -69,7 +69,7 @@ class Solver3TL(Solver3T):
         """
         return 0.5 * (surface_temperature + core_temperature)
 
-    def morgan(
+    def morgan_3t(
         self,
         surface_temperature: floatArray,
         core_temperature: floatArray,
@@ -202,7 +202,7 @@ class Solver3TL(Solver3T):
 
         # compute transient temperatures for each row after the first.
         for i in range(1, len(offset)):
-            balance = self.balance(
+            balance = self.balance_3t(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             time_difference = offset[i] - offset[i - 1]

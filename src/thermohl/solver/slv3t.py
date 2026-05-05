@@ -224,7 +224,7 @@ class Solver3T(Solver_):
         average_temperature = self.average(surface_temperature, core_temperature)
         return self.joule_heating.value(average_temperature)
 
-    def balance(
+    def balance_3t(
         self,
         surface_temperature: floatArray,
         core_temperature: floatArray,
@@ -256,7 +256,7 @@ class Solver3T(Solver_):
             - self.precipitation_cooling.value(surface_temperature)
         )
 
-    def morgan(
+    def morgan_3t(
         self,
         surface_temperature: floatArray,
         core_temperature: floatArray,
@@ -304,10 +304,10 @@ class Solver3T(Solver_):
         # Compute joule once and reuse for both functions
         joule_value = self.joule(surface_temperature, core_temperature)
 
-        balance_value = self.balance(
+        balance_value = self.balance_3t(
             surface_temperature, core_temperature, joule_value=joule_value
         )
-        morgan_value = self.morgan(
+        morgan_value = self.morgan_3t(
             surface_temperature, core_temperature, joule_value=joule_value
         )
         return balance_value, morgan_value
@@ -498,7 +498,7 @@ class Solver3T(Solver_):
             for k in time_changing_parameters.keys():
                 self.args[k] = time_changing_parameters[k][i, :]
             self.update()
-            bal = self.balance(
+            bal = self.balance_3t(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             average_temperature[i, :] = (
