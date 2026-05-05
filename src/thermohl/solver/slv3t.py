@@ -33,8 +33,6 @@ from thermohl.utils import quasi_newton_2d
 logger = logging.getLogger(__name__)
 
 
-
-
 def _phi(
     radius: floatArrayLike, core_radius: floatArrayLike, outer_radius: floatArrayLike
 ) -> floatArrayLike:
@@ -284,7 +282,7 @@ class Solver3T(Solver_):
             core_temperature (numpy.ndarray): Array of core temperatures.
 
         Returns:
-            tuple[float | numpy.ndarray, numpy.ndarray]: 
+            tuple[float | numpy.ndarray, numpy.ndarray]:
                 The thermal balance and the Morgan function result.
         """
         balance_value, joule_value = self._balance_with_joule(
@@ -294,7 +292,9 @@ class Solver3T(Solver_):
         morgan_coefficient = heat_capacity / (
             2.0 * np.pi * self.args.radial_thermal_conductivity
         )
-        morgan_value = (core_temperature - surface_temperature) - morgan_coefficient * joule_value
+        morgan_value = (
+            core_temperature - surface_temperature
+        ) - morgan_coefficient * joule_value
         return balance_value, morgan_value
 
     def steady_temperature(
@@ -605,7 +605,9 @@ class Solver3T(Solver_):
             max_conductor_temperature, target
         )
 
-        def balance_and_morgan(i: floatArray, tg: floatArray) -> Tuple[floatArrayLike, floatArray]:
+        def balance_and_morgan(
+            i: floatArray, tg: floatArray
+        ) -> Tuple[floatArrayLike, floatArray]:
             surface_temperature, core_temperature = newtheader(i, tg)
             return self.balance_and_morgan(surface_temperature, core_temperature)
 

@@ -17,8 +17,6 @@ from thermohl.solver.slv3t import (
 )
 
 
-
-
 def test_phi_basic():
     r = 0.6
     ri = 0.5
