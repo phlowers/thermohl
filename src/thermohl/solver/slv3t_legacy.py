@@ -90,7 +90,9 @@ class Solver3TL(Solver3T):
             joule_value = self.joule(surface_temperature, core_temperature)
 
         morgan_coefficient = self.morgan_coefficients[0]
-        return (core_temperature - surface_temperature) - morgan_coefficient * joule_value
+        return (
+            core_temperature - surface_temperature
+        ) - morgan_coefficient * joule_value
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: CableLocationListLike
