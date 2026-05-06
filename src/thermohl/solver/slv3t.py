@@ -276,13 +276,13 @@ class Solver3T(Solver_):
         """
         if joule_value is None:
             joule_value = self.joule(surface_temperature, core_temperature)
-        heat_capacity = self.morgan_coefficients[0]
-        morgan_coefficient = heat_capacity / (
+        heat_flux_coefficient = self.morgan_coefficients[0]
+        thermal_resistance = heat_flux_coefficient / (
             2.0 * np.pi * self.args.radial_thermal_conductivity
         )
         return (
             core_temperature - surface_temperature
-        ) - morgan_coefficient * joule_value
+        ) - thermal_resistance * joule_value
 
     def balance_and_morgan(
         self, surface_temperature: floatArray, core_temperature: floatArray
