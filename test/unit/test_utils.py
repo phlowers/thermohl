@@ -111,17 +111,13 @@ def test_quasi_newton_2d_convergence():
     a = np.abs(1 + np.random.randn(size))
     b = np.abs(1 + np.random.randn(size))
 
-    def f1(x, y):
-        return y - a * x**2
-
-    def f2(x, y):
-        return y - b * x**3
+    def f(x, y):
+        return y - a * x**2, y - b * x**3
 
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        func1=f1,
-        func2=f2,
+        f,
         x_init=xg,
         y_init=yg,
         relative_tolerance=tol,
@@ -130,9 +126,8 @@ def test_quasi_newton_2d_convergence():
         delta_y=1.0e-09,
     )
 
-    assert np.logical_and(
-        np.max(np.abs(f1(x, y))) < tol, np.max(np.abs(f2(x, y))) < tol
-    )
+    f1, f2 = f(x, y)
+    assert np.logical_and(np.max(np.abs(f1)) < tol, np.max(np.abs(f2)) < tol)
     assert count == 999
 
 
@@ -144,17 +139,13 @@ def test_quasi_newton_2d_no_convergence():
     a = np.abs(1 + np.random.randn(size))
     b = np.abs(1 + np.random.randn(size))
 
-    def f1(x, y):
-        return y - a * x**2
-
-    def f2(x, y):
-        return y - b * x**3
+    def f(x, y):
+        return y - a * x**2, y - b * x**3
 
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        func1=f1,
-        func2=f2,
+        f,
         x_init=xg,
         y_init=yg,
         relative_tolerance=tol,
@@ -163,10 +154,9 @@ def test_quasi_newton_2d_no_convergence():
         delta_y=1.0e-09,
     )
 
+    f1, f2 = f(x, y)
     assert count == 1
-    assert np.logical_or(
-        np.max(np.abs(f1(x, y))) >= tol, np.max(np.abs(f2(x, y))) >= tol
-    )
+    assert np.logical_or(np.max(np.abs(f1)) >= tol, np.max(np.abs(f2)) >= tol)
 
 
 def test_quasi_newton_2d_large_system():
@@ -177,17 +167,13 @@ def test_quasi_newton_2d_large_system():
     a = np.abs(1 + np.random.randn(size))
     b = np.abs(1 + np.random.randn(size))
 
-    def f1(x, y):
-        return y - a * x**2
-
-    def f2(x, y):
-        return y - b * x**3
+    def f(x, y):
+        return y - a * x**2, y - b * x**3
 
     xg = np.ones((size,))
     yg = np.ones((size,))
     x, y, count, err = quasi_newton_2d(
-        func1=f1,
-        func2=f2,
+        f,
         x_init=xg,
         y_init=yg,
         relative_tolerance=tol,
@@ -196,6 +182,5 @@ def test_quasi_newton_2d_large_system():
         delta_y=1.0e-09,
     )
 
-    assert np.logical_and(
-        np.max(np.abs(f1(x, y))) < tol, np.max(np.abs(f2(x, y))) < tol
-    )
+    f1, f2 = f(x, y)
+    assert np.logical_and(np.max(np.abs(f1)) < tol, np.max(np.abs(f2)) < tol)

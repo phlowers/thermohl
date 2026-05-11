@@ -192,8 +192,7 @@ def bisect_v(
 # in order to remove the external dependency on this library.
 # In this library, this function was initially developed under the name qnewt2d_v
 def quasi_newton_2d(
-    func1: callable,
-    func2: callable,
+    func: callable,
     x_init: np.ndarray,
     y_init: np.ndarray,
     relative_tolerance: float = 1.0e-12,
@@ -207,14 +206,14 @@ def quasi_newton_2d(
     Apply a 2D quasi newton on a large number of case at the same time, ie solve
     the system [f1(x, y), f2(x, y)] = [0., 0.] in n cases.
 
-    Derivatives are estimated with a second-order centered estimation (ie f1 and
-    f2 are evaluated four times at each iteration).
+    Derivatives are estimated with a second-order centered estimation (func is
+    evaluated five times at each iteration).
 
-    All return values are arrays of the same size as inputs x0 and y0.
+    All return values are arrays of the same size as inputs x_init and y_init.
 
     Args:
-        func1 (Callable[[np.ndarray, np.ndarray], np.ndarray]): First component of a 2D function of two variables.
-        func2 (Callable[[np.ndarray, np.ndarray], np.ndarray]): Second component of a 2D function of two variables.
+        func (Callable[[np.ndarray, np.ndarray], tuple[np.ndarray, np.ndarray]]):
+            Function returning ``(f1(x, y), f2(x, y))`` in a single call.
         x_init (np.ndarray): First component of the initial guess.
         y_init (np.ndarray): Second component of the initial guess.
         relative_tolerance (float): Relative tolerance for convergence.
@@ -232,31 +231,28 @@ def quasi_newton_2d(
     """
     x = x_init.copy()
     y = y_init.copy()
+    err_abs_x = np.zeros_like(x)
+    err_abs_y = np.zeros_like(y)
 
     for count in range(max_iterations):
-        # Evaluate functions at current x and y
-        func1_value = func1(x, y)
-        func2_value = func2(x, y)
+        f1, f2 = func(x, y)
+        f1_xp, f2_xp = func(x + delta_x, y)
+        f1_xm, f2_xm = func(x - delta_x, y)
+        f1_yp, f2_yp = func(x, y + delta_y)
+        f1_ym, f2_ym = func(x, y - delta_y)
 
-        # Compute Jacobian matrix using second-order centered differences
-        jacobian_11 = (func1(x + delta_x, y) - func1(x - delta_x, y)) / (2 * delta_x)
-        jacobian_12 = (func1(x, y + delta_y) - func1(x, y - delta_y)) / (2 * delta_y)
-        jacobian_21 = (func2(x + delta_x, y) - func2(x - delta_x, y)) / (2 * delta_x)
-        jacobian_22 = (func2(x, y + delta_y) - func2(x, y - delta_y)) / (2 * delta_y)
+        jacobian_11 = (f1_xp - f1_xm) / (2 * delta_x)
+        jacobian_12 = (f1_yp - f1_ym) / (2 * delta_y)
+        jacobian_21 = (f2_xp - f2_xm) / (2 * delta_x)
+        jacobian_22 = (f2_yp - f2_ym) / (2 * delta_y)
 
-        # Compute inverse of the Jacobian determinant
         inv_jacobian_det = 1.0 / (jacobian_11 * jacobian_22 - jacobian_12 * jacobian_21)
-        err_abs_x = inv_jacobian_det * (
-            jacobian_22 * func1_value - jacobian_12 * func2_value
-        )
-        err_abs_y = inv_jacobian_det * (
-            jacobian_11 * func2_value - jacobian_21 * func1_value
-        )
+        err_abs_x = inv_jacobian_det * (jacobian_22 * f1 - jacobian_12 * f2)
+        err_abs_y = inv_jacobian_det * (jacobian_11 * f2 - jacobian_21 * f1)
 
         x -= err_abs_x
         y -= err_abs_y
 
-        # Check for convergence
         err = max(np.nanmax(np.abs(err_abs_x / x)), np.nanmax(np.abs(err_abs_y / y)))
         if err <= relative_tolerance:
             break
