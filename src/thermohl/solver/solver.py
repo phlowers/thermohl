@@ -10,6 +10,8 @@
 from datetime import timedelta
 from abc import ABC, abstractmethod
 from typing import Type, Any, Optional, Iterable
+from contextlib import contextmanager
+
 import numpy.typing as npt
 import numpy as np
 from numpy import ndarray
@@ -239,3 +241,26 @@ def get_time_changing_parameters(args, offset, N, n):
     }
     del datetime_utc
     return de
+
+
+@contextmanager
+def temporarily_override_parameter(solver: Solver, arg_name: str, arg_value: Any):
+    try:
+        saved_arg_value = solver.args.__getattribute__(arg_name).copy()
+        solver.args.__setattr__(
+            arg_name,
+            arg_value,
+        )
+        yield solver
+    finally:
+        solver.args.__setattr__(arg_name, saved_arg_value)
+
+
+@contextmanager
+def temporarily_override_solar_irradiance(solver: Solver, value: Any):
+    try:
+        saved_solar_irradiance = solver.solar_heating.solar_irradiance.copy()
+        solver.solar_heating.solar_irradiance = value
+        yield solver
+    finally:
+        solver.solar_heating.solar_irradiance = saved_solar_irradiance

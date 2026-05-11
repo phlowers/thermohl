@@ -153,3 +153,40 @@ specific model with three temperatures for the conductor :
 * the surface temperature;
 * the average temperature;
 * the core temperature.
+
+### Uncertainty in cable temperature computation
+
+For the conductor temperature computation with the three-temperatures "legacy" solver,
+we provide a standard uncertainty value estimated using following formula:
+
+$$
+u_T² = (\frac{\partial T}{\partial I}*u_I)²
++ (\frac{\partial T}{\partial T_{amb}}*u_{Tamb})²
++ (\frac{\partial T}{\partial W}*u_W)²
++ (\frac{\partial T}{\partial Azm}*u_{Azm})²
++ (\frac{\partial T}{\partial Q_S}*u_{QS})²
+$$
+
+where
+
+$$
+u_I = 0.05 * I
+$$
+
+whith following notations:
+
+- $u_x$ = standard uncertainty about the variable x (see below)
+- $I$ = transit
+- $T_{amb}$ = ambient temperature
+- $W$ = wind speed
+- $Azm$ = wind azimuth
+- $Q_s$ = solar irradiance
+
+The uncertainties about ambient temperature, wind speed, wind azimuth and solar irradiance are constants set as follows:
+
+| Variable | Standard uncertainty |
+|----------|----------------------|
+| Ambient temperature | 1 °C |
+| Wind speed | 1 m/s |
+| Wind azimuth | 10° |
+| Solar irradiance | 100 W/m² |
