@@ -160,11 +160,11 @@ For the conductor temperature computation with the three-temperatures "legacy" s
 we provide a standard uncertainty value estimated using following formula:
 
 $$
-u_T² = (\frac{\partial T}{\partial I}*u_I)²
-+ (\frac{\partial T}{\partial T_{amb}}*u_{Tamb})²
-+ (\frac{\partial T}{\partial W}*u_W)²
-+ (\frac{\partial T}{\partial Azm}*u_{Azm})²
-+ (\frac{\partial T}{\partial Q_S}*u_{QS})²
+u_T^2 = (\frac{\partial T}{\partial I}*u_I)^2
++ (\frac{\partial T}{\partial T_{amb}}*u_{T_{amb}})^2
++ (\frac{\partial T}{\partial W}*u_W)^2
++ (\frac{\partial T}{\partial Azm}*u_{Azm})^2
++ (\frac{\partial T}{\partial Q_s}*u_{Q_s})^2
 $$
 
 where
@@ -173,7 +173,7 @@ $$
 u_I = 0.05 * I
 $$
 
-whith following notations:
+with following notations:
 
 - $u_x$ = standard uncertainty about the variable x (see below)
 - $I$ = transit
@@ -189,4 +189,4 @@ The uncertainties about ambient temperature, wind speed, wind azimuth and solar 
 | Ambient temperature | 1 °C |
 | Wind speed | 1 m/s |
 | Wind azimuth | 10° |
-| Solar irradiance | 100 W/m² |
+| Solar irradiance | 100 $W/m^2$ |
