@@ -329,8 +329,8 @@ class Solver3T(Solver_):
             core_temperature_guess (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5 times the absolute value of ambient temperature is used.
             tol (float): Tolerance for the quasi-Newton solver.
             maxiter (int): Maximum number of iterations for the quasi-Newton solver.
-            return_err (bool): If True, the error of the solution is included in the returned DataFrame.
-            return_power (bool): If True, power-related values are included in the returned DataFrame.
+            return_err (bool): If True, the error of the solution is included in the returned dict.
+            return_power (bool): If True, power-related values are included in the returned dict.
 
         Returns:
             dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and power-related values,
