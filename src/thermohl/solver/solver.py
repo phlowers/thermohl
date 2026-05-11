@@ -244,22 +244,34 @@ def get_time_changing_parameters(args, offset, N, n):
 
 
 @contextmanager
-def temporarily_override_parameter(solver: Solver, arg_name: str, arg_value: Any):
+def temporarily_override_parameter(
+    solver: Solver, parameter_name: str, parameter_value: Any
+):
+    if not hasattr(solver.args, parameter_name):
+        raise ValueError(
+            f"solver.args has no attribute '{parameter_name}' to override."
+        )
+
+    current_parameter_value = getattr(solver.args, parameter_name)
+    if hasattr(current_parameter_value, "copy"):
+        saved_parameter_value = current_parameter_value.copy()
+    else:
+        saved_parameter_value = current_parameter_value
+
     try:
-        saved_arg_value = solver.args.__getattribute__(arg_name).copy()
         solver.args.__setattr__(
-            arg_name,
-            arg_value,
+            parameter_name,
+            parameter_value,
         )
         yield solver
     finally:
-        solver.args.__setattr__(arg_name, saved_arg_value)
+        solver.args.__setattr__(parameter_name, saved_parameter_value)
 
 
 @contextmanager
 def temporarily_override_solar_irradiance(solver: Solver, value: Any):
+    saved_solar_irradiance = solver.solar_heating.solar_irradiance.copy()
     try:
-        saved_solar_irradiance = solver.solar_heating.solar_irradiance.copy()
         solver.solar_heating.solar_irradiance = value
         yield solver
     finally:

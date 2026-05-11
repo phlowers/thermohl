@@ -342,29 +342,24 @@ class Solver3TL(Solver3T):
         parameter_name: str,
         **kwargs,
     ) -> floatArrayLike:
-        try:
-            incremented_parameter_value = (
-                self.args.__getattribute__(parameter_name) + self.DERIVATIVE_INCREMENT
+        incremented_parameter_value = (
+            self.args.__getattribute__(parameter_name) + self.DERIVATIVE_INCREMENT
+        )
+        with temporarily_override_parameter(
+            self, parameter_name, incremented_parameter_value
+        ):
+            kwargs.update(
+                {
+                    "surface_temperature_guess": temperature,
+                    "core_temperature_guess": temperature,
+                    "return_err": False,
+                    "return_power": False,
+                    "return_uncertainty": False,
+                }
             )
-            with temporarily_override_parameter(
-                self, parameter_name, incremented_parameter_value
-            ):
-                kwargs.update(
-                    {
-                        "surface_temperature_guess": temperature,
-                        "core_temperature_guess": temperature,
-                        "return_err": False,
-                        "return_power": False,
-                        "return_uncertainty": False,
-                    }
-                )
-                temperature_bis = self.steady_temperature(
-                    **kwargs,
-                )[TemperatureType.AVERAGE.value]
-        except AttributeError:
-            raise ValueError(
-                f"Solver.args doesn't include {parameter_name}, can't compute partial derivative"
-            )
+            temperature_bis = self.steady_temperature(
+                **kwargs,
+            )[TemperatureType.AVERAGE.value]
         return self._approximate_derivative(temperature_bis, temperature)
 
     def _steady_temperature_partial_derivative_irradiance(

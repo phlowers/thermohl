@@ -6,12 +6,13 @@
 # SPDX-License-Identifier: MPL-2.0
 
 from datetime import datetime, timezone
-
+import pytest
 import numpy as np
 from numpy import array
 from thermohl.solver.entities import TemperatureType, HeatEquationType
 
 from thermohl.solver import rte
+from thermohl.solver.solver import temporarily_override_parameter
 
 
 def test_solver3t_legacy():
@@ -104,3 +105,10 @@ def test_steady_temperature_uncertainty():
     assert np.allclose(solver.args.wind_azimuth, saved_wind_azimuth)
     assert np.allclose(solver.solar_heating.solar_irradiance, saved_solar_irradiance)
     assert np.allclose(solver.solar_heating.value(100), saved_solar_heating)
+
+
+def test_temporarily_override_parameter():
+    solver = rte({}, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY)
+    with pytest.raises(ValueError):
+        with temporarily_override_parameter(solver, "made_up_parameter", 42):
+            pass  # noqa
