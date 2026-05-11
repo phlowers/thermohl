@@ -263,9 +263,11 @@ def temporarily_override_parameter(
             parameter_name,
             parameter_value,
         )
+        solver.update()
         yield solver
     finally:
         solver.args.__setattr__(parameter_name, saved_parameter_value)
+        solver.update()
 
 
 @contextmanager

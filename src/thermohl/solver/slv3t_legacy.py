@@ -292,7 +292,6 @@ class Solver3TL(Solver3T):
         UNCERTAINTY_WIND_SPEED = 1
         UNCERTAINTY_WIND_DIRECTION = 10
         UNCERTAINTY_SOLAR_IRRADIANCE = 100
-        self._steady_temperature_partial_derivative(temperature, "transit", **kwargs)
         square_uncertainty = (
             (
                 uncertainty_transit
