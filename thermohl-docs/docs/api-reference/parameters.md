@@ -19,7 +19,7 @@ input dictionary are replaced with a default value, available using
 Below is a table with all physical parameters used in ThermOHL, with
 units, default values and in which set of power terms they are used.
 
-[TODO : check with sources + add a paragraph explaining which parameters are not required if we use measured_global_radiation directly]: #
+[TODO : check with sources + add a paragraph explaining which parameters are not required if we use solar_radiation or measured_global_radiation directly]: #
 
 | Parameter | Default Value | Unit       | Used in CIGRE | Used in IEEE | Used in OLLA | Used in RTE | Comment                                                      |
 |-----------|---------------|------------|---------------|--------------|--------------|-------------|--------------------------------------------------------------|
@@ -55,7 +55,8 @@ units, default values and in which set of power terms they are used.
 | linear_resistance_temp_low    | 2.66E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at temp_low             |
 | temp_high     | 60            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
 | temp_low      | 20            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
-| measured_global_radiation      | NaN           | W.m⁻²      | yes          | yes          | yes          | yes         | solar irradiance                                             |
+| measured_global_radiation      | NaN           | W.m⁻²      | yes          | yes          | yes          | yes         | global radiation (not to be confused with solar radiation. In Rte context solar radiation is computed from global radiation and other parameters. Global radiation has no meaning outside Rte context.) |
+| solar_irradiance  | NaN   | W.m⁻² | yes | yes | yes | no | |
 
 For consistent joule heating outputs between CIGRE and IEEE joule
 power terms, you must have

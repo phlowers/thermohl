@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 from math import pi
+import logging
 from typing import Any, Tuple, Iterable
 import numpy as np
 from thermohl import (
@@ -13,6 +14,9 @@ from thermohl import (
     datetimeListLike,
 )
 from thermohl.power import SolarHeatingBase
+
+
+logger = logging.getLogger(__name__)
 
 
 def compute_solar_irradiance(
@@ -116,6 +120,16 @@ class SolarHeating(SolarHeatingBase):
         :param nebulosity: Sky nebulosity (0 to 8).
         :param measured_global_radiation: Optional measured solar irradiance (W/m2).
         """
+        if (
+            kwargs.get("solar_irradiance", None) is not None
+            and not np.isnan(kwargs["solar_irradiance"]).all()
+        ):
+            logger.warning(
+                "Got 'solar_irradiance' keyword argument in SolarHeating.__init__, which is not supported by Rte"
+                "implementation. This will be ignored."
+            )
+            kwargs.pop("solar_irradiance")
+
         date = (
             [d.date() for d in datetime_utc]
             if isinstance(datetime_utc, Iterable)

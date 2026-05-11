@@ -86,7 +86,7 @@ class SolarHeating(PowerTerm):
         datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        measured_global_radiation: floatArrayLike,
+        solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         """Init with args.
@@ -98,14 +98,14 @@ class SolarHeating(PowerTerm):
         :param datetime_utc: Datetime in UTC.
         :param outer_diameter: external diameter of the conductor.
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
-        :param measured_global_radiation: Optional precomputed solar radiation term.
+        :param solar_irradiance: Optional precomputed solar radiation term.
         """
         self.solar_absorptivity = solar_absorptivity
 
-        mask = np.isnan(measured_global_radiation)
-        self.solar_irradiance = np.empty_like(measured_global_radiation)
+        mask = np.isnan(solar_irradiance)
+        self.solar_irradiance = np.empty_like(solar_irradiance)
         if np.any(~mask):
-            self.solar_irradiance[~mask] = np.maximum(measured_global_radiation, 0.0)
+            self.solar_irradiance[~mask] = np.maximum(solar_irradiance, 0.0)
         if np.any(mask):
             self.solar_irradiance[mask] = SolarHeating._solar_radiation(
                 np.deg2rad(latitude),
