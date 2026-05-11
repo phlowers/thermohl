@@ -11,15 +11,16 @@ from typing import Any
 import numpy as np
 
 from thermohl import floatArrayLike
-from thermohl.power import PowerTerm
-from thermohl.power.convective_cooling import compute_wind_attack_angle
+from thermohl.power.convective_cooling import (
+    ConvectiveCoolingBase,
+)
 from thermohl.power.cigre import Air
 
 
 logger = logging.getLogger(__name__)
 
 
-class ConvectiveCooling(PowerTerm):
+class ConvectiveCooling(ConvectiveCoolingBase):
     """Convective cooling term."""
 
     def __init__(
@@ -30,8 +31,8 @@ class ConvectiveCooling(PowerTerm):
         wind_speed: floatArrayLike,
         outer_diameter: floatArrayLike,
         roughness_ratio: floatArrayLike,
-        wind_azimuth: floatArrayLike = None,
-        wind_attack_angle: floatArrayLike = None,
+        wind_azimuth: floatArrayLike | None = None,
+        wind_attack_angle: floatArrayLike | None = None,
         g: float = 9.81,
         **kwargs: Any,
     ):
@@ -44,12 +45,16 @@ class ConvectiveCooling(PowerTerm):
             cable_azimuth (float | numpy.ndarray): Azimuth (deg).
             ambient_temperature (float | numpy.ndarray): Ambient temperature (°C).
             wind_speed (float | numpy.ndarray): Wind speed (m·s⁻¹).
-            wind_azimuth (float | numpy.ndarray): wind azimuth regarding north (deg).
+            wind_azimuth (float | numpy.ndarray | None): wind azimuth regarding north (deg).
+            wind_attack_angle (float | numpy.ndarray | None): wind attack angle (rad).
             outer_diameter (float | numpy.ndarray): External diameter (m).
             roughness_ratio (float | numpy.ndarray): Cable roughness (—).
             g (float, optional): Gravitational acceleration (m·s⁻²). The default is 9.81.
 
         """
+        self._check_arguments(wind_azimuth, wind_attack_angle)
+        self._set_wind_attack_angle(cable_azimuth, wind_azimuth, wind_attack_angle)
+
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
@@ -57,20 +62,7 @@ class ConvectiveCooling(PowerTerm):
         self.roughness_ratio = roughness_ratio
         self.gravity = g
 
-        if wind_attack_angle is None and wind_azimuth is None:
-            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
-        if wind_attack_angle is not None and wind_azimuth is not None:
-            logger.warning(
-                "both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
-            )
-        if wind_attack_angle is not None:
-            self.wind_attack_angle = wind_attack_angle
-        else:
-            self.wind_attack_angle = compute_wind_attack_angle(
-                cable_azimuth, wind_azimuth
-            )
-
-    def _nu_forced(
+    def _nusselt_forced(
         self, film_temperature: floatArrayLike, kinematic_viscosity: floatArrayLike
     ) -> floatArrayLike:
         """
@@ -133,7 +125,7 @@ class ConvectiveCooling(PowerTerm):
             B1 * reynolds**n
         )
 
-    def _nu_natural(
+    def _nusselt_natural(
         self,
         film_temperature: floatArrayLike,
         temperature_delta: floatArrayLike,
@@ -192,8 +184,8 @@ class ConvectiveCooling(PowerTerm):
         # nu[nu < 1.0E-06] = 1.0E-06
         thermal_conductivity = Air.thermal_conductivity(film_temperature)
         # lm[lm < 0.01] = 0.01
-        nusselt_forced = self._nu_forced(film_temperature, kinematic_viscosity)
-        nusselt_natural = self._nu_natural(
+        nusselt_forced = self._nusselt_forced(film_temperature, kinematic_viscosity)
+        nusselt_natural = self._nusselt_natural(
             film_temperature, temperature_delta, kinematic_viscosity
         )
         return (
