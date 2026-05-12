@@ -145,7 +145,9 @@ def test_solar_irradiance_ignored_by_rte_solar_heating():
     )
 
     # The provided solar_irradiance keyword argument must be ignored.
-    assert np.allclose(solar_heating_1.solar_irradiance, solar_heating_2.solar_irradiance)
+    assert np.allclose(
+        solar_heating_1.solar_irradiance, solar_heating_2.solar_irradiance
+    )
 
     # With non-zero parameters, value() would differ if the keyword argument were used.
     assert np.allclose(solar_heating_1.value(100), solar_heating_2.value(100))
