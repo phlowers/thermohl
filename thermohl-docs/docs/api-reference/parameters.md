@@ -55,8 +55,8 @@ units, default values and in which set of power terms they are used.
 | linear_resistance_temp_low    | 2.66E-05      | Ohm.m⁻¹    | no            | yes          | no           | no          | electric resistance per unit length (DC) at temp_low             |
 | temp_high     | 60            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
 | temp_low      | 20            | celsius    | no            | yes          | no           | no          | temperature for linear_resistance_temp_high measurement                          |
-| measured_global_radiation      | NaN           | W.m⁻²      | no          | no          | no          | yes         | global radiation (not to be confused with solar irradiance. In Rte context solar irradiance is computed from global radiation and other parameters. Global radiation has no meaning outside Rte context.) |
-| solar_irradiance  | NaN   | W.m⁻² | yes | yes | yes | no | |
+| measured_global_radiation      | NaN           | W.m⁻²      | no          | no          | no          | yes         | global radiation (not to be confused with solar irradiance. In Rte context solar irradiance is computed from global radiation and other parameters. Global radiation has no meaning outside Rte context.) NB : in our context "irradiance" and "radiation" mean the same. |
+| solar_irradiance  | NaN   | W.m⁻² | yes | yes | yes | no | NB : in our context "irradiance" and "radiation" mean the same. |
 
 For consistent joule heating outputs between CIGRE and IEEE joule
 power terms, you must have

@@ -35,7 +35,7 @@ class SolarHeating(SolarHeatingBase):
         :param datetime_utc: Datetime in UTC.
         :param outer_diameter: external diameter of the conductor.
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
-        :param solar_irradiance: Optional precomputed solar radiation term.
+        :param solar_irradiance: Optional precomputed solar irradiance term.
         """
         est = _SRad(
             [
