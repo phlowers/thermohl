@@ -119,30 +119,33 @@ def test_solar_irradiance_ignored_by_rte_solar_heating():
     ]
 
     solar_heating_1 = SolarHeating(
-        solar_irradiance=[0.0, 0.0, 0.0],  # null solar irradiance
+        solar_irradiance=[0.0, 0.0, 0.0],  # must be ignored
         latitude=latitude,
         longitude=longitude,
         cable_azimuth=cable_azimuth,
         datetime_utc=datetime_utc,
-        outer_diameter=0,
-        solar_absorptivity=0,
+        outer_diameter=0.03,
+        solar_absorptivity=0.5,
         albedo=0.15,
         nebulosity=0,
         measured_global_radiation=np.nan,
     )
 
     solar_heating_2 = SolarHeating(
-        solar_irradiance=[100, 200, 300],  # not-null solar irradiance
+        solar_irradiance=[100, 200, 300],  # must also be ignored
         latitude=latitude,
         longitude=longitude,
         cable_azimuth=cable_azimuth,
         datetime_utc=datetime_utc,
-        outer_diameter=0,
-        solar_absorptivity=0,
+        outer_diameter=0.03,
+        solar_absorptivity=0.5,
         albedo=0.15,
         nebulosity=0,
         measured_global_radiation=np.nan,
     )
 
-    # result must be the same
+    # The provided solar_irradiance keyword argument must be ignored.
+    assert np.allclose(solar_heating_1.solar_irradiance, solar_heating_2.solar_irradiance)
+
+    # With non-zero parameters, value() would differ if the keyword argument were used.
     assert np.allclose(solar_heating_1.value(100), solar_heating_2.value(100))

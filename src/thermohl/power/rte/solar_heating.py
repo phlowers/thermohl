@@ -118,14 +118,14 @@ class SolarHeating(SolarHeatingBase):
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
         :param albedo: Ground albedo.
         :param nebulosity: Sky nebulosity (0 to 8).
-        :param measured_global_radiation: Optional measured solar irradiance (W/m2).
+        :param measured_global_radiation: Optional measured global radiation (W/m2) used to compute solar irradiance.
         """
         if (
             kwargs.get("solar_irradiance", None) is not None
             and not np.isnan(kwargs["solar_irradiance"]).all()
         ):
             logger.warning(
-                "Got 'solar_irradiance' keyword argument in SolarHeating.__init__, which is not supported by Rte"
+                "Got 'solar_irradiance' keyword argument in SolarHeating.__init__, which is not supported by Rte "
                 "implementation. This will be ignored."
             )
             kwargs.pop("solar_irradiance")
