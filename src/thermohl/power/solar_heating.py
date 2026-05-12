@@ -107,15 +107,15 @@ class SolarHeatingBase(PowerTerm):
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,
-        measured_global_radiation: floatArrayLike,
+        solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         self.solar_absorptivity = solar_absorptivity
 
-        mask = np.isnan(measured_global_radiation)
-        self.solar_irradiance = np.empty_like(measured_global_radiation)
+        mask = np.isnan(solar_irradiance)
+        self.solar_irradiance = np.empty_like(solar_irradiance)
         if np.any(~mask):
-            self.solar_irradiance[~mask] = np.maximum(measured_global_radiation, 0.0)
+            self.solar_irradiance[~mask] = np.maximum(solar_irradiance, 0.0)
         if np.any(mask):
             self.solar_irradiance[mask] = est(
                 np.deg2rad(latitude),
