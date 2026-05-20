@@ -7,7 +7,7 @@
 
 import numpy as np
 
-from functional_test.test_functional_steady import (
+from test.functional_test.test_functional_steady import (
     get_scenarios,
     scn2dict,
 )
