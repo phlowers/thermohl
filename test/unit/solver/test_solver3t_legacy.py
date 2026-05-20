@@ -14,6 +14,8 @@ from thermohl.solver.entities import TemperatureType, HeatEquationType
 from thermohl.solver import rte
 from thermohl.solver.solver import temporarily_override_parameter
 
+from test.utils import get_cable_data
+
 
 def test_solver3t_legacy():
     data = {
@@ -57,31 +59,14 @@ def test_solver3t_legacy():
     assert abs(result[TemperatureType.AVERAGE.value][-1] - 40.9) <= 0.5
 
 
-def test_steady_temperature_uncertainty():
+def test_steady_temperature_uncertainty_doesnt_change_parameters():
     solver_input_data = {
-        "cable_azimuth": array([90.0, 85.0]),
-        "wind_speed": array([0, 1.0]),
-        "wind_azimuth": array([45.0, 43.0]),
-        "altitude": array([100]),
-        "ambient_temperature": array([20.0, 22.0]),
-        "transit": array([1500.0, 1550.0]),
-        "outer_diameter": array([0.03105]),
-        "core_diameter": array([0.0]),
-        "outer_area": array([0.00057]),
-        "core_area": array([0.0]),
-        "linear_resistance_dc_20c": array([5.83e-05]),
-        "linear_mass": array([1.539]),
-        "heat_capacity": array([900.0]),
-        "roughness_ratio": array([0]),
-        "radial_thermal_conductivity": array([1]),
-        "temperature_coeff_linear": array([0.0036]),
-        "temperature_coeff_quadratic": array([8.0e-07]),
-        "magnetic_coeff": array([1.0]),
-        "magnetic_coeff_per_a": array([0.0]),
-        "solar_absorptivity": array([0.9]),
-        "emissivity": array([0.8]),
-        "datetime_utc": datetime(2026, 12, 13, 13, 12, tzinfo=timezone.utc),
+        "wind_speed": array([2]),
+        "wind_azimuth": array([0]),
+        "ambient_temperature": array([30.0]),
+        "transit": array([1000]),
     }
+
     solver = rte(
         solver_input_data, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY
     )
@@ -94,9 +79,7 @@ def test_steady_temperature_uncertainty():
     saved_solar_irradiance = solver.solar_heating.solar_irradiance.copy()
     saved_solar_heating = solver.solar_heating.value(100).copy()
 
-    result = solver.steady_temperature(return_uncertainty=True)
-
-    assert len(result["uncertainty"]) == len(solver_input_data["transit"])
+    solver.steady_temperature(return_uncertainty=True)
 
     # check that solver args haven't been changed
     assert np.allclose(solver.args.transit, saved_transit)
@@ -105,6 +88,43 @@ def test_steady_temperature_uncertainty():
     assert np.allclose(solver.args.wind_azimuth, saved_wind_azimuth)
     assert np.allclose(solver.solar_heating.solar_irradiance, saved_solar_irradiance)
     assert np.allclose(solver.solar_heating.value(100), saved_solar_heating)
+
+
+def test_steady_temperature_uncertainty_results():
+    cable_data = get_cable_data("ASTER600")
+
+    solver_input_data = {
+        # span positions
+        "cable_azimuth": array([0, 0, 0, 0, 0, 0]),
+        "altitude": array([100, 100, 100, 100, 100, 100]),
+        # weather
+        "wind_speed": array([0, 15, 15, 15, 15, 15]),
+        "wind_azimuth": array([0, 90, -45, -90, 0, 0]),
+        "ambient_temperature": array([-5, -5, 30, 30, 30, 30]),
+        "nebulosity": array([5, 5, 5, 5, 5, 5]),
+        # others
+        "transit": array([700, 700, 700, 1000, 1000, 1000]),
+        "datetime_utc": [
+            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
+            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
+            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
+            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
+            datetime(2026, 12, 21, 8, 0, tzinfo=timezone.utc),
+            datetime(2026, 12, 21, 21, 0, tzinfo=timezone.utc),
+        ],
+    }
+    solver_input_data.update(cable_data)
+
+    # Values computed with the prototype
+    expected_uncertainties = array([3.2, 1.1, 1.2, 1.4, 5.5, 5.4])
+
+    solver = rte(
+        solver_input_data, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY
+    )
+
+    result = solver.steady_temperature(return_uncertainty=True)
+
+    np.testing.assert_allclose(result["uncertainty"], expected_uncertainties, atol=0.1)
 
 
 def test_temporarily_override_parameter():
