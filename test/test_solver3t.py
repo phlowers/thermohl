@@ -242,7 +242,7 @@ def test_steady_intensity_cable_type_list():
         "hour": rng.integers(0, 24, N),
         "ambient_temperature": rng.random(N) * 30.0,
         "wind_speed": rng.random(N) * 7.0,
-        "wind_angle": rng.random(N) * 90.0,
+        "wind_azimuth": rng.random(N) * 90.0,
         "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
     }
@@ -287,7 +287,7 @@ def test_steady_intensity_cable_type_and_target():
         "hour": rng.integers(0, 24, N),
         "ambient_temperature": rng.random(N) * 30.0,
         "wind_speed": rng.random(N) * 7.0,
-        "wind_angle": rng.random(N) * 90.0,
+        "wind_azimuth": rng.random(N) * 90.0,
         "core_diameter": rng.integers(2, size=N)
         * solver.default_values()["core_diameter"],
     }
