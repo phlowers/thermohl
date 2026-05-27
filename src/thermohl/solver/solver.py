@@ -156,6 +156,39 @@ class Solver(ABC):
         self.args.compress()
         return result
 
+    @contextmanager
+    def temporarily_override_parameter(self, parameter_name: str, parameter_value: Any):
+        if not hasattr(self.args, parameter_name):
+            raise ValueError(
+                f"self.args has no attribute '{parameter_name}' to override."
+            )
+
+        current_parameter_value = getattr(self.args, parameter_name)
+        if hasattr(current_parameter_value, "copy"):
+            saved_parameter_value = current_parameter_value.copy()
+        else:
+            saved_parameter_value = current_parameter_value
+
+        try:
+            self.args.__setattr__(
+                parameter_name,
+                parameter_value,
+            )
+            self.update()
+            yield self
+        finally:
+            self.args.__setattr__(parameter_name, saved_parameter_value)
+            self.update()
+
+    @contextmanager
+    def temporarily_override_solar_irradiance(self, value: Any):
+        saved_solar_irradiance = self.solar_heating.solar_irradiance.copy()
+        try:
+            self.solar_heating.solar_irradiance = value
+            yield self
+        finally:
+            self.solar_heating.solar_irradiance = saved_solar_irradiance
+
 
 def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numberArray:
     """
@@ -241,40 +274,3 @@ def get_time_changing_parameters(args, offset, N, n):
     }
     del datetime_utc
     return de
-
-
-@contextmanager
-def temporarily_override_parameter(
-    solver: Solver, parameter_name: str, parameter_value: Any
-):
-    if not hasattr(solver.args, parameter_name):
-        raise ValueError(
-            f"solver.args has no attribute '{parameter_name}' to override."
-        )
-
-    current_parameter_value = getattr(solver.args, parameter_name)
-    if hasattr(current_parameter_value, "copy"):
-        saved_parameter_value = current_parameter_value.copy()
-    else:
-        saved_parameter_value = current_parameter_value
-
-    try:
-        solver.args.__setattr__(
-            parameter_name,
-            parameter_value,
-        )
-        solver.update()
-        yield solver
-    finally:
-        solver.args.__setattr__(parameter_name, saved_parameter_value)
-        solver.update()
-
-
-@contextmanager
-def temporarily_override_solar_irradiance(solver: Solver, value: Any):
-    saved_solar_irradiance = solver.solar_heating.solar_irradiance.copy()
-    try:
-        solver.solar_heating.solar_irradiance = value
-        yield solver
-    finally:
-        solver.solar_heating.solar_irradiance = saved_solar_irradiance

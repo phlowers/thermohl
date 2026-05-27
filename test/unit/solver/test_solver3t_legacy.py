@@ -12,7 +12,6 @@ from numpy import array
 from thermohl.solver.entities import TemperatureType, HeatEquationType
 
 from thermohl.solver import rte
-from thermohl.solver.solver import temporarily_override_parameter
 
 from test.utils import get_cable_data
 
@@ -130,5 +129,5 @@ def test_steady_temperature_uncertainty_results():
 def test_temporarily_override_parameter():
     solver = rte({}, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY)
     with pytest.raises(ValueError):
-        with temporarily_override_parameter(solver, "made_up_parameter", 42):
+        with solver.temporarily_override_parameter("made_up_parameter", 42):
             pass  # noqa

@@ -14,10 +14,6 @@ from thermohl.power import PowerTerm
 from thermohl.solver.entities import TargetType, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
 from thermohl.solver.entities import TemperatureType
-from thermohl.solver.solver import (
-    temporarily_override_parameter,
-    temporarily_override_solar_irradiance,
-)
 
 
 class Solver3TL(Solver3T):
@@ -344,8 +340,8 @@ class Solver3TL(Solver3T):
         incremented_parameter_value = (
             self.args.__getattribute__(parameter_name) + self.DERIVATIVE_INCREMENT
         )
-        with temporarily_override_parameter(
-            self, parameter_name, incremented_parameter_value
+        with self.temporarily_override_parameter(
+            parameter_name, incremented_parameter_value
         ):
             kwargs.update(
                 {
@@ -369,7 +365,7 @@ class Solver3TL(Solver3T):
         incremented_solar_irradiance = (
             self.solar_heating.solar_irradiance + self.DERIVATIVE_INCREMENT
         )
-        with temporarily_override_solar_irradiance(self, incremented_solar_irradiance):
+        with self.temporarily_override_solar_irradiance(incremented_solar_irradiance):
             kwargs.update(
                 {
                     "surface_temperature_guess": temperature,
