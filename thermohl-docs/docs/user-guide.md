@@ -159,7 +159,15 @@ specific model with three temperatures for the conductor :
 For the conductor temperature computation with the three-temperatures "legacy" solver,
 we provide a standard uncertainty value estimated using following formula:
 
-$ u_T^2 = (\frac{\partial T}{\partial I}*u_I)^2 + (\frac{\partial T}{\partial T_{amb}}*u_{T_{amb}})^2 + (\frac{\partial T}{\partial W} u_W)^2 + (\frac{\partial T}{\partial Azm}*u_{Azm})^2 + (\frac {\partial T}{\partial Q_s}*u_{Q_s})^2 $
+$ u_T^2 = (\frac{\partial T}{\partial I}*u_I)^2 $
+
+$ + (\frac{\partial T}{\partial T_{amb}}*u_{T_{amb}})^2 $
+
+$ + (\frac{\partial T}{\partial W} u_W)^2 $
+
+$ + (\frac{\partial T}{\partial Azm}*u_{Azm})^2 $
+
+$ + (\frac {\partial T}{\partial Q_s}*u_{Q_s})^2 $
 
 where
 
