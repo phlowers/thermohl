@@ -103,7 +103,7 @@ def test_steady_ampacity_array():
     }
     # Initialisation des valeurs manquantes pour nebulosite et measured_global_radiation
     dict_scenarios["nebulosity"] = np.array(
-        [d if d is not None else 0 for d in dict_scenarios["nebulosity"]]
+        [d if d is not None else np.nan for d in dict_scenarios["nebulosity"]]
     )
     dict_scenarios["measured_global_radiation"] = np.array(
         [
