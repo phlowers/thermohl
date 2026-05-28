@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
 import pytest
 import numpy as np
 
@@ -27,7 +26,7 @@ def solver():
         "precipitation_rate": np.array([0]),
         "linear_mass": 1.0,
         "heat_capacity": 1.0,
-        "datetime_utc": datetime(2025, 1, 1, 0, tzinfo=timezone.utc),
+        "datetime_utc": np.datetime64("2025-01-01T00:00:00"),
         "latitude": np.array([48.0]),
         "longitude": np.array([2.3]),
         "altitude": np.array([50.0]),

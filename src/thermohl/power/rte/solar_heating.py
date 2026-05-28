@@ -6,12 +6,12 @@
 # SPDX-License-Identifier: MPL-2.0
 from math import pi
 import logging
-from typing import Any, Tuple, Iterable
+from typing import Any, Tuple
 import numpy as np
 from thermohl import (
     floatArrayLike,
     sun,
-    datetimeListLike,
+    datetimeArrayLike,
 )
 from thermohl.power import SolarHeatingBase
 
@@ -103,7 +103,7 @@ class SolarHeating(SolarHeatingBase):
         latitude: floatArrayLike,
         longitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         albedo: floatArrayLike,
@@ -134,11 +134,7 @@ class SolarHeating(SolarHeatingBase):
             )
             kwargs.pop("solar_irradiance")
 
-        date = (
-            [d.date() for d in datetime_utc]
-            if isinstance(datetime_utc, Iterable)
-            else datetime_utc.date()
-        )
+        date = datetime_utc.astype("datetime64[D]")
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
         solar_altitude = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         nebulosity, global_radiation = compute_data_from_provided(

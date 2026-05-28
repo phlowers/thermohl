@@ -42,7 +42,7 @@ def scn2dict(scn: dict) -> dict:
     datetime_paris = datetime.strptime(
         f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
     ).replace(tzinfo=ZoneInfo("Europe/Paris"))
-    datetime_utc = datetime_paris.astimezone(timezone.utc)
+    datetime_utc = np.datetime64(datetime_paris.astimezone(timezone.utc))
     dic["datetime_utc"] = datetime_utc
 
     # utile uniquement pour le test test_steady_temperature

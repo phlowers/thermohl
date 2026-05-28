@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime
 import pytest
 import random
 import numpy as np
@@ -48,7 +47,13 @@ def test_balance():
         latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         cable_azimuth=np.random.uniform(0.0, 360.0, N),
-        datetime_utc=[datetime(2026, month, day, hour) for _ in range(N)],
+        datetime_utc=np.array(
+            [
+                np.datetime64(f"2026-{month:02d}-{day:02d}T{hour:02d}:00:00")
+                for _ in range(N)
+            ],
+            dtype="datetime64[s]",
+        ),
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
         wind_azimuth=np.random.uniform(0.0, 90.0, N),

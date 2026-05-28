@@ -8,7 +8,7 @@
 from typing import Any
 
 from thermohl.power import ieee
-from thermohl import floatArrayLike, datetimeListLike
+from thermohl import floatArrayLike, datetimeArrayLike
 
 
 class SolarHeating(ieee.SolarHeating):
@@ -19,7 +19,7 @@ class SolarHeating(ieee.SolarHeating):
         latitude: floatArrayLike,
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         solar_irradiance: floatArrayLike,

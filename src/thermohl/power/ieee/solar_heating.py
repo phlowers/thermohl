@@ -8,7 +8,7 @@
 from typing import Any
 
 
-from thermohl import floatArrayLike, datetimeListLike
+from thermohl import floatArrayLike, datetimeArrayLike
 from thermohl.power import _SRad, SolarHeatingBase
 
 
@@ -19,7 +19,7 @@ class SolarHeating(SolarHeatingBase):
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         solar_irradiance: floatArrayLike,

@@ -8,7 +8,6 @@
 
 import numpy as np
 from thermohl.power.rte.solar_heating import compute_solar_irradiance, SolarHeating
-from pandas import Timestamp
 
 
 def test_compute_solar_irradiance_night():
@@ -87,11 +86,13 @@ def test_solar_heating():
     latitude = [0.86892843, 0.86909212, 0.86957649]
     longitude = [0.03194659, 0.03498268, 0.03403367]
     cable_azimuth = [1.29034491, -2.43771926, 1.05803243]
-    datetime_utc = [
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-    ]
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-03-09T08:50:00"),
+            np.datetime64("2026-03-09T08:50:00"),
+            np.datetime64("2026-03-09T08:50:00"),
+        ]
+    )
 
     solar_heating = SolarHeating(
         latitude=latitude,
@@ -112,11 +113,13 @@ def test_solar_irradiance_ignored_by_rte_solar_heating():
     latitude = [0.86892843, 0.86909212, 0.86957649]
     longitude = [0.03194659, 0.03498268, 0.03403367]
     cable_azimuth = [1.29034491, -2.43771926, 1.05803243]
-    datetime_utc = [
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-        Timestamp("2026-03-09 08:50:00+0000", tz="UTC"),
-    ]
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-03-09T08:50:00"),
+            np.datetime64("2026-03-09T08:50:00"),
+            np.datetime64("2026-03-09T08:50:00"),
+        ]
+    )
 
     solar_heating_1 = SolarHeating(
         solar_irradiance=[0.0, 0.0, 0.0],  # must be ignored
