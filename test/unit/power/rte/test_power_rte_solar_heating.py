@@ -6,8 +6,18 @@
 # SPDX-License-Identifier: MPL-2.0
 
 
+from math import pi
+import pytest
+
 import numpy as np
-from thermohl.power.rte.solar_heating import compute_solar_irradiance, SolarHeating
+from thermohl.power.rte.solar_heating import (
+    compute_solar_irradiance,
+    SolarHeating,
+    estimate_nebulosity_from_diffuse_and_beam_radiation,
+    compute_global_radiation,
+    compute_diffuse_radiation,
+    compute_beam_radiation,
+)
 from pandas import Timestamp
 
 
@@ -151,3 +161,58 @@ def test_solar_irradiance_ignored_by_rte_solar_heating():
 
     # With non-zero parameters, value() would differ if the keyword argument were used.
     assert np.allclose(solar_heating_1.value(100), solar_heating_2.value(100))
+
+
+input_nebulosity = [0, 3.5, 8]
+solar_altitude = [-pi / 4, 0, pi / 3, pi / 2, pi, 5 * pi / 4]
+
+
+@pytest.mark.parametrize(
+    "input_nebulosity",
+    input_nebulosity,
+)
+@pytest.mark.parametrize(
+    "solar_altitude",
+    solar_altitude,
+)
+def test_estimate_nebulosity_from_diffuse_and_beam_radiation__scalar(
+    input_nebulosity, solar_altitude
+) -> None:
+    global_radiation = compute_global_radiation(solar_altitude, input_nebulosity)
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, input_nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
+
+    tol = 1e-8
+    expected_nebulosity = np.where(
+        np.sin(solar_altitude) > tol, input_nebulosity, np.nan
+    )
+
+    nebulosity_estimate = estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude, diffuse_radiation + beam_radiation
+    )
+
+    np.testing.assert_allclose(nebulosity_estimate, np.floor(expected_nebulosity))
+
+
+def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> None:
+    # Take the solar altitude and nebulosity which give the highest radiation
+    # (zenith and no clouds),
+    # compute the global radiation, take a greater value.
+    # It's impossible to find a nebulosity which gives this radiation,
+    # attempting to calculate it should raise an error.
+    solar_altitude = np.pi / 2
+
+    global_radiation = (
+        compute_global_radiation(solar_altitude=solar_altitude, nebulosity=0) + 10
+    )
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity=0)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
+
+    with pytest.raises(ValueError):
+        estimate_nebulosity_from_diffuse_and_beam_radiation(
+            solar_altitude, diffuse_radiation + beam_radiation
+        )

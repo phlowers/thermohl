@@ -4,9 +4,8 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from math import pi
 import logging
-from typing import Any, Tuple, Iterable
+from typing import Any, Tuple, Iterable, Callable
 import numpy as np
 from thermohl import (
     floatArrayLike,
@@ -17,6 +16,37 @@ from thermohl.power import SolarHeatingBase
 
 
 logger = logging.getLogger(__name__)
+
+
+TOL = 1e-06
+
+
+def compute_global_radiation(
+    solar_altitude: floatArrayLike, nebulosity: floatArrayLike
+) -> floatArrayLike:
+    res = (910 * np.sin(solar_altitude) - 30) * (
+        1 - 0.75 * np.power(nebulosity / 8, 3.4)
+    )
+    res = np.maximum(0, res)
+    # radiation is zero during the night
+    return np.where(np.sin(solar_altitude) < TOL, 0, res)
+
+
+def compute_diffuse_radiation(
+    global_radiation: floatArrayLike, nebulosity: floatArrayLike
+) -> floatArrayLike:
+    return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
+
+
+def compute_beam_radiation(
+    global_radiation, diffuse_radiation, solar_altitude
+) -> floatArrayLike:
+    # if sin(solar altitude) <= 0 (dawn, twilight or night) the beam radiation is zero
+    return np.where(
+        np.sin(solar_altitude) <= 0,
+        0,
+        (global_radiation - diffuse_radiation) / np.sin(solar_altitude),
+    )
 
 
 def compute_solar_irradiance(
@@ -37,19 +67,13 @@ def compute_solar_irradiance(
     :return: Solar radiation value. Negative values are set to zero.
     """
 
-    def compute_diffuse_radiation() -> floatArrayLike:
-        return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
-
-    def compute_beam_radiation() -> floatArrayLike:
-        # si l'altitude solaire est nulle, on fixe la radiation solaire à 0.
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return (global_radiation - diffuse_radiation) / np.sin(solar_altitude)
-
-    diffuse_radiation = compute_diffuse_radiation()
-    beam_radiation = compute_beam_radiation()
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
     solar_irradiance = beam_radiation * (
-        np.sin(incidence) + pi / 2 * albedo * np.sin(solar_altitude)
-    ) + diffuse_radiation * pi / 2 * (1 + albedo)
+        np.sin(incidence) + np.pi / 2 * albedo * np.sin(solar_altitude)
+    ) + diffuse_radiation * np.pi / 2 * (1 + albedo)
 
     return np.where(solar_altitude > 0.0, solar_irradiance, 0.0)
 
@@ -65,6 +89,7 @@ def compute_data_from_provided(
     Otherwise, if the global radiation is provided (ie not NaN), the nebulosity is computed from it.
     Otherwise, the nebulosity defaut value is 0.
     The returned global radiation is computed from the nebulosity, even if a global radiation is already provided.
+    If solar altitude shows it is the night (or nearly the night, with solar altitude = 0), the global radiation is zero.
 
     :param provided_global_radiation: provided global radiation (W/m2).
     :param provided_nebulosity: provided nebulosity (0 to 8).
@@ -88,13 +113,87 @@ def compute_data_from_provided(
     )
 
     # Finally, the returned global radiation is computed from the previous nebulosity.
-    with np.errstate(divide="ignore", invalid="ignore"):
-        inter_rad = 1 - 3 / 4 * (final_nebulosity / 8) ** 3.4
-        final_global_radiation = np.maximum(
-            0, (910 * np.sin(solar_altitude) - 30) * inter_rad
-        )
+    final_global_radiation = compute_global_radiation(solar_altitude, final_nebulosity)
 
     return final_nebulosity, final_global_radiation
+
+
+def estimate_nebulosity_from_diffuse_and_beam_radiation(
+    solar_altitude: float, radiation_sum: float
+) -> float:
+    """Estimate nebulosity based on diffuse radiation + beam radiation, and solar altitude.
+
+    For solar_altitude values corresponding to the night, the result is nan.
+    Else, if no nebulosity could yield the given radiation (e.g. given radiation
+    is too high for given solar altitude), it raises a ValueError.
+
+    Args:
+        solar_altitude(float): solar altitude in radians.
+        radiation_sum(float): diffuse radiation + beam radiation.
+    Returns:
+        integer or np.nan: nebulosity (integer between 0 and 8).
+    """
+    if np.sin(solar_altitude) <= TOL:
+        # This is the night.
+        # Can't compute a nebulosity
+        return np.nan
+
+    # Since f is strictly monotonous (decreasing) which can use dichotomy
+    # algorithm to find x which minimizes |f(x) - radiation_sum|.
+    def f(x):
+        global_radiation = compute_global_radiation(solar_altitude, x)
+        diffuse_radiation = compute_diffuse_radiation(global_radiation, x)
+        beam_radiation = compute_beam_radiation(
+            global_radiation, diffuse_radiation, solar_altitude
+        )
+        return diffuse_radiation + beam_radiation
+
+    lower_bound = 0
+    upper_bound = 8
+
+    return _integer_bisect(f, radiation_sum, lower_bound, upper_bound)
+
+
+def _integer_bisect(
+    f: Callable[[float], float],
+    target: float,
+    lower_bound: float,
+    upper_bound: float,
+    tol: float = TOL,
+) -> np.ndarray[int]:
+    """Returns x such as to minimize |f(x) - target|, with x an integer.
+
+    f must be a monotonic function.
+    """
+    if lower_bound > upper_bound:
+        raise ValueError("lower_bound must be lower or equal to upper_bound")
+
+    if f(lower_bound) > f(upper_bound):
+
+        def f_opposite(x):
+            return -f(x)
+
+        return _integer_bisect(f_opposite, -target, lower_bound, upper_bound)
+
+    if target < f(lower_bound) - tol or target > f(upper_bound) + tol:
+        raise ValueError(
+            f"Can't find x such that f(x) == {target} in given range [{lower_bound}; {upper_bound}])"
+        )
+
+    while upper_bound - lower_bound > 1 - tol:
+        mean = (lower_bound + upper_bound) / 2
+        f_value = f(mean)
+        if f_value >= target:
+            upper_bound = mean
+        else:
+            lower_bound = mean
+    lower_bound = np.floor(lower_bound)
+    upper_bound = np.ceil(upper_bound)
+    return np.where(
+        np.abs(f(lower_bound) - target) <= np.abs(target - f(upper_bound)),
+        lower_bound,
+        upper_bound,
+    )
 
 
 class SolarHeating(SolarHeatingBase):
