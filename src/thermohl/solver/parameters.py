@@ -43,7 +43,8 @@ class Parameters:
         self.datetime_utc = datetime(2000, 3, 21, 12, tzinfo=timezone.utc)
 
         # weather and mesurement
-        self.measured_global_radiation = np.nan  # solar irradiance
+        self.measured_global_radiation = np.nan
+        self.solar_irradiance = np.nan
         self.ambient_temperature = 15.0  # ambient temperature (C)
         self.ambient_pressure = 1.0e05  # ambient pressure (Pa)
         self.relative_humidity = 0.8  # relative humidity (none, in [0, 1])
@@ -51,7 +52,7 @@ class Parameters:
         self.wind_speed = 0.0  # wind speed (m.s**-1)
         self.wind_azimuth = 90.0  # wind_azimuth (deg, regarding north)
         self.wind_attack_angle = np.nan  # wind attack angle (rad)
-        self.nebulosity = 0  # nebulosity (1)
+        self.nebulosity = np.nan  # nebulosity (1)
         self.albedo = 0.15  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1

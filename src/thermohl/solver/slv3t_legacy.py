@@ -13,9 +13,12 @@ from thermohl import floatArrayLike, floatArray, intArray
 from thermohl.power import PowerTerm
 from thermohl.solver.entities import TargetType, CableLocationListLike
 from thermohl.solver.slv3t import Solver3T
+from thermohl.solver.entities import TemperatureType
 
 
 class Solver3TL(Solver3T):
+    DERIVATIVE_INCREMENT = 0.1
+
     def __init__(
         self,
         dic: Optional[dict[str, Any]] = None,
@@ -69,8 +72,11 @@ class Solver3TL(Solver3T):
         """
         return 0.5 * (surface_temperature + core_temperature)
 
-    def morgan(
-        self, surface_temperature: floatArray, core_temperature: floatArray
+    def morgan_3t(
+        self,
+        surface_temperature: floatArray,
+        core_temperature: floatArray,
+        joule_value: Optional[floatArrayLike] = None,
     ) -> floatArray:
         """
         Computes the Morgan function for given temperature arrays.
@@ -78,14 +84,18 @@ class Solver3TL(Solver3T):
         Args:
             surface_temperature (numpy.ndarray): Array of surface temperatures.
             core_temperature (numpy.ndarray): Array of core temperatures.
+            joule_value (float | numpy.ndarray, optional): Precomputed joule heating value.
 
         Returns:
             numpy.ndarray: Resulting array after applying the Morgan function.
         """
-        morgan_coefficient = self.morgan_coefficients[0]
+        if joule_value is None:
+            joule_value = self.joule(surface_temperature, core_temperature)
+
+        heat_flux_coefficient = self.morgan_coefficients[0]
         return (
             core_temperature - surface_temperature
-        ) - morgan_coefficient * self.joule(surface_temperature, core_temperature)
+        ) - heat_flux_coefficient * joule_value
 
     def _steady_intensity_header(
         self, T: floatArrayLike, target: CableLocationListLike
@@ -195,7 +205,7 @@ class Solver3TL(Solver3T):
 
         # compute transient temperatures for each row after the first.
         for i in range(1, len(offset)):
-            balance = self.balance(
+            balance = self.balance_3t(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
             time_difference = offset[i] - offset[i - 1]
@@ -229,3 +239,150 @@ class Solver3TL(Solver3T):
         result = self._add_input_data_to_result(result)
 
         return result
+
+    def steady_temperature(
+        self,
+        return_uncertainty=False,
+        **kwargs,
+    ):
+        """
+        Compute the steady-state temperature distribution.
+
+        Args:
+            surface_temperature_guess (float | numpy.ndarray | None): Initial guess for the surface temperature. If
+                None, ambient temperature is used.
+            core_temperature_guess (float | numpy.ndarray | None): Initial guess for the core temperature. If None, 1.5
+                times the absolute value of ambient temperature is used.
+            tol (float): Tolerance for the quasi-Newton solver.
+            maxiter (int): Maximum number of iterations for the quasi-Newton solver.
+            return_err (bool): If True, the error of the solution is included in the returned dict.
+            return_power (bool): If True, power-related values are included in the returned dict.
+            return_uncertainty (bool): If True, the uncertainty on computed average temperature is included in the
+                returned dict. This is the uncertainty due to uncertainties on transit, ambient temperature, wind speed
+                and direction, and solar irradiance. Uncertainties on other parameters (e.g. albedo) are ignored.
+
+        Returns:
+            dict[str, np.ndarray]: Dictionary containing the steady-state temperatures and optionally the error and
+                power-related values and uncertainty,
+                along with input data.
+        """
+        result = super().steady_temperature(**kwargs)
+        if not return_uncertainty:
+            return result
+
+        average_temperature = result[TemperatureType.AVERAGE.value]
+        uncertainty = self._compute_temperature_uncertainty(
+            average_temperature, **kwargs
+        )
+        result["uncertainty"] = uncertainty
+
+        return result
+
+    def _compute_temperature_uncertainty(
+        self,
+        temperature: floatArrayLike,
+        **kwargs,
+    ) -> floatArrayLike:
+        uncertainty_transit = 0.05 * self.args["transit"]
+        UNCERTAINTY_AMBIENT_TEMPERATURE = 1
+        UNCERTAINTY_WIND_SPEED = 1
+        UNCERTAINTY_WIND_DIRECTION = 10
+        UNCERTAINTY_SOLAR_IRRADIANCE = 100
+        square_uncertainty = (
+            (
+                uncertainty_transit
+                * self._steady_temperature_partial_derivative(
+                    temperature, "transit", **kwargs
+                )
+            )
+            ** 2
+            + (
+                UNCERTAINTY_AMBIENT_TEMPERATURE
+                * self._steady_temperature_partial_derivative(
+                    temperature,
+                    "ambient_temperature",
+                    **kwargs,
+                )
+            )
+            ** 2
+            + (
+                UNCERTAINTY_WIND_SPEED
+                * self._steady_temperature_partial_derivative(
+                    temperature, "wind_speed", **kwargs
+                )
+            )
+            ** 2
+            + (
+                UNCERTAINTY_WIND_DIRECTION
+                * self._steady_temperature_partial_derivative(
+                    temperature,
+                    "wind_azimuth",
+                    **kwargs,
+                )
+            )
+            ** 2
+            + (
+                UNCERTAINTY_SOLAR_IRRADIANCE
+                * self._steady_temperature_partial_derivative_irradiance(
+                    temperature, **kwargs
+                )
+            )
+            ** 2
+        )
+        return square_uncertainty**0.5
+
+    def _steady_temperature_partial_derivative(
+        self,
+        temperature: floatArrayLike,
+        parameter_name: str,
+        **kwargs,
+    ) -> floatArrayLike:
+        incremented_parameter_value = (
+            self.args.__getattribute__(parameter_name) + self.DERIVATIVE_INCREMENT
+        )
+        with self.temporarily_override_parameter(
+            parameter_name, incremented_parameter_value
+        ):
+            kwargs.update(
+                {
+                    "surface_temperature_guess": temperature,
+                    "core_temperature_guess": temperature,
+                    "return_err": False,
+                    "return_power": False,
+                    "return_uncertainty": False,
+                }
+            )
+            temperature_bis = self.steady_temperature(
+                **kwargs,
+            )[TemperatureType.AVERAGE.value]
+        return self._approximate_derivative(temperature_bis, temperature)
+
+    def _steady_temperature_partial_derivative_irradiance(
+        self,
+        temperature: floatArrayLike,
+        **kwargs,
+    ):
+        incremented_solar_irradiance = (
+            self.solar_heating.solar_irradiance + self.DERIVATIVE_INCREMENT
+        )
+        with self.temporarily_override_solar_irradiance(incremented_solar_irradiance):
+            kwargs.update(
+                {
+                    "surface_temperature_guess": temperature,
+                    "core_temperature_guess": temperature,
+                    "return_err": False,
+                    "return_power": False,
+                    "return_uncertainty": False,
+                }
+            )
+            temperature_with_increased_solar_irradiance = self.steady_temperature(
+                **kwargs,
+            )[TemperatureType.AVERAGE.value]
+
+        return self._approximate_derivative(
+            temperature_with_increased_solar_irradiance, temperature
+        )
+
+    @classmethod
+    def _approximate_derivative(cls, value_a, value_b) -> floatArrayLike:
+        return (value_a - value_b) / cls.DERIVATIVE_INCREMENT

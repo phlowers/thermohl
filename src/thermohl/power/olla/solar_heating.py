@@ -22,7 +22,7 @@ class SolarHeating(ieee.SolarHeating):
         datetime_utc: datetimeListLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
-        measured_global_radiation: floatArrayLike,
+        solar_irradiance: floatArrayLike,
         **kwargs: Any,
     ):
         """Init with args.
@@ -35,7 +35,7 @@ class SolarHeating(ieee.SolarHeating):
         :param datetime_utc: Datetime in UTC.
         :param outer_diameter: external diameter of the conductor.
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
-        :param measured_global_radiation: Optional precomputed solar radiation term.
+        :param solar_irradiance: Optional precomputed solar irradiance term.
         """
         if "turbidity" in kwargs.keys():
             kwargs.pop("turbidity")
@@ -47,6 +47,6 @@ class SolarHeating(ieee.SolarHeating):
             datetime_utc=datetime_utc,
             outer_diameter=outer_diameter,
             solar_absorptivity=solar_absorptivity,
-            measured_global_radiation=measured_global_radiation,
+            solar_irradiance=solar_irradiance,
             **kwargs,
         )

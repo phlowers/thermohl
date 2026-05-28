@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 from math import pi
+import logging
 from typing import Any, Tuple, Iterable
 import numpy as np
 from thermohl import (
@@ -13,6 +14,9 @@ from thermohl import (
     datetimeListLike,
 )
 from thermohl.power import SolarHeatingBase
+
+
+logger = logging.getLogger(__name__)
 
 
 def compute_solar_irradiance(
@@ -57,8 +61,10 @@ def compute_data_from_provided(
 ) -> Tuple[floatArrayLike, floatArrayLike]:
     """
     Returns a value of nebulosity and a value of global_radiation.
-    If the global radiation is provided (ie not NaN), the nebulosity is computed from it.
-    Otherwise, the global radiation is computed from the provided nebulosity (default value of 0).
+    If the nebulosity is provided, it is kept.
+    Otherwise, if the global radiation is provided (ie not NaN), the nebulosity is computed from it.
+    Otherwise, the nebulosity defaut value is 0.
+    The returned global radiation is computed from the nebulosity, even if a global radiation is already provided.
 
     :param provided_global_radiation: provided global radiation (W/m2).
     :param provided_nebulosity: provided nebulosity (0 to 8).
@@ -66,26 +72,28 @@ def compute_data_from_provided(
     :return: (nebulosity, global_radiation).
     """
 
-    mask = np.isnan(provided_global_radiation)
     # First, everything is computed (np.errstate ignore warnings on NaN values)
     with np.errstate(divide="ignore", invalid="ignore"):
-        # nebulosity computation
+        # nebulosity computation from global radiation
         inter_neb = np.minimum(
             1, provided_global_radiation / (910 * np.sin(solar_altitude) - 30)
         )
         computed_nebulosity = np.minimum(8, 8 * (4 / 3 * (1 - inter_neb)) ** (1 / 3.4))
 
-        # global radiation computation
-        inter_rad = 1 - 3 / 4 * (provided_nebulosity / 8) ** 3.4
-        computed_global_radiation = np.maximum(
+    # Then, a filter is applied to keep useful values amongst the computations.
+    final_nebulosity = np.where(
+        ~np.isnan(provided_nebulosity),
+        provided_nebulosity,
+        np.where(~np.isnan(provided_global_radiation), computed_nebulosity, 0.0),
+    )
+
+    # Finally, the returned global radiation is computed from the previous nebulosity.
+    with np.errstate(divide="ignore", invalid="ignore"):
+        inter_rad = 1 - 3 / 4 * (final_nebulosity / 8) ** 3.4
+        final_global_radiation = np.maximum(
             0, (910 * np.sin(solar_altitude) - 30) * inter_rad
         )
 
-    # Then, a filter is applied to keep useful values amongst the computations.
-    final_nebulosity = np.where(mask, provided_nebulosity, computed_nebulosity)
-    final_global_radiation = np.where(
-        ~mask, provided_global_radiation, computed_global_radiation
-    )
     return final_nebulosity, final_global_radiation
 
 
@@ -114,8 +122,18 @@ class SolarHeating(SolarHeatingBase):
         :param solar_absorptivity: Solar absorption coefficient of the conductor.
         :param albedo: Ground albedo.
         :param nebulosity: Sky nebulosity (0 to 8).
-        :param measured_global_radiation: Optional measured solar irradiance (W/m2).
+        :param measured_global_radiation: Optional measured global radiation (W/m2) used to compute solar irradiance.
         """
+        if (
+            kwargs.get("solar_irradiance", None) is not None
+            and not np.isnan(kwargs["solar_irradiance"]).all()
+        ):
+            logger.warning(
+                "Got 'solar_irradiance' keyword argument in SolarHeating.__init__, which is not supported by Rte "
+                "implementation. This will be ignored."
+            )
+            kwargs.pop("solar_irradiance")
+
         date = (
             [d.date() for d in datetime_utc]
             if isinstance(datetime_utc, Iterable)
