@@ -40,20 +40,15 @@ def test_balance():
     random.seed(_nprs)
     np.random.seed(_nprs)
     N = 9999
-    month = random.randint(1, 12)
-    day = random.randint(1, 30)
-    hour = random.randint(0, 23)
+    datetime_utc = np.full(N, np.datetime64("2026-06-01"))
+    offset = np.random.randint(0, 365, N).astype("timedelta64[D]")
+    datetime_utc += offset
+
     dic = dict(
         latitude=np.random.uniform(42.0, 51.0, N),
         altitude=np.random.uniform(0.0, 1600.0, N),
         cable_azimuth=np.random.uniform(0.0, 360.0, N),
-        datetime_utc=np.array(
-            [
-                np.datetime64(f"2026-{month:02d}-{day:02d}T{hour:02d}:00:00")
-                for _ in range(N)
-            ],
-            dtype="datetime64[s]",
-        ),
+        datetime_utc=datetime_utc,
         ambient_temperature=np.random.uniform(0.0, 30.0, N),
         wind_speed=np.random.uniform(0.0, 7.0, N),
         wind_azimuth=np.random.uniform(0.0, 90.0, N),

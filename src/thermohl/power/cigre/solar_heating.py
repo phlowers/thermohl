@@ -32,9 +32,7 @@ class SolarHeating(PowerTerm):
         :return: Solar radiation.
         """
         date = datetime_utc.astype("datetime64[D]")
-        hour = (
-            datetime_utc.astype("datetime64[s]") - datetime_utc.astype("datetime64[D]")
-        ).astype(int) / 3600.0
+        hour = sun.time_to_float_hours(datetime_utc)
         solar_declination_rad = sun.solar_declination(date)
         hour_angle_rad = sun.hour_angle(hour)
         solar_altitude_rad = sun.solar_altitude(latitude, date, hour)
