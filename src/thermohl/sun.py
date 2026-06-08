@@ -27,8 +27,9 @@ from thermohl import (
 def time_to_float_hours(
     datetime: Union[np.datetime64, npt.NDArray[np.datetime64]],
 ) -> Union[float, npt.NDArray[np.float64]]:
-    datetime = np.asarray(datetime).astype("datetime64[s]")  # noqa
-    seconds = (datetime - datetime.astype("datetime64[D]")).astype(int)  # noqa
+    seconds = (
+        datetime.astype("datetime64[s]") - datetime.astype("datetime64[D]")
+    ).astype(int)  # noqa
     return seconds / 3600.0
 
 
