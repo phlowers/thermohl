@@ -65,6 +65,5 @@ power terms, you must have
 $ R_{\text{DC,high}} - R_{\text{DC,low}} = (T_{\text{high}} - T_{\text{low}}) \cdot k_{\ell} \cdot R_{\text{DC},20} $.
 
 If you use direct solar radiation formula (with `measured_global_radiation` key), you can
-ignore the following parameters : `latitude`, `longitude`, `month`, `day`,
-`hour`, `albedo` and `turbidity`.
+ignore the following parameters : `latitude`, `longitude`, `datetime_utc`, `albedo` and `turbidity`.
 
