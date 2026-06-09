@@ -7,9 +7,8 @@
 
 """Base class to build a solver for heat equation."""
 
-from datetime import timedelta
 from abc import ABC, abstractmethod
-from typing import Type, Any, Optional, Iterable
+from typing import Type, Any, Optional
 from contextlib import contextmanager
 
 import numpy.typing as npt
@@ -21,7 +20,7 @@ from thermohl import (
     floatArray,
     numberArray,
     numberArrayLike,
-    datetimeListLike,
+    datetimeArrayLike,
 )
 from thermohl.power import PowerTerm
 from thermohl.solver.parameters import Parameters
@@ -226,7 +225,7 @@ def reshape(input_array: numberArrayLike, nb_row: int, nb_columns: int) -> numbe
 
 
 def _set_dates(
-    datetime_utc: datetimeListLike,
+    datetime_utc: datetimeArrayLike,
     offset: floatArray,
     number_of_computations: int,
 ) -> npt.NDArray[np.datetime64]:
@@ -241,18 +240,11 @@ def _set_dates(
 
     :return: 2D array of shape (len(offset), number_of_computations) with datetime values.
     """
-    datetime_utc = (
-        np.array(datetime_utc)
-        if isinstance(datetime_utc, Iterable)
-        else np.array(number_of_computations * [datetime_utc])
-    )
+    dt = np.asarray(datetime_utc, dtype="datetime64[s]")
+    dt = dt if dt.ndim > 0 else np.full(number_of_computations, dt)
 
-    number_of_offset = len(offset)
-    datetime_with_offset = np.zeros(
-        (number_of_offset, number_of_computations), dtype=object
-    )
-    for i in range(number_of_offset):
-        datetime_with_offset[i, :] = datetime_utc + timedelta(seconds=float(offset[i]))
+    offsets = np.asarray(offset, dtype=float).astype("timedelta64[s]")
+    datetime_with_offset = dt + offsets[:, None]
 
     return datetime_with_offset
 

@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
+from datetime import datetime
 import numpy as np
 from numpy import ndarray
 
@@ -181,7 +181,7 @@ def test_compress_with_empty_dict():
     args = Parameters({})
     args.compress()
     for key in args.keys():
-        assert isinstance(args[key], (float, np.int64, ndarray, datetime))
+        assert isinstance(args[key], (float, np.int64, ndarray, np.datetime64))
 
 
 # Tests Fonctions Base
@@ -252,49 +252,51 @@ def test_reshape_invalid_shape():
 
 
 def test_set_dates_single_day():
-    datetime_utc = datetime(2000, 1, 1, 0, tzinfo=timezone.utc)
+    datetime_utc = np.datetime64("2000-01-01T00:00:00")
     offset = np.array([0, 3600, 7200])
     n = 1
 
     result = _set_dates(datetime_utc, offset, n)
 
     assert result.shape == (3, 1)
-    assert result[0, 0] == datetime(2000, 1, 1, 0, tzinfo=timezone.utc)
-    assert result[1, 0] == datetime(2000, 1, 1, 1, tzinfo=timezone.utc)
-    assert result[2, 0] == datetime(2000, 1, 1, 2, tzinfo=timezone.utc)
+    assert result[0, 0] == np.datetime64("2000-01-01T00:00:00")
+    assert result[1, 0] == np.datetime64("2000-01-01T01:00:00")
+    assert result[2, 0] == np.datetime64("2000-01-01T02:00:00")
 
 
 def test_set_dates_multiple_days():
-    datetime_utc = datetime(2000, 1, 1, 23, tzinfo=timezone.utc)
+    datetime_utc = np.datetime64("2000-01-01T23:00:00")
     offset = np.array([0, 3600, 7200])
     n = 1
 
     result = _set_dates(datetime_utc, offset, n)
 
     assert result.shape == (3, 1)
-    assert result[0, 0] == datetime(2000, 1, 1, 23, tzinfo=timezone.utc)
-    assert result[1, 0] == datetime(2000, 1, 2, 0, tzinfo=timezone.utc)
-    assert result[2, 0] == datetime(2000, 1, 2, 1, tzinfo=timezone.utc)
+    assert result[0, 0] == np.datetime64("2000-01-01T23:00:00")
+    assert result[1, 0] == np.datetime64("2000-01-02T00:00:00")
+    assert result[2, 0] == np.datetime64("2000-01-02T01:00:00")
 
 
 def test_set_dates_multiple_months():
-    datetime_utc = datetime(2000, 12, 31, 23, tzinfo=timezone.utc)
+    datetime_utc = np.datetime64("2000-12-31T23:00:00")
     offset = np.array([0, 3600, 7200])
     n = 1
 
     result = _set_dates(datetime_utc, offset, n)
 
     assert result.shape == (3, 1)
-    assert result[0, 0] == datetime(2000, 12, 31, 23, tzinfo=timezone.utc)
-    assert result[1, 0] == datetime(2001, 1, 1, 0, tzinfo=timezone.utc)
-    assert result[2, 0] == datetime(2001, 1, 1, 1, tzinfo=timezone.utc)
+    assert result[0, 0] == np.datetime64("2000-12-31T23:00:00")
+    assert result[1, 0] == np.datetime64("2001-01-01T00:00:00")
+    assert result[2, 0] == np.datetime64("2001-01-01T01:00:00")
 
 
 def test_set_dates_multiple_inputs():
-    datetime_utc = [
-        datetime(2000, 1, 1, 0, tzinfo=timezone.utc),
-        datetime(2000, 2, 2, 12, tzinfo=timezone.utc),
-    ]
+    datetime_utc = np.array(
+        [
+            np.datetime64("2000-01-01T00:00:00"),
+            np.datetime64("2000-02-02T12:00:00"),
+        ]
+    )
     offset = np.array([0, 3600, 7200])
     n = 2
 
@@ -302,10 +304,10 @@ def test_set_dates_multiple_inputs():
 
     assert result.shape == (3, 2)
 
-    assert result[0, 0] == datetime(2000, 1, 1, 0, tzinfo=timezone.utc)
-    assert result[1, 0] == datetime(2000, 1, 1, 1, tzinfo=timezone.utc)
-    assert result[2, 0] == datetime(2000, 1, 1, 2, tzinfo=timezone.utc)
+    assert result[0, 0] == np.datetime64("2000-01-01T00:00:00")
+    assert result[1, 0] == np.datetime64("2000-01-01T01:00:00")
+    assert result[2, 0] == np.datetime64("2000-01-01T02:00:00")
 
-    assert result[0, 1] == datetime(2000, 2, 2, 12, tzinfo=timezone.utc)
-    assert result[1, 1] == datetime(2000, 2, 2, 13, tzinfo=timezone.utc)
-    assert result[2, 1] == datetime(2000, 2, 2, 14, tzinfo=timezone.utc)
+    assert result[0, 1] == np.datetime64("2000-02-02T12:00:00")
+    assert result[1, 1] == np.datetime64("2000-02-02T13:00:00")
+    assert result[2, 1] == np.datetime64("2000-02-02T14:00:00")

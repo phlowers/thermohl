@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
 import pytest
 import numpy as np
 from numpy import array
@@ -39,7 +38,7 @@ def test_solver3t_legacy():
         "magnetic_coeff_per_a": array([0.0]),
         "solar_absorptivity": array([0.9]),
         "emissivity": array([0.8]),
-        "datetime_utc": datetime(2000, 3, 7, 0, tzinfo=timezone.utc),
+        "datetime_utc": np.datetime64("2000-03-07T00:00:00"),
     }
     Ts0 = [34.955032]
     Tc0 = [36.164476]
@@ -103,14 +102,16 @@ def test_steady_temperature_uncertainty_results():
         "nebulosity": array([5, 5, 5, 5, 5, 5]),
         # others
         "transit": array([700, 700, 700, 1000, 1000, 1000]),
-        "datetime_utc": [
-            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 10, 1, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 12, 21, 8, 0, tzinfo=timezone.utc),
-            datetime(2026, 12, 21, 21, 0, tzinfo=timezone.utc),
-        ],
+        "datetime_utc": np.array(
+            [
+                np.datetime64("2026-10-01T08:00:00"),
+                np.datetime64("2026-10-01T08:00:00"),
+                np.datetime64("2026-10-01T08:00:00"),
+                np.datetime64("2026-10-01T08:00:00"),
+                np.datetime64("2026-12-21T08:00:00"),
+                np.datetime64("2026-12-21T21:00:00"),
+            ]
+        ),
     }
     solver_input_data.update(cable_data)
 

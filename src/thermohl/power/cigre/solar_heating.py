@@ -5,13 +5,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import Any, Iterable
+from typing import Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, sun as sun, datetimeListLike
+from thermohl import floatArrayLike, sun as sun, datetimeArrayLike
 from thermohl.power import PowerTerm
-from thermohl.sun import time_to_float_hours
 
 
 class SolarHeating(PowerTerm):
@@ -22,7 +21,7 @@ class SolarHeating(PowerTerm):
         latitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation.
 
@@ -32,16 +31,8 @@ class SolarHeating(PowerTerm):
         :param datetime_utc: Datetime in UTC.
         :return: Solar radiation.
         """
-        date = (
-            np.array([d.date() for d in datetime_utc])
-            if isinstance(datetime_utc, Iterable)
-            else datetime_utc.date()
-        )
-        hour = (
-            np.array([time_to_float_hours(d.time()) for d in datetime_utc])
-            if isinstance(datetime_utc, Iterable)
-            else time_to_float_hours(datetime_utc.time())
-        )
+        date = datetime_utc.astype("datetime64[D]")
+        hour = sun.time_to_float_hours(datetime_utc)
         solar_declination_rad = sun.solar_declination(date)
         hour_angle_rad = sun.hour_angle(hour)
         solar_altitude_rad = sun.solar_altitude(latitude, date, hour)
@@ -83,7 +74,7 @@ class SolarHeating(PowerTerm):
         latitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         albedo: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         solar_irradiance: floatArrayLike,

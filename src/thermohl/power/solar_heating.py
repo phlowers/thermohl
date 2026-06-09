@@ -5,13 +5,12 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from typing import List, Optional, Any, Iterable
+from typing import List, Optional, Any
 
 import numpy as np
 
-from thermohl import floatArrayLike, sun, datetimeListLike
+from thermohl import floatArrayLike, sun, datetimeArrayLike
 from thermohl.power.power_term import PowerTerm
-from thermohl.sun import time_to_float_hours
 
 
 class _SRad:
@@ -65,19 +64,11 @@ class _SRad:
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
     ) -> floatArrayLike:
         """Compute solar radiation."""
-        date = (
-            [d.date() for d in datetime_utc]
-            if isinstance(datetime_utc, Iterable)
-            else datetime_utc.date()
-        )
-        hour = (
-            np.array([time_to_float_hours(d.time()) for d in datetime_utc])
-            if isinstance(datetime_utc, Iterable)
-            else time_to_float_hours(datetime_utc.time())
-        )
+        date = datetime_utc.astype("datetime64[D]")
+        hour = sun.time_to_float_hours(datetime_utc)
         computed_solar_altitude = sun.solar_altitude(latitude, date, hour)
         computed_solar_azimuth = sun.solar_azimuth(latitude, date, hour)
         computed_incidence_angle = np.arccos(
@@ -103,7 +94,7 @@ class SolarHeatingBase(PowerTerm):
         altitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
         turbidity: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         est: _SRad,

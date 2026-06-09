@@ -10,7 +10,6 @@ from typing import Union, List
 
 import numpy as np
 import numpy.typing as npt
-from datetime import datetime, date
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
@@ -29,8 +28,8 @@ except ImportError:
 floatArrayLike = Union[float, npt.NDArray[np.float64]]
 numberArrayLike = Union[float, int, npt.NDArray[np.float64], npt.NDArray[np.int64]]
 strListLike = Union[str, List[str]]
-dateListLike = Union[date, List[date]]
-datetimeListLike = Union[datetime, List[datetime]]
+dateArrayLike = Union[np.datetime64, npt.NDArray[np.datetime64]]
+datetimeArrayLike = Union[np.datetime64, npt.NDArray[np.datetime64]]
 
 floatArray = npt.NDArray[np.float64]
 intArray = npt.NDArray[np.int64]
