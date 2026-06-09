@@ -5,7 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 import logging
-from typing import Any, Tuple, Callable
+from typing import Any, Tuple
 import numpy as np
 from thermohl import (
     floatArrayLike,
@@ -14,6 +14,7 @@ from thermohl import (
 )
 from thermohl.power import SolarHeatingBase
 
+from thermohl.utils import bisect_v
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +120,7 @@ def compute_data_from_provided(
 
 
 def estimate_nebulosity_from_diffuse_and_beam_radiation(
-    solar_altitude: float, radiation_sum: float
+    solar_altitude: floatArrayLike, radiation_sum: floatArrayLike
 ) -> float:
     """Estimate nebulosity based on diffuse radiation + beam radiation, and solar altitude.
 
@@ -133,67 +134,39 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     Returns:
         integer or np.nan: nebulosity (integer between 0 and 8).
     """
-    if np.sin(solar_altitude) <= TOL:
-        # This is the night.
-        # Can't compute a nebulosity
-        return np.nan
 
-    # Since f is strictly monotonous (decreasing) which can use dichotomy
-    # algorithm to find x which minimizes |f(x) - radiation_sum|.
+    # Since f is strictly monotonous (increasing) we can use dichotomy
+    # algorithm to find x which minimizes |f|.
     def f(x):
         global_radiation = compute_global_radiation(solar_altitude, x)
         diffuse_radiation = compute_diffuse_radiation(global_radiation, x)
         beam_radiation = compute_beam_radiation(
             global_radiation, diffuse_radiation, solar_altitude
         )
-        return diffuse_radiation + beam_radiation
+        return radiation_sum - diffuse_radiation - beam_radiation
 
     lower_bound = 0
     upper_bound = 8
 
-    return _integer_bisect(f, radiation_sum, lower_bound, upper_bound)
+    if hasattr(radiation_sum, "shape") and radiation_sum.shape:
+        output_shape = radiation_sum.shape
+    else:
+        output_shape = (1,)
 
-
-def _integer_bisect(
-    f: Callable[[float], float],
-    target: float,
-    lower_bound: float,
-    upper_bound: float,
-    tol: float = TOL,
-) -> np.ndarray[int]:
-    """Returns x such as to minimize |f(x) - target|, with x an integer.
-
-    f must be a monotonic function.
-    """
-    if lower_bound > upper_bound:
-        raise ValueError("lower_bound must be lower or equal to upper_bound")
-
-    if f(lower_bound) > f(upper_bound):
-
-        def f_opposite(x):
-            return -f(x)
-
-        return _integer_bisect(f_opposite, -target, lower_bound, upper_bound)
-
-    if target < f(lower_bound) - tol or target > f(upper_bound) + tol:
-        raise ValueError(
-            f"Can't find x such that f(x) == {target} in given range [{lower_bound}; {upper_bound}])"
-        )
-
-    while upper_bound - lower_bound > 1 - tol:
-        mean = (lower_bound + upper_bound) / 2
-        f_value = f(mean)
-        if f_value >= target:
-            upper_bound = mean
-        else:
-            lower_bound = mean
-    lower_bound = np.floor(lower_bound)
-    upper_bound = np.ceil(upper_bound)
-    return np.where(
-        np.abs(f(lower_bound) - target) <= np.abs(target - f(upper_bound)),
-        lower_bound,
-        upper_bound,
+    # Very few iterations are needed because we want an integer approximate answer
+    nebulosity, _ = bisect_v(
+        f, lower_bound, upper_bound, output_shape, max_iterations=4
     )
+    rounded_down = np.floor(nebulosity)
+    rounded_up = np.ceil(nebulosity)
+    nebulosity = np.where(
+        np.abs(f(rounded_down)) <= np.abs(f(rounded_up)),
+        rounded_down,
+        rounded_up,
+    )
+    # negative sin(solar_altitude) means this is the night
+    # so can't compute nebulosity
+    return np.where(np.sin(solar_altitude) <= TOL, np.nan, nebulosity)
 
 
 class SolarHeating(SolarHeatingBase):
