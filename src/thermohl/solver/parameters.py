@@ -18,6 +18,9 @@ class DEFAULT_PARAMETERS:
     imax = 9999.0
 
 
+DEFAULT_ALBEDO = 0.15
+
+
 class Parameters:
     """Object to store Solver args in a dict-like manner."""
 
@@ -51,7 +54,7 @@ class Parameters:
         self.wind_speed = 0.0  # wind speed (m.s**-1)
         self.wind_azimuth = 90.0  # wind_azimuth (deg, regarding north)
         self.nebulosity = np.nan  # nebulosity (1)
-        self.albedo = 0.15  # albedo (1)
+        self.albedo = DEFAULT_ALBEDO  # albedo (1)
         # coefficient for air pollution from 0 (clean) to 1 (polluted)
         self.turbidity = 0.1
         self.transit = 100.0  # transit intensity (A)

@@ -22,6 +22,70 @@ logger = logging.getLogger(__name__)
 TOL = 1e-06
 
 
+class RadiationIncompatibleWithParameters(ValueError):
+    """Raised when attempting to estimate a nebulosity for a radiation
+    which is not compatible with the other parameters.
+
+    This means the described situation is physically impossible."""
+
+    def __init__(self, *args, **kwargs):
+        self.message = (
+            "It's impossible to have this radiation level with given parameters."
+        )
+        super().__init__(*args, **kwargs)
+
+
+def diffuse_and_beam_radiations(
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    nebulosity: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute diffuse radiation and beam radiation.
+
+    :param datetime_utc: Array of datetimes (more precisely np.datetime64). The year is indifferent.
+    :param latitude: Array of latitudes.
+    :param longitude: Array of longitudes.
+    :param nebulosity: Array of nebulosities (integer between 0 and 8).
+    :return: Tuple of (diffuse_radiation, beam_radiation) in W/m².
+    """
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    global_radiation = compute_global_radiation(solar_altitude, nebulosity)
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
+    return diffuse_radiation, beam_radiation
+
+
+def estimate_nebulosity(
+    diffuse_plus_beam_radiation: np.ndarray,
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+):
+    """Estimate nebulosity from measured diffuse radiation + beam radiation.
+
+    The results are rounded to the values which give the closest radiation sums.
+
+    Raises RadiationIncompatibleWithParameters if it's impossible to have
+    this radiation level with given parameters (datetime_utc, latitude and longitude).
+
+    :param diffuse_plus_beam_solar_flow: Array of diffuse radiation + beam radiation (in W/m²).
+    :param datetime_utc: Array of datetimes (more precisely np.datetime64). The year is indifferent.
+    :param latitude: Array of latitudes.
+    :param longitude: Array of longitudes.
+    :return: Nebulosities (intgers between 0 and 8, or nan if it can't be computed because of the night).
+    """
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    return estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude,
+        diffuse_plus_beam_radiation,
+    )
+
+
 def compute_global_radiation(
     solar_altitude: floatArrayLike, nebulosity: floatArrayLike
 ) -> floatArrayLike:
@@ -126,7 +190,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
 
     For solar_altitude values corresponding to the night, the result is nan.
     Else, if no nebulosity could yield the given radiation (e.g. given radiation
-    is too high for given solar altitude), it raises a ValueError.
+    is too high for given solar altitude), it raises a RadiationIncompatibleWithParameters.
 
     Args:
         solar_altitude(float): solar altitude in radians.
@@ -153,10 +217,14 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     else:
         output_shape = (1,)
 
-    # Very few iterations are needed because we want an integer approximate answer
-    nebulosity, _ = bisect_v(
-        f, lower_bound, upper_bound, output_shape, max_iterations=4
-    )
+    try:
+        # Very few iterations are needed because we want an integer approximate answer
+        nebulosity, _ = bisect_v(
+            f, lower_bound, upper_bound, output_shape, max_iterations=4
+        )
+    except ValueError:
+        raise RadiationIncompatibleWithParameters()
+
     rounded_down = np.floor(nebulosity)
     rounded_up = np.ceil(nebulosity)
     nebulosity = np.where(
