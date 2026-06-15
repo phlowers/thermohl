@@ -19,7 +19,7 @@ from thermohl.power.rte.solar_heating import (
     compute_global_radiation,
     compute_diffuse_radiation,
     compute_beam_radiation,
-    RadiationIncompatibleWithParameters,
+    RadiationIncompatibleWithParametersError,
 )
 
 
@@ -262,7 +262,7 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> N
         global_radiation, diffuse_radiation, solar_altitude
     )
 
-    with pytest.raises(RadiationIncompatibleWithParameters):
+    with pytest.raises(RadiationIncompatibleWithParametersError):
         estimate_nebulosity_from_diffuse_and_beam_radiation(
             solar_altitude, diffuse_radiation + beam_radiation
         )
@@ -287,7 +287,7 @@ def test_estimate_nebulosity__array_no_solution() -> None:
     datetime_utc = np.array([np.datetime64("2026-06-15T00:00:00")])
     latitude = np.array([45.0])
     longitude = np.array([20.0])
-    with pytest.raises(RadiationIncompatibleWithParameters):
+    with pytest.raises(RadiationIncompatibleWithParametersError):
         estimate_nebulosity(
             diffuse_plus_beam_radiation,
             datetime_utc,

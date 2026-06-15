@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 TOL = 1e-06
 
 
-class RadiationIncompatibleWithParameters(ValueError):
+class RadiationIncompatibleWithParametersError(ValueError):
     """Raised when attempting to estimate a nebulosity for a radiation
     which is not compatible with the other parameters.
 
@@ -71,7 +71,7 @@ def estimate_nebulosity(
 
     The results are rounded to the values which give the closest radiation sums.
 
-    Raises RadiationIncompatibleWithParameters if it's impossible to have
+    Raises RadiationIncompatibleWithParametersError if it's impossible to have
     this radiation level with given parameters (datetime_utc, latitude and longitude).
 
     Args:
@@ -194,7 +194,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
 
     For solar_altitude values corresponding to the night, the result is nan.
     Else, if no nebulosity could yield the given radiation (e.g. given radiation
-    is too high for given solar altitude), it raises a RadiationIncompatibleWithParameters.
+    is too high for given solar altitude), it raises a RadiationIncompatibleWithParametersError.
 
     Args:
         solar_altitude(float): solar altitude in radians.
@@ -227,7 +227,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
             f, lower_bound, upper_bound, output_shape, max_iterations=4
         )
     except ValueError:
-        raise RadiationIncompatibleWithParameters()
+        raise RadiationIncompatibleWithParametersError()
 
     rounded_down = np.floor(nebulosity)
     rounded_up = np.ceil(nebulosity)
