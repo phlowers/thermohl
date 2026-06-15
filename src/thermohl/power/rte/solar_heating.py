@@ -15,11 +15,71 @@ from thermohl import (
 from thermohl.power import SolarHeatingBase
 
 from thermohl.utils import bisect_v
+from thermohl import errors as thermohl_errors
+
 
 logger = logging.getLogger(__name__)
 
 
 TOL = 1e-06
+
+
+def diffuse_and_beam_radiations(
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    nebulosity: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute diffuse radiation and beam radiation.
+
+    Args:
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+        nebulosity(np.ndarray): Array of nebulosities (integer between 0 and 8).
+    Returns:
+        tuple(np.ndarray, np.ndarray): diffuse_radiation, beam_radiation in W/m².
+    """
+    if (nebulosity < 0).any() or (nebulosity > 8).any():
+        raise ValueError(f"nebulosity must be between 0 and 8. Got {nebulosity}")
+
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    global_radiation = compute_global_radiation(solar_altitude, nebulosity)
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
+    return diffuse_radiation, beam_radiation
+
+
+def estimate_nebulosity(
+    diffuse_plus_beam_radiation: np.ndarray,
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+) -> np.array:
+    """Estimate nebulosity from measured diffuse radiation + beam radiation.
+
+    The results are rounded to the values which give the closest radiation sums.
+
+    Raises RadiationIncompatibleWithParametersError if it's impossible to have
+    this radiation level with given parameters (datetime_utc, latitude and longitude).
+
+    Args:
+        diffuse_plus_beam_solar_flow(np.ndarray): Array of diffuse radiation + beam radiation (in W/m²).
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+    Returns:
+        np.ndarray: Nebulosities (integers between 0 and 8, or nan if it can't be computed because of the night).
+    """
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    return estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude,
+        diffuse_plus_beam_radiation,
+    )
 
 
 def compute_global_radiation(
@@ -126,7 +186,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
 
     For solar_altitude values corresponding to the night, the result is nan.
     Else, if no nebulosity could yield the given radiation (e.g. given radiation
-    is too high for given solar altitude), it raises a ValueError.
+    is too high for given solar altitude), it raises a RadiationIncompatibleWithParametersError.
 
     Args:
         solar_altitude(float): solar altitude in radians.
@@ -153,10 +213,14 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     else:
         output_shape = (1,)
 
-    # Very few iterations are needed because we want an integer approximate answer
-    nebulosity, _ = bisect_v(
-        f, lower_bound, upper_bound, output_shape, max_iterations=4
-    )
+    try:
+        # Very few iterations are needed because we want an integer approximate answer
+        nebulosity, _ = bisect_v(
+            f, lower_bound, upper_bound, output_shape, max_iterations=4
+        )
+    except ValueError:
+        raise thermohl_errors.RadiationIncompatibleWithParametersError()
+
     rounded_down = np.floor(nebulosity)
     rounded_up = np.ceil(nebulosity)
     nebulosity = np.where(

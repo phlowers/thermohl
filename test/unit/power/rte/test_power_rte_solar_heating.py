@@ -13,11 +13,14 @@ import numpy as np
 from thermohl.power.rte.solar_heating import (
     compute_solar_irradiance,
     SolarHeating,
+    diffuse_and_beam_radiations,
+    estimate_nebulosity,
     estimate_nebulosity_from_diffuse_and_beam_radiation,
     compute_global_radiation,
     compute_diffuse_radiation,
     compute_beam_radiation,
 )
+from thermohl import errors as thermohl_errors
 
 
 def test_compute_solar_irradiance_night():
@@ -166,6 +169,47 @@ def test_solar_irradiance_ignored_by_rte_solar_heating():
     assert np.allclose(solar_heating_1.value(100), solar_heating_2.value(100))
 
 
+def test_diffuse_and_beam_radiations() -> None:
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-06-15T00:00"),
+            np.datetime64("2026-06-15T06:00"),
+            np.datetime64("2026-06-15T12:00"),
+        ]
+    )
+    latitude = np.array([48, 48, 48])
+    longitude = np.array([21, 21, 21])
+    nebulosity = np.array([0, 2, 8])
+    diffuse_radiation, beam_radiation = diffuse_and_beam_radiations(
+        datetime_utc,
+        latitude,
+        longitude,
+        nebulosity,
+    )
+    assert np.allclose(diffuse_radiation, np.array([0, 149.44519, 189.98370]))
+    assert np.allclose(beam_radiation, np.array([0, 555.11970, 0]))
+
+
+def test_diffuse_and_beam_radiations__wrong_nebulosity() -> None:
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-06-15T00:00"),
+            np.datetime64("2026-06-15T06:00"),
+            np.datetime64("2026-06-15T12:00"),
+        ]
+    )
+    latitude = np.array([48, 48, 48])
+    longitude = np.array([21, 21, 21])
+    nebulosity = np.array([0, 2, 8.5])
+    with pytest.raises(ValueError):
+        diffuse_and_beam_radiations(
+            datetime_utc,
+            latitude,
+            longitude,
+            nebulosity,
+        )
+
+
 @pytest.mark.parametrize(
     "input_nebulosity, solar_altitude, expected_nebulosity",
     [
@@ -238,7 +282,40 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> N
         global_radiation, diffuse_radiation, solar_altitude
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(thermohl_errors.RadiationIncompatibleWithParametersError):
         estimate_nebulosity_from_diffuse_and_beam_radiation(
             solar_altitude, diffuse_radiation + beam_radiation
+        )
+
+
+def test_estimate_nebulosity__array() -> None:
+    diffuse_plus_beam_radiation = np.array([700, 600])
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T12:00:00"),
+        ]
+    )
+    latitude = np.array([45.0, 45.0])
+    longitude = np.array([20.0, 20.0])
+    nebulosity = estimate_nebulosity(
+        diffuse_plus_beam_radiation,
+        datetime_utc,
+        latitude,
+        longitude,
+    )
+    assert np.allclose(nebulosity, np.array([5, 6]))
+
+
+def test_estimate_nebulosity__array_no_solution() -> None:
+    diffuse_plus_beam_radiation = np.array([700])
+    datetime_utc = np.array([np.datetime64("2026-06-15T00:00:00")])
+    latitude = np.array([45.0])
+    longitude = np.array([20.0])
+    with pytest.raises(thermohl_errors.RadiationIncompatibleWithParametersError):
+        estimate_nebulosity(
+            diffuse_plus_beam_radiation,
+            datetime_utc,
+            latitude,
+            longitude,
         )
