@@ -43,11 +43,13 @@ def diffuse_and_beam_radiations(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Compute diffuse radiation and beam radiation.
 
-    :param datetime_utc: Array of datetimes (more precisely np.datetime64). The year is indifferent.
-    :param latitude: Array of latitudes.
-    :param longitude: Array of longitudes.
-    :param nebulosity: Array of nebulosities (integer between 0 and 8).
-    :return: Tuple of (diffuse_radiation, beam_radiation) in W/m².
+    Args:
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+        nebulosity(np.ndarray): Array of nebulosities (integer between 0 and 8).
+    Returns:
+        tuple(np.ndarray, np.ndarray): diffuse_radiation, beam_radiation in W/m².
     """
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
@@ -64,7 +66,7 @@ def estimate_nebulosity(
     datetime_utc: np.ndarray,
     latitude: np.ndarray,
     longitude: np.ndarray,
-):
+) -> np.array:
     """Estimate nebulosity from measured diffuse radiation + beam radiation.
 
     The results are rounded to the values which give the closest radiation sums.
@@ -72,11 +74,13 @@ def estimate_nebulosity(
     Raises RadiationIncompatibleWithParameters if it's impossible to have
     this radiation level with given parameters (datetime_utc, latitude and longitude).
 
-    :param diffuse_plus_beam_solar_flow: Array of diffuse radiation + beam radiation (in W/m²).
-    :param datetime_utc: Array of datetimes (more precisely np.datetime64). The year is indifferent.
-    :param latitude: Array of latitudes.
-    :param longitude: Array of longitudes.
-    :return: Nebulosities (intgers between 0 and 8, or nan if it can't be computed because of the night).
+    Args:
+        diffuse_plus_beam_solar_flow(np.ndarray): Array of diffuse radiation + beam radiation (in W/m²).
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+    Returns:
+        np.ndarray: Nebulosities (integers between 0 and 8, or nan if it can't be computed because of the night).
     """
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
