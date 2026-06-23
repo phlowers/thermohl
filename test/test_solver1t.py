@@ -140,10 +140,15 @@ def test_steady_intensity_hot_weather():
     )
 
     # Here some ambient temperatures are above the maximum conductor temperature,
-    # so there's no solution - the solver should raise a ValueError
-    with pytest.raises(ValueError):
-        solver_1t.steady_intensity(
-            max_conductor_temperature=45,
-            Imin=np.ones_like(ambient_temperature) * DP.imin,
-            Imax=np.ones_like(ambient_temperature) * DP.imax,
-        )
+    # so there's no solution - the solver should return 0 for these cases
+    result = solver_1t.steady_intensity(
+        max_conductor_temperature=45,
+        Imin=np.ones_like(ambient_temperature) * DP.imin,
+        Imax=np.ones_like(ambient_temperature) * DP.imax,
+    )
+    intensity = result[VariableType.TRANSIT.value]
+    # For ambient temp 30, 35, 40 -> should have some positive intensity (or at least valid bisection)
+    # For ambient temp 45, 50 -> should be 0 because f(Imin) might be > 0 or f(Imax) < 0
+    # Actually if Tamb >= Tmax, convection is >= 0 (cooling if Tmax > Tamb, heating if Tmax < Tamb)
+    # If Tamb=50, Tmax=45, cooling is negative (heating).
+    assert intensity[4] == 0.0

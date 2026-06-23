@@ -17,7 +17,6 @@ from importlib.util import find_spec
 import numpy as np
 import yaml
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -160,30 +159,43 @@ def bisect_v(
     lower_bounds = lower_bound * np.ones(output_shape)
     upper_bounds = upper_bound * np.ones(output_shape)
 
-    # If the condition f(a) <= 0 <= f(b) is not satisfied,
-    # there's no guaranty there is a unique solution, so the bisection method can't be applied
-    # and we raise an error
-    if np.any(func(lower_bounds) > 0) or np.any(func(upper_bounds) < 0):
-        raise ValueError(
-            "Can't use bisection method: function applied to lower bound should be strictly negative"
-            " and function applied to upper bound should be strictly positive."
+    # Check if the condition f(a) <= 0 <= f(b) is satisfied
+    f_lower = func(lower_bounds)
+    f_upper = func(upper_bounds)
+    valid_mask = ((f_lower <= 0) & (f_upper >= 0)).flatten()
+
+    if not np.all(valid_mask):
+        invalid_count = np.sum(~valid_mask)
+        logger.warning(
+            f"Bisection method: {invalid_count} case(s) do not satisfy convergence conditions "
+            f"(f(a) <= 0 <= f(b)). Returning 0 for these cases."
         )
 
-    abs_error = np.abs(upper_bound - lower_bound)
+    abs_error = np.abs(upper_bound - lower_bound) * np.ones(output_shape)
     iteration_count = 1
-    while np.nanmax(abs_error) > tolerance and iteration_count <= max_iterations:
+    # Only iterate on valid cases
+    while (
+        np.any(abs_error[valid_mask] > tolerance) and iteration_count <= max_iterations
+    ):
         midpoint = 0.5 * (lower_bounds + upper_bounds)
         values = func(midpoint)
-        lower_mask = values < 0
+        lower_mask = (values < 0) & valid_mask
+        upper_mask = (values >= 0) & valid_mask
+
         lower_bounds[lower_mask] = midpoint[lower_mask]
-        upper_bounds[~lower_mask] = midpoint[~lower_mask]
-        abs_error = np.abs(upper_bounds - lower_bounds)
+        upper_bounds[upper_mask] = midpoint[upper_mask]
+
+        abs_error[valid_mask] = np.abs(
+            upper_bounds[valid_mask] - lower_bounds[valid_mask]
+        )
         iteration_count += 1
+
     midpoint = 0.5 * (lower_bounds + upper_bounds)
+    midpoint[~valid_mask] = 0.0
     midpoint[np.isnan(func(midpoint))] = np.nan
     if print_error:
         logger.info(
-            f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
+            f"Bisection max err (abs) : {np.nanmax(abs_error):.2E}; count={iteration_count}"
         )
     return midpoint, abs_error
 
