@@ -17,7 +17,6 @@ from thermohl.power import SolarHeatingBase
 from thermohl.utils import bisect_v
 from thermohl import errors as thermohl_errors
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -213,13 +212,9 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     else:
         output_shape = (1,)
 
-    try:
-        # Very few iterations are needed because we want an integer approximate answer
-        nebulosity, _ = bisect_v(
-            f, lower_bound, upper_bound, output_shape, max_iterations=4
-        )
-    except ValueError:
-        raise thermohl_errors.RadiationIncompatibleWithParametersError()
+    nebulosity, _ = bisect_v(
+        f, lower_bound, upper_bound, output_shape, max_iterations=4
+    )
 
     rounded_down = np.floor(nebulosity)
     rounded_up = np.ceil(nebulosity)

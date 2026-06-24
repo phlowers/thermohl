@@ -304,18 +304,32 @@ def test_estimate_nebulosity__array() -> None:
         latitude,
         longitude,
     )
-    assert np.allclose(nebulosity, np.array([5, 6]))
+    assert np.allclose(nebulosity, [5, 6])
 
 
-def test_estimate_nebulosity__array_no_solution() -> None:
+def test_estimate_nebulosity__inconsistent_radiation() -> None:
+    diffuse_plus_beam_radiation = np.array([10, 4200])
+    datetime_utc = np.array([np.datetime64("2026-06-15T12:00:00")])
+    latitude = np.array([45.0])
+    longitude = np.array([20.0])
+    nebulosity = estimate_nebulosity(
+        diffuse_plus_beam_radiation,
+        datetime_utc,
+        latitude,
+        longitude,
+    )
+    assert np.allclose(nebulosity, [8, 0])
+
+
+def test_estimate_nebulosity__array_night() -> None:
     diffuse_plus_beam_radiation = np.array([700])
     datetime_utc = np.array([np.datetime64("2026-06-15T00:00:00")])
     latitude = np.array([45.0])
     longitude = np.array([20.0])
-    with pytest.raises(thermohl_errors.RadiationIncompatibleWithParametersError):
-        estimate_nebulosity(
-            diffuse_plus_beam_radiation,
-            datetime_utc,
-            latitude,
-            longitude,
-        )
+    nebulosity = estimate_nebulosity(
+        diffuse_plus_beam_radiation,
+        datetime_utc,
+        latitude,
+        longitude,
+    )
+    assert np.isnan(nebulosity[0])

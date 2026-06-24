@@ -166,7 +166,7 @@ def bisect_v(
         invalid_count = np.sum(~valid_mask)
         logger.warning(
             f"Bisection method: {invalid_count} case(s) do not satisfy convergence conditions "
-            f"(f(a) <= 0 <= f(b)). Returning 0 for these cases."
+            f"(f(a) <= 0 <= f(b)). Returning lower_bound or upper_bound for these cases."
         )
 
     abs_error = np.abs(upper_bound - lower_bound) * np.ones(output_shape)
@@ -189,7 +189,13 @@ def bisect_v(
         iteration_count += 1
 
     midpoint = 0.5 * (lower_bounds + upper_bounds)
-    midpoint[~valid_mask] = 0.0
+    # Handle non-convergent cases: return lower_bound if f(a) > 0, upper_bound if f(b) < 0
+    # If both are true (shouldn't happen for monotonic), f_lower > 0 takes precedence here
+    midpoint[~valid_mask] = np.where(
+        func(lower_bounds)[~valid_mask] > 0,
+        lower_bounds[~valid_mask],
+        upper_bounds[~valid_mask],
+    )
     midpoint[np.isnan(func(midpoint))] = np.nan
     if print_error:
         logger.info(
@@ -284,7 +290,10 @@ def quasi_newton_2d(
             break
 
     final_err = np.zeros_like(x)
-    final_err[valid_mask] = np.maximum(np.abs(err_abs_x[valid_mask] / x[valid_mask]), np.abs(err_abs_y[valid_mask] / y[valid_mask]))
+    final_err[valid_mask] = np.maximum(
+        np.abs(err_abs_x[valid_mask] / x[valid_mask]),
+        np.abs(err_abs_y[valid_mask] / y[valid_mask]),
+    )
 
     return x, y, count + 1, final_err
 

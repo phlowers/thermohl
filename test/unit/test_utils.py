@@ -84,7 +84,9 @@ def test_bisect_no_convergence():
         upper_bound=50,
         output_shape=(1,),
     )
-    assert x0[0] == 0.0
+    # f(x) = x^2 + 1. f(-50) = 2501 > 0.
+    # Should return lower_bound = -50.0
+    assert x0[0] == -50.0
 
 
 def test_bisect_no_convergence_array():
@@ -101,10 +103,7 @@ def test_bisect_no_convergence_array():
         upper_bound=2.0,
         output_shape=(2,),
     )
-    # case 1 should be exactly 0.0 because it's invalid
-    assert x0[1] == 0.0
-    # case 0 should be 1.0
-    np.testing.assert_allclose(x0[0], 1.0, atol=1e-6)
+    assert np.allclose(x0, [1, 0])
 
 
 def test_bisect_all_convergent():
@@ -123,6 +122,7 @@ def test_bisect_all_non_convergent():
         return x**2 + 1.0  # f(x) > 0 always
 
     x0, err = bisect_v(f, 0.0, 10.0, output_shape=(3,))
+    # f(0) = 1 > 0, so returns lower_bound = 0.0
     np.testing.assert_allclose(x0, np.zeros(3))
 
 
@@ -138,7 +138,7 @@ def test_bisect_mixed_convergence():
     tol = 1e-6
     x0, err = bisect_v(f, 0.0, 10.0, output_shape=(3,), tolerance=tol)
 
-    # First case should be 0.0
+    # First case should be lower_bound = 0.0 because f(0) = 0^2 - (-1) = 1 > 0
     assert x0[0] == 0.0
     # Other cases should have converged
     np.testing.assert_allclose(x0[1:], [1.0, 2.0], atol=tol)
