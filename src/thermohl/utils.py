@@ -169,7 +169,7 @@ def bisect_v(
             f"(f(a) <= 0 <= f(b)). Returning lower_bound or upper_bound for these cases."
         )
 
-    abs_error = np.abs(upper_bound - lower_bound)
+    abs_error = np.abs(upper_bounds - lower_bounds)
     iteration_count = 1
     # Only iterate on valid cases
     while (
@@ -247,8 +247,6 @@ def quasi_newton_2d(
     """
     x = x_init.copy()
     y = y_init.copy()
-    err_abs_x = np.zeros_like(x)
-    err_abs_y = np.zeros_like(y)
 
     for count in range(max_iterations):
         f1, f2 = func(x, y)
@@ -279,19 +277,13 @@ def quasi_newton_2d(
         x -= err_abs_x
         y -= err_abs_y
 
-        rel_err_x = np.abs(err_abs_x / x)
-        rel_err_y = np.abs(err_abs_y / y)
-        err_val = max(np.nanmax(rel_err_x), np.nanmax(rel_err_y))
-
-        if err_val <= relative_tolerance:
+        err_rel_x = np.abs(err_abs_x / x)
+        err_rel_y = np.abs(err_abs_y / y)
+        rel_err = max(np.nanmax(err_rel_x), np.nanmax(err_rel_y))
+        if rel_err <= relative_tolerance:
             break
 
-    final_err = np.maximum(
-        np.abs(err_abs_x / x),
-        np.abs(err_abs_y / y),
-    )
-
-    return x, y, count + 1, final_err
+    return x, y, count + 1, rel_err
 
 
 def depends_on_optional(module_name: str):
