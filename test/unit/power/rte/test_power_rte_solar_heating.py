@@ -20,7 +20,6 @@ from thermohl.power.rte.solar_heating import (
     compute_diffuse_radiation,
     compute_beam_radiation,
 )
-from thermohl import errors as thermohl_errors
 
 
 def test_compute_solar_irradiance_night():

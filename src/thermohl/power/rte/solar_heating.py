@@ -15,7 +15,6 @@ from thermohl import (
 from thermohl.power import SolarHeatingBase
 
 from thermohl.utils import bisect_v
-from thermohl import errors as thermohl_errors
 
 logger = logging.getLogger(__name__)
 
