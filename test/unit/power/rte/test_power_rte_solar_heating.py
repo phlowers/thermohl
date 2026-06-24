@@ -267,11 +267,10 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__array() -> None:
 
 
 def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> None:
-    # Take the solar altitude and nebulosity which give the highest radiation
-    # (zenith and no clouds),
-    # compute the global radiation, take a greater value.
-    # It's impossible to find a nebulosity which gives this radiation,
-    # attempting to calculate it should raise an error.
+    # Take the solar altitude and nebulosity which give the highest radiation (zenith and no clouds).
+    # Compute the global radiation, and use a greater value to try to compute nebulosity.
+    # It's impossible to find a nebulosity with the given radiation, attempting to
+    # calculate it should raise a warning log and return a saturated value (0 in this case).
     solar_altitude = np.pi / 2
 
     global_radiation = (
@@ -282,10 +281,10 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> N
         global_radiation, diffuse_radiation, solar_altitude
     )
 
-    with pytest.raises(thermohl_errors.RadiationIncompatibleWithParametersError):
-        estimate_nebulosity_from_diffuse_and_beam_radiation(
-            solar_altitude, diffuse_radiation + beam_radiation
-        )
+    nebulosity = estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude, diffuse_radiation + beam_radiation
+    )
+    assert nebulosity == 0
 
 
 def test_estimate_nebulosity__array() -> None:
