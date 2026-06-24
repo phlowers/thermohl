@@ -250,15 +250,7 @@ def quasi_newton_2d(
     err_abs_x = np.zeros_like(x)
     err_abs_y = np.zeros_like(y)
 
-    # identify valid cases (where x_init > 0)
-    # If x_init is 0, it means it didn't converge in the first place or it is really 0.
-    # We should avoid computing on these cases to avoid division by zero.
-    valid_mask = (x_init > 0).flatten()
-
     for count in range(max_iterations):
-        if not np.any(valid_mask):
-            break
-
         f1, f2 = func(x, y)
         f1_xp, f2_xp = func(x + delta_x, y)
         f1_xm, f2_xm = func(x - delta_x, y)
@@ -272,27 +264,31 @@ def quasi_newton_2d(
 
         det = jacobian_11 * jacobian_22 - jacobian_12 * jacobian_21
         inv_jacobian_det = np.zeros_like(det)
-        inv_jacobian_det[valid_mask] = 1.0 / det[valid_mask]
+        mask_det = det != 0
+        inv_jacobian_det[mask_det] = 1.0 / det[mask_det]
 
-        err_abs_x = inv_jacobian_det * (jacobian_22 * f1 - jacobian_12 * f2)
-        err_abs_y = inv_jacobian_det * (jacobian_11 * f2 - jacobian_21 * f1)
+        err_abs_x = np.zeros_like(x)
+        err_abs_y = np.zeros_like(y)
+        err_abs_x[mask_det] = inv_jacobian_det[mask_det] * (
+            jacobian_22[mask_det] * f1[mask_det] - jacobian_12[mask_det] * f2[mask_det]
+        )
+        err_abs_y[mask_det] = inv_jacobian_det[mask_det] * (
+            jacobian_11[mask_det] * f2[mask_det] - jacobian_21[mask_det] * f1[mask_det]
+        )
 
         x -= err_abs_x
         y -= err_abs_y
 
-        rel_err_x = np.zeros_like(x)
-        rel_err_y = np.zeros_like(y)
-        rel_err_x[valid_mask] = np.abs(err_abs_x[valid_mask] / x[valid_mask])
-        rel_err_y[valid_mask] = np.abs(err_abs_y[valid_mask] / y[valid_mask])
+        rel_err_x = np.abs(err_abs_x / x)
+        rel_err_y = np.abs(err_abs_y / y)
         err_val = max(np.nanmax(rel_err_x), np.nanmax(rel_err_y))
 
         if err_val <= relative_tolerance:
             break
 
-    final_err = np.zeros_like(x)
-    final_err[valid_mask] = np.maximum(
-        np.abs(err_abs_x[valid_mask] / x[valid_mask]),
-        np.abs(err_abs_y[valid_mask] / y[valid_mask]),
+    final_err = np.maximum(
+        np.abs(err_abs_x / x),
+        np.abs(err_abs_y / y),
     )
 
     return x, y, count + 1, final_err
