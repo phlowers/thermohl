@@ -1,5 +1,5 @@
 version = 1
-revision = 3
+revision = 2
 requires-python = ">=3.10, <3.15"
 resolution-markers = [
     "python_full_version >= '3.14' and sys_platform == 'win32'",
@@ -3102,7 +3102,7 @@ docs = [
     { name = "markdown-extensions", specifier = ">=0.0.1" },
     { name = "markdown-include", specifier = ">=0.8.1" },
     { name = "matplotlib", specifier = ">=3.10.8" },
-    { name = "matplotlib-inline", specifier = ">=0.2.1" },
+    { name = "matplotlib-inline", specifier = ">=0.1.7" },
     { name = "mistune", specifier = ">=3.2.1" },
     { name = "mkdocs", specifier = ">=1.6.1" },
     { name = "mkdocs-jupyter", specifier = "==0.26.3" },
@@ -3123,7 +3123,7 @@ notebooks = [
     { name = "ipykernel", specifier = ">=7.3.0" },
     { name = "ipython", specifier = ">=8.39.0" },
     { name = "matplotlib", specifier = ">=3.10.8" },
-    { name = "matplotlib-inline", specifier = ">=0.2.1" },
+    { name = "matplotlib-inline", specifier = ">=0.1.7" },
 ]
 test = [
     { name = "pylint", specifier = ">=3.3.1" },

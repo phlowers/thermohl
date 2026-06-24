@@ -138,3 +138,6 @@ indent-style = "space"
 write_to = "src/thermohl/_version.py"
 version_scheme = "post-release"
 local_scheme = "no-local-version"
+
+[tool.pytest.ini_options]
+testpaths = ["test"]
