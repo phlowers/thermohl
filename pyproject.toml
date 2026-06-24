@@ -140,4 +140,5 @@ version_scheme = "post-release"
 local_scheme = "no-local-version"
 
 [tool.pytest.ini_options]
+pythonpath = ["."]
 testpaths = ["test"]
