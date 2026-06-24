@@ -169,7 +169,7 @@ def bisect_v(
             f"(f(a) <= 0 <= f(b)). Returning lower_bound or upper_bound for these cases."
         )
 
-    abs_error = np.abs(upper_bound - lower_bound) * np.ones(output_shape)
+    abs_error = np.abs(upper_bound - lower_bound)
     iteration_count = 1
     # Only iterate on valid cases
     while (
