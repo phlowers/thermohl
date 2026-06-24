@@ -62,9 +62,6 @@ def estimate_nebulosity(
 
     The results are rounded to the values which give the closest radiation sums.
 
-    Raises RadiationIncompatibleWithParametersError if it's impossible to have
-    this radiation level with given parameters (datetime_utc, latitude and longitude).
-
     Args:
         diffuse_plus_beam_solar_flow(np.ndarray): Array of diffuse radiation + beam radiation (in W/m²).
         datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
@@ -185,7 +182,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
 
     For solar_altitude values corresponding to the night, the result is nan.
     Else, if no nebulosity could yield the given radiation (e.g. given radiation
-    is too high for given solar altitude), it raises a RadiationIncompatibleWithParametersError.
+    is too high or too low for given solar altitude), it provides a capped value between 0 and 8.
 
     Args:
         solar_altitude(float): solar altitude in radians.
