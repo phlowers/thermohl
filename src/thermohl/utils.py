@@ -160,7 +160,7 @@ def bisect_v(
     upper_bounds = upper_bound * np.ones(output_shape)
 
     # Check if the condition f(a) <= 0 <= f(b) is satisfied
-    valid_mask = ((func(lower_bounds) <= 0) & (func(upper_bounds) >= 0)).flatten()
+    valid_mask = (func(lower_bounds) <= 0) & (func(upper_bounds) >= 0)
 
     if not np.all(valid_mask):
         invalid_count = np.sum(~valid_mask)

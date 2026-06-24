@@ -78,28 +78,70 @@ def test_bisect_no_convergence():
     def f(x):
         return x**2 + 1  # No root
 
-    with pytest.raises(ValueError):
-        bisect_v(
-            f,
-            lower_bound=-50,
-            upper_bound=50,
-            output_shape=(1,),
-        )
+    x0, err = bisect_v(
+        f,
+        lower_bound=-50,
+        upper_bound=50,
+        output_shape=(1,),
+    )
+    assert x0[0] == 0.0
 
 
 def test_bisect_no_convergence_array():
-    c = np.arange(-1, 1)
+    # c = 1 -> x^2 - 1 = 0, root at 1.0 (valid in [0, 2])
+    # c = 3 -> x^2 + 1 = 0, no root (f(0)=1, f(2)=5) (invalid in [0, 2])
+    c = np.array([1.0, 3.0])
 
     def f(x):
-        return x**2 + c  # No root for c > 0
+        return x**2 - 2.0 + c
 
-    with pytest.raises(ValueError):
-        bisect_v(
-            f,
-            lower_bound=-50,
-            upper_bound=50,
-            output_shape=(1,),
-        )
+    x0, err = bisect_v(
+        f,
+        lower_bound=0.0,
+        upper_bound=2.0,
+        output_shape=(2,),
+    )
+    # case 1 should be exactly 0.0 because it's invalid
+    assert x0[1] == 0.0
+    # case 0 should be 1.0
+    np.testing.assert_allclose(x0[0], 1.0, atol=1e-6)
+
+
+def test_bisect_all_convergent():
+    c = np.array([1.0, 4.0, 9.0])
+
+    def f(x):
+        return x**2 - c
+
+    tol = 1e-6
+    x0, err = bisect_v(f, 0.0, 10.0, output_shape=(3,), tolerance=tol)
+    np.testing.assert_allclose(x0, np.sqrt(c), atol=tol)
+
+
+def test_bisect_all_non_convergent():
+    def f(x):
+        return x**2 + 1.0  # f(x) > 0 always
+
+    x0, err = bisect_v(f, 0.0, 10.0, output_shape=(3,))
+    np.testing.assert_allclose(x0, np.zeros(3))
+
+
+def test_bisect_mixed_convergence():
+    # c = -1 -> no root (x^2 + 1 = 0)
+    # c = 1 -> root at 1 (x^2 - 1 = 0)
+    # c = 4 -> root at 2 (x^2 - 4 = 0)
+    c = np.array([-1.0, 1.0, 4.0])
+
+    def f(x):
+        return x**2 - c
+
+    tol = 1e-6
+    x0, err = bisect_v(f, 0.0, 10.0, output_shape=(3,), tolerance=tol)
+
+    # First case should be 0.0
+    assert x0[0] == 0.0
+    # Other cases should have converged
+    np.testing.assert_allclose(x0[1:], [1.0, 2.0], atol=tol)
 
 
 #
