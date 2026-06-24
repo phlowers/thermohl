@@ -266,7 +266,9 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__array() -> None:
     np.testing.assert_allclose(nebulosity_estimate, expected_nebulosity)
 
 
-def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> None:
+def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution(
+    caplog,
+) -> None:
     # Take the solar altitude and nebulosity which give the highest radiation (zenith and no clouds).
     # Compute the global radiation, and use a greater value to try to compute nebulosity.
     # It's impossible to find a nebulosity with the given radiation, attempting to
@@ -281,9 +283,12 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution() -> N
         global_radiation, diffuse_radiation, solar_altitude
     )
 
-    nebulosity = estimate_nebulosity_from_diffuse_and_beam_radiation(
-        solar_altitude, diffuse_radiation + beam_radiation
-    )
+    with caplog.at_level("WARNING"):
+        nebulosity = estimate_nebulosity_from_diffuse_and_beam_radiation(
+            solar_altitude, diffuse_radiation + beam_radiation
+        )
+    assert "Bisection method" in caplog.text
+    assert "do not satisfy convergence conditions" in caplog.text
     assert nebulosity == 0
 
 
