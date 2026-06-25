@@ -6,7 +6,6 @@
 # SPDX-License-Identifier: MPL-2.0
 
 import numpy as np
-import pytest
 
 from thermohl.utils import bisect_v, quasi_newton_2d
 
