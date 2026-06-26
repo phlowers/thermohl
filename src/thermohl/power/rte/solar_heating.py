@@ -181,7 +181,7 @@ def compute_data_from_provided(
 
 def estimate_nebulosity_from_diffuse_and_beam_radiation(
     solar_altitude: floatArrayLike, radiation_sum: floatArrayLike
-) -> float:
+) -> floatArrayLike:
     """Estimate nebulosity based on diffuse radiation + beam radiation, and solar altitude.
 
     For solar_altitude values corresponding to the night, the result is nan.
