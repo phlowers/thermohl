@@ -181,7 +181,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
 
     For solar_altitude values corresponding to the night, the result is nan.
     Else, if no nebulosity could yield the given radiation (e.g. given radiation
-    is too high or too low for given solar altitude), it provides a capped value between 0 and 8.
+    is too high or too low for given solar altitude), it provides a capped value respectively 0 or 8.
 
     Args:
         solar_altitude(float): solar altitude in radians.
