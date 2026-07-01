@@ -7,6 +7,7 @@
 import logging
 from typing import Any, Tuple
 import numpy as np
+from numpy import typing as npt
 from thermohl import (
     floatArrayLike,
     sun,
@@ -79,12 +80,29 @@ def estimate_nebulosity(
 
 
 def solar_irradiance(
-    datetime_utc: np.ndarray,
+    datetime_utc: npt.NDArray[np.datetime64],
     latitude: np.ndarray,
     longitude: np.ndarray,
     nebulosity: np.ndarray,
     cable_azimuth: np.ndarray,
 ) -> np.ndarray:
+    """Compute solar irradiance.
+
+    Wrapper around compute_solar_irradiance, it computes the same thing
+    but from different inputs.
+    It uses default albedo of 0.15.
+
+    Args:
+        datetime_utc(npt.NDArray[np.datetime64]): datetimes. Year is indifferent,
+            feel free to set an arbitrary value.
+        latitude(np.array): latitude.
+        longitude(np.array): longitude.
+        nebulosity(np.array): nebulosity (integers between 0 and 8).
+        cable_azimuth(np.array): cable azimuth.
+
+    Returns:
+        Solar irradiance value.
+    """
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
     global_radiation = compute_global_radiation(solar_altitude, nebulosity)
