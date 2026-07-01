@@ -13,13 +13,14 @@ from thermohl import (
     datetimeArrayLike,
 )
 from thermohl.power import SolarHeatingBase
-
 from thermohl.utils import bisect_v
 
 logger = logging.getLogger(__name__)
 
 
 TOL = 1e-06
+
+DEFAULT_ALBEDO = 0.15
 
 
 def diffuse_and_beam_radiations(
@@ -74,6 +75,29 @@ def estimate_nebulosity(
     return estimate_nebulosity_from_diffuse_and_beam_radiation(
         solar_altitude,
         diffuse_plus_beam_radiation,
+    )
+
+
+def solar_irradiance(
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    nebulosity: np.ndarray,
+    cable_azimuth: np.ndarray,
+) -> np.ndarray:
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    global_radiation = compute_global_radiation(solar_altitude, nebulosity)
+    solar_azimuth_rad = sun.solar_azimuth(
+        np.deg2rad(latitude), datetime_utc, solar_hour
+    )
+    incidence = compute_incidence(solar_altitude, solar_azimuth_rad, cable_azimuth)
+    return compute_solar_irradiance(  # type: ignore
+        global_radiation,
+        solar_altitude,
+        incidence,
+        nebulosity,
+        albedo=DEFAULT_ALBEDO,
     )
 
 
@@ -224,6 +248,16 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     return np.where(np.sin(solar_altitude) <= TOL, np.nan, nebulosity)
 
 
+def compute_incidence(
+    solar_altitude: floatArrayLike,
+    solar_azimuth_rad: floatArrayLike,
+    cable_azimuth: floatArrayLike,
+) -> floatArrayLike:
+    return np.arccos(
+        np.cos(solar_altitude) * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
+    )
+
+
 class SolarHeating(SolarHeatingBase):
     def __init__(
         self,
@@ -268,10 +302,7 @@ class SolarHeating(SolarHeatingBase):
             measured_global_radiation, nebulosity, solar_altitude
         )
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
-        incidence = np.arccos(
-            np.cos(solar_altitude)
-            * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
-        )
+        incidence = compute_incidence(solar_altitude, solar_azimuth_rad, cable_azimuth)
 
         self.solar_absorptivity = solar_absorptivity
         self.outer_diameter = outer_diameter

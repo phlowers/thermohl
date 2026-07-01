@@ -15,6 +15,7 @@ from thermohl.power.rte.solar_heating import (
     SolarHeating,
     diffuse_and_beam_radiations,
     estimate_nebulosity,
+    solar_irradiance,
     estimate_nebulosity_from_diffuse_and_beam_radiation,
     compute_global_radiation,
     compute_diffuse_radiation,
@@ -336,3 +337,46 @@ def test_estimate_nebulosity__array_night() -> None:
         longitude,
     )
     assert np.isnan(nebulosity[0])
+
+
+@pytest.mark.parametrize(
+    "datetime_utc, latitude, longitude, nebulosity, cable_azimuth, expected_result",
+    [
+        (
+            np.array(
+                [
+                    np.datetime64("2026-07-01T14:30:00"),
+                    np.datetime64("2026-07-01T14:30:00"),
+                ]
+            ),
+            np.array([48, 49]),
+            np.array([-5, 8]),
+            np.array([0, 8]),
+            np.array([0, 360]),
+            np.array([1082.90, 284.73]),
+        ),
+        (
+            np.array([np.datetime64("2026-07-01T01:00:30")]),
+            np.array([49]),
+            np.array([8]),
+            np.array([8]),
+            np.array([360]),
+            np.array([0]),
+        ),
+    ],
+    ids=[
+        "Nominal",
+        "Night",
+    ],
+)
+def test_solar_irradiance(
+    datetime_utc, latitude, longitude, nebulosity, cable_azimuth, expected_result
+) -> None:
+    result = solar_irradiance(
+        datetime_utc,
+        latitude,
+        longitude,
+        nebulosity,
+        cable_azimuth,
+    )
+    assert np.allclose(result, expected_result)
