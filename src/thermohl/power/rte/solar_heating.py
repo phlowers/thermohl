@@ -21,8 +21,6 @@ logger = logging.getLogger(__name__)
 
 TOL = 1e-06
 
-DEFAULT_ALBEDO = 0.15
-
 
 def diffuse_and_beam_radiations(
     datetime_utc: np.ndarray,
@@ -85,6 +83,7 @@ def solar_irradiance(
     longitude: np.ndarray,
     nebulosity: np.ndarray,
     cable_azimuth: np.ndarray,
+    albedo: np.ndarray | None = None,
 ) -> np.ndarray:
     """Compute solar irradiance.
 
@@ -99,10 +98,15 @@ def solar_irradiance(
         longitude(np.array): longitude.
         nebulosity(np.array): nebulosity (integers between 0 and 8).
         cable_azimuth(np.array): cable azimuth.
+        albedo(np.array | None): albedo (describes how the ground reflects radiation).
+            If not provided, a default value of 0.15 will be used.
 
     Returns:
         Solar irradiance value.
     """
+    if albedo is None:
+        albedo = np.full_like(datetime_utc, 0.15)
+
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
     global_radiation = compute_global_radiation(solar_altitude, nebulosity)
@@ -115,7 +119,7 @@ def solar_irradiance(
         solar_altitude,
         incidence,
         nebulosity,
-        albedo=DEFAULT_ALBEDO,
+        albedo,
     )
 
 

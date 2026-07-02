@@ -339,6 +339,18 @@ def test_estimate_nebulosity__array_night() -> None:
     assert np.isnan(nebulosity[0])
 
 
+def test_solar_irradiance() -> None:
+    result = solar_irradiance(
+        datetime_utc=np.datetime64("2026-07-01T14:30:00"),
+        latitude=np.array([48]),
+        longitude=np.array([-5]),
+        nebulosity=np.array([5]),
+        cable_azimuth=np.array([180]),
+        albedo=np.array([0.12]),
+    )
+    assert np.allclose(result, np.array([957.73]))
+
+
 @pytest.mark.parametrize(
     "datetime_utc, latitude, longitude, nebulosity, cable_azimuth, expected_result",
     [
@@ -369,7 +381,7 @@ def test_estimate_nebulosity__array_night() -> None:
         "Night",
     ],
 )
-def test_solar_irradiance(
+def test_solar_irradiance__default_albedo(
     datetime_utc, latitude, longitude, nebulosity, cable_azimuth, expected_result
 ) -> None:
     result = solar_irradiance(
