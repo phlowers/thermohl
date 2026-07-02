@@ -105,7 +105,7 @@ def solar_irradiance(
         Solar irradiance value.
     """
     if albedo is None:
-        albedo = np.full_like(datetime_utc, 0.15)
+        albedo = np.full_like(latitude, 0.15)
 
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)

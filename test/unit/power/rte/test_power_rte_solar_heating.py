@@ -368,6 +368,30 @@ def test_solar_irradiance() -> None:
             np.array([1082.90, 284.73]),
         ),
         (
+            np.array(
+                [
+                    np.datetime64("2026-07-01T14:30:00"),
+                ]
+            ),
+            np.array([48]),
+            np.array([-5]),
+            np.array([0]),
+            np.array([0]),
+            np.array([1082.90]),
+        ),
+        (
+            np.array(
+                [
+                    np.datetime64("2026-07-01T14:30:00"),
+                ]
+            ),
+            np.array([49]),
+            np.array([8]),
+            np.array([8]),
+            np.array([360]),
+            np.array([284.73]),
+        ),
+        (
             np.array([np.datetime64("2026-07-01T01:00:30")]),
             np.array([49]),
             np.array([8]),
@@ -378,6 +402,8 @@ def test_solar_irradiance() -> None:
     ],
     ids=[
         "Nominal",
+        "Nominal 1",
+        "Nominal 2",
         "Night",
     ],
 )
