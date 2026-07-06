@@ -9,15 +9,31 @@
 
 """Misc. utility code for thermohl project."""
 
+import math
 import logging
 import os
 from functools import wraps
 from importlib.util import find_spec
-
+from dataclasses import dataclass
 import numpy as np
 import yaml
 
 logger = logging.getLogger(__name__)
+
+
+TOL = 1e-06
+
+
+@dataclass
+class Result:
+    value: float
+    converged: bool
+
+    def __eq__(self, other):
+        return (
+            abs(self.value - other.value) < TOL
+            or (math.isnan(self.value) and math.isnan(other.value))
+        ) and (self.converged == other.converged)
 
 
 def add_stderr_logger(level: int = logging.DEBUG) -> logging.StreamHandler:
