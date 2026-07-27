@@ -12,9 +12,11 @@ from thermohl import (
     floatArrayLike,
     sun,
     datetimeArrayLike,
+    boolArrayLike,
 )
 from thermohl.power import SolarHeatingBase
 from thermohl.utils import bisect_v
+
 
 logger = logging.getLogger(__name__)
 
@@ -56,24 +58,60 @@ def estimate_nebulosity(
     datetime_utc: np.ndarray,
     latitude: np.ndarray,
     longitude: np.ndarray,
-) -> np.array:
+    return_converged: bool = False,
+) -> np.ndarray | tuple[npt.NDArray[np.float64], npt.NDArray[np.bool]]:
     """Estimate nebulosity from measured diffuse radiation + beam radiation.
 
     The results are rounded to the values which give the closest radiation sums.
+    For datetime_utc values corresponding to the night, the result is nan.
 
     Args:
-        diffuse_plus_beam_solar_flow(np.ndarray): Array of diffuse radiation + beam radiation (in W/m²).
-        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
-        latitude(np.ndarray): Array of latitudes.
-        longitude(np.ndarray): Array of longitudes.
+        diffuse_plus_beam_solar_flow(array): Array of diffuse radiation + beam radiation (in W/m²).
+        datetime_utc(array): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(array): Array of latitudes.
+        longitude(array): Array of longitudes.
+        return_converged(bool): if True, output contains information on whether computation converged.
+            Default is False.
+
     Returns:
-        np.ndarray: Nebulosities (integers between 0 and 8, or nan if it can't be computed because of the night).
+        array | tuple[array, array]: Nebulosities (integers between 0 and 8, or nan if it can't be computed because of the night).
+        If return_converged is False, the output is an array.
+        If return_converged is True, the output is a tuple of two arrays: the first contains the nebulosities,
+        the second contains boolean signaling whether computation converged.
+
+    Examples:
+
+    ```python
+    >>> estimate_nebulosity(
+    >>>     np.array([700, 10]),
+            np.array([np.datetime64("2026-06-15T12:00:00"), np.datetime64("2026-06-15T12:00:00")]),
+            np.array([45.0, 45.0]),
+            np.array([20.0, 20.0]),
+    >>> )
+    array([5.0, 8.0])
+    >>> nebulosity, converged = estimate_nebulosity(
+    >>>     np.array([700, 10]),
+            np.array([np.datetime64("2026-06-15T12:00:00"), np.datetime64("2026-06-15T12:00:00")]),
+            np.array([45.0, 45.0]),
+            np.array([20.0, 20.0]),
+            return_converged=True,
+    >>> )
+    >>> nebulosity[0]
+    np.float64(5.0)
+    >>> converged[0]
+    np.True_
+    >>> nebulosity[1]
+    np.float64(8.0)
+    >>> converged[1]
+    np.False_
+    ```
     """
     solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
     solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
     return estimate_nebulosity_from_diffuse_and_beam_radiation(
         solar_altitude,
         diffuse_plus_beam_radiation,
+        return_converged=return_converged,
     )
 
 
@@ -221,8 +259,10 @@ def compute_data_from_provided(
 
 
 def estimate_nebulosity_from_diffuse_and_beam_radiation(
-    solar_altitude: floatArrayLike, radiation_sum: floatArrayLike
-) -> floatArrayLike:
+    solar_altitude: floatArrayLike,
+    radiation_sum: floatArrayLike,
+    return_converged: bool = False,
+) -> floatArrayLike | tuple[floatArrayLike, boolArrayLike]:
     """Estimate nebulosity based on diffuse radiation + beam radiation, and solar altitude.
 
     For solar_altitude values corresponding to the night, the result is nan.
@@ -232,8 +272,32 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     Args:
         solar_altitude(float): solar altitude in radians.
         radiation_sum(float): diffuse radiation + beam radiation.
+        return_converged(bool): if True, output contains information on whether computation converged.
+            Default is False.
+
     Returns:
-        integer or np.nan: nebulosity (integer between 0 and 8).
+        float, array[float], tuple[float, bool] or tuple[array[float], array[bool]]:
+        If return_converged is False, returns the nebulosity, as float or float array depending on the input.
+        nebulosity is an integer between 0 and 8 (or nan).
+        If return_converged is True, the output is a tuple where the first element is the nebulosity (same as above)
+        and the second element signals whether the computation converged. It is a bool or a bool array
+        depending on the input.
+
+    Examples:
+        ```python
+        >>> estimate_nebulosity_from_diffuse_and_beam_radiation(
+        >>>     np.array([1.10, -0.34]), np.array([700, 700], return_converged=False),
+        >>> )
+        array([5.0, nan])
+
+        >>> nebulosity, converged = estimate_nebulosity_from_diffuse_and_beam_radiation(
+        >>>     np.array([1.10, 1.10]), np.array([700, 10], return_converged=True),
+        >>> )
+        >>> nebulosity
+        array([5.0, 8.0])
+        >>> converged
+        array([True, False)]
+        ```
     """
 
     # Since f is strictly monotonous (increasing) we can use dichotomy
@@ -254,7 +318,7 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     else:
         output_shape = (1,)
 
-    nebulosity, _ = bisect_v(
+    nebulosity, error = bisect_v(
         f, lower_bound, upper_bound, output_shape, max_iterations=4
     )
 
@@ -267,7 +331,13 @@ def estimate_nebulosity_from_diffuse_and_beam_radiation(
     )
     # negative sin(solar_altitude) means this is the night
     # so can't compute nebulosity
-    return np.where(np.sin(solar_altitude) <= TOL, np.nan, nebulosity)
+    nebulosity = np.where(np.sin(solar_altitude) <= TOL, np.nan, nebulosity)
+
+    if return_converged:
+        converged = np.logical_and(error <= 1, np.logical_not(np.isnan(nebulosity)))
+        return nebulosity, converged
+
+    return nebulosity
 
 
 def compute_incidence(

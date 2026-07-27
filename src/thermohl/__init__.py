@@ -30,6 +30,7 @@ numberArrayLike = Union[float, int, npt.NDArray[np.float64], npt.NDArray[np.int6
 strListLike = Union[str, List[str]]
 dateArrayLike = Union[np.datetime64, npt.NDArray[np.datetime64]]
 datetimeArrayLike = Union[np.datetime64, npt.NDArray[np.datetime64]]
+boolArrayLike = Union[bool, npt.NDArray[np.bool_]]
 
 floatArray = npt.NDArray[np.float64]
 intArray = npt.NDArray[np.int64]

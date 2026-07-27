@@ -248,6 +248,49 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__scalar(
     np.testing.assert_allclose(nebulosity_estimate, expected_nebulosity)
 
 
+@pytest.mark.parametrize(
+    "diffuse_plus_beam_radiation, solar_altitude, expected_nebulosity, expected_converged",
+    [
+        (
+            700,
+            1.10,
+            5.0,
+            True,
+        ),
+        (
+            10,
+            1.10,
+            8.0,
+            False,
+        ),
+        (
+            4200,
+            1.10,
+            0.0,
+            False,
+        ),
+        (
+            700,
+            -0.34,
+            np.nan,
+            False,
+        ),
+    ],
+    ids=["nominal", "radiation too low", "radiation too high", "night"],
+)
+def test_estimate_nebulosity_from_diffuse_and_beam_radiation__scalar__return_converged(
+    diffuse_plus_beam_radiation, solar_altitude, expected_nebulosity, expected_converged
+) -> None:
+    nebulosity, converged = estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude,
+        diffuse_plus_beam_radiation,
+        return_converged=True,
+    )
+
+    np.testing.assert_equal(nebulosity, expected_nebulosity)
+    assert converged == expected_converged
+
+
 def test_estimate_nebulosity_from_diffuse_and_beam_radiation__array() -> None:
     input_nebulosity = np.array([1, 2])
     solar_altitude = np.array([np.pi / 2, 0])
@@ -264,6 +307,38 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__array() -> None:
     )
 
     np.testing.assert_allclose(nebulosity_estimate, expected_nebulosity)
+
+
+def test_estimate_nebulosity_from_diffuse_and_beam_radiation__array__return_converged() -> (
+    None
+):
+    diffuse_plus_beam_radiation = np.array(
+        [
+            700,  # nominal
+            10,  # radiation too low
+            4200,  # radiation too high
+            700,  # night
+        ]
+    )
+    solar_altitude = np.array([1.10, 1.10, 1.10, -0.34])
+    expected_nebulosity = np.array(
+        [
+            5.0,
+            8.0,
+            0.0,
+            np.nan,
+        ]
+    )
+    expected_converged = np.array([True, False, False, False])
+
+    nebulosity, converged = estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude,
+        diffuse_plus_beam_radiation,
+        return_converged=True,
+    )
+
+    np.testing.assert_equal(nebulosity, expected_nebulosity)
+    np.testing.assert_equal(converged, expected_converged)
 
 
 def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution(
@@ -292,51 +367,78 @@ def test_estimate_nebulosity_from_diffuse_and_beam_radiation__no_solution(
     assert nebulosity == 0
 
 
-def test_estimate_nebulosity__array() -> None:
+def test_estimate_nebulosity() -> None:
     diffuse_plus_beam_radiation = np.array([700, 600])
+    diffuse_plus_beam_radiation = np.array(
+        [
+            700,  # nominal
+            10,  # radiation is too low
+            4200,  # radiation is too high
+            700,  # night
+        ]
+    )
     datetime_utc = np.array(
         [
             np.datetime64("2026-06-15T12:00:00"),
             np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T00:00:00"),
         ]
     )
-    latitude = np.array([45.0, 45.0])
-    longitude = np.array([20.0, 20.0])
+    latitude = np.full(4, 45.0)
+    longitude = np.full(4, 20.0)
     nebulosity = estimate_nebulosity(
         diffuse_plus_beam_radiation,
         datetime_utc,
         latitude,
         longitude,
     )
-    assert np.allclose(nebulosity, [5, 6])
+    np.testing.assert_allclose(nebulosity, [5, 8, 0, np.nan])
 
 
-def test_estimate_nebulosity__inconsistent_radiation() -> None:
-    diffuse_plus_beam_radiation = np.array([10, 4200])
-    datetime_utc = np.array([np.datetime64("2026-06-15T12:00:00")])
-    latitude = np.array([45.0])
-    longitude = np.array([20.0])
-    nebulosity = estimate_nebulosity(
+def test_estimate_nebulosity__return_converged() -> None:
+    diffuse_plus_beam_radiation = np.array(
+        [
+            700,  # nominal
+            10,  # radiation is too low
+            4200,  # radiation is too high
+            700,  # night
+        ]
+    )
+    datetime_utc = np.array(
+        [
+            np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T12:00:00"),
+            np.datetime64("2026-06-15T00:00:00"),
+        ]
+    )
+    latitude = np.full(4, 45.0)
+    longitude = np.full(4, 20.0)
+    nebulosity, converged = estimate_nebulosity(
         diffuse_plus_beam_radiation,
         datetime_utc,
         latitude,
         longitude,
+        return_converged=True,
     )
-    assert np.allclose(nebulosity, [8, 0])
-
-
-def test_estimate_nebulosity__array_night() -> None:
-    diffuse_plus_beam_radiation = np.array([700])
-    datetime_utc = np.array([np.datetime64("2026-06-15T00:00:00")])
-    latitude = np.array([45.0])
-    longitude = np.array([20.0])
-    nebulosity = estimate_nebulosity(
-        diffuse_plus_beam_radiation,
-        datetime_utc,
-        latitude,
-        longitude,
+    expected_nebulosity = [
+        5.0,
+        8.0,
+        0.0,
+        np.nan,
+    ]
+    expected_converged = np.array(
+        [
+            True,
+            False,
+            False,
+            False,
+        ]
     )
-    assert np.isnan(nebulosity[0])
+
+    np.testing.assert_equal(nebulosity, expected_nebulosity)
+    np.testing.assert_equal(converged, expected_converged)
 
 
 def test_solar_irradiance() -> None:
