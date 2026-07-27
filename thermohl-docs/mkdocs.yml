@@ -80,7 +80,6 @@ nav:
           - Solver 3 temperatures RTE: docstring/Solvers/Solver3TL/solver_3_temperature_rte.md
 
 
-
 plugins:
   - search
   - mkdocs-jupyter:

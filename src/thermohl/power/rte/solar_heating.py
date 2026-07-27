@@ -4,19 +4,151 @@
 # License, v. 2.0. If a copy of the MPL was not distributed with this
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
-from math import pi
 import logging
-from typing import Any, Tuple, Iterable
+from typing import Any, Tuple
 import numpy as np
+from numpy import typing as npt
 from thermohl import (
     floatArrayLike,
     sun,
-    datetimeListLike,
+    datetimeArrayLike,
 )
 from thermohl.power import SolarHeatingBase
-
+from thermohl.utils import bisect_v
 
 logger = logging.getLogger(__name__)
+
+
+TOL = 1e-06
+
+
+def diffuse_and_beam_radiations(
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    nebulosity: np.ndarray,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Compute diffuse radiation and beam radiation.
+
+    Args:
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+        nebulosity(np.ndarray): Array of nebulosities (integer between 0 and 8).
+    Returns:
+        tuple(np.ndarray, np.ndarray): diffuse_radiation, beam_radiation in W/m².
+    """
+    if (nebulosity < 0).any() or (nebulosity > 8).any():
+        raise ValueError(f"nebulosity must be between 0 and 8. Got {nebulosity}")
+
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    global_radiation = compute_global_radiation(solar_altitude, nebulosity)
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
+    return diffuse_radiation, beam_radiation
+
+
+def estimate_nebulosity(
+    diffuse_plus_beam_radiation: np.ndarray,
+    datetime_utc: np.ndarray,
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+) -> np.array:
+    """Estimate nebulosity from measured diffuse radiation + beam radiation.
+
+    The results are rounded to the values which give the closest radiation sums.
+
+    Args:
+        diffuse_plus_beam_solar_flow(np.ndarray): Array of diffuse radiation + beam radiation (in W/m²).
+        datetime_utc(np.ndarray): Array of datetimes (more precisely np.datetime64). The year is indifferent.
+        latitude(np.ndarray): Array of latitudes.
+        longitude(np.ndarray): Array of longitudes.
+    Returns:
+        np.ndarray: Nebulosities (integers between 0 and 8, or nan if it can't be computed because of the night).
+    """
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    return estimate_nebulosity_from_diffuse_and_beam_radiation(
+        solar_altitude,
+        diffuse_plus_beam_radiation,
+    )
+
+
+def solar_irradiance(
+    datetime_utc: npt.NDArray[np.datetime64],
+    latitude: np.ndarray,
+    longitude: np.ndarray,
+    nebulosity: np.ndarray,
+    cable_azimuth: np.ndarray,
+    albedo: np.ndarray | None = None,
+) -> np.ndarray:
+    """Compute solar irradiance.
+
+    Wrapper around compute_solar_irradiance, it computes the same thing
+    but from different inputs.
+    It uses default albedo of 0.15.
+
+    Args:
+        datetime_utc(npt.NDArray[np.datetime64]): datetimes. Year is indifferent,
+            feel free to set an arbitrary value.
+        latitude(np.array): latitude.
+        longitude(np.array): longitude.
+        nebulosity(np.array): nebulosity (integers between 0 and 8).
+        cable_azimuth(np.array): cable azimuth.
+        albedo(np.array | None): albedo (describes how the ground reflects radiation).
+            If not provided, a default value of 0.15 will be used.
+
+    Returns:
+        Solar irradiance value.
+    """
+    if albedo is None:
+        albedo = np.full_like(latitude, 0.15, dtype=float)
+
+    solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
+    solar_altitude = sun.solar_altitude(np.deg2rad(latitude), datetime_utc, solar_hour)
+    global_radiation = compute_global_radiation(solar_altitude, nebulosity)
+    solar_azimuth_rad = sun.solar_azimuth(
+        np.deg2rad(latitude), datetime_utc, solar_hour
+    )
+    incidence = compute_incidence(solar_altitude, solar_azimuth_rad, cable_azimuth)
+    return compute_solar_irradiance(  # type: ignore
+        global_radiation,
+        solar_altitude,
+        incidence,
+        nebulosity,
+        albedo,
+    )
+
+
+def compute_global_radiation(
+    solar_altitude: floatArrayLike, nebulosity: floatArrayLike
+) -> floatArrayLike:
+    res = (910 * np.sin(solar_altitude) - 30) * (
+        1 - 0.75 * np.power(nebulosity / 8, 3.4)
+    )
+    res = np.maximum(0, res)
+    # radiation is zero during the night
+    return np.where(np.sin(solar_altitude) < TOL, 0, res)
+
+
+def compute_diffuse_radiation(
+    global_radiation: floatArrayLike, nebulosity: floatArrayLike
+) -> floatArrayLike:
+    return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
+
+
+def compute_beam_radiation(
+    global_radiation, diffuse_radiation, solar_altitude
+) -> floatArrayLike:
+    # if sin(solar altitude) <= 0 (dawn, twilight or night) the beam radiation is zero
+    return np.where(
+        np.sin(solar_altitude) <= 0,
+        0,
+        (global_radiation - diffuse_radiation) / np.sin(solar_altitude),
+    )
 
 
 def compute_solar_irradiance(
@@ -37,19 +169,13 @@ def compute_solar_irradiance(
     :return: Solar radiation value. Negative values are set to zero.
     """
 
-    def compute_diffuse_radiation() -> floatArrayLike:
-        return global_radiation * (0.3 + 0.7 * (nebulosity / 8) ** 2)
-
-    def compute_beam_radiation() -> floatArrayLike:
-        # si l'altitude solaire est nulle, on fixe la radiation solaire à 0.
-        with np.errstate(divide="ignore", invalid="ignore"):
-            return (global_radiation - diffuse_radiation) / np.sin(solar_altitude)
-
-    diffuse_radiation = compute_diffuse_radiation()
-    beam_radiation = compute_beam_radiation()
+    diffuse_radiation = compute_diffuse_radiation(global_radiation, nebulosity)
+    beam_radiation = compute_beam_radiation(
+        global_radiation, diffuse_radiation, solar_altitude
+    )
     solar_irradiance = beam_radiation * (
-        np.sin(incidence) + pi / 2 * albedo * np.sin(solar_altitude)
-    ) + diffuse_radiation * pi / 2 * (1 + albedo)
+        np.sin(incidence) + np.pi / 2 * albedo * np.sin(solar_altitude)
+    ) + diffuse_radiation * np.pi / 2 * (1 + albedo)
 
     return np.where(solar_altitude > 0.0, solar_irradiance, 0.0)
 
@@ -65,6 +191,7 @@ def compute_data_from_provided(
     Otherwise, if the global radiation is provided (ie not NaN), the nebulosity is computed from it.
     Otherwise, the nebulosity defaut value is 0.
     The returned global radiation is computed from the nebulosity, even if a global radiation is already provided.
+    If solar altitude shows it is the night (or nearly the night, with solar altitude = 0), the global radiation is zero.
 
     :param provided_global_radiation: provided global radiation (W/m2).
     :param provided_nebulosity: provided nebulosity (0 to 8).
@@ -88,13 +215,69 @@ def compute_data_from_provided(
     )
 
     # Finally, the returned global radiation is computed from the previous nebulosity.
-    with np.errstate(divide="ignore", invalid="ignore"):
-        inter_rad = 1 - 3 / 4 * (final_nebulosity / 8) ** 3.4
-        final_global_radiation = np.maximum(
-            0, (910 * np.sin(solar_altitude) - 30) * inter_rad
-        )
+    final_global_radiation = compute_global_radiation(solar_altitude, final_nebulosity)
 
     return final_nebulosity, final_global_radiation
+
+
+def estimate_nebulosity_from_diffuse_and_beam_radiation(
+    solar_altitude: floatArrayLike, radiation_sum: floatArrayLike
+) -> floatArrayLike:
+    """Estimate nebulosity based on diffuse radiation + beam radiation, and solar altitude.
+
+    For solar_altitude values corresponding to the night, the result is nan.
+    Else, if no nebulosity could yield the given radiation (e.g. given radiation
+    is too high or too low for given solar altitude), it provides a capped value respectively 0 or 8.
+
+    Args:
+        solar_altitude(float): solar altitude in radians.
+        radiation_sum(float): diffuse radiation + beam radiation.
+    Returns:
+        integer or np.nan: nebulosity (integer between 0 and 8).
+    """
+
+    # Since f is strictly monotonous (increasing) we can use dichotomy
+    # algorithm to find x which minimizes |f|.
+    def f(x):
+        global_radiation = compute_global_radiation(solar_altitude, x)
+        diffuse_radiation = compute_diffuse_radiation(global_radiation, x)
+        beam_radiation = compute_beam_radiation(
+            global_radiation, diffuse_radiation, solar_altitude
+        )
+        return radiation_sum - diffuse_radiation - beam_radiation
+
+    lower_bound = 0
+    upper_bound = 8
+
+    if hasattr(radiation_sum, "shape") and radiation_sum.shape:
+        output_shape = radiation_sum.shape
+    else:
+        output_shape = (1,)
+
+    nebulosity, _ = bisect_v(
+        f, lower_bound, upper_bound, output_shape, max_iterations=4
+    )
+
+    rounded_down = np.floor(nebulosity)
+    rounded_up = np.ceil(nebulosity)
+    nebulosity = np.where(
+        np.abs(f(rounded_down)) <= np.abs(f(rounded_up)),
+        rounded_down,
+        rounded_up,
+    )
+    # negative sin(solar_altitude) means this is the night
+    # so can't compute nebulosity
+    return np.where(np.sin(solar_altitude) <= TOL, np.nan, nebulosity)
+
+
+def compute_incidence(
+    solar_altitude: floatArrayLike,
+    solar_azimuth_rad: floatArrayLike,
+    cable_azimuth: floatArrayLike,
+) -> floatArrayLike:
+    return np.arccos(
+        np.cos(solar_altitude) * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
+    )
 
 
 class SolarHeating(SolarHeatingBase):
@@ -103,7 +286,7 @@ class SolarHeating(SolarHeatingBase):
         latitude: floatArrayLike,
         longitude: floatArrayLike,
         cable_azimuth: floatArrayLike,
-        datetime_utc: datetimeListLike,
+        datetime_utc: datetimeArrayLike,
         outer_diameter: floatArrayLike,
         solar_absorptivity: floatArrayLike,
         albedo: floatArrayLike,
@@ -134,21 +317,14 @@ class SolarHeating(SolarHeatingBase):
             )
             kwargs.pop("solar_irradiance")
 
-        date = (
-            [d.date() for d in datetime_utc]
-            if isinstance(datetime_utc, Iterable)
-            else datetime_utc.date()
-        )
+        date = datetime_utc.astype("datetime64[D]")
         solar_hour = sun.utc2solar_hour(datetime_utc, np.deg2rad(longitude))
         solar_altitude = sun.solar_altitude(np.deg2rad(latitude), date, solar_hour)
         nebulosity, global_radiation = compute_data_from_provided(
             measured_global_radiation, nebulosity, solar_altitude
         )
         solar_azimuth_rad = sun.solar_azimuth(np.deg2rad(latitude), date, solar_hour)
-        incidence = np.arccos(
-            np.cos(solar_altitude)
-            * np.cos(solar_azimuth_rad - np.deg2rad(cable_azimuth))
-        )
+        incidence = compute_incidence(solar_altitude, solar_azimuth_rad, cable_azimuth)
 
         self.solar_absorptivity = solar_absorptivity
         self.outer_diameter = outer_diameter

@@ -9,3 +9,6 @@ SPDX-License-Identifier: MPL-2.0
 
 # SolarHeating
 ::: thermohl.power.rte.solar_heating.SolarHeating
+::: thermohl.power.rte.solar_heating.estimate_nebulosity
+::: thermohl.power.rte.solar_heating.diffuse_and_beam_radiations
+::: thermohl.power.rte.solar_heating.solar_irradiance

@@ -164,30 +164,47 @@ def bisect_v(
     lower_bounds = lower_bound * np.ones(output_shape)
     upper_bounds = upper_bound * np.ones(output_shape)
 
-    # If the condition f(a) <= 0 <= f(b) is not satisfied,
-    # there's no guaranty there is a unique solution, so the bisection method can't be applied
-    # and we raise an error
-    if np.any(func(lower_bounds) > 0) or np.any(func(upper_bounds) < 0):
-        raise ValueError(
-            "Can't use bisection method: function applied to lower bound should be strictly negative"
-            " and function applied to upper bound should be strictly positive."
+    # Check if the condition f(a) <= 0 <= f(b) is satisfied
+    valid_mask = (func(lower_bounds) <= 0) & (func(upper_bounds) >= 0)
+
+    if not np.all(valid_mask):
+        invalid_count = np.sum(~valid_mask)
+        logger.warning(
+            f"Bisection method: {invalid_count} case(s) do not satisfy convergence conditions "
+            f"(f(a) <= 0 <= f(b)). Returning lower_bound or upper_bound for these cases."
         )
 
-    abs_error = np.abs(upper_bound - lower_bound)
+    abs_error = np.abs(upper_bounds - lower_bounds)
     iteration_count = 1
-    while np.nanmax(abs_error) > tolerance and iteration_count <= max_iterations:
+    # Only iterate on valid cases
+    while (
+        np.any(abs_error[valid_mask] > tolerance) and iteration_count <= max_iterations
+    ):
         midpoint = 0.5 * (lower_bounds + upper_bounds)
         values = func(midpoint)
-        lower_mask = values < 0
+        lower_mask = (values < 0) & valid_mask
+        upper_mask = (values >= 0) & valid_mask
+
         lower_bounds[lower_mask] = midpoint[lower_mask]
-        upper_bounds[~lower_mask] = midpoint[~lower_mask]
-        abs_error = np.abs(upper_bounds - lower_bounds)
+        upper_bounds[upper_mask] = midpoint[upper_mask]
+
+        abs_error[valid_mask] = np.abs(
+            upper_bounds[valid_mask] - lower_bounds[valid_mask]
+        )
         iteration_count += 1
+
     midpoint = 0.5 * (lower_bounds + upper_bounds)
+    # Handle non-convergent cases: return lower_bound if f(a) > 0, upper_bound if f(b) < 0
+    # If both are true (shouldn't happen for monotonic), f_lower > 0 takes precedence here
+    midpoint[~valid_mask] = np.where(
+        func(lower_bounds)[~valid_mask] > 0,
+        lower_bounds[~valid_mask],
+        upper_bounds[~valid_mask],
+    )
     midpoint[np.isnan(func(midpoint))] = np.nan
     if print_error:
         logger.info(
-            f"Bisection max err (abs) : {np.max(abs_error):.2E}; count={iteration_count}"
+            f"Bisection max err (abs) : {np.nanmax(abs_error):.2E}; count={iteration_count}"
         )
     return midpoint, abs_error
 
@@ -361,8 +378,6 @@ def quasi_newton_2d(
     """
     x = x_init.copy()
     y = y_init.copy()
-    err_abs_x = np.zeros_like(x)
-    err_abs_y = np.zeros_like(y)
 
     for count in range(max_iterations):
         f1, f2 = func(x, y)
@@ -376,18 +391,30 @@ def quasi_newton_2d(
         jacobian_21 = (f2_xp - f2_xm) / (2 * delta_x)
         jacobian_22 = (f2_yp - f2_ym) / (2 * delta_y)
 
-        inv_jacobian_det = 1.0 / (jacobian_11 * jacobian_22 - jacobian_12 * jacobian_21)
-        err_abs_x = inv_jacobian_det * (jacobian_22 * f1 - jacobian_12 * f2)
-        err_abs_y = inv_jacobian_det * (jacobian_11 * f2 - jacobian_21 * f1)
+        det = jacobian_11 * jacobian_22 - jacobian_12 * jacobian_21
+        inv_jacobian_det = np.zeros_like(det)
+        mask_det = det != 0
+        inv_jacobian_det[mask_det] = 1.0 / det[mask_det]
+
+        err_abs_x = np.zeros_like(x)
+        err_abs_y = np.zeros_like(y)
+        err_abs_x[mask_det] = inv_jacobian_det[mask_det] * (
+            jacobian_22[mask_det] * f1[mask_det] - jacobian_12[mask_det] * f2[mask_det]
+        )
+        err_abs_y[mask_det] = inv_jacobian_det[mask_det] * (
+            jacobian_11[mask_det] * f2[mask_det] - jacobian_21[mask_det] * f1[mask_det]
+        )
 
         x -= err_abs_x
         y -= err_abs_y
 
-        err = max(np.nanmax(np.abs(err_abs_x / x)), np.nanmax(np.abs(err_abs_y / y)))
-        if err <= relative_tolerance:
+        err_rel_x = np.abs(err_abs_x / x)
+        err_rel_y = np.abs(err_abs_y / y)
+        rel_err = max(np.nanmax(err_rel_x), np.nanmax(err_rel_y))
+        if rel_err <= relative_tolerance:
             break
 
-    return x, y, count + 1, np.maximum(np.abs(err_abs_x / x), np.abs(err_abs_y / y))
+    return x, y, count + 1, rel_err
 
 
 def depends_on_optional(module_name: str):

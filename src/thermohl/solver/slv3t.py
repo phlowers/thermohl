@@ -635,7 +635,7 @@ class Solver3T(Solver_):
             type(self.radiative_cooling),
             type(self.precipitation_cooling),
         )
-        r = s.steady_intensity(Tmax, tol=1.0, maxiter=8, return_power=False)
+        r = s.steady_intensity(Tmax, tol=1.0, return_power=False)
         x, y, iterations, err = quasi_newton_2d(
             balance_and_morgan,
             r[VariableType.TRANSIT.value],

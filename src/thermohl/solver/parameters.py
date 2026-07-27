@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
 from typing import Optional, Any, KeysView, Iterable
 import numpy as np
 
@@ -40,7 +39,7 @@ class Parameters:
         self.longitude = 0.0  # longitude (deg)
         self.altitude = 0.0  # altitude (m)
         self.cable_azimuth = 0.0  # cable_azimuth (deg)
-        self.datetime_utc = datetime(2000, 3, 21, 12, tzinfo=timezone.utc)
+        self.datetime_utc = np.datetime64("2000-03-21T12:00:00")
 
         # weather and mesurement
         self.measured_global_radiation = np.nan

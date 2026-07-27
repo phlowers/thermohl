@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
 import numpy as np
 
 from thermohl.power import ieee
@@ -34,7 +33,7 @@ def test_compare_powers():
     dic["altitude"] = 0.0
     dic["outer_diameter"] = 28.14 * 1.0e-03
     dic["core_diameter"] = 10.4 * 1.0e-03
-    dic["datetime_utc"] = datetime(2000, 6, 10, 11, tzinfo=timezone.utc)
+    dic["datetime_utc"] = np.datetime64("2000-06-10T11:00:00")
 
     conductor_temperature = 100.0
 
@@ -57,23 +56,23 @@ def test_compare_powers():
 
     from thermohl import sun
 
-    sd = sun.solar_declination(dic["datetime_utc"].date())
+    sd = sun.solar_declination(dic["datetime_utc"])
     assert np.isclose(np.rad2deg(sd), 23.0, atol=0.1)
 
-    ha = sun.hour_angle(sun.time_to_float_hours(dic["datetime_utc"].time()))
+    ha = sun.hour_angle(sun.time_to_float_hours(dic["datetime_utc"]))
     assert np.isclose(np.rad2deg(ha), -15.0, atol=0.1)
 
     sa = sun.solar_altitude(
         np.deg2rad(dic["latitude"]),
-        dic["datetime_utc"].date(),
-        sun.time_to_float_hours(dic["datetime_utc"].time()),
+        dic["datetime_utc"],
+        sun.time_to_float_hours(dic["datetime_utc"]),
     )
     assert np.isclose(np.rad2deg(sa), 74.8, atol=0.2)
 
     sz = sun.solar_azimuth(
         np.deg2rad(dic["latitude"]),
-        dic["datetime_utc"].date(),
-        sun.time_to_float_hours(dic["datetime_utc"].time()),
+        dic["datetime_utc"],
+        sun.time_to_float_hours(dic["datetime_utc"]),
     )
     assert np.isclose(np.rad2deg(sz), 114.0, atol=0.5)
 

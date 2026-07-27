@@ -306,7 +306,7 @@ class Solver1T(Solver_):
         def conductor_temperature(transit):
             self.args.transit = transit
             self.joule_heating.__init__(**self.args.__dict__)
-            return self.steady_temperature()[VariableType.TEMPERATURE][0]
+            return self.steady_temperature()[VariableType.TEMPERATURE.value][0]
 
         def temperature_difference(transit):
             return measured_temperature_difference * (

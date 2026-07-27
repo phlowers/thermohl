@@ -5,7 +5,6 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
-from datetime import datetime, timezone
 import numpy as np
 import pytest
 
@@ -96,9 +95,9 @@ def test_srad_call_scalar(srad):
     altitude = 1000.0
     cable_azimuth = 180.0
     turbidity = 0.5
-    datetime_utc = datetime(2000, 6, 21, 12, tzinfo=timezone.utc)
-    date = datetime_utc.date()
-    hour = np.array([time_to_float_hours(datetime_utc.time())])
+    datetime_utc = np.datetime64("2000-06-21T12:00:00")
+    date = datetime_utc
+    hour = np.array([time_to_float_hours(datetime_utc)])
     sa = sun.solar_altitude(latitude, date, hour)
     sz = sun.solar_azimuth(latitude, date, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - cable_azimuth))
@@ -117,12 +116,11 @@ def test_srad_call_array(srad):
     altitude = np.array([1000.0, 2000.0])
     cable_azimuth = np.array([180.0, 190.0])
     turbidity = np.array([0.5, 0.7])
-    datetime_utc = [
-        datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
-        datetime(2000, 7, 22, 13, tzinfo=timezone.utc),
-    ]
-    date = [d.date() for d in datetime_utc]
-    hour = np.array([time_to_float_hours(d.time()) for d in datetime_utc])
+    datetime_utc = np.array(
+        [np.datetime64("2000-06-21T12:00:00"), np.datetime64("2000-07-22T13:00:00")]
+    )
+    date = datetime_utc.astype("datetime64[D]")
+    hour = np.array([time_to_float_hours(d) for d in datetime_utc])
     sa = sun.solar_altitude(latitude, date, hour)
     sz = sun.solar_azimuth(latitude, date, hour)
     th = np.arccos(np.cos(sa) * np.cos(sz - cable_azimuth))
@@ -143,10 +141,12 @@ solar_heating_instances = [
         altitude=np.array([1000.0, 2000.0]),
         cable_azimuth=np.array([180.0, 190.0]),
         turbidity=np.array([0.5, 0.7]),
-        datetime_utc=[
-            datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
-            datetime(2000, 7, 22, 13, tzinfo=timezone.utc),
-        ],
+        datetime_utc=np.array(
+            [
+                np.datetime64("2000-06-21T12:00:00"),
+                np.datetime64("2000-07-22T13:00:00"),
+            ]
+        ),
         outer_diameter=np.array([0.01, 0.02]),
         solar_absorptivity=np.array([0.9, 0.8]),
         solar_irradiance=np.array([800.0, 900.0]),
@@ -156,7 +156,7 @@ solar_heating_instances = [
         altitude=1000.0,
         cable_azimuth=180.0,
         turbidity=0.5,
-        datetime_utc=datetime(2000, 6, 21, 12, tzinfo=timezone.utc),
+        datetime_utc=np.datetime64("2000-06-21T12:00:00"),
         outer_diameter=0.01,
         solar_absorptivity=0.9,
         solar_irradiance=800.0,

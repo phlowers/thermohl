@@ -12,24 +12,37 @@ position is then used to estimate the solar radiation in CIGRE and IEEE
 models.
 """
 
-from datetime import time
 from math import pi
-from typing import Iterable
+from typing import Union
 
 import numpy as np
+import numpy.typing as npt
 from thermohl import (
     floatArrayLike,
-    dateListLike,
-    datetimeListLike,
+    dateArrayLike,
+    datetimeArrayLike,
 )
 
 
-def time_to_float_hours(t: time) -> float:
-    return t.hour + t.minute / 60 + t.second / 3600
+def time_to_float_hours(
+    datetime: Union[np.datetime64, npt.NDArray[np.datetime64]],
+) -> Union[float, npt.NDArray[np.float64]]:
+    seconds = (
+        datetime.astype("datetime64[s]") - datetime.astype("datetime64[D]")
+    ).astype(int)  # noqa
+    return seconds / 3600.0
+
+
+def time_to_day_of_year(
+    datetime: Union[np.datetime64, npt.NDArray[np.datetime64]],
+) -> Union[int, npt.NDArray[np.int64]]:
+    return (datetime.astype("datetime64[D]") - datetime.astype("datetime64[Y]")).astype(
+        int
+    ) + 1
 
 
 def utc2solar_hour(
-    datetime_utc: datetimeListLike,
+    datetime_utc: datetimeArrayLike,
     longitude: floatArrayLike,
 ) -> floatArrayLike:
     """Convert UTC datetime to solar hour adding the longitude contribution.
@@ -39,16 +52,8 @@ def utc2solar_hour(
     :param longitude: Longitude (in rad).
     :return: Solar hour.
     """
-    day_of_year = (
-        np.array([d.timetuple().tm_yday for d in datetime_utc])
-        if isinstance(datetime_utc, Iterable)
-        else datetime_utc.timetuple().tm_yday
-    )
-    utc_hour = (
-        np.array([time_to_float_hours(d.time()) for d in datetime_utc])
-        if isinstance(datetime_utc, Iterable)
-        else time_to_float_hours(datetime_utc.time())
-    )
+    day_of_year = time_to_day_of_year(datetime_utc)
+    utc_hour = time_to_float_hours(datetime_utc)
     B = 2 * pi * (day_of_year - 81) / 365
     solar_hour = (
         utc_hour
@@ -68,24 +73,20 @@ def hour_angle(solar_hour: floatArrayLike) -> floatArrayLike:
     return np.radians(15.0 * (solar_hour - 12.0))
 
 
-def solar_declination(date: dateListLike) -> floatArrayLike:
+def solar_declination(date: dateArrayLike) -> floatArrayLike:
     """Compute solar declination.
     If more than one input are numpy arrays, they should have the same size.
 
     :param date: Date of the year.
     :return: Solar declination in radians.
     """
-    day_of_year = (
-        np.array([d.timetuple().tm_yday for d in date])
-        if isinstance(date, Iterable)
-        else date.timetuple().tm_yday
-    )
+    day_of_year = time_to_day_of_year(date)
     return np.deg2rad(23.46) * np.sin(2.0 * np.pi * (day_of_year + 284) / 365.0)
 
 
 def solar_altitude(
     latitude: floatArrayLike,
-    date: dateListLike,
+    date: dateArrayLike,
     solar_hour: floatArrayLike,
 ) -> floatArrayLike:
     """Compute solar altitude.
@@ -108,7 +109,7 @@ def solar_altitude(
 
 def solar_azimuth(
     latitude: floatArrayLike,
-    date: dateListLike,
+    date: dateArrayLike,
     solar_hour: floatArrayLike,
 ) -> floatArrayLike:
     """Compute solar azimuth.
