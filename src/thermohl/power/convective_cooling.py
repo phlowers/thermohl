@@ -46,32 +46,109 @@ class ConvectiveCoolingBase(PowerTerm):
         air_density: Callable[[floatArrayLike, floatArrayLike], floatArrayLike],
         dynamic_viscosity: Callable[[floatArrayLike], floatArrayLike],
         thermal_conductivity: Callable[[floatArrayLike], floatArrayLike],
-        wind_azimuth: floatArrayLike = None,
-        wind_attack_angle: floatArrayLike = None,
+        wind_azimuth: floatArrayLike | None = None,
+        wind_attack_angle: floatArrayLike | None = None,
         **kwargs: Any,
     ):
+        self.wind_attack_angle = self._compute_missing_wind_attack_angles(
+            wind_attack_angle, cable_azimuth, wind_azimuth
+        )
+
         self.altitude = altitude
         self.ambient_temp = ambient_temperature
         self.wind_speed = wind_speed
-
-        if wind_attack_angle is None and wind_azimuth is None:
-            raise ValueError("Must provide either wind_attack_angle or wind_azimuth.")
-        if wind_attack_angle is not None and wind_azimuth is not None:
-            logger.warning(
-                "both wind_attack_angle and wind_azimuth are provided. wind_azimuth will be ignored."
-            )
-        if wind_attack_angle is not None:
-            self.wind_attack_angle = wind_attack_angle
-        else:
-            self.wind_attack_angle = compute_wind_attack_angle(
-                cable_azimuth, wind_azimuth
-            )
 
         self.outer_diameter = outer_diameter
 
         self.air_density = air_density
         self.dynamic_viscosity = dynamic_viscosity
         self.thermal_conductivity = thermal_conductivity
+
+    @classmethod
+    def _compute_missing_wind_attack_angles(
+        cls,
+        wind_attack_angle: floatArrayLike | None,
+        cable_azimuth: floatArrayLike,
+        wind_azimuth: floatArrayLike | None,
+    ) -> floatArrayLike:
+        if isinstance(cable_azimuth, np.ndarray):
+            return cls._compute_missing_wind_attack_angles__array(
+                wind_attack_angle,
+                cable_azimuth,
+                wind_azimuth,
+            )
+        else:
+            return cls._compute_missing_wind_attack_angles__scalar(
+                wind_attack_angle,
+                cable_azimuth,
+                wind_azimuth,
+            )
+
+    @classmethod
+    def _compute_missing_wind_attack_angles__scalar(
+        cls,
+        wind_attack_angle: float | None,
+        cable_azimuth: float,
+        wind_azimuth: float | None,
+    ):
+        if wind_attack_angle is None:
+            wind_attack_angle = np.nan
+        if wind_azimuth is None:
+            wind_azimuth = np.nan
+
+        if np.isnan(wind_azimuth) and np.isnan(wind_attack_angle):
+            raise ValueError(
+                "Must provide either wind_attack_angle or wind_azimuth for each computation."
+            )
+
+        if not np.isnan(wind_azimuth) and not (np.isnan(wind_attack_angle)):
+            logger.warning(
+                "Both wind_attack_angle and wind_azimuth are provided for at least one computation."
+                "wind_azimuth will be ignored where wind_attack_angle is provided."
+            )
+
+        if np.isnan(wind_attack_angle):
+            return compute_wind_attack_angle(cable_azimuth, wind_azimuth)
+        return wind_attack_angle
+
+    @classmethod
+    def _compute_missing_wind_attack_angles__array(
+        cls,
+        wind_attack_angle: np.ndarray | None,
+        cable_azimuth: np.ndarray,
+        wind_azimuth: np.ndarray | None,
+    ) -> np.ndarray:
+        if wind_attack_angle is None:
+            wind_attack_angle = np.full(len(cable_azimuth), np.nan)
+        if wind_azimuth is None:
+            wind_azimuth = np.full(len(cable_azimuth), np.nan)
+
+        if np.logical_and(np.isnan(wind_azimuth), np.isnan(wind_attack_angle)).any():
+            raise ValueError(
+                "Must provide either wind_attack_angle or wind_azimuth for each computation."
+            )
+
+        if np.logical_and(
+            np.logical_not(np.isnan(wind_azimuth)),
+            np.logical_not(np.isnan(wind_attack_angle)),
+        ).any():
+            logger.warning(
+                "Both wind_attack_angle and wind_azimuth are provided for at least one computation."
+                "wind_azimuth will be ignored where wind_attack_angle is provided."
+            )
+
+        # Compute missing wind attack angles
+        mask = np.isnan(wind_attack_angle)
+        if np.any(mask):
+            return np.where(
+                mask,
+                compute_wind_attack_angle(
+                    cable_azimuth,
+                    wind_azimuth,
+                ),
+                wind_attack_angle,
+            )
+        return wind_attack_angle
 
     def _value_forced(
         self,

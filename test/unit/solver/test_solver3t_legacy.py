@@ -51,7 +51,6 @@ def test_solver3t_legacy():
         return_power=True,
     )
 
-    print(result)
     assert abs(result[TemperatureType.CORE.value][-1] - 42) <= 0.5
     assert abs(result[TemperatureType.SURFACE.value][-1] - 39.9) <= 0.5
     assert abs(result[TemperatureType.AVERAGE.value][-1] - 40.9) <= 0.5
@@ -130,5 +129,5 @@ def test_steady_temperature_uncertainty_results():
 def test_temporarily_override_parameter():
     solver = rte({}, heat_equation=HeatEquationType.THREE_TEMPERATURES_LEGACY)
     with pytest.raises(ValueError):
-        with solver.temporarily_override_parameter("made_up_parameter", 42):
+        with solver.temporarily_override_parameters(made_up_parameter=42):
             pass  # noqa

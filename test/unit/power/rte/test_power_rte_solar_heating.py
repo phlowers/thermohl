@@ -107,7 +107,7 @@ def test_solar_heating():
         ]
     )
 
-    solar_heating = SolarHeating(
+    SolarHeating(
         latitude=latitude,
         longitude=longitude,
         cable_azimuth=cable_azimuth,
@@ -118,8 +118,6 @@ def test_solar_heating():
         nebulosity=0,
         measured_global_radiation=np.nan,
     )
-
-    print(solar_heating.solar_irradiance)
 
 
 def test_solar_irradiance_ignored_by_rte_solar_heating():

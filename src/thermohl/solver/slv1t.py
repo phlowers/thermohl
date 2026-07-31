@@ -5,16 +5,22 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 # SPDX-License-Identifier: MPL-2.0
 
+import logging
 import numbers
 from typing import Optional
 
 import numpy as np
 
 from thermohl import floatArrayLike, floatArray
+from thermohl.power.solar_heating import FixedSolarIrradianceSolarHeating
 from thermohl.solver.solver import Solver as Solver_, get_time_changing_parameters
 from thermohl.solver.parameters import DEFAULT_PARAMETERS as default
 from thermohl.solver.entities import PowerType, VariableType
 from thermohl.utils import bisect_v
+from thermohl.utils import quasi_newton
+
+
+logger = logging.getLogger(__name__)
 
 
 class Solver1T(Solver_):
@@ -221,5 +227,71 @@ class Solver1T(Solver_):
         )
 
         result = self._add_input_data_to_result(result)
-
         return result
+
+    def reduced_intensity(
+        self,
+        measured_temperature_difference: float,
+        measured_intensity: float,
+        ambient_temperature: float = 30.0,
+        wind_speed: float = 0.6,
+        solar_irradiance: float = 600.0,
+        max_conductor_temperature: float = 100.0,
+    ) -> float:
+        """
+        Compute the reduced intensity limit for a given measured temperature difference
+        between the sound cable and a hotspot on the junction between a cable
+        and a faulty sleeve.
+
+        Args:
+            measured_temperature_difference (float): The measured temperature difference between the cable surface and the sleeve.
+            measured_intensity (float): The measured intensity at which the temperature difference was measured.
+            ambient_temperature (Optional[float]): The ambient temperature. Default is 30.
+            wind_speed (Optional[float]): The wind speed (more precisely, speed of the wind component perpendicular to the cable). Default is 0.6.
+            solar_irradiance (Optional[float]): The measured solar irradiance. Default is 600.
+            max_conductor_temperature (Optional[float]): The maximum conductor temperature. Default is 100.
+
+        NB: Default values for optional parameters differ from the default values used for
+        other computations.
+        """
+        with self.temporarily_override_parameters(
+            ambient_temperature=ambient_temperature,
+            wind_speed=wind_speed,
+            wind_attack_angle=np.pi / 2,
+        ):
+            try:
+                saved_solar_heating = self.solar_heating
+                self.args.fixed_solar_irradiance = solar_irradiance
+
+                self.solar_heating = FixedSolarIrradianceSolarHeating(
+                    **self.args.__dict__,
+                )
+
+                def conductor_temperature(transit):
+                    with self.temporarily_override_parameters(
+                        transit=transit,
+                    ):
+                        return self.steady_temperature()[
+                            VariableType.TEMPERATURE.value
+                        ][0]
+
+                def temperature_difference(transit):
+                    return measured_temperature_difference * (
+                        (transit / measured_intensity) ** 2
+                    )
+
+                def sleeve_temperature(transit):
+                    return conductor_temperature(transit) + temperature_difference(
+                        transit
+                    )
+
+                def f(transit):
+                    return sleeve_temperature(transit) - max_conductor_temperature
+
+                reduced_intensity = quasi_newton(f, x0=100)
+
+            finally:
+                self.solar_heating = saved_solar_heating
+                del self.args.fixed_solar_irradiance
+
+        return reduced_intensity
