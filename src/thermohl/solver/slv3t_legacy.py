@@ -244,7 +244,7 @@ class Solver3TL(Solver3T):
         self,
         return_uncertainty=False,
         **kwargs,
-    ):
+    ) -> dict[str, np.ndarray]:
         """
         Compute the steady-state temperature distribution.
 
