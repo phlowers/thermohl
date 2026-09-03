@@ -156,27 +156,29 @@ class Solver(ABC):
         return result
 
     @contextmanager
-    def temporarily_override_parameter(self, parameter_name: str, parameter_value: Any):
-        if not hasattr(self.args, parameter_name):
-            raise ValueError(
-                f"self.args has no attribute '{parameter_name}' to override."
-            )
-
-        current_parameter_value = getattr(self.args, parameter_name)
-        if hasattr(current_parameter_value, "copy"):
-            saved_parameter_value = current_parameter_value.copy()
-        else:
-            saved_parameter_value = current_parameter_value
+    def temporarily_override_parameters(self, **kwargs):
+        saved_parameter_values = {}
+        for key in kwargs:
+            if not hasattr(self.args, key):
+                raise ValueError(f"self.args has no attribute '{key}' to override.")
+            current_parameter_value = getattr(self.args, key)
+            if hasattr(current_parameter_value, "copy"):
+                saved_parameter_value = current_parameter_value.copy()
+            else:
+                saved_parameter_value = current_parameter_value
+            saved_parameter_values[key] = saved_parameter_value
 
         try:
-            self.args.__setattr__(
-                parameter_name,
-                parameter_value,
-            )
+            for key, value in kwargs.items():
+                self.args.__setattr__(
+                    key,
+                    value,
+                )
             self.update()
             yield self
         finally:
-            self.args.__setattr__(parameter_name, saved_parameter_value)
+            for key, saved_value in saved_parameter_values.items():
+                self.args.__setattr__(key, saved_value)
             self.update()
 
     @contextmanager

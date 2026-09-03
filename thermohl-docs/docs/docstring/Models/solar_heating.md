@@ -12,3 +12,6 @@ SPDX-License-Identifier: MPL-2.0
 
 # _SRad
 ::: thermohl.power.solar_heating._SRad
+
+# FixedSolarIrradianceSolarHeating
+::: thermohl.power.solar_heating.FixedSolarIrradianceSolarHeating

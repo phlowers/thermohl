@@ -138,3 +138,26 @@ class SolarHeatingBase(PowerTerm):
         :return: Derivative of solar heating.
         """
         return np.zeros_like(conductor_temperature)
+
+
+class FixedSolarIrradianceSolarHeating(SolarHeatingBase):
+    """Solar heating term with fixed solar irradiance.
+
+    This class only computes the solar heating (power) and its
+    derivative based on the provided solar irradiance.
+    """
+
+    def __init__(
+        self,
+        outer_diameter: floatArrayLike,
+        solar_absorptivity: floatArrayLike,
+        fixed_solar_irradiance: floatArrayLike,
+        **kwargs,
+    ):
+        self.outer_diameter = outer_diameter
+        self.solar_absorptivity = solar_absorptivity
+        self.fixed_solar_irradiance = fixed_solar_irradiance
+
+    @property
+    def solar_irradiance(self):
+        return self.fixed_solar_irradiance

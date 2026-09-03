@@ -340,8 +340,8 @@ class Solver3TL(Solver3T):
         incremented_parameter_value = (
             self.args.__getattribute__(parameter_name) + self.DERIVATIVE_INCREMENT
         )
-        with self.temporarily_override_parameter(
-            parameter_name, incremented_parameter_value
+        with self.temporarily_override_parameters(
+            **{parameter_name: incremented_parameter_value},
         ):
             kwargs.update(
                 {

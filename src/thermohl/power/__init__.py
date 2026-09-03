@@ -8,7 +8,7 @@
 from .radiative_cooling import RadiativeCoolingBase
 
 from .power_term import PowerTerm
-from .solar_heating import _SRad, SolarHeatingBase
+from .solar_heating import _SRad, SolarHeatingBase, FixedSolarIrradianceSolarHeating
 
 
 __all__ = [
@@ -16,4 +16,5 @@ __all__ = [
     "PowerTerm",
     "_SRad",
     "SolarHeatingBase",
+    "FixedSolarIrradianceSolarHeating",
 ]

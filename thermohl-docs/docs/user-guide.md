@@ -190,3 +190,27 @@ The uncertainties about ambient temperature, wind speed, wind azimuth and solar 
 | Wind speed | 1 m/s |
 | Wind azimuth | 10° |
 | Solar irradiance | 100 $ W/m^2 $ |
+
+## IST reduction (intensity limit reduction)
+
+For most computations, cable sleeves are ignored.
+However, if a sleeve is faulty, it can overheat. ThermoHL enables the user to
+compute a reduced intensity limit (called reduced IST) so that the interface
+between the sleeve and the cable doesn't exceed a given maximum temperature.
+Input data are
+- the measured temperature difference between the hotspot (at the interface between sleeve and cable)
+and the cable far away from the sleeve
+- the measured transit.
+
+This computation uses the single temperature model.
+
+Please note that following default values differ from the defaults for other
+computations:
+
+| Parameter | Default value |
+|----|----|
+| ambient_temperature | 30.0 °C |
+| wind_speed | 0.6 m/s |
+| solar_irradiance | 600.0 W/m² |
+
+Also, the wind is assumed to be perpendicular to the cable.

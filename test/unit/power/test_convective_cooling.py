@@ -332,3 +332,17 @@ def test_value_missing_wind_attack_angle_and_wind_azimuth():
         ValueError, match="Must provide either wind_attack_angle or wind_azimuth."
     ):
         ConvectiveCooling(**dic)
+
+
+def test_value_partial_wind_attack_angle():
+    dic = set_default_values_array()
+    angle = np.deg2rad(30.0)
+    dic["wind_azimuth"] = np.array([np.nan, 30])
+    dic["wind_attack_angle"] = np.array([angle, np.nan])
+    dic["cable_azimuth"] = np.array([0, 0])
+
+    convecting_cooling = ConvectiveCooling(**dic)
+
+    np.testing.assert_allclose(
+        convecting_cooling.wind_attack_angle, np.array([angle, angle])
+    )
