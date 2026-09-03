@@ -66,7 +66,7 @@ def estimate_nebulosity(
     For datetime_utc values corresponding to the night, the result is nan.
 
     Args:
-        diffuse_plus_beam_solar_flow(array): Array of diffuse radiation + beam radiation (in W/m²).
+        diffuse_plus_beam_radiation(array): Array of diffuse radiation + beam radiation (in W/m²).
         datetime_utc(array): Array of datetimes (more precisely np.datetime64). The year is indifferent.
         latitude(array): Array of latitudes.
         longitude(array): Array of longitudes.
