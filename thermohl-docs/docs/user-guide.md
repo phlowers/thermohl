@@ -191,8 +191,7 @@ The uncertainties about ambient temperature, wind speed, wind azimuth and solar 
 | Wind azimuth | 10° |
 | Solar irradiance | 100 $ W/m^2 $ |
 
-
-# IST reduction (intensity limit reduction)
+## IST reduction (intensity limit reduction)
 
 For most computations, cable sleeves are ignored.
 However, if a sleeve is faulty, it can overheat. ThermoHL enables the user to
@@ -212,6 +211,6 @@ computations:
 |----|----|
 | ambient_temperature | 30.0 °C |
 | wind_speed | 0.6 m/s |
-| measured_global_radiation | 600.0 W/m² |
+| solar_irradiance | 600.0 W/m² |
 
 Also, the wind is assumed to be perpendicular to the cable.
