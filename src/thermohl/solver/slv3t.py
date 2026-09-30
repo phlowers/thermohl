@@ -105,7 +105,7 @@ def _infer_target_from_cable_type(
 class Solver3T(Solver_):
     def __init__(
         self,
-        dic: Optional[dict[str, Any]] = None,
+        dic: Optional[Dict[str, Any]] = None,
         joule: Type[PowerTerm] = PowerTerm,
         solar: Type[PowerTerm] = PowerTerm,
         convective: Type[PowerTerm] = PowerTerm,
@@ -254,6 +254,24 @@ class Solver3T(Solver_):
             - self.convective_cooling.value(surface_temperature)
             - self.radiative_cooling.value(surface_temperature)
             - self.precipitation_cooling.value(surface_temperature)
+        )
+
+    def tau(
+        self,
+        surface_temperature: floatArray,
+        core_temperature: floatArray,
+        time_step: float = 1.0e-05,
+    ) -> floatArrayLike:
+        """Estimation of a time-constant by linearization of the EDO."""
+        return (
+            -(self.args.linear_mass * self.args.heat_capacity)
+            / (
+                self.balance_3t(surface_temperature + time_step, core_temperature)
+                - self.balance_3t(surface_temperature - time_step, core_temperature)
+                + self.balance_3t(surface_temperature, core_temperature + time_step)
+                - self.balance_3t(surface_temperature, core_temperature - time_step)
+            )
+            * (2 * time_step)
         )
 
     def morgan_3t(
@@ -493,20 +511,30 @@ class Solver3T(Solver_):
             surface_temperature[0, :], core_temperature[0, :]
         )
 
+        # state variables for the continuity-preserving integration scheme
+        # the solve operation is actually performed on this variables, which have the dimension
+        # of a temperature but no physical meaning of interest, hence the generic names
+        tx = core_temperature[0, :] - surface_temperature[0, :]
+        ty = c2 * surface_temperature[0, :] + (1 - c2) * core_temperature[0, :]
+
         # main time loop
         for i in range(1, len(offset)):
             for k in time_changing_parameters.keys():
                 self.args[k] = time_changing_parameters[k][i, :]
             self.update()
+            time_step = offset[i] - offset[i - 1]
             bal = self.balance_3t(
                 surface_temperature[i - 1, :], core_temperature[i - 1, :]
             )
+            tau = self.tau(surface_temperature[i - 1, :], core_temperature[i - 1, :])
             average_temperature[i, :] = (
-                average_temperature[i - 1, :] + (offset[i] - offset[i - 1]) * bal * imc
+                average_temperature[i - 1, :] + time_step * bal * imc
             )
-            mrg = c1 * (self.joule_heating.value(average_temperature[i, :]) - bal)
-            core_temperature[i, :] = average_temperature[i, :] + c2 * mrg
-            surface_temperature[i, :] = core_temperature[i, :] - mrg
+            morgan = c1 * (self.joule_heating.value(average_temperature[i, :]) - bal)
+            tx = tx + time_step * (-tx + morgan) / (tau * 0.3)
+            ty = ty + time_step * (-ty + average_temperature[i - 1, :]) / (tau * 0.02)
+            core_temperature[i, :] = c2 * tx + ty
+            surface_temperature[i, :] = ty - (1 - c2) * tx
 
         result = self._transient_temperature_results(
             offset,
