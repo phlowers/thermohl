@@ -99,6 +99,7 @@ ignore_errors = true
 extend-exclude = [
     "src/thermohl/_version.py",
     "thermohl-docs/docs/examples/*.ipynb",
+    "MIGRATION_GUIDE.md",
 ]
 
 [tool.ruff.lint]

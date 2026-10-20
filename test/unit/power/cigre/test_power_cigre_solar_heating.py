@@ -22,9 +22,9 @@ def test_solar_radiation_scalar():
         latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.allclose(
-        result, expected, atol=1e-1
-    ), f"Expected {expected}, but got {result}"
+    assert np.allclose(result, expected, atol=1e-1), (
+        f"Expected {expected}, but got {result}"
+    )
 
 
 def test_solar_radiation_array():
@@ -44,9 +44,9 @@ def test_solar_radiation_array():
         latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.allclose(
-        result, expected, atol=1e-1
-    ), f"Expected {expected}, but got {result}"
+    assert np.allclose(result, expected, atol=1e-1), (
+        f"Expected {expected}, but got {result}"
+    )
 
 
 def test_solar_radiation_default_albedo():
@@ -66,9 +66,9 @@ def test_solar_radiation_default_albedo():
         latitude, cable_azimuth, albedo, datetime_utc
     )
 
-    assert np.allclose(
-        result, expected, atol=1e-1
-    ), f"Expected {expected}, but got {result}"
+    assert np.allclose(result, expected, atol=1e-1), (
+        f"Expected {expected}, but got {result}"
+    )
 
 
 def test_solar_radiation_mismatched_array_sizes():
@@ -132,9 +132,9 @@ def test_solar_heating_value_scalar(solar_heating, expected):
 
     result = solar_heating.value(conductor_temperature)
 
-    assert np.allclose(
-        result, expected, atol=1e-3
-    ), f"Expected {expected}, but got {result}"
+    assert np.allclose(result, expected, atol=1e-3), (
+        f"Expected {expected}, but got {result}"
+    )
 
 
 def test_solar_heating_value_array():
@@ -164,9 +164,9 @@ def test_solar_heating_value_array():
 
     result = solar_heating.value(conductor_temperature)
 
-    assert np.allclose(
-        result, expected, atol=1e-3
-    ), f"Expected {expected}, but got {result}"
+    assert np.allclose(result, expected, atol=1e-3), (
+        f"Expected {expected}, but got {result}"
+    )
 
 
 def test_solar_heating_value_mismatched_array_sizes_should_raise_error():

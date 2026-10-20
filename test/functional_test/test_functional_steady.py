@@ -40,7 +40,7 @@ def scn2dict(scn: dict) -> dict:
     dic["solar_absorptivity"] = 0.9
     dic["emissivity"] = 0.8
     datetime_paris = datetime.strptime(
-        f'{scn["Date"]} {scn["Heure"]}', "%d/%m/%Y %H:%M"
+        f"{scn['Date']} {scn['Heure']}", "%d/%m/%Y %H:%M"
     ).replace(tzinfo=ZoneInfo("Europe/Paris"))
     datetime_utc = np.datetime64(datetime_paris.astimezone(timezone.utc))
     dic["datetime_utc"] = datetime_utc
