@@ -107,7 +107,7 @@ from thermohl import solver
 from thermohl.solver.entities import HeatEquationType
 
 slvr = solver.ieee(dic=None, heat_equation=HeatEquationType.ONE_TEMPERATURE)
-temp = slvr.steady_temperature() 
+temp = slvr.steady_temperature()
 ```
 
 Results from the solver are returned in a dict where values are numpy arrays::
@@ -137,8 +137,11 @@ import numpy as np
 from thermohl import solver
 from thermohl.solver.entities import HeatEquationType
 
-slvr = solver.ieee(dict(ambient_temperature=np.array([0., 15., 30.])), heat_equation=HeatEquationType.ONE_TEMPERATURE)
-Tmax = 80.
+slvr = solver.ieee(
+    dict(ambient_temperature=np.array([0.0, 15.0, 30.0])),
+    heat_equation=HeatEquationType.ONE_TEMPERATURE,
+)
+Tmax = 80.0
 imax = slvr.steady_intensity(Tmax)
 ```
 

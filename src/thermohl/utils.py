@@ -314,10 +314,7 @@ def quasi_newton(  # NOSONAR(S3776)
         if q1 == q0:
             if p1 != p0:
                 msg = f"Tolerance of {p1 - p0} reached."
-                msg += (
-                    f" Failed to converge after {itr + 1} iterations,"
-                    f" value is {p1}."
-                )
+                msg += f" Failed to converge after {itr + 1} iterations, value is {p1}."
                 raise RuntimeError(msg)
             return (p1 + p0) / 2.0
         else:
