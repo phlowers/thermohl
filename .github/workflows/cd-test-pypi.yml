@@ -32,7 +32,7 @@ jobs:
       - name: Install uv and Set up Python
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.15"
+          version: "0.13.5"
           python-version: ${{ matrix.python-version }}
 
       - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
       - name: Install uv and Set up Python
         uses: astral-sh/setup-uv@v7
         with:
-          version: "0.9.15"
+          version: "0.13.5"
           python-version: 3.12
 
       - name: Build SDist and wheel
