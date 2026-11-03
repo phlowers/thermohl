@@ -24,7 +24,7 @@ jobs:
         uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "0.13.7"
-          python-version: 3.12
+          python-version: 3.12.16
 
       - name: Install dependencies
         run: uv sync --group lint
@@ -40,7 +40,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest]
-        python-version: ["3.10", "3.11", "3.12", "3.13", "3.14"]
+        python-version: ["3.10", "3.11.18", "3.12.16", "3.13.18", "3.14.10"]
 
     steps:
     - uses: actions/checkout@v5
@@ -78,7 +78,7 @@ jobs:
         uses: astral-sh/setup-uv@v10.3.3
         with:
           version: "0.13.7"
-          python-version: 3.12
+          python-version: 3.12.16
 
       - name: Install dependencies
         run: |
