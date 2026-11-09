@@ -66,10 +66,10 @@ jobs:
 
 
       - name: Install uv and Set up Python
-        uses: astral-sh/setup-uv@v7
+        uses: astral-sh/setup-uv@v10.3.3
         with:
-          version: "0.13.5"
-          python-version: 3.12
+          version: "0.13.7"
+          python-version: 3.12.16
 
       - name: Install dependencies
         run: |
