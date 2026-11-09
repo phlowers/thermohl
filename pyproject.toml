@@ -60,7 +60,7 @@ docs = [
     "mkdocs-jupyter>=0.26.3",
     "mkdocs-material >= 9.7.7",
     # Temporary fix to avoid CVE in certifi<2026.10.18
-    # See https://github.com/phlowers/thermohl/security/dependabot/73
+    # See https://github.com/advisories/GHSA-6q48-6c7w-9gw2
     "certifi>=2026.10.19",
     "mkdocstrings[python]>=0.31.1",
     "markdown_extensions >= 0.0.1",
